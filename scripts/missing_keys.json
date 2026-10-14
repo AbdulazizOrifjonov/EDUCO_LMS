@@ -1,0 +1,10 @@
+{
+  "active": "active",
+  ".": ".",
+  "target": "ilike', '%payroll%",
+  "action": "ilike', '%payroll%",
+  "group_id": "group_id",
+  "created_at": "created_at",
+  "id": "id",
+  "status": "status"
+}

@@ -1,0 +1,142 @@
+/* Tailwind CSS Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-brand-navy: #123D78;
+    --color-brand-red: #F12D3A;
+    --color-bg-light: #EFECE4;
+    --color-bg-dark: #101827;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  body {
+    background-color: #EFECE4;
+    color: #1E293B;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  .dark body,
+  html.dark body {
+    @apply bg-surface-dark text-gray-100;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    text-align: right;
+  }
+
+  [dir="ltr"] {
+    text-align: left;
+  }
+}
+
+/* Warm Cream / Soft Ivory Light Mode Theme Overrides (Gentle on the eyes, never glaring white) */
+html:not(.dark) .bg-white {
+  background-color: #FAF7F0 !important;
+}
+
+html:not(.dark) .bg-white\/95 {
+  background-color: rgba(248, 245, 236, 0.96) !important;
+}
+
+html:not(.dark) .bg-gray-50 {
+  background-color: #F2EEE4 !important;
+}
+
+html:not(.dark) .bg-gray-50\/80,
+html:not(.dark) .bg-gray-50\/70,
+html:not(.dark) .bg-gray-50\/40 {
+  background-color: rgba(240, 235, 224, 0.85) !important;
+}
+
+html:not(.dark) .bg-gray-100,
+html:not(.dark) .bg-gray-100\/90 {
+  background-color: #E8E2D5 !important;
+}
+
+html:not(.dark) .border-gray-100 {
+  border-color: #E2DDD0 !important;
+}
+
+html:not(.dark) .border-gray-200,
+html:not(.dark) .border-gray-200\/80 {
+  border-color: #D8D1C2 !important;
+}
+
+html:not(.dark) .border-gray-300 {
+  border-color: #CBC2B0 !important;
+}
+
+html:not(.dark) .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+html:not(.dark) .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #DFD9CA !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5bdb0;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a69d8e;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Subtle Sidebar Scrollbar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 0px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Brand Focus Rings */
+@layer utilities {
+  .focus-ring-brand {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-navy focus:ring-offset-2 dark:focus:ring-brand-navy-light dark:focus:ring-offset-surface-dark;
+  }
+
+  .focus-ring-red {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 dark:focus:ring-brand-red-light dark:focus:ring-offset-surface-dark;
+  }
+}
