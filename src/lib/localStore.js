@@ -58,1057 +58,106 @@ const INITIAL_SMS_DEVICES = [
   },
   {
     id: 'dev-backup-2',
-    name: 'Zaxira Android Gateway (Lokal Wi-Fi server)',
+    name: 'Zaxira Android Gateway (SMS Gate Cloud)',
     device_role: 'backup',
-    gateway_url: 'http://192.168.1.151:8080/message',
-    api_token: 'educo_gw_backup_secret',
+    gateway_url: 'https://api.sms-gate.app/3rdparty/v1/messages',
+    api_token: 'SXP6_F:_8_-fv9uvdsyrp',
     is_active: false,
     status: 'offline',
     last_seen_at: null,
     last_error: null,
-    phone_number: '+998 93 987 65 43',
+    phone_number: '+998 93 582 17 74',
     created_at: new Date().toISOString(),
   },
 ];
 
-const INITIAL_COURSES = [
-  {
-    id: 'crs-1',
-    name: 'Frontend React & JavaScript',
-    code: 'FE-101',
-    description: 'Zamonaviy React.js, Tailwind CSS va JavaScript dasturlash kursi',
-    monthly_fee: 600000,
-    color: '#123D78',
-    is_active: true,
-    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
-    updated_at: new Date().toISOString(),
-    groupsCount: 2,
-    activeGroupsCount: 2,
-  },
-  {
-    id: 'crs-2',
-    name: 'Python Backend & Data Science',
-    code: 'BE-201',
-    description: 'Python, Django, PostgreSQL va suniy intellekt asoslari',
-    monthly_fee: 700000,
-    color: '#F12D3A',
-    is_active: true,
-    created_at: new Date(Date.now() - 25 * 86400000).toISOString(),
-    updated_at: new Date().toISOString(),
-    groupsCount: 1,
-    activeGroupsCount: 1,
-  },
-  {
-    id: 'crs-3',
-    name: 'Ingliz tili (IELTS Intensive)',
-    code: 'ENG-01',
-    description: 'IELTS 7.0+ natijasiga tayyorlovchi intensiv kurs',
-    monthly_fee: 500000,
-    color: '#10B981',
-    is_active: true,
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-    updated_at: new Date().toISOString(),
-    groupsCount: 1,
-    activeGroupsCount: 1,
-  },
-  {
-    id: 'crs-4',
-    name: 'UI/UX Web & Mobile Design',
-    code: 'DSGN-01',
-    description: 'Figma, foydalanuvchi tajribasi (UX) va interfeys dizayni',
-    monthly_fee: 550000,
-    color: '#8B5CF6',
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    updated_at: new Date().toISOString(),
-    groupsCount: 1,
-    activeGroupsCount: 1,
-  },
-];
+const INITIAL_COURSES = [];
 
 const INITIAL_USERS = [
   {
     id: 'usr-owner-1',
-    username: 'owner',
-    first_name: 'Alisher',
-    last_name: 'Qodirov',
-    fullName: 'Alisher Qodirov',
+    username: 'abbosbek',
+    first_name: 'Abbosbek',
+    last_name: 'Boshqaruvchi',
+    fullName: 'Abbosbek',
+    full_name: 'Abbosbek',
     role: 'owner',
-    email: 'owner@educo.app',
-    phone: '+998901112233',
-    password: 'Educo#2026!Pro',
-    password_updated_at: new Date(Date.now() - 40 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 40 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-admin-1',
-    username: 'admin',
-    first_name: 'Malika',
-    last_name: 'Karimova',
-    fullName: 'Malika Karimova',
-    role: 'admin',
-    email: 'admin@educo.app',
-    phone: '+998902223344',
-    password: 'Malika#2026!',
-    password_updated_at: new Date(Date.now() - 35 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 35 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-teacher-1',
-    username: 'teacher_bobur',
-    first_name: 'Bobur',
-    last_name: 'Mirzayev',
-    fullName: 'Bobur Mirzayev',
-    role: 'teacher',
-    email: 'teacher@educo.app',
-    phone: '+998903334455',
-    password: 'Bobur#2026!',
-    password_updated_at: new Date(Date.now() - 30 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-teacher-2',
-    username: 'teacher_nilufar',
-    first_name: 'Nilufar',
-    last_name: 'Usmonova',
-    fullName: 'Nilufar Usmonova',
-    role: 'teacher',
-    email: 'nilufar@educo.app',
-    phone: '+998904445566',
-    password: 'Nilufar#2026!',
-    password_updated_at: new Date(Date.now() - 25 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 25 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-teacher-abdulaziz',
-    username: 'abdulazizbek',
-    first_name: 'Abdulazizbek',
-    last_name: 'Orifjonov',
-    fullName: 'Abdulazizbek Orifjonov',
-    full_name: 'Abdulazizbek Orifjonov',
-    role: 'teacher',
-    email: 'abdulazizbek@educo.app',
-    phone: '+998 93 582 17 74',
-    password: 'Ltmy$95W2',
+    email: 'abbosbek@educo.app',
+    phone: '+998 98 800 14 15',
+    password: 'AbbosBek1415',
     password_updated_at: new Date().toISOString(),
     is_active: true,
     created_at: new Date().toISOString(),
   },
   {
-    id: 'usr-student-1',
-    username: 'student_jasur',
-    first_name: 'Jasur',
-    last_name: 'Rustamov',
-    fullName: 'Jasur Rustamov',
-    role: 'student',
-    email: 'jasur@educo.app',
-    phone: '+998905556677',
-    father_phone: '+998905551122',
-    mother_phone: '+998905553344',
-    password: 'Jasur#2026!',
-    password_updated_at: new Date(Date.now() - 20 * 86400000).toISOString(),
+    id: 'usr-owner-2',
+    username: 'abdulazizbek',
+    first_name: 'Abdulazizbek',
+    last_name: 'Orifjonov',
+    fullName: 'Abdulazizbek Orifjonov',
+    full_name: 'Abdulazizbek Orifjonov',
+    role: 'owner',
+    email: 'abdulazizbek@educo.app',
+    phone: '+998 93 610 17 74',
+    password: 'Abdulazibek1774',
+    password_updated_at: new Date().toISOString(),
     is_active: true,
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-fe-2',
-    username: 'student_sardor',
-    first_name: 'Sardor',
-    last_name: 'Aliyev',
-    fullName: 'Sardor Aliyev',
-    role: 'student',
-    email: 'sardor@educo.app',
-    phone: '+998901011122',
-    father_phone: '+998901011199',
-    password: 'Sardor#2026!',
-    password_updated_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-fe-3',
-    username: 'student_bobur',
-    first_name: 'Bobur',
-    last_name: 'Temirov',
-    fullName: 'Bobur Temirov',
-    role: 'student',
-    email: 'bobur_t@educo.app',
-    phone: '+998901012233',
-    father_phone: '+998901012299',
-    password: 'Bobur#2026!',
-    password_updated_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-fe-4',
-    username: 'student_shaxzod',
-    first_name: 'Shaxzod',
-    last_name: 'Karimov',
-    fullName: 'Shaxzod Karimov',
-    role: 'student',
-    email: 'shaxzod@educo.app',
-    phone: '+998901013344',
-    mother_phone: '+998901013399',
-    password: 'Shaxzod#2026!',
-    password_updated_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-fe-5',
-    username: 'student_nilufar',
-    first_name: 'Nilufar',
-    last_name: 'Saidova',
-    fullName: 'Nilufar Saidova',
-    role: 'student',
-    email: 'nilufar_s@educo.app',
-    phone: '+998901014455',
-    father_phone: '+998901014499',
-    password: 'Nilufar#2026!',
-    password_updated_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-fe-6',
-    username: 'student_malika',
-    first_name: 'Malika',
-    last_name: 'Nurmatova',
-    fullName: 'Malika Nurmatova',
-    role: 'student',
-    email: 'malika_n@educo.app',
-    phone: '+998901015566',
-    mother_phone: '+998901015599',
-    password: 'Malika#2026!',
-    password_updated_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-
-  // 6 Students for Course 2: Python Backend & Data Science (Group 2: PY-18 Python Dasturlash)
-  {
-    id: 'usr-student-2',
-    username: 'student_madina',
-    first_name: 'Madina',
-    last_name: 'Rahimova',
-    fullName: 'Madina Rahimova',
-    role: 'student',
-    email: 'madina@educo.app',
-    phone: '+998906667788',
-    father_phone: '+998906661122',
-    password: 'Madina#2026!',
-    password_updated_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-py-2',
-    username: 'student_azizbek',
-    first_name: 'Azizbek',
-    last_name: 'Toshmatov',
-    fullName: 'Azizbek Toshmatov',
-    role: 'student',
-    email: 'azizbek_t@educo.app',
-    phone: '+998902021122',
-    father_phone: '+998902021199',
-    password: 'Azizbek#2026!',
-    password_updated_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-py-3',
-    username: 'student_bekzod',
-    first_name: 'Bekzod',
-    last_name: 'Mahmudov',
-    fullName: 'Bekzod Mahmudov',
-    role: 'student',
-    email: 'bekzod_m@educo.app',
-    phone: '+998902022233',
-    mother_phone: '+998902022299',
-    password: 'Bekzod#2026!',
-    password_updated_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-py-4',
-    username: 'student_kamron',
-    first_name: 'Kamron',
-    last_name: 'Yusupov',
-    fullName: 'Kamron Yusupov',
-    role: 'student',
-    email: 'kamron_y@educo.app',
-    phone: '+998902023344',
-    father_phone: '+998902023399',
-    password: 'Kamron#2026!',
-    password_updated_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-py-5',
-    username: 'student_diyora',
-    first_name: 'Diyora',
-    last_name: 'Rahimova',
-    fullName: 'Diyora Rahimova',
-    role: 'student',
-    email: 'diyora_r@educo.app',
-    phone: '+998902024455',
-    mother_phone: '+998902024499',
-    password: 'Diyora#2026!',
-    password_updated_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-py-6',
-    username: 'student_javohir',
-    first_name: 'Javohir',
-    last_name: 'Qodirov',
-    fullName: 'Javohir Qodirov',
-    role: 'student',
-    email: 'javohir_q@educo.app',
-    phone: '+998902025566',
-    father_phone: '+998902025599',
-    password: 'Javohir#2026!',
-    password_updated_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-  },
-
-  // 6 Students for Course 3: Ingliz tili IELTS Intensive (Group 3: ENG-05 IELTS Foundation)
-  {
-    id: 'usr-student-3',
-    username: 'student_otabek',
-    first_name: 'Otabek',
-    last_name: 'Shukurov',
-    fullName: 'Otabek Shukurov',
-    role: 'student',
-    email: 'otabek@educo.app',
-    phone: '+998907778899',
-    mother_phone: '+998907771122',
-    password: 'Otabek#2026!',
-    password_updated_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-eng-2',
-    username: 'student_sevara',
-    first_name: 'Sevara',
-    last_name: 'Azimova',
-    fullName: 'Sevara Azimova',
-    role: 'student',
-    email: 'sevara_a@educo.app',
-    phone: '+998903031122',
-    father_phone: '+998903031199',
-    password: 'Sevara#2026!',
-    password_updated_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-eng-3',
-    username: 'student_umidjon',
-    first_name: 'Umidjon',
-    last_name: 'Soliyev',
-    fullName: 'Umidjon Soliyev',
-    role: 'student',
-    email: 'umidjon_s@educo.app',
-    phone: '+998903032233',
-    father_phone: '+998903032299',
-    password: 'Umidjon#2026!',
-    password_updated_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-eng-4',
-    username: 'student_nodira',
-    first_name: 'Nodira',
-    last_name: 'Xolmatova',
-    fullName: 'Nodira Xolmatova',
-    role: 'student',
-    email: 'nodira_x@educo.app',
-    phone: '+998903033344',
-    mother_phone: '+998903033399',
-    password: 'Nodira#2026!',
-    password_updated_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-eng-5',
-    username: 'student_farrux',
-    first_name: 'Farrux',
-    last_name: 'Ikromov',
-    fullName: 'Farrux Ikromov',
-    role: 'student',
-    email: 'farrux_i@educo.app',
-    phone: '+998903034455',
-    father_phone: '+998903034499',
-    password: 'Farrux#2026!',
-    password_updated_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-eng-6',
-    username: 'student_zarina',
-    first_name: 'Zarina',
-    last_name: 'Rustamova',
-    fullName: 'Zarina Rustamova',
-    role: 'student',
-    email: 'zarina_r@educo.app',
-    phone: '+998903035566',
-    mother_phone: '+998903035599',
-    password: 'Zarina#2026!',
-    password_updated_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-
-  // 6 Students for Course 4: UI/UX Web & Mobile Design (Group 4: DSGN-08 UI/UX Dizayn)
-  {
-    id: 'usr-student-ux-1',
-    username: 'student_akbar',
-    first_name: 'Akbar',
-    last_name: 'Jalilov',
-    fullName: 'Akbar Jalilov',
-    role: 'student',
-    email: 'akbar_j@educo.app',
-    phone: '+998904041122',
-    father_phone: '+998904041199',
-    password: 'Akbar#2026!',
-    password_updated_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-ux-2',
-    username: 'student_rayhona',
-    first_name: 'Rayhona',
-    last_name: 'Fayzullayeva',
-    fullName: 'Rayhona Fayzullayeva',
-    role: 'student',
-    email: 'rayhona_f@educo.app',
-    phone: '+998904042233',
-    mother_phone: '+998904042299',
-    password: 'Rayhona#2026!',
-    password_updated_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-ux-3',
-    username: 'student_temur',
-    first_name: 'Temur',
-    last_name: 'Mirzayev',
-    fullName: 'Temur Mirzayev',
-    role: 'student',
-    email: 'temur_m@educo.app',
-    phone: '+998904043344',
-    father_phone: '+998904043399',
-    password: 'Temur#2026!',
-    password_updated_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-ux-4',
-    username: 'student_zilola',
-    first_name: 'Zilola',
-    last_name: 'Sobirova',
-    fullName: 'Zilola Sobirova',
-    role: 'student',
-    email: 'zilola_s@educo.app',
-    phone: '+998904044455',
-    mother_phone: '+998904044499',
-    password: 'Zilola#2026!',
-    password_updated_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-ux-5',
-    username: 'student_shahriyor',
-    first_name: 'Shahriyor',
-    last_name: 'Ergashev',
-    fullName: 'Shahriyor Ergashev',
-    role: 'student',
-    email: 'shahriyor_e@educo.app',
-    phone: '+998904045566',
-    father_phone: '+998904045599',
-    password: 'Shahriyor#2026!',
-    password_updated_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-  },
-  {
-    id: 'usr-student-ux-6',
-    username: 'student_mohira',
-    first_name: 'Mohira',
-    last_name: 'Qosimova',
-    fullName: 'Mohira Qosimova',
-    role: 'student',
-    email: 'mohira_q@educo.app',
-    phone: '+998904046677',
-    mother_phone: '+998904046699',
-    password: 'Mohira#2026!',
-    password_updated_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-    is_active: true,
-    created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
+    created_at: new Date().toISOString(),
   },
 ];
 
-const INITIAL_GROUPS = [
-  {
-    id: 'grp-1',
-    name: 'FE-24 React Guruh',
-    code: 'FE24-01',
-    course_id: 'crs-1',
-    course_name: 'Frontend React & JavaScript',
-    teacher_id: 'usr-teacher-1',
-    teacher_name: 'Bobur Mirzayev',
-    room: '101-xona',
-    capacity: 16,
-    enrolled_count: 6,
-    status: 'active',
-    monthly_price: 600000,
-    schedule: 'Dush-Chor-Jum, 18:00 - 20:00',
-    student_ids: [
-      'usr-student-1',
-      'usr-student-fe-2',
-      'usr-student-fe-3',
-      'usr-student-fe-4',
-      'usr-student-fe-5',
-      'usr-student-fe-6',
-    ],
-    created_at: new Date(Date.now() - 28 * 86400000).toISOString(),
-  },
-  {
-    id: 'grp-2',
-    name: 'PY-18 Python Dasturlash',
-    code: 'PY18-01',
-    course_id: 'crs-2',
-    course_name: 'Python Backend & Data Science',
-    teacher_id: 'usr-teacher-1',
-    teacher_name: 'Bobur Mirzayev',
-    room: '102-xona',
-    capacity: 14,
-    enrolled_count: 6,
-    status: 'active',
-    monthly_price: 700000,
-    schedule: 'Sesh-Pay-Shan, 15:00 - 17:00',
-    student_ids: [
-      'usr-student-2',
-      'usr-student-py-2',
-      'usr-student-py-3',
-      'usr-student-py-4',
-      'usr-student-py-5',
-      'usr-student-py-6',
-    ],
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'grp-3',
-    name: 'ENG-05 IELTS Foundation',
-    code: 'ENG05-01',
-    course_id: 'crs-3',
-    course_name: 'Ingliz tili (IELTS Intensive)',
-    teacher_id: 'usr-teacher-2',
-    teacher_name: 'Nilufar Usmonova',
-    room: '103-xona',
-    capacity: 18,
-    enrolled_count: 6,
-    status: 'active',
-    monthly_price: 500000,
-    schedule: 'Dush-Chor-Jum, 14:00 - 16:00',
-    student_ids: [
-      'usr-student-3',
-      'usr-student-eng-2',
-      'usr-student-eng-3',
-      'usr-student-eng-4',
-      'usr-student-eng-5',
-      'usr-student-eng-6',
-    ],
-    created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-  },
-  {
-    id: 'grp-4',
-    name: 'DSGN-08 UI/UX Dizayn',
-    code: 'DSGN08-01',
-    course_id: 'crs-4',
-    course_name: 'UI/UX Web & Mobile Design',
-    teacher_id: 'usr-teacher-abdulaziz',
-    teacher_name: 'Abdulazizbek Orifjonov',
-    room: '104-xona',
-    capacity: 15,
-    enrolled_count: 6,
-    status: 'active',
-    monthly_price: 550000,
-    schedule: 'Sesh-Pay-Shan, 18:00 - 20:00',
-    student_ids: [
-      'usr-student-ux-1',
-      'usr-student-ux-2',
-      'usr-student-ux-3',
-      'usr-student-ux-4',
-      'usr-student-ux-5',
-      'usr-student-ux-6',
-    ],
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-];
-
-const INITIAL_SCHEDULES = [
-  // grp-1: Toq kunlar (Dushanba, Chorshanba, Juma)
-  {
-    id: 'sch-1',
-    group_id: 'grp-1',
-    day_of_week: 1, // Monday
-    start_time: '09:00:00',
-    end_time: '10:30:00',
-    room: '101-xona',
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-2',
-    group_id: 'grp-1',
-    day_of_week: 3, // Wednesday
-    start_time: '09:00:00',
-    end_time: '10:30:00',
-    room: '101-xona',
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-3',
-    group_id: 'grp-1',
-    day_of_week: 5, // Friday
-    start_time: '09:00:00',
-    end_time: '10:30:00',
-    room: '101-xona',
-    created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-  },
-  // grp-2: Juft kunlar (Seshanba, Payshanba, Shanba)
-  {
-    id: 'sch-4',
-    group_id: 'grp-2',
-    day_of_week: 2, // Tuesday
-    start_time: '14:00:00',
-    end_time: '15:30:00',
-    room: '102-xona',
-    created_at: new Date(Date.now() - 18 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-4b',
-    group_id: 'grp-2',
-    day_of_week: 4, // Thursday
-    start_time: '14:00:00',
-    end_time: '15:30:00',
-    room: '102-xona',
-    created_at: new Date(Date.now() - 18 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-4c',
-    group_id: 'grp-2',
-    day_of_week: 6, // Saturday
-    start_time: '14:00:00',
-    end_time: '15:30:00',
-    room: '102-xona',
-    created_at: new Date(Date.now() - 18 * 86400000).toISOString(),
-  },
-  // grp-3: Toq kunlar (Dushanba, Chorshanba, Juma)
-  {
-    id: 'sch-5a',
-    group_id: 'grp-3',
-    day_of_week: 1, // Monday
-    start_time: '11:00:00',
-    end_time: '12:30:00',
-    room: '103-xona',
-    created_at: new Date(Date.now() - 16 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-5',
-    group_id: 'grp-3',
-    day_of_week: 3, // Wednesday
-    start_time: '11:00:00',
-    end_time: '12:30:00',
-    room: '103-xona',
-    created_at: new Date(Date.now() - 16 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-5c',
-    group_id: 'grp-3',
-    day_of_week: 5, // Friday
-    start_time: '11:00:00',
-    end_time: '12:30:00',
-    room: '103-xona',
-    created_at: new Date(Date.now() - 16 * 86400000).toISOString(),
-  },
-  // grp-4: Juft kunlar (Seshanba, Payshanba, Shanba) - 18:00 - 19:30
-  {
-    id: 'sch-6a',
-    group_id: 'grp-4',
-    day_of_week: 2, // Tuesday
-    start_time: '18:00:00',
-    end_time: '19:30:00',
-    room: '104-xona',
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-6b',
-    group_id: 'grp-4',
-    day_of_week: 4, // Thursday
-    start_time: '18:00:00',
-    end_time: '19:30:00',
-    room: '104-xona',
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-  {
-    id: 'sch-6c',
-    group_id: 'grp-4',
-    day_of_week: 6, // Saturday
-    start_time: '18:00:00',
-    end_time: '19:30:00',
-    room: '104-xona',
-    created_at: new Date(Date.now() - 10 * 86400000).toISOString(),
-  },
-];
-
-const INITIAL_MEMBERSHIPS = [
-  // Group 1: Frontend React (6 students) - Base price: 600,000 UZS
-  { id: 'mem-fe-1', group_id: 'grp-1', student_id: 'usr-student-1', is_active: true, custom_price: 480000, discount_type: 'percent', discount_percent: 20, discount_amount: 120000, discount_reason: "Olimpiada sovrindori (20% chegirma)", enrolled_at: new Date(Date.now() - 25 * 86400000).toISOString() },
-  { id: 'mem-fe-2', group_id: 'grp-1', student_id: 'usr-student-fe-2', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 24 * 86400000).toISOString() },
-  { id: 'mem-fe-3', group_id: 'grp-1', student_id: 'usr-student-fe-3', is_active: true, custom_price: 500000, discount_type: 'fixed', discount_percent: 0, discount_amount: 100000, discount_reason: "Oila a'zosi chegirmasi (-100 000 so'm)", enrolled_at: new Date(Date.now() - 23 * 86400000).toISOString() },
-  { id: 'mem-fe-4', group_id: 'grp-1', student_id: 'usr-student-fe-4', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 22 * 86400000).toISOString() },
-  { id: 'mem-fe-5', group_id: 'grp-1', student_id: 'usr-student-fe-5', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 21 * 86400000).toISOString() },
-  { id: 'mem-fe-6', group_id: 'grp-1', student_id: 'usr-student-fe-6', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 20 * 86400000).toISOString() },
-
-  // Group 2: Python Backend (6 students) - Base price: 700,000 UZS
-  { id: 'mem-py-1', group_id: 'grp-2', student_id: 'usr-student-2', is_active: true, custom_price: 350000, discount_type: 'percent', discount_percent: 50, discount_amount: 350000, discount_reason: "Iqtidorli talaba granti (50% chegirma)", enrolled_at: new Date(Date.now() - 19 * 86400000).toISOString() },
-  { id: 'mem-py-2', group_id: 'grp-2', student_id: 'usr-student-py-2', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 18 * 86400000).toISOString() },
-  { id: 'mem-py-3', group_id: 'grp-2', student_id: 'usr-student-py-3', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 17 * 86400000).toISOString() },
-  { id: 'mem-py-4', group_id: 'grp-2', student_id: 'usr-student-py-4', is_active: true, custom_price: 600000, discount_type: 'fixed', discount_percent: 0, discount_amount: 100000, discount_reason: "Hamkor maktab chegirmasi", enrolled_at: new Date(Date.now() - 16 * 86400000).toISOString() },
-  { id: 'mem-py-5', group_id: 'grp-2', student_id: 'usr-student-py-5', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 15 * 86400000).toISOString() },
-  { id: 'mem-py-6', group_id: 'grp-2', student_id: 'usr-student-py-6', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 14 * 86400000).toISOString() },
-
-  // Group 3: English IELTS (6 students) - Base price: 500,000 UZS
-  { id: 'mem-eng-1', group_id: 'grp-3', student_id: 'usr-student-3', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 14 * 86400000).toISOString() },
-  { id: 'mem-eng-2', group_id: 'grp-3', student_id: 'usr-student-eng-2', is_active: true, custom_price: 450000, discount_type: 'percent', discount_percent: 10, discount_amount: 50000, discount_reason: "Oila a'zosi chegirmasi (10%)", enrolled_at: new Date(Date.now() - 13 * 86400000).toISOString() },
-  { id: 'mem-eng-3', group_id: 'grp-3', student_id: 'usr-student-eng-3', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 12 * 86400000).toISOString() },
-  { id: 'mem-eng-4', group_id: 'grp-3', student_id: 'usr-student-eng-4', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 11 * 86400000).toISOString() },
-  { id: 'mem-eng-5', group_id: 'grp-3', student_id: 'usr-student-eng-5', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 10 * 86400000).toISOString() },
-  { id: 'mem-eng-6', group_id: 'grp-3', student_id: 'usr-student-eng-6', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 9 * 86400000).toISOString() },
-
-  // Group 4: UI/UX Design (6 students) - Base price: 550,000 UZS
-  { id: 'mem-ux-1', group_id: 'grp-4', student_id: 'usr-student-ux-1', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 9 * 86400000).toISOString() },
-  { id: 'mem-ux-2', group_id: 'grp-4', student_id: 'usr-student-ux-2', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 8 * 86400000).toISOString() },
-  { id: 'mem-ux-3', group_id: 'grp-4', student_id: 'usr-student-ux-3', is_active: true, custom_price: 400000, discount_type: 'custom', discount_percent: 0, discount_amount: 150000, discount_reason: "Maxsus homiylik narxi", enrolled_at: new Date(Date.now() - 7 * 86400000).toISOString() },
-  { id: 'mem-ux-4', group_id: 'grp-4', student_id: 'usr-student-ux-4', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 6 * 86400000).toISOString() },
-  { id: 'mem-ux-5', group_id: 'grp-4', student_id: 'usr-student-ux-5', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 5 * 86400000).toISOString() },
-  { id: 'mem-ux-6', group_id: 'grp-4', student_id: 'usr-student-ux-6', is_active: true, custom_price: null, discount_type: null, discount_percent: 0, discount_amount: 0, discount_reason: '', enrolled_at: new Date(Date.now() - 4 * 86400000).toISOString() },
-];
-
-const INITIAL_PAYMENTS = [
-  // 1. Jasur Rustamov (usr-student-1) - QARZDOR (Debt: 280,000 so'm, paid 200,000 of 480,000 fee)
-  {
-    id: 'pay-fe-1',
-    student_id: 'usr-student-1',
-    amount: 200000,
-    payment_method: 'Naqd pul',
-    reference_number: 'CSH-10492',
-    payment_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-    notes: "Qisman to'lov (20% chegirmali narxdan, 280,000 so'm qolgan)",
-    status: 'paid',
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  // 2. Madina Rahimova (usr-student-2) - TO'LANGAN (Paid 350,000 of 350,000 fee, 50% grant)
-  {
-    id: 'pay-py-1',
-    student_id: 'usr-student-2',
-    amount: 350000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-771923',
-    payment_date: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0],
-    notes: "Imtiyozli grant to'lovi to'liq to'langan (Qarz: 0)",
-    status: 'paid',
-    created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  // 3. Otabek Shukurov (usr-student-3) - TO'LANGAN (Paid 500,000 of 500,000 fee)
-  {
-    id: 'pay-eng-otabek',
-    student_id: 'usr-student-3',
-    amount: 500000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-891044',
-    payment_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq to'langan (Kvitansiya #891044, Qarz: 0)",
-    status: 'paid',
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  // Sardor Aliyev - Full 600,000 UZS paid
-  {
-    id: 'pay-fe-2',
-    student_id: 'usr-student-fe-2',
-    amount: 600000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-882190',
-    payment_date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
-    notes: "Oktyabr oyi to'lovi to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-  },
-  // Bobur Temirov - Full 500,000 UZS paid
-  {
-    id: 'pay-fe-3',
-    student_id: 'usr-student-fe-3',
-    amount: 500000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-991201',
-    payment_date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-  },
-  // Shaxzod Karimov - Full 600,000 UZS paid
-  {
-    id: 'pay-fe-4',
-    student_id: 'usr-student-fe-4',
-    amount: 600000,
-    payment_method: 'Naqd pul',
-    reference_number: 'CSH-44109',
-    payment_date: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  // Nilufar Saidova - Full 600,000 UZS paid
-  {
-    id: 'pay-fe-5',
-    student_id: 'usr-student-fe-5',
-    amount: 600000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-901123',
-    payment_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
-    notes: "Oktyabr oylik to'lovi",
-    status: 'paid',
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  // Malika Nurmatova - Full 600,000 UZS paid
-  {
-    id: 'pay-fe-6',
-    student_id: 'usr-student-fe-6',
-    amount: 600000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-901199',
-    payment_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  // Azizbek Toshmatov - Full 700,000 UZS paid
-  {
-    id: 'pay-py-2',
-    student_id: 'usr-student-py-2',
-    amount: 700000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-774411',
-    payment_date: new Date(Date.now() - 6 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 6 * 86400000).toISOString(),
-  },
-  // Bekzod Mahmudov - Full 700,000 UZS paid
-  {
-    id: 'pay-py-3',
-    student_id: 'usr-student-py-3',
-    amount: 700000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-774412',
-    payment_date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-  },
-  // Dilnoza Yusupova - Full 600,000 UZS paid
-  {
-    id: 'pay-py-4',
-    student_id: 'usr-student-py-4',
-    amount: 600000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-774413',
-    payment_date: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  // Jahongir Qodirov - Full 700,000 UZS paid
-  {
-    id: 'pay-py-5',
-    student_id: 'usr-student-py-5',
-    amount: 700000,
-    payment_method: 'Naqd pul',
-    reference_number: 'CSH-774414',
-    payment_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  // Kamola Alimova - Full 700,000 UZS paid
-  {
-    id: 'pay-py-6',
-    student_id: 'usr-student-py-6',
-    amount: 700000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-774415',
-    payment_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  // Shahnoza Karimova - Full 450,000 UZS paid
-  {
-    id: 'pay-eng-2',
-    student_id: 'usr-student-eng-2',
-    amount: 450000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-891045',
-    payment_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  // Nodira Xolmatova - Full 500,000 UZS paid
-  {
-    id: 'pay-eng-3',
-    student_id: 'usr-student-eng-3',
-    amount: 500000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-891046',
-    payment_date: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  // Farrux Ikromov - Full 500,000 UZS paid
-  {
-    id: 'pay-eng-4',
-    student_id: 'usr-student-eng-4',
-    amount: 500000,
-    payment_method: 'Naqd pul',
-    reference_number: 'CSH-891047',
-    payment_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  // Zarina Rustamova - Full 500,000 UZS paid
-  {
-    id: 'pay-eng-5',
-    student_id: 'usr-student-eng-5',
-    amount: 500000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-891048',
-    payment_date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-  },
-  // Akbar Jalilov - Full 500,000 UZS paid
-  {
-    id: 'pay-eng-6',
-    student_id: 'usr-student-eng-6',
-    amount: 500000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-891049',
-    payment_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  // Rayhona Fayzullayeva - Full 550,000 UZS paid
-  {
-    id: 'pay-ux-1',
-    student_id: 'usr-student-ux-1',
-    amount: 550000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-900101',
-    payment_date: new Date(Date.now() - 4 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-  },
-  // Temur Mirzayev - Full 550,000 UZS paid
-  {
-    id: 'pay-ux-2',
-    student_id: 'usr-student-ux-2',
-    amount: 550000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-900102',
-    payment_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  // Zilola Sobirova - Full 400,000 UZS paid
-  {
-    id: 'pay-ux-3',
-    student_id: 'usr-student-ux-3',
-    amount: 400000,
-    payment_method: 'Naqd pul',
-    reference_number: 'CSH-900103',
-    payment_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-  // Shahriyor Ergashev - Full 550,000 UZS paid
-  {
-    id: 'pay-ux-4',
-    student_id: 'usr-student-ux-4',
-    amount: 550000,
-    payment_method: 'Payme',
-    reference_number: 'PAY-900104',
-    payment_date: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
-  },
-  // Mohira Qosimova - Full 550,000 UZS paid
-  {
-    id: 'pay-ux-5',
-    student_id: 'usr-student-ux-5',
-    amount: 550000,
-    payment_method: 'Click / Karta',
-    reference_number: 'CLK-900105',
-    payment_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-  },
-  // Diyorbek Rahmonov - Full 550,000 UZS paid
-  {
-    id: 'pay-ux-6',
-    student_id: 'usr-student-ux-6',
-    amount: 550000,
-    payment_method: 'Naqd pul',
-    reference_number: 'CSH-900106',
-    payment_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
-    notes: "Oylik to'lov to'liq",
-    status: 'paid',
-    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-  },
-];
+const INITIAL_GROUPS = [];
+const INITIAL_SCHEDULES = [];
+const INITIAL_MEMBERSHIPS = [];
+const INITIAL_PAYMENTS = [];
 
 class LocalStore {
   constructor() {
     this.memoryStore = {};
+    this.ensureCleanStart();
+  }
+
+  ensureCleanStart() {
+    const WIPE_VERSION_KEY = 'educo_clean_start_v4';
+    try {
+      if (typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function') {
+        if (window.localStorage.getItem(WIPE_VERSION_KEY) !== 'v4_done') {
+          // Reset all data to clean starting state: only the two Owners!
+          window.localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
+          window.localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.GROUPS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.MEMBERSHIPS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.LESSON_SCHEDULES, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.LESSONS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.GRADES, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.HOMEWORK, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.MATERIALS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.STUDENT_REMINDERS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.TEACHER_ATTENDANCE, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.SMS_DEVICES, JSON.stringify(INITIAL_SMS_DEVICES));
+          window.localStorage.setItem(STORAGE_KEYS.SMS_QUEUE, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.SMS_LOGS, JSON.stringify([]));
+
+          // Clear any old active session so user logs in cleanly with the new owner credentials
+          window.localStorage.removeItem('educo_demo_session');
+          window.localStorage.setItem(WIPE_VERSION_KEY, 'v4_done');
+
+          // Sync clean slate to server
+          this.pushToServer({
+            [STORAGE_KEYS.USERS]: INITIAL_USERS,
+            [STORAGE_KEYS.COURSES]: [],
+            [STORAGE_KEYS.GROUPS]: [],
+            [STORAGE_KEYS.MEMBERSHIPS]: [],
+            [STORAGE_KEYS.LESSON_SCHEDULES]: [],
+            [STORAGE_KEYS.PAYMENTS]: [],
+            [STORAGE_KEYS.SMS_DEVICES]: INITIAL_SMS_DEVICES,
+          }).catch(() => {});
+        }
+      }
+    } catch (_) {}
   }
 
   getItem(key, defaultValue) {
@@ -1227,6 +276,7 @@ class LocalStore {
 
   async syncWithServer() {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+    if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
     // Skip if offline or tab is completely hidden in background
     if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     if (typeof document !== 'undefined' && document.hidden) return;
@@ -1273,6 +323,7 @@ class LocalStore {
 
   async pushToServer(payload) {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+    if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
     try {
       await fetch('/api/sync-store', {
         method: 'POST',
@@ -1323,9 +374,6 @@ class LocalStore {
   normalizeUserId(id) {
     const map = {
       'demo-owner-id': 'usr-owner-1',
-      'demo-admin-id': 'usr-admin-1',
-      'demo-teacher-id': 'usr-teacher-1',
-      'demo-student-id': 'usr-student-1',
     };
     return map[id] || id;
   }
@@ -1333,9 +381,48 @@ class LocalStore {
   getUsers() {
     let raw = this.getItem(STORAGE_KEYS.USERS, INITIAL_USERS);
     let needsCleanup = false;
-    const migratedAvatars = {};
 
-    // Ensure all seed INITIAL_USERS exist in raw (including newly seeded users like Abdulazizbek)
+    // Purge legacy demo accounts that user requested to delete
+    const legacyDemoIds = new Set([
+      'usr-admin-1',
+      'usr-teacher-1',
+      'usr-teacher-2',
+      'usr-teacher-abdulaziz',
+      'usr-student-1',
+      'usr-student-fe-2',
+      'usr-student-fe-3',
+      'usr-student-fe-4',
+      'usr-student-fe-5',
+      'usr-student-fe-6',
+      'usr-student-2',
+      'usr-student-py-2',
+      'usr-student-py-3',
+      'usr-student-py-4',
+      'usr-student-py-5',
+      'usr-student-py-6',
+      'usr-student-3',
+      'usr-student-eng-2',
+      'usr-student-eng-3',
+      'usr-student-eng-4',
+      'usr-student-eng-5',
+      'usr-student-eng-6',
+      'usr-student-ux-1',
+      'usr-student-ux-2',
+      'usr-student-ux-3',
+      'usr-student-ux-4',
+      'usr-student-ux-5',
+      'usr-student-ux-6',
+    ]);
+
+    raw = (raw || []).filter((u) => {
+      if (legacyDemoIds.has(u.id)) {
+        needsCleanup = true;
+        return false;
+      }
+      return true;
+    });
+
+    // Ensure all seed INITIAL_USERS exist in raw (Abbosbek and Abdulazizbek)
     INITIAL_USERS.forEach((initUser) => {
       const initPhoneClean = (initUser.phone || '').replace(/\D/g, '').slice(-9);
       const exists = raw.some(
@@ -1349,21 +436,7 @@ class LocalStore {
       }
     });
 
-    // Identify any accidentally created legacy demo-*-id rows and rescue their avatar_url
-    raw.forEach((u) => {
-      const mappedId = this.normalizeUserId(u.id);
-      if (mappedId !== u.id || (u.fullName === 'User' && !u.phone && !u.first_name)) {
-        needsCleanup = true;
-        if (u.avatar_url) {
-          const targetId = mappedId !== u.id ? mappedId : 'usr-owner-1';
-          migratedAvatars[targetId] = u.avatar_url;
-        }
-      }
-    });
-
     const filtered = raw.filter((u) => {
-      const mappedId = this.normalizeUserId(u.id);
-      if (mappedId !== u.id) return false;
       if (u.fullName === 'User' && !u.phone && !u.first_name) return false;
       return true;
     });
@@ -1378,7 +451,7 @@ class LocalStore {
       );
       return {
         ...u,
-        avatar_url: u.avatar_url || migratedAvatars[u.id] || '',
+        avatar_url: u.avatar_url || '',
         password: u.password || defaultRef?.password || 'Educo#2026!',
         password_updated_at: u.password_updated_at || u.updated_at || u.created_at,
       };
@@ -1497,47 +570,14 @@ class LocalStore {
   // --- GROUPS ---
   getGroups() {
     let raw = this.getItem(STORAGE_KEYS.GROUPS, INITIAL_GROUPS);
-    let changed = false;
-
-    INITIAL_GROUPS.forEach((initG) => {
-      const idx = raw.findIndex((g) => g.id === initG.id);
-      if (idx === -1) {
-        raw.push(initG);
-        changed = true;
-      } else {
-        if (!Array.isArray(raw[idx].student_ids) || raw[idx].student_ids.length < initG.student_ids.length) {
-          raw[idx] = {
-            ...raw[idx],
-            student_ids: initG.student_ids,
-            enrolled_count: initG.student_ids.length,
-          };
-          changed = true;
-        }
-      }
-    });
-
-    if (changed) {
-      this.setItem(STORAGE_KEYS.GROUPS, raw);
-    }
+    if (!Array.isArray(raw)) raw = [];
     return raw;
   }
 
   // --- MEMBERSHIPS ---
   getMemberships() {
     let raw = this.getItem(STORAGE_KEYS.MEMBERSHIPS, INITIAL_MEMBERSHIPS);
-    let changed = false;
-    if (!Array.isArray(raw) || raw.length < INITIAL_MEMBERSHIPS.length) {
-      const existingIds = new Set((raw || []).map((m) => m.id));
-      const merged = Array.isArray(raw) ? [...raw] : [];
-      INITIAL_MEMBERSHIPS.forEach((im) => {
-        if (!existingIds.has(im.id)) {
-          merged.push(im);
-          changed = true;
-        }
-      });
-      raw = merged;
-      this.setItem(STORAGE_KEYS.MEMBERSHIPS, raw);
-    }
+    if (!Array.isArray(raw)) raw = [];
     return raw;
   }
 
@@ -1670,16 +710,7 @@ class LocalStore {
   // --- LESSON SCHEDULES (TIMETABLE) ---
   getSchedules() {
     let raw = this.getItem(STORAGE_KEYS.LESSON_SCHEDULES, INITIAL_SCHEDULES);
-
-    // Auto-migrate legacy 5-item seed data so demo groups have full 3-day patterns
-    if (
-      Array.isArray(raw) &&
-      raw.some((s) => s.id === 'sch-4') &&
-      !raw.some((s) => s.id === 'sch-4b')
-    ) {
-      raw = INITIAL_SCHEDULES;
-      this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, raw);
-    }
+    if (!Array.isArray(raw)) raw = [];
 
     const groups = this.getGroups();
     const courses = this.getCourses();

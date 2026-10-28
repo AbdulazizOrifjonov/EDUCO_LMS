@@ -96,16 +96,22 @@ describe('Student Creation with Parent Phone Numbers Suite', () => {
   });
 
   it('successfully creates student and immediately enrolls into group', async () => {
+    const testGroup = localStore.saveGroup({
+      id: 'grp-test-enroll',
+      name: 'Test Group',
+      student_ids: [],
+    });
+
     const student = await createStudent({
       firstName: 'Dilshod',
       lastName: 'Ergashev',
       fatherPhone: '+998912345678',
-      groupId: 'grp-1',
+      groupId: testGroup.id,
     });
 
     expect(student.id).toBeDefined();
 
-    const group = await getGroupById('grp-1');
+    const group = await getGroupById(testGroup.id);
     const isEnrolled = group.students.some((s) => s.id === student.id);
     expect(isEnrolled).toBe(true);
   });

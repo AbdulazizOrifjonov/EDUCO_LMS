@@ -173,6 +173,30 @@ describe('SMS Service - Comprehensive Suite', () => {
 
   describe('getProspectiveRecipients', () => {
     it('returns array of prospective recipients with properly formatted messages', async () => {
+      // Seed a test student and group so prospective recipients has mock debtor data
+      localStore.saveUser({
+        id: 'usr-debtor-test',
+        fullName: 'Test Talaba',
+        first_name: 'Test',
+        last_name: 'Talaba',
+        phone: '+998 90 123 45 67',
+        father_phone: '+998 90 765 43 21',
+        role: 'student',
+        is_active: true,
+      });
+      localStore.saveCourse({
+        id: 'crs-debtor-test',
+        name: 'Test Kurs',
+        monthly_fee: 500000,
+        is_active: true,
+      });
+      localStore.saveGroup({
+        id: 'grp-debtor-test',
+        course_id: 'crs-debtor-test',
+        name: 'Test Guruh',
+        student_ids: ['usr-debtor-test'],
+      });
+
       const recipients = await getProspectiveRecipients();
       expect(Array.isArray(recipients)).toBe(true);
       expect(recipients.length).toBeGreaterThan(0);

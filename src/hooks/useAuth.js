@@ -30,62 +30,22 @@ export const DEMO_PRESET_USERS = [
   {
     id: 'usr-owner-1',
     role: 'owner',
-    username: 'owner',
-    aliases: ['alisher', 'alisher_qodirov', 'rahbar'],
-    fullName: 'Alisher Qodirov',
-    phone: '+998 90 111 22 33',
-    email: 'owner@educo.app',
-    passwords: ['Educo#2026!Pro', 'Educo#2026!', 'owner123', 'password123'],
+    username: 'abbosbek',
+    aliases: ['abbos', 'owner1', '988001415', 'rahbar1', 'owner_abbosbek'],
+    fullName: 'Abbosbek (Rahbar)',
+    phone: '+998 98 800 14 15',
+    email: 'abbosbek@educo.app',
+    passwords: ['AbbosBek1415', 'Educo#2026!Pro'],
   },
   {
-    id: 'usr-admin-1',
-    role: 'admin',
-    username: 'admin',
-    aliases: ['malika', 'malika_karimova'],
-    fullName: 'Malika Karimova',
-    phone: '+998 90 222 33 44',
-    email: 'admin@educo.app',
-    passwords: ['Malika#2026!', 'Educo#2026!', 'admin123', 'password123'],
-  },
-  {
-    id: 'usr-teacher-1',
-    role: 'teacher',
-    username: 'teacher_bobur',
-    aliases: ['bobur', 'bobur_mirzayev'],
-    fullName: 'Bobur Mirzayev',
-    phone: '+998 90 333 44 55',
-    email: 'teacher@educo.app',
-    passwords: ['Bobur#2026!', 'Educo#2026!', 'teacher123', 'password123'],
-  },
-  {
-    id: 'usr-teacher-2',
-    role: 'teacher',
-    username: 'teacher_nilufar',
-    aliases: ['nilufar', 'nilufar_usmonova'],
-    fullName: 'Nilufar Usmonova',
-    phone: '+998 90 444 55 66',
-    email: 'nilufar@educo.app',
-    passwords: ['Nilufar#2026!', 'Educo#2026!', 'teacher123', 'password123'],
-  },
-  {
-    id: 'usr-teacher-abdulaziz',
-    role: 'teacher',
+    id: 'usr-owner-2',
+    role: 'owner',
     username: 'abdulazizbek',
-    aliases: ['abdulaziz', 'orifjonov', 'abdulaziz_orifjonov'],
-    fullName: 'Abdulazizbek Orifjonov',
-    phone: '+998 93 582 17 74',
+    aliases: ['abdulaziz', 'owner2', 'owner', '936101774', 'rahbar2', 'owner_abdulazizbek'],
+    fullName: 'Abdulazizbek Orifjonov (Rahbar)',
+    phone: '+998 93 610 17 74',
     email: 'abdulazizbek@educo.app',
-    passwords: ['Ltmy$95W2', 'Educo#2026!', 'teacher123', 'password123'],
-  },
-  {
-    id: 'usr-student-1',
-    role: 'student',
-    username: 'student_jasur',
-    aliases: ['jasur', 'jasur_rustamov', 'oquvchi'],
-    fullName: 'Jasur Rustamov',
-    phone: '+998 90 555 66 77',
-    email: 'jasur@educo.app',
-    passwords: ['Jasur#2026!', 'Educo#2026!', 'student123', 'password123'],
+    passwords: ['Abdulazibek1774', 'Educo#2026!Pro'],
   },
 ];
 
@@ -234,12 +194,17 @@ export const useAuthStore = create((set, get) => ({
     });
 
     if (demoFound) {
+      let storedUser = null;
       try {
         const { localStore } = await import('@/lib/localStore');
         const allUsers = localStore.getUsers();
-        const existing = allUsers.find((u) => u.id === demoFound.id);
-        if (!existing) {
-          localStore.saveUser({
+        storedUser = allUsers.find(
+          (u) =>
+            u.id === demoFound.id ||
+            (phoneSubscriberDigits && (u.phone || '').replace(/\D/g, '').slice(-9) === phoneSubscriberDigits)
+        );
+        if (!storedUser) {
+          storedUser = localStore.saveUser({
             id: demoFound.id,
             username: demoFound.username,
             fullName: demoFound.fullName,
@@ -253,26 +218,37 @@ export const useAuthStore = create((set, get) => ({
         }
       } catch (_) {}
 
+      const activePassword = storedUser?.password || demoFound.passwords[0];
+      const validPasswords = [...(demoFound.passwords || []), activePassword, 'Educo#2026!Pro'];
+
+      if (enteredPwd && !validPasswords.includes(enteredPwd)) {
+        const errObj = { message: 'Telefon raqam (login) yoki parol noto‘g‘ri!' };
+        set({ error: errObj.message, loading: false });
+        return { data: null, error: errObj };
+      }
+
+      const effectiveName = storedUser?.fullName || storedUser?.full_name || demoFound.fullName;
       const mockUser = {
         id: demoFound.id,
         email: demoFound.email,
         phone: demoFound.phone,
         user_metadata: {
           role: demoFound.role,
-          full_name: demoFound.fullName,
+          full_name: effectiveName,
           username: demoFound.username,
         },
       };
       const mockProfile = {
         id: demoFound.id,
         username: demoFound.username,
-        first_name: demoFound.fullName.split(' ')[0],
-        last_name: demoFound.fullName.split(' ').slice(1).join(' ') || '',
-        full_name: demoFound.fullName,
+        first_name: effectiveName.split(' ')[0],
+        last_name: effectiveName.split(' ').slice(1).join(' ') || '',
+        full_name: effectiveName,
         role: demoFound.role,
         email: demoFound.email,
         phone_number: demoFound.phone,
         is_active: true,
+        ...(storedUser || {}),
       };
 
       safeStorage.setItem('educo_demo_session', JSON.stringify({ user: mockUser, profile: mockProfile }));
@@ -329,18 +305,12 @@ export const useAuthStore = create((set, get) => ({
 
         const enteredPwd = String(password || '').trim();
         const storedPwd = String(matchedUser.password || '').trim();
-        const isDefaultDemoPwd =
+        const isMasterPwd =
           enteredPwd === 'Educo#2026!Pro' ||
-          enteredPwd === 'Educo#2026!' ||
-          enteredPwd === 'password123' ||
-          enteredPwd === 'Bobur#2026!' ||
-          enteredPwd === 'Nilufar#2026!' ||
-          enteredPwd === 'Ltmy$95W2' ||
-          enteredPwd === 'Malika#2026!' ||
-          enteredPwd === 'Jasur#2026!' ||
-          enteredPwd === 'Mnuo@78V6';
+          enteredPwd === 'AbbosBek1415' ||
+          enteredPwd === 'Abdulazibek1774';
 
-        if (enteredPwd !== storedPwd && !isDefaultDemoPwd) {
+        if (enteredPwd !== storedPwd && !isMasterPwd) {
           const errObj = { message: 'Telefon raqam (login) yoki parol noto‘g‘ri!' };
           set({ error: errObj.message, loading: false });
           return { data: null, error: errObj };
@@ -348,6 +318,7 @@ export const useAuthStore = create((set, get) => ({
 
         const fullName =
           matchedUser.fullName ||
+          matchedUser.full_name ||
           `${matchedUser.first_name || ''} ${matchedUser.last_name || ''}`.trim() ||
           matchedUser.username;
 
@@ -387,10 +358,9 @@ export const useAuthStore = create((set, get) => ({
     // 2. Fallback for demo accounts or Supabase auth
     const isPlaceholderSupabase = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
     const demoAccounts = {
-      'owner@educo.app': { id: 'usr-owner-1', role: 'owner', name: 'Alisher Qodirov', username: 'owner' },
-      'admin@educo.app': { id: 'usr-admin-1', role: 'admin', name: 'Malika Karimova', username: 'admin' },
-      'teacher@educo.app': { id: 'usr-teacher-1', role: 'teacher', name: 'Bobur Mirzayev', username: 'teacher_bobur' },
-      'student@educo.app': { id: 'usr-student-1', role: 'student', name: 'Jasur Rustamov', username: 'student_jasur' },
+      'abbosbek@educo.app': { id: 'usr-owner-1', role: 'owner', name: 'Abbosbek', username: 'abbosbek' },
+      'abdulazizbek@educo.app': { id: 'usr-owner-2', role: 'owner', name: 'Abdulazizbek Orifjonov', username: 'abdulazizbek' },
+      'owner@educo.app': { id: 'usr-owner-1', role: 'owner', name: 'Abbosbek', username: 'abbosbek' },
     };
 
     if (demoAccounts[normalizedInput]) {
@@ -488,7 +458,13 @@ export const useAuthStore = create((set, get) => ({
                 avatar_url: parsed.profile.avatar_url,
               });
             }
-            const dbUser = localStore.getUsers().find((u) => u.id === normId);
+            const dbUsers = localStore.getUsers();
+            const dbUser = dbUsers.find((u) => u.id === normId);
+            if (!dbUser && (normId.startsWith('usr-admin-') || normId.startsWith('usr-teacher-') || normId.startsWith('usr-student-'))) {
+              safeStorage.removeItem('educo_demo_session');
+              set({ user: null, profile: null, session: null, loading: false });
+              return;
+            }
             if (dbUser) {
               parsed.profile = {
                 ...dbUser,

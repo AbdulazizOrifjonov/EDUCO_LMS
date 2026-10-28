@@ -115,13 +115,9 @@ export default function ProfilePage() {
     setPasswordError('');
     setPasswordSuccess('');
 
-    const strength = evaluatePasswordStrength(newPassword);
-    if (!strength.allMet) {
+    if (!newPassword || newPassword.length < 6) {
       setPasswordError(
-        t(
-          'users.passwordMustBeStrong',
-          'Yangi parol xavfsiz (yashil) bo‘lishi uchun katta-kichik harf, raqam va maxsus belgi (!@#$) bo‘lishi shart!'
-        )
+        t('users.passwordMinLength', 'Yangi parol kamida 6 ta belgidan iborat bo‘lishi kerak!')
       );
       return;
     }

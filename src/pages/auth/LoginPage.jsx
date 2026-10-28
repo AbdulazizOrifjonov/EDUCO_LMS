@@ -399,51 +399,50 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Quick Demo Access - Dedicated Teachers Section */}
+            {/* Owner Quick Access Section */}
             <div className="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-base">👨‍🏫</span>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                    {t('common.teacherDemoAccounts', "O'qituvchilar kabineti (Demo kirish)")}
+                  <span className="text-base">👑</span>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-brand-navy dark:text-blue-400">
+                    {t('common.ownerAccounts', 'Boshqaruvchi / Rahbar (Owner) kabineti')}
                   </h3>
                 </div>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/80 text-brand-navy dark:text-blue-300">
                   1-klikda kirish
                 </span>
               </div>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">
-                {t('common.teacherDemoHint', "Istalgan o'qituvchi kartasini bosing va to'g'ridan-to'g'ri o'qituvchi profiliga kiring:")}
+                {t('common.ownerAccountsHint', 'Owner sifatida tizimga kirish uchun quyidagi rahbar hisoblaridan birini tanlang:')}
               </p>
 
-              {/* 3 Teachers Cards */}
-              <div className="space-y-2 mb-4">
-                {/* Teacher 1: Bobur Mirzayev */}
+              <div className="space-y-2.5">
+                {/* Owner 1: Abbosbek */}
                 <div
                   role="button"
                   tabIndex={0}
-                  onClick={() => handleQuickLogin('+998 90 333 44 55', 'Bobur#2026!', 'teacher')}
+                  onClick={() => handleQuickLogin('+998 98 800 14 15', 'AbbosBek1415', 'owner')}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      handleQuickLogin('+998 90 333 44 55', 'Bobur#2026!', 'teacher');
+                      handleQuickLogin('+998 98 800 14 15', 'AbbosBek1415', 'owner');
                     }
                   }}
-                  className="p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/50 transition-all flex items-center justify-between gap-2 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
+                  className="p-3 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20 hover:bg-blue-100/70 dark:hover:bg-blue-950/50 transition-all flex items-center justify-between gap-3 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
-                        Bobur Mirzayev
+                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-brand-navy dark:group-hover:text-blue-300 transition-colors">
+                        Abbosbek
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-medium">
-                        IT & Backend
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-semibold">
+                        👑 Rahbar (Owner 1)
                       </span>
                     </div>
                     <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
-                      <span>+998 90 333 44 55</span>
+                      <span>+998 98 800 14 15</span>
                       <span className="text-[10px] text-gray-400">•</span>
-                      <span className="text-gray-600 dark:text-gray-300 font-semibold">Bobur#2026!</span>
+                      <span className="text-gray-700 dark:text-gray-300 font-semibold">AbbosBek1415</span>
                     </div>
                   </div>
                   <button
@@ -451,83 +450,41 @@ export default function LoginPage() {
                     disabled={isSubmitting || authLoading}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleQuickLogin('+998 90 333 44 55', 'Bobur#2026!', 'teacher');
+                      handleQuickLogin('+998 98 800 14 15', 'AbbosBek1415', 'owner');
                     }}
-                    className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                    className="shrink-0 px-3.5 py-1.5 rounded-lg bg-brand-navy hover:bg-blue-900 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
                   >
-                    <span>{quickLoggingInRole === 'teacher' && watch('username') === '+998 90 333 44 55' ? 'Kirilmoqda...' : 'Kirish'}</span>
+                    <span>{quickLoggingInRole === 'owner' && watch('username') === '+998 98 800 14 15' ? 'Kirilmoqda...' : 'Kirish'}</span>
                     <span className="text-[10px]">→</span>
                   </button>
                 </div>
 
-                {/* Teacher 2: Nilufar Usmonova */}
+                {/* Owner 2: Abdulazizbek Orifjonov */}
                 <div
                   role="button"
                   tabIndex={0}
-                  onClick={() => handleQuickLogin('+998 90 444 55 66', 'Nilufar#2026!', 'teacher')}
+                  onClick={() => handleQuickLogin('+998 93 610 17 74', 'Abdulazibek1774', 'owner')}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      handleQuickLogin('+998 90 444 55 66', 'Nilufar#2026!', 'teacher');
+                      handleQuickLogin('+998 93 610 17 74', 'Abdulazibek1774', 'owner');
                     }
                   }}
-                  className="p-2.5 rounded-xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 hover:bg-teal-100/70 dark:hover:bg-teal-950/50 transition-all flex items-center justify-between gap-2 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">
-                        Nilufar Usmonova
-                      </span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300 font-medium">
-                        Ingliz tili (IELTS)
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
-                      <span>+998 90 444 55 66</span>
-                      <span className="text-[10px] text-gray-400">•</span>
-                      <span className="text-gray-600 dark:text-gray-300 font-semibold">Nilufar#2026!</span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={isSubmitting || authLoading}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleQuickLogin('+998 90 444 55 66', 'Nilufar#2026!', 'teacher');
-                    }}
-                    className="shrink-0 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>{quickLoggingInRole === 'teacher' && watch('username') === '+998 90 444 55 66' ? 'Kirilmoqda...' : 'Kirish'}</span>
-                    <span className="text-[10px]">→</span>
-                  </button>
-                </div>
-
-                {/* Teacher 3: Abdulazizbek Orifjonov */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => handleQuickLogin('+998 93 582 17 74', 'Ltmy$95W2', 'teacher')}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleQuickLogin('+998 93 582 17 74', 'Ltmy$95W2', 'teacher');
-                    }
-                  }}
-                  className="p-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-950/50 transition-all flex items-center justify-between gap-2 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
+                  className="p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-950/50 transition-all flex items-center justify-between gap-3 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
                         Abdulazizbek Orifjonov
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-medium">
-                        Frontend & Web
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold">
+                        👑 Rahbar (Owner 2)
                       </span>
                     </div>
                     <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
-                      <span>+998 93 582 17 74</span>
+                      <span>+998 93 610 17 74</span>
                       <span className="text-[10px] text-gray-400">•</span>
-                      <span className="text-gray-600 dark:text-gray-300 font-semibold">Ltmy$95W2</span>
+                      <span className="text-gray-700 dark:text-gray-300 font-semibold">Abdulazibek1774</span>
                     </div>
                   </div>
                   <button
@@ -535,54 +492,12 @@ export default function LoginPage() {
                     disabled={isSubmitting || authLoading}
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleQuickLogin('+998 93 582 17 74', 'Ltmy$95W2', 'teacher');
+                      handleQuickLogin('+998 93 610 17 74', 'Abdulazibek1774', 'owner');
                     }}
-                    className="shrink-0 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                    className="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
                   >
-                    <span>{quickLoggingInRole === 'teacher' && watch('username') === '+998 93 582 17 74' ? 'Kirilmoqda...' : 'Kirish'}</span>
+                    <span>{quickLoggingInRole === 'owner' && watch('username') === '+998 93 610 17 74' ? 'Kirilmoqda...' : 'Kirish'}</span>
                     <span className="text-[10px]">→</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Other Roles Demo Access */}
-              <div className="pt-3 border-t border-dashed border-gray-200 dark:border-gray-800">
-                <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-2">
-                  {t('common.otherRolesDemo', 'Boshqa rollar (1-klikda tezkor kirish):')}
-                </p>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <button
-                    type="button"
-                    disabled={isSubmitting || authLoading}
-                    onClick={() => handleQuickLogin('+998 90 111 22 33', 'Educo#2026!Pro', 'owner')}
-                    className="p-2.5 rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30 text-brand-navy dark:text-blue-300 font-medium hover:bg-blue-100/70 dark:hover:bg-blue-900/50 active:scale-95 transition-all text-center shadow-xs flex flex-col items-center gap-0.5 cursor-pointer"
-                  >
-                    <span className="font-bold text-xs">👑 Rahbar</span>
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                      {quickLoggingInRole === 'owner' ? 'Kirilmoqda...' : 'Alisher Q.'}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isSubmitting || authLoading}
-                    onClick={() => handleQuickLogin('+998 90 222 33 44', 'Malika#2026!', 'admin')}
-                    className="p-2.5 rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 font-medium hover:bg-purple-100/70 dark:hover:bg-purple-900/50 active:scale-95 transition-all text-center shadow-xs flex flex-col items-center gap-0.5 cursor-pointer"
-                  >
-                    <span className="font-bold text-xs">🛡️ Admin</span>
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                      {quickLoggingInRole === 'admin' ? 'Kirilmoqda...' : 'Malika K.'}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isSubmitting || authLoading}
-                    onClick={() => handleQuickLogin('+998 90 555 66 77', 'Jasur#2026!', 'student')}
-                    className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 font-medium hover:bg-amber-100/70 dark:hover:bg-amber-900/50 active:scale-95 transition-all text-center shadow-xs flex flex-col items-center gap-0.5 cursor-pointer"
-                  >
-                    <span className="font-bold text-xs">🎓 O'quvchi</span>
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                      {quickLoggingInRole === 'student' ? 'Kirilmoqda...' : 'Jasur R.'}
-                    </span>
                   </button>
                 </div>
               </div>
