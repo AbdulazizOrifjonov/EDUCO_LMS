@@ -260,7 +260,7 @@ export default function ChatInput({
   };
 
   return (
-    <div className="relative border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 sm:p-4">
+    <div className="relative shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-2.5 sm:p-3 md:p-4 pb-[max(0.625rem,env(safe-area-inset-bottom))] mb-0">
       {/* Upload Progress Bar */}
       {uploading && uploadProgress !== null && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden">

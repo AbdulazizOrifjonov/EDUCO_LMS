@@ -116,6 +116,24 @@ export default function DashboardLayout({
     }
   }, [location.pathname, mobileOpen]);
 
+  // Lock body & html scroll when viewing chat page so mobile viewport never shifts or scrolls
+  useEffect(() => {
+    if (isChatPage) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.touchAction = 'pan-y';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isChatPage]);
+
   // Global mobile touch handler: dismiss keyboard when user taps outside input fields
   useEffect(() => {
     const handleTouchStart = (e) => {
@@ -247,7 +265,11 @@ export default function DashboardLayout({
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-[#EFECE4] text-slate-900 transition-colors duration-200 dark:bg-[#101827] dark:text-gray-100 flex overflow-x-hidden w-full max-w-full"
+      className={`${
+        isChatPage
+          ? 'fixed inset-0 h-[100dvh] max-h-[100dvh] overflow-hidden'
+          : 'min-h-screen overflow-x-hidden'
+      } bg-[#EFECE4] text-slate-900 transition-colors duration-200 dark:bg-[#101827] dark:text-gray-100 flex w-full max-w-full`}
     >
       {/* Sidebar Component */}
       <Sidebar
@@ -261,8 +283,8 @@ export default function DashboardLayout({
 
       {/* Main Content Wrapper */}
       <div
-        className={`flex min-w-0 flex-1 flex-col pt-16 transition-all duration-300 ease-in-out overflow-x-hidden ${
-          isChatPage ? 'h-[100dvh] max-h-[100dvh] overflow-hidden' : 'min-h-screen'
+        className={`flex min-w-0 flex-1 flex-col pt-16 transition-all duration-300 ease-in-out ${
+          isChatPage ? 'h-full max-h-full overflow-hidden' : 'min-h-screen overflow-x-hidden'
         }
           ${
             collapsed
@@ -628,10 +650,10 @@ export default function DashboardLayout({
 
         {/* Main Content Area */}
         <main
-          className={`flex-1 min-w-0 w-full overflow-x-hidden ${
+          className={`flex-1 min-h-0 min-w-0 w-full ${
             isChatPage
-              ? 'p-0 md:p-3 overflow-hidden flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)]'
-              : 'p-3 sm:p-5 lg:p-6 overflow-y-auto'
+              ? 'p-0 md:p-3 overflow-hidden flex flex-col h-full max-h-full'
+              : 'p-3 sm:p-5 lg:p-6 overflow-y-auto overflow-x-hidden'
           }`}
         >
           {children || <Outlet />}

@@ -106,7 +106,7 @@ export default function ChatPage() {
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="flex h-full w-full max-w-full overflow-hidden bg-[#F5F7FA] dark:bg-[#101827] border-0 md:border border-gray-200 dark:border-gray-800 rounded-none md:rounded-2xl shadow-none md:shadow-sm my-0"
+      className="flex flex-1 min-h-0 h-full w-full max-w-full overflow-hidden bg-[#F5F7FA] dark:bg-[#101827] border-0 md:border border-gray-200 dark:border-gray-800 rounded-none md:rounded-2xl shadow-none md:shadow-sm my-0"
     >
       {/* Sidebar: Group list */}
       <div
@@ -125,7 +125,7 @@ export default function ChatPage() {
 
       {/* Main chat window */}
       <div
-        className={`flex-1 min-w-0 max-w-full h-full flex flex-col overflow-hidden ${
+        className={`flex-1 min-h-0 min-w-0 max-w-full h-full flex flex-col overflow-hidden ${
           showMobileChat ? 'flex' : 'hidden md:flex'
         }`}
       >

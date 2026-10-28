@@ -439,9 +439,9 @@ export default function ChatWindow({
   const courseColor = activeGroup.course?.color || '#123D78';
 
   return (
-    <div className="flex-1 min-w-0 max-w-full flex flex-col h-full bg-[#F5F7FA] dark:bg-[#101827] relative overflow-hidden">
+    <div className="flex-1 min-h-0 min-w-0 max-w-full flex flex-col h-full bg-[#F5F7FA] dark:bg-[#101827] relative overflow-hidden">
       {/* Chat Header */}
-      <div className="h-16 px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-xs z-10 shrink-0 sticky top-0">
+      <div className="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-xs z-10 shrink-0 sticky top-0">
         <div className="flex items-center space-x-3 rtl:space-x-reverse min-w-0">
           {/* Mobile Back Button */}
           <button
@@ -641,7 +641,7 @@ export default function ChatWindow({
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 min-w-0 max-w-full overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-4 md:p-6 space-y-2 relative"
+        className="flex-1 min-h-0 min-w-0 max-w-full overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-4 md:p-6 space-y-2 relative"
       >
         {/* Loading History Spinner */}
         {loadingHistory && (
