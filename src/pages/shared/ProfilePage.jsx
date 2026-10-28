@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { useThemeStore } from '@/hooks/useTheme';
-import { Button, Card, Badge, Input, PasswordStrengthInput, evaluatePasswordStrength } from '@/components/ui';
+import { Button, Card, Badge, Input, PasswordStrengthInput, evaluatePasswordStrength, ImageCropperModal } from '@/components/ui';
 import { LanguageFlag } from '@/components/LanguageSelector';
 import { updateProfile, changePassword, uploadAvatar } from '@/services/settingsService';
 
@@ -40,6 +40,7 @@ export default function ProfilePage() {
   const [profileSuccess, setProfileSuccess] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [cropModalFile, setCropModalFile] = useState(null);
 
   // Handle Profile Update
   const handleProfileSubmit = async (e) => {
@@ -62,16 +63,24 @@ export default function ProfilePage() {
     }
   };
 
-  // Handle Avatar File Upload
-  const handleAvatarChange = async (e) => {
+  // Handle Avatar Selection for Telegram-like Cropping
+  const handleAvatarSelect = (e) => {
     const file = e.target.files?.[0];
+    if (file) {
+      setCropModalFile(file);
+    }
+    e.target.value = '';
+  };
+
+  const handleApplyCroppedAvatar = async (croppedDataUrl, croppedFile) => {
+    setCropModalFile(null);
     const uid = profile?.id || user?.id;
-    if (!file || !uid) return;
+    if (!uid) return;
 
     try {
       setAvatarUploading(true);
       setProfileSuccess('');
-      const uploadedUrl = await uploadAvatar(uid, file);
+      const uploadedUrl = await uploadAvatar(uid, croppedFile || croppedDataUrl);
       setAvatarUrl(uploadedUrl);
       await fetchProfile(uid);
       setProfileSuccess(t('users.avatarUpdated', 'Profil rasmi muvaffaqiyatli o‘rnatildi!'));
@@ -80,7 +89,6 @@ export default function ProfilePage() {
       console.error('Failed to upload avatar:', err);
     } finally {
       setAvatarUploading(false);
-      e.target.value = '';
     }
   };
 
@@ -153,7 +161,7 @@ export default function ProfilePage() {
   const displayAvatar = avatarUrl || profile?.avatar_url || '';
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -168,7 +176,7 @@ export default function ProfilePage() {
       <Card>
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="relative group">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-surface-dark-tertiary border-2 border-brand-navy dark:border-blue-500 flex items-center justify-center text-2xl font-bold text-brand-navy dark:text-blue-400 shadow-md">
+            <div className="w-24 h-24 rounded-3xl overflow-hidden bg-gray-100 dark:bg-surface-dark-tertiary border-2 border-emerald-600 dark:border-emerald-500 flex items-center justify-center text-2xl font-bold text-emerald-700 dark:text-emerald-300 shadow-md">
               {displayAvatar ? (
                 <img
                   src={displayAvatar}
@@ -182,14 +190,14 @@ export default function ProfilePage() {
 
             <label
               title={t('users.uploadAvatar', 'Profilga rasm qo‘yish')}
-              className="absolute bottom-0 right-0 p-2 bg-brand-navy hover:bg-blue-800 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105"
+              className="absolute -bottom-1 -right-1 p-2 bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-xl cursor-pointer shadow-lg transition-transform hover:scale-105"
             >
               <Camera className="w-4 h-4" />
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleAvatarChange}
+                onChange={handleAvatarSelect}
                 disabled={avatarUploading}
               />
             </label>
@@ -200,9 +208,23 @@ export default function ProfilePage() {
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {fullName || profile?.full_name || 'EDUCO'}
               </h2>
-              <Badge variant="primary" size="sm" className="capitalize w-fit mx-auto sm:mx-0">
-                {t('roles.' + (profile?.role || 'student'), { defaultValue: profile?.role || 'Student' })}
-              </Badge>
+              {profile?.role === 'teacher' ? (
+                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
+                  {t('roles.teacher', 'O‘qituvchi')}
+                </span>
+              ) : profile?.role === 'admin' ? (
+                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
+                  {t('roles.admin', 'Administrator')}
+                </span>
+              ) : profile?.role === 'owner' ? (
+                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
+                  {t('roles.owner', 'Boshliq (Owner)')}
+                </span>
+              ) : (
+                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
+                  {t('roles.student', 'O‘quvchi')}
+                </span>
+              )}
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">
               {profile?.phone || profile?.phone_number || profile?.email || user?.email}
@@ -210,7 +232,7 @@ export default function ProfilePage() {
 
             {/* Explicit Upload / Remove Avatar Buttons */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-              <label className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-brand-navy hover:bg-blue-800 text-white text-xs font-semibold cursor-pointer shadow-sm transition-colors">
+              <label className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer shadow-sm transition-colors">
                 <Camera className="w-3.5 h-3.5" />
                 <span>
                   {displayAvatar
@@ -221,7 +243,7 @@ export default function ProfilePage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={handleAvatarChange}
+                  onChange={handleAvatarSelect}
                   disabled={avatarUploading}
                 />
               </label>
@@ -239,7 +261,7 @@ export default function ProfilePage() {
             </div>
 
             {avatarUploading && (
-              <p className="text-xs text-blue-500 animate-pulse mt-1">{t('common.loading')}</p>
+              <p className="text-xs text-emerald-600 animate-pulse mt-1">{t('common.loading')}</p>
             )}
           </div>
         </div>
@@ -391,7 +413,7 @@ export default function ProfilePage() {
                     py-2 px-3 text-xs font-medium rounded-lg capitalize border transition-all
                     ${
                       theme === m
-                        ? 'border-brand-navy bg-blue-50 dark:bg-blue-950/40 text-brand-navy dark:text-blue-300 font-semibold ring-1 ring-brand-navy'
+                        ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold ring-1 ring-emerald-600'
                         : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300'
                     }
                   `}
@@ -420,7 +442,7 @@ export default function ProfilePage() {
                     py-2 px-2 text-xs font-medium rounded-lg border transition-all flex items-center justify-center gap-1.5
                     ${
                       i18n.language === lang.code
-                        ? 'border-brand-navy bg-blue-50 dark:bg-blue-950/40 text-brand-navy dark:text-blue-300 font-semibold ring-1 ring-brand-navy'
+                        ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold ring-1 ring-emerald-600'
                         : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300'
                     }
                   `}
@@ -433,6 +455,15 @@ export default function ProfilePage() {
           </div>
         </div>
       </Card>
+
+      {/* Telegram-style Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={Boolean(cropModalFile)}
+        imageFile={cropModalFile}
+        onClose={() => setCropModalFile(null)}
+        onCrop={handleApplyCroppedAvatar}
+        title={t('users.editAvatar', 'Profil rasmini moslashtirish')}
+      />
     </div>
   );
 }

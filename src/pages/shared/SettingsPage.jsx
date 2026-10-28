@@ -18,6 +18,7 @@ import {
 import useAuth from '@/hooks/useAuth';
 import { useThemeStore } from '@/hooks/useTheme';
 import { Button, Card, Badge, Input } from '@/components/ui';
+import Select from '@/components/ui/Select';
 import ProfilePage from './ProfilePage';
 import { LanguageFlag } from '@/components/LanguageSelector';
 import { getCenterSettings, updateCenterSettings } from '@/services/settingsService';
@@ -100,7 +101,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -120,7 +121,7 @@ export default function SettingsPage() {
               flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors
               ${
                 activeTab === 'profile'
-                  ? 'border-brand-navy text-brand-navy dark:border-blue-400 dark:text-blue-400'
+                  ? 'border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-300'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
               }
             `}
@@ -135,7 +136,7 @@ export default function SettingsPage() {
               flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors
               ${
                 activeTab === 'appearance'
-                  ? 'border-brand-navy text-brand-navy dark:border-blue-400 dark:text-blue-400'
+                  ? 'border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-300'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
               }
             `}
@@ -150,7 +151,7 @@ export default function SettingsPage() {
               flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors
               ${
                 activeTab === 'language'
-                  ? 'border-brand-navy text-brand-navy dark:border-blue-400 dark:text-blue-400'
+                  ? 'border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-300'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
               }
             `}
@@ -166,7 +167,7 @@ export default function SettingsPage() {
                 flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors
                 ${
                   activeTab === 'center'
-                    ? 'border-brand-navy text-brand-navy dark:border-blue-400 dark:text-blue-400'
+                    ? 'border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-300'
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
                 }
               `}
@@ -224,13 +225,13 @@ export default function SettingsPage() {
                       p-5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between
                       ${
                         isSelected
-                          ? 'border-brand-navy bg-blue-50/50 dark:bg-blue-950/20 ring-2 ring-brand-navy dark:ring-blue-500'
+                          ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-emerald-600 dark:ring-emerald-500'
                           : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary hover:border-gray-300 dark:hover:border-gray-700'
                       }
                     `}
                   >
                     <div>
-                      <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-surface-dark-tertiary w-fit text-brand-navy dark:text-blue-400 mb-3">
+                      <div className="p-2.5 rounded-lg bg-gray-100 dark:bg-surface-dark-tertiary w-fit text-emerald-600 dark:text-emerald-400 mb-3">
                         <Icon className="w-5 h-5" />
                       </div>
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
@@ -245,7 +246,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-medium text-gray-500">
                         {isSelected ? t('common.active') : t('common.view')}
                       </span>
-                      {isSelected && <CheckCircle className="w-4 h-4 text-brand-navy dark:text-blue-400" />}
+                      {isSelected && <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
                     </div>
                   </div>
                 );
@@ -277,7 +278,7 @@ export default function SettingsPage() {
                       p-5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between
                       ${
                         isSelected
-                          ? 'border-brand-navy bg-blue-50/50 dark:bg-blue-950/20 ring-2 ring-brand-navy dark:ring-blue-500'
+                          ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 ring-2 ring-emerald-600 dark:ring-emerald-500'
                           : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary hover:border-gray-300 dark:hover:border-gray-700'
                       }
                     `}
@@ -298,7 +299,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-medium text-gray-500">
                         {isSelected ? t('common.active') : t('common.edit')}
                       </span>
-                      {isSelected && <CheckCircle className="w-4 h-4 text-brand-navy dark:text-blue-400" />}
+                      {isSelected && <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
                     </div>
                   </div>
                 );
@@ -335,22 +336,21 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-                  {t('settings.timezone')}
-                </label>
-                <select
+                <Select
+                  label={t('settings.timezone')}
+                  options={[
+                    { value: 'Asia/Tashkent', label: 'Asia/Tashkent (UTC+05:00)' },
+                    { value: 'Asia/Samarkand', label: 'Asia/Samarkand (UTC+05:00)' },
+                    { value: 'Asia/Dubai', label: 'Asia/Dubai (UTC+04:00)' },
+                    { value: 'Europe/Moscow', label: 'Europe/Moscow (UTC+03:00)' },
+                    { value: 'Europe/London', label: 'Europe/London (UTC+00:00)' },
+                  ]}
                   value={centerConfig.timezone || 'Asia/Tashkent'}
                   onChange={(e) =>
                     setCenterConfig({ ...centerConfig, timezone: e.target.value })
                   }
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary px-3.5 py-2 text-sm text-gray-900 dark:text-gray-100"
-                >
-                  <option value="Asia/Tashkent">Asia/Tashkent (UTC+05:00)</option>
-                  <option value="Asia/Samarkand">Asia/Samarkand (UTC+05:00)</option>
-                  <option value="Asia/Dubai">Asia/Dubai (UTC+04:00)</option>
-                  <option value="Europe/Moscow">Europe/Moscow (UTC+03:00)</option>
-                  <option value="Europe/London">Europe/London (UTC+00:00)</option>
-                </select>
+                  color="blue"
+                />
               </div>
             </div>
 
@@ -370,20 +370,19 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-                  {t('settings.defaultAbsenceType')}
-                </label>
-                <select
+                <Select
+                  label={t('settings.defaultAbsenceType')}
+                  options={[
+                    { value: 'unexcused', label: t('attendance.unexcused') },
+                    { value: 'excused', label: t('attendance.excused') },
+                    { value: 'late', label: t('attendance.late') },
+                  ]}
                   value={centerConfig.default_absence_type || 'unexcused'}
                   onChange={(e) =>
                     setCenterConfig({ ...centerConfig, default_absence_type: e.target.value })
                   }
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary px-3.5 py-2 text-sm text-gray-900 dark:text-gray-100"
-                >
-                  <option value="unexcused">{t('attendance.unexcused')}</option>
-                  <option value="excused">{t('attendance.excused')}</option>
-                  <option value="late">{t('attendance.late')}</option>
-                </select>
+                  color="amber"
+                />
               </div>
             </div>
 

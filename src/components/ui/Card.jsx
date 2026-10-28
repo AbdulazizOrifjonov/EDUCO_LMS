@@ -9,6 +9,7 @@ export default function Card({
   footer,
   variant = 'default',
   noPadding = false,
+  overflow = 'visible',
   onClick,
   ...props
 }) {
@@ -24,12 +25,32 @@ export default function Card({
   };
 
   const hasHeader = title || subtitle || headerAction;
+  const hasCustomPadding = /\b(p|px|py)-\d+(\.\d+)?\b/.test(className);
+  const paddingClass = noPadding || hasCustomPadding ? '' : 'p-3.5 sm:p-5';
+
+  if (!hasHeader && !footer) {
+    return (
+      <div
+        onClick={onClick}
+        className={`
+          rounded-xl ${overflow === 'hidden' ? 'overflow-hidden' : 'overflow-visible'} transition-all duration-150
+          ${variants[variant] || variants.default}
+          ${onClick ? 'cursor-pointer hover:shadow-card-hover hover:border-gray-300 dark:hover:border-gray-600' : ''}
+          ${paddingClass}
+          ${className}
+        `}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div
       onClick={onClick}
       className={`
-        rounded-xl overflow-hidden transition-all duration-150
+        rounded-xl ${overflow === 'hidden' ? 'overflow-hidden' : 'overflow-visible'} transition-all duration-150
         ${variants[variant] || variants.default}
         ${onClick ? 'cursor-pointer hover:shadow-card-hover hover:border-gray-300 dark:hover:border-gray-600' : ''}
         ${className}
@@ -54,7 +75,7 @@ export default function Card({
         </div>
       )}
 
-      <div className={noPadding ? '' : 'p-5'}>{children}</div>
+      <div className={paddingClass}>{children}</div>
 
       {footer && (
         <div className="px-5 py-3 bg-gray-50 dark:bg-surface-dark-tertiary border-t border-gray-100 dark:border-gray-800">

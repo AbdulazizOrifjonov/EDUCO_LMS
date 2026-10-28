@@ -15,10 +15,12 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If specific roles are required, verify user's role
+  // If specific roles are required, verify user's role (case-insensitive & trimmed)
   if (allowedRoles.length > 0) {
-    const userRole = profile?.role || user?.user_metadata?.role;
-    if (!userRole || !allowedRoles.includes(userRole)) {
+    const rawRole = profile?.role || user?.user_metadata?.role || '';
+    const userRole = String(rawRole).toLowerCase().trim();
+    const hasAccess = allowedRoles.some((r) => String(r).toLowerCase().trim() === userRole);
+    if (!userRole || !hasAccess) {
       return <Navigate to="/unauthorized" replace />;
     }
   }

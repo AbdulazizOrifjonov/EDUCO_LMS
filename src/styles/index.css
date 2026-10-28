@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --color-brand-navy: #123D78;
+    --color-brand-navy: #064e3b;
     --color-brand-red: #F12D3A;
     --color-bg-light: #EFECE4;
     --color-bg-dark: #101827;
@@ -140,3 +140,38 @@ html:not(.dark) .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
     @apply focus:outline-none focus:ring-2 focus:ring-brand-red focus:ring-offset-2 dark:focus:ring-brand-red-light dark:focus:ring-offset-surface-dark;
   }
 }
+
+/* =========================================================================
+   DATEPICKER & CALENDAR DARK/LIGHT MODE STYLES
+   ========================================================================= */
+html.dark input[type="date"],
+html.dark input[type="datetime-local"],
+html.dark input[type="time"] {
+  color-scheme: dark !important;
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+html:not(.dark) input[type="date"],
+html:not(.dark) input[type="datetime-local"],
+html:not(.dark) input[type="time"] {
+  color-scheme: light !important;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.15s, transform 0.15s;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}
+

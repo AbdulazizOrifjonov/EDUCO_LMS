@@ -7,6 +7,7 @@ import { Award, User, MessageSquare, BookOpen, Check } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
 import { saveGrade, GRADE_COLORS } from '@/services/gradeService';
 
@@ -21,6 +22,7 @@ export default function GradeForm({
   isOpen,
   onClose,
   lessonId,
+  groupId = null,
   student = null,
   availableStudents = [],
   currentGrade = null,
@@ -43,7 +45,7 @@ export default function GradeForm({
       studentId: student?.id || '',
       gradeValue: currentGrade?.grade_value || 5,
       feedback: currentGrade?.feedback || '',
-      topic: '',
+      topic: currentGrade?.topic || '',
     },
   });
 
@@ -61,20 +63,30 @@ export default function GradeForm({
   }, [isOpen, student, currentGrade, availableStudents, reset]);
 
   const onSubmit = async (data) => {
-    if (!lessonId) {
+    if (!lessonId && !groupId) {
       toast.error(t('grades.lessonRequired', 'A lesson instance is required to record grades'));
       return;
     }
     setIsSubmitting(true);
     try {
+      const targetStudent = student || availableStudents.find((s) => s.id === data.studentId);
+      const studentName =
+        targetStudent?.fullName ||
+        `${targetStudent?.first_name || ''} ${targetStudent?.last_name || ''}`.trim() ||
+        targetStudent?.username ||
+        'Talaba';
+
       await saveGrade({
-        lessonId,
+        lessonId: lessonId || `lsn-${groupId || 'group'}-${new Date().toISOString().split('T')[0]}`,
+        groupId,
         studentId: data.studentId,
+        studentName,
         gradeValue: data.gradeValue,
+        topic: data.topic || 'Dars mashgʻuloti',
         feedback: data.feedback,
         gradedBy,
       });
-      toast.success(t('grades.saveSuccess', 'Grade and assessment recorded!'));
+      toast.success(t('grades.saveSuccess', 'Baho va izoh muvaffaqiyatli saqlandi!'));
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -86,8 +98,8 @@ export default function GradeForm({
   };
 
   const gradeOptions = [
-    { val: 1, label: t('grades.scale1', 'Poor'), bg: 'bg-red-500 hover:bg-red-600', ring: 'ring-red-500' },
-    { val: 2, label: t('grades.scale2', 'Fair'), bg: 'bg-orange-500 hover:bg-orange-600', ring: 'ring-orange-500' },
+    { val: 1, label: t('grades.scale1', 'Yomon'), bg: 'bg-red-500 hover:bg-red-600', ring: 'ring-red-500' },
+    { val: 2, label: t('grades.scale2', 'Qoniqarsiz'), bg: 'bg-orange-500 hover:bg-orange-600', ring: 'ring-orange-500' },
     { val: 3, label: t('grades.scale3', 'Satisfactory'), bg: 'bg-amber-400 hover:bg-amber-500', ring: 'ring-amber-400' },
     { val: 4, label: t('grades.scale4', 'Good'), bg: 'bg-brand-navy hover:bg-brand-navy-light', ring: 'ring-brand-navy' },
     { val: 5, label: t('grades.scale5', 'Excellent'), bg: 'bg-emerald-600 hover:bg-emerald-700', ring: 'ring-emerald-600' },
@@ -114,21 +126,20 @@ export default function GradeForm({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-              {t('users.student', 'Student')} <span className="text-brand-red">*</span>
-            </label>
-            <select
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              {...register('studentId')}
-            >
-              {availableStudents.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.fullName || st.first_name} (@{st.username})
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('users.student', 'Student')}
+            required
+            options={availableStudents.map((st) => ({
+              value: st.id,
+              label: st.fullName || st.first_name,
+              subtitle: `@${st.username}`,
+            }))}
+            value={watch('studentId') || ''}
+            onChange={(e) => setValue('studentId', e.target.value, { shouldValidate: true })}
+            error={errors.studentId?.message}
+            color="emerald"
+            searchable
+          />
         )}
 
         {/* Grade 1-5 Selection Buttons */}
@@ -164,14 +175,27 @@ export default function GradeForm({
           </div>
         </div>
 
+        {/* Lesson Topic */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+            {t('grades.topic', 'Dars mavzusi / Mashgʻulot')}
+          </label>
+          <input
+            type="text"
+            placeholder={t('grades.topicPlaceholder', 'Mavzuni kiriting (masalan: Yangi grammatik mavzu, Mustaqil ish...)')}
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
+            {...register('topic')}
+          />
+        </div>
+
         {/* Feedback Textarea */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-            {t('grades.feedback', 'Teacher Feedback & Recommendations')}
+            {t('grades.feedback', 'Ustoz izohi va tavsiyalari')}
           </label>
           <textarea
             rows={3}
-            placeholder={t('grades.feedbackPlaceholder', 'Write constructive notes for the student (e.g. Great comprehension of grammar, needs practice on speaking fluency...)')}
+            placeholder={t('grades.feedbackPlaceholder', 'Talabaning darsdagi faolligi boʻyicha izoh yozing...')}
             className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm p-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
             {...register('feedback')}
           />

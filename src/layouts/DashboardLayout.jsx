@@ -25,6 +25,10 @@ import useTheme from '@/hooks/useTheme';
 import useNotifications from '@/hooks/useNotifications';
 import { SUPPORTED_LANGUAGES, ROLES } from '@/lib/constants';
 import { uploadAvatar } from '@/services/settingsService';
+import StudentRemindersModal from '@/components/reminders/StudentRemindersModal';
+import { getDueReminders } from '@/services/reminderService';
+import GlobalSearchBar from '@/components/GlobalSearchBar';
+import ImageCropperModal from '@/components/ui/ImageCropperModal';
 
 export default function DashboardLayout({
   sidebarItems = [],
@@ -34,6 +38,7 @@ export default function DashboardLayout({
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const isChatPage = location.pathname.includes('/chat');
 
   const { user, profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -49,10 +54,27 @@ export default function DashboardLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [remindersModalOpen, setRemindersModalOpen] = useState(false);
+  const [dueRemindersCount, setDueRemindersCount] = useState(0);
+  const [cropAvatarFile, setCropAvatarFile] = useState(null);
 
   const userDropdownRef = useRef(null);
   const notifDropdownRef = useRef(null);
+
+  // Poll for due reminders (admin & owner)
+  useEffect(() => {
+    if (role === 'admin' || role === 'owner') {
+      const checkReminders = async () => {
+        try {
+          const due = await getDueReminders();
+          setDueRemindersCount(due.length);
+        } catch (_) {}
+      };
+      checkReminders();
+      const interval = setInterval(checkReminders, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [role]);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -87,6 +109,30 @@ export default function DashboardLayout({
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
   }, [isRtl]);
 
+  // Mobile virtual keyboard management: dismiss keyboard on navigation or when mobile menu toggles
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
+  }, [location.pathname, mobileOpen]);
+
+  // Global mobile touch handler: dismiss keyboard when user taps outside input fields
+  useEffect(() => {
+    const handleTouchStart = (e) => {
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
+        if (e.target !== active && !active.contains(e.target)) {
+          if (!e.target.closest('input, textarea, [contenteditable="true"]')) {
+            active.blur();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    return () => document.removeEventListener('touchstart', handleTouchStart);
+  }, []);
+
   // Derived user details
   const displayName =
     profile?.full_name ||
@@ -113,30 +159,79 @@ export default function DashboardLayout({
 
   // Compute Page Title based on current route or active item
   const getPageTitle = () => {
-    const activeItem = sidebarItems.find(
+    // 1. Exact match in sidebarItems
+    const exactItem = sidebarItems.find(
       (item) => item.path === location.pathname
     );
-    if (activeItem) {
-      if (activeItem.labelKey) return t(activeItem.labelKey, activeItem.label);
-      if (typeof activeItem.label === 'string') {
-        const key = `nav.${activeItem.label.toLowerCase().replace(/\s+/g, '')}`;
+    if (exactItem) {
+      if (exactItem.labelKey) return t(exactItem.labelKey, exactItem.label);
+      if (typeof exactItem.label === 'string') {
+        const key = `nav.${exactItem.label.toLowerCase().replace(/\s+/g, '')}`;
         const translated = t(key);
-        return translated !== key ? translated : activeItem.label;
+        return translated !== key ? translated : exactItem.label;
       }
-      return activeItem.label;
+      return exactItem.label;
     }
 
-    // Fallbacks based on path segments
+    // 2. Prefix match in sidebarItems (e.g. /teacher/groups/create matches /teacher/groups)
+    const matchingParent = sidebarItems
+      .filter((item) => item.path && item.path !== `/${userRole}` && item.path !== `/${userRole}/dashboard`)
+      .sort((a, b) => (b.path?.length || 0) - (a.path?.length || 0))
+      .find((item) => location.pathname.startsWith(item.path));
+
+    if (matchingParent) {
+      if (matchingParent.labelKey) return t(matchingParent.labelKey, matchingParent.label);
+      if (typeof matchingParent.label === 'string') {
+        const key = `nav.${matchingParent.label.toLowerCase().replace(/\s+/g, '')}`;
+        const translated = t(key);
+        return translated !== key ? translated : matchingParent.label;
+      }
+      return matchingParent.label;
+    }
+
+    // 3. Contextual section title by route (Prevents "Create", "Edit", or raw IDs from appearing)
+    const path = location.pathname.toLowerCase();
+    if (path.includes('/groups')) {
+      return userRole === 'teacher' ? t('nav.myGroups', 'Mening guruhlarim') : t('nav.groups', 'Guruhlar');
+    }
+    if (path.includes('/courses')) return t('nav.courses', 'Kurslar');
+    if (path.includes('/users') || path.includes('/students')) return t('nav.users', 'Foydalanuvchilar');
+    if (path.includes('/attendance')) return t('nav.attendance', 'Davomat');
+    if (path.includes('/grades')) return t('nav.grades', 'Baholar');
+    if (path.includes('/schedule')) return t('nav.schedule', 'Dars jadvali');
+    if (path.includes('/passwords')) return t('nav.passwords', 'Parollar bazasi');
+    if (path.includes('/tuition')) return t('nav.tuition', 'O‘qish to‘lovlari');
+    if (path.includes('/reports')) return t('nav.reports', 'Hisobotlar');
+    if (path.includes('/chat')) return t('nav.chat', 'Guruh chatlari');
+    if (path.includes('/sms')) return t('nav.sms', 'SMS Xabarlar');
+    if (path.includes('/settings')) return t('nav.settings', 'Sozlamalar');
+    if (path.includes('/notifications')) return t('nav.notifications', 'Xabarnomalar');
+    if (path.includes('/dashboard')) return t('nav.dashboard', 'Boshqaruv paneli');
+
+    // 4. Fallbacks based on path segments, strictly filtering out "create", "edit", and UUIDs
     const segments = location.pathname.split('/').filter(Boolean);
     if (segments.length === 0 || (segments.length === 1 && ['owner', 'admin', 'teacher', 'student'].includes(segments[0]))) {
-      return t('nav.dashboard', 'Dashboard');
+      return t('nav.dashboard', 'Boshqaruv paneli');
     }
-    const lastSegment = segments[segments.length - 1];
-    const navKey = `nav.${lastSegment}`;
+
+    let relevantSegment = segments[segments.length - 1];
+    if (['create', 'edit', 'add-student'].includes(relevantSegment.toLowerCase()) || /^[0-9a-fA-F-]+$/.test(relevantSegment)) {
+      if (segments.length > 2) {
+        relevantSegment = segments[segments.length - 2];
+      } else {
+        return '';
+      }
+    }
+
+    if (relevantSegment.toLowerCase() === 'create' || relevantSegment.toLowerCase() === 'edit') {
+      return '';
+    }
+
+    const navKey = `nav.${relevantSegment}`;
     const translated = t(navKey);
     return translated !== navKey
       ? translated
-      : lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
+      : relevantSegment.charAt(0).toUpperCase() + relevantSegment.slice(1);
   };
 
   const handleLogout = async () => {
@@ -146,14 +241,6 @@ export default function DashboardLayout({
       navigate('/login');
     } catch (err) {
       console.error('Logout error:', err);
-    }
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Navigate to search or trigger search event
-      console.log('Search query:', searchQuery);
     }
   };
 
@@ -174,7 +261,9 @@ export default function DashboardLayout({
 
       {/* Main Content Wrapper */}
       <div
-        className={`flex min-h-screen min-w-0 flex-1 flex-col pt-16 transition-all duration-300 ease-in-out overflow-x-hidden
+        className={`flex min-w-0 flex-1 flex-col pt-16 transition-all duration-300 ease-in-out overflow-x-hidden ${
+          isChatPage ? 'h-[100dvh] max-h-[100dvh] overflow-hidden' : 'min-h-screen'
+        }
           ${
             collapsed
               ? isRtl
@@ -202,47 +291,68 @@ export default function DashboardLayout({
           `}
         >
           {/* Left section: Hamburger (mobile) + Page Title */}
-          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 mr-2">
+          <div className="flex shrink min-w-0 items-center gap-1.5 sm:gap-3 mr-2 sm:mr-3 lg:mr-6">
             <button
               type="button"
-              onClick={() => setMobileOpen(true)}
+              onClick={() => {
+                if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
+                  document.activeElement.blur();
+                }
+                setMobileOpen(true);
+              }}
               className="shrink-0 rounded-lg p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white lg:hidden"
               aria-label="Open mobile menu"
             >
               <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
-            <div className="min-w-0 flex-1">
-              <h1 className="truncate whitespace-nowrap text-base font-bold tracking-tight text-gray-900 dark:text-white sm:text-lg md:text-xl">
-                {getPageTitle()}
-              </h1>
-            </div>
-          </div>
-
-          {/* Center / Search bar */}
-          <div className="hidden max-w-md flex-1 px-4 md:block">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <div
-                className={`pointer-events-none absolute inset-y-0 flex items-center text-gray-500 ${
-                  isRtl ? 'right-3' : 'left-3'
-                }`}
-              >
-                <Search className="h-4 w-4" />
+            {Boolean(getPageTitle()) && (
+              <div className="min-w-0">
+                <h1 className="truncate text-sm sm:text-lg md:text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {getPageTitle()}
+                </h1>
               </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`${t('common.search', 'Search')} (Ctrl+K)...`}
-                className={`w-full rounded-xl border border-[#D4CCB9] bg-[#EFECE2] py-2 text-sm text-gray-900 placeholder-gray-500 outline-none transition-all focus:border-[#123D78] focus:bg-[#FAF7F0] focus:ring-2 focus:ring-[#123D78]/20 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-red-500 dark:focus:bg-gray-800
-                  ${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'}
-                `}
-              />
-            </form>
+            )}
           </div>
 
-          {/* Right section: Language selector, Theme toggle, Notifications, User Profile */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+          {/* Center / Search bar with reactive live search (Stretched to fill available space) */}
+          <div className="hidden md:flex flex-1 min-w-0 max-w-xl lg:max-w-2xl xl:max-w-3xl mr-3 lg:mr-6">
+            <GlobalSearchBar role={userRole} isRtl={isRtl} />
+          </div>
+
+          {/* Right section: System status pill, Language selector, Theme toggle, Notifications, User Profile */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            {/* Live System Status Pill */}
+            <div className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/15 text-blue-800 border border-blue-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-semibold shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-emerald-500 animate-pulse shrink-0" />
+              <span>{t('common.systemActive', 'Tizim faol')}</span>
+            </div>
+
+            {/* Student Reminders Alert Pill for Admin and Owner */}
+            {(role === 'admin' || role === 'owner') && (
+              <button
+                type="button"
+                onClick={() => setRemindersModalOpen(true)}
+                className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                  dueRemindersCount > 0
+                    ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 ring-2 ring-rose-400/30 animate-pulse'
+                    : 'hidden sm:inline-flex bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/20'
+                }`}
+                title="O'quvchilar bilan bog'lanish eslatmalari"
+              >
+                <Clock className={`w-3.5 h-3.5 ${dueRemindersCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`} />
+                <span className="hidden sm:inline">
+                  {dueRemindersCount > 0 ? `${dueRemindersCount} ta qo'ng'iroq!` : 'Eslatmalar'}
+                </span>
+                <span className="sm:hidden font-black text-[11px]">
+                  {dueRemindersCount > 0 ? dueRemindersCount : ''}
+                </span>
+                {dueRemindersCount > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 animate-ping" />
+                )}
+              </button>
+            )}
+
             {/* Language Switcher */}
             <LanguageSelector />
 
@@ -276,7 +386,7 @@ export default function DashboardLayout({
               >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#F12D3A] px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-gray-900">
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#F12D3A] dark:bg-emerald-600 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-gray-900">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -285,8 +395,8 @@ export default function DashboardLayout({
               {/* Notification Menu Card */}
               {notifDropdownOpen && (
                 <div
-                  className={`absolute top-full mt-2 w-80 sm:w-96 rounded-2xl border border-gray-100 bg-white p-0 shadow-2xl transition-all dark:border-gray-800 dark:bg-[#1a2332]
-                    ${isRtl ? 'left-0' : 'right-0'}
+                  className={`fixed sm:absolute top-16 sm:top-full mt-2 inset-x-3 sm:inset-x-auto sm:w-96 rounded-2xl border border-gray-100 bg-white p-0 shadow-2xl transition-all dark:border-gray-800 dark:bg-[#1a2332] z-50
+                    ${isRtl ? 'sm:left-0' : 'sm:right-0'}
                   `}
                 >
                   <div className="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">
@@ -295,7 +405,7 @@ export default function DashboardLayout({
                         {t('nav.notifications', 'Notifications')}
                       </h3>
                       {unreadCount > 0 && (
-                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-[#F12D3A] dark:bg-red-900/30 dark:text-red-300">
+                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-[#F12D3A] dark:bg-emerald-950/40 dark:text-emerald-300">
                           {unreadCount} {t('common.new', 'new')}
                         </span>
                       )}
@@ -304,7 +414,7 @@ export default function DashboardLayout({
                       <button
                         type="button"
                         onClick={markAllAsRead}
-                        className="text-xs font-medium text-[#123D78] hover:underline dark:text-blue-400"
+                        className="text-xs font-medium text-blue-600 hover:underline dark:text-emerald-400"
                       >
                         {t('common.markAllAsRead', 'Mark all as read')}
                       </button>
@@ -314,7 +424,7 @@ export default function DashboardLayout({
                   <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
                     {notifications.length === 0 ? (
                       <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                        <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-emerald-500" />
+                        <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-blue-500 dark:text-emerald-500" />
                         <p>{t('common.noNotifications', 'All caught up!')}</p>
                       </div>
                     ) : (
@@ -325,10 +435,10 @@ export default function DashboardLayout({
                             if (!notif.is_read) markAsRead(notif.id);
                           }}
                           className={`flex items-start gap-3 p-3.5 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60
-                            ${!notif.is_read ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''}
+                            ${!notif.is_read ? 'bg-blue-50/50 dark:bg-emerald-950/20' : ''}
                           `}
                         >
-                          <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-[#123D78] dark:bg-blue-900/40 dark:text-blue-300">
+                          <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-800 dark:bg-emerald-900/40 dark:text-emerald-300">
                             <Bell className="h-3.5 w-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -349,7 +459,7 @@ export default function DashboardLayout({
                             </span>
                           </div>
                           {!notif.is_read && (
-                            <span className="h-2 w-2 rounded-full bg-[#F12D3A] flex-shrink-0 mt-1.5" />
+                            <span className="h-2 w-2 rounded-full bg-[#F12D3A] dark:bg-emerald-500 flex-shrink-0 mt-1.5" />
                           )}
                         </div>
                       ))
@@ -360,7 +470,7 @@ export default function DashboardLayout({
                     <Link
                       to={`/${userRole}/notifications`}
                       onClick={() => setNotifDropdownOpen(false)}
-                      className="text-xs font-semibold text-[#123D78] hover:text-[#F12D3A] transition-colors dark:text-blue-400 dark:hover:text-red-400"
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors dark:text-emerald-400 dark:hover:text-emerald-300"
                     >
                       {t('common.viewAll', 'View all notifications')} →
                     </Link>
@@ -378,7 +488,15 @@ export default function DashboardLayout({
                 aria-label="User menu"
               >
                 {/* Avatar */}
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full overflow-hidden bg-gradient-to-tr from-[#123D78] to-[#1a4f9a] text-xs font-bold text-white shadow-sm ring-2 ring-gray-100 dark:ring-gray-800">
+                <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full overflow-hidden bg-gradient-to-tr ${
+                  userRole === 'owner'
+                    ? 'from-rose-500 to-red-600'
+                    : userRole === 'admin'
+                    ? 'from-purple-600 to-indigo-600'
+                    : userRole === 'teacher'
+                    ? 'from-amber-500 to-orange-600'
+                    : 'from-blue-600 to-indigo-600 dark:from-emerald-500 dark:to-teal-600'
+                } text-xs font-bold text-white shadow-sm ring-2 ring-gray-100 dark:ring-gray-800`}>
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -410,7 +528,15 @@ export default function DashboardLayout({
                   <div className="flex items-center gap-3 border-b border-gray-100 px-3 py-2.5 dark:border-gray-800">
                     <label
                       title={t('users.uploadAvatar', 'Rasm yuklash')}
-                      className="group relative flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full overflow-hidden bg-gradient-to-tr from-[#123D78] to-[#1a4f9a] text-xs font-bold text-white shadow-sm"
+                      className={`group relative flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full overflow-hidden bg-gradient-to-tr ${
+                        userRole === 'owner'
+                          ? 'from-rose-500 to-red-600'
+                          : userRole === 'admin'
+                          ? 'from-purple-600 to-indigo-600'
+                          : userRole === 'teacher'
+                          ? 'from-amber-500 to-orange-600'
+                          : 'from-blue-600 to-indigo-600 dark:from-emerald-500 dark:to-teal-600'
+                      } text-xs font-bold text-white shadow-sm`}
                     >
                       {profile?.avatar_url ? (
                         <img
@@ -428,15 +554,11 @@ export default function DashboardLayout({
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           const file = e.target.files?.[0];
-                          const uid = profile?.id || user?.id;
-                          if (file && uid) {
-                            try {
-                              await uploadAvatar(uid, file);
-                            } catch (err) {
-                              console.error('Avatar upload error:', err);
-                            }
+                          if (file) {
+                            setCropAvatarFile(file);
+                            setUserDropdownOpen(false);
                           }
                           e.target.value = '';
                         }}
@@ -453,23 +575,18 @@ export default function DashboardLayout({
                   </div>
 
                   <div className="py-1">
-                    <label className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-[#123D78] dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white">
-                      <Camera className="h-4 w-4 text-brand-navy dark:text-blue-400" />
+                    <label className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-emerald-300">
+                      <Camera className="h-4 w-4 text-blue-600 dark:text-emerald-400" />
                       <span>{t('users.uploadAvatar', 'Profilga rasm qo‘yish')}</span>
                       <input
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           const file = e.target.files?.[0];
-                          const uid = profile?.id || user?.id;
-                          if (file && uid) {
-                            try {
-                              await uploadAvatar(uid, file);
-                              setUserDropdownOpen(false);
-                            } catch (err) {
-                              console.error('Avatar upload error:', err);
-                            }
+                          if (file) {
+                            setCropAvatarFile(file);
+                            setUserDropdownOpen(false);
                           }
                           e.target.value = '';
                         }}
@@ -478,7 +595,7 @@ export default function DashboardLayout({
                     <Link
                       to={`/${userRole}/settings`}
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-[#123D78] dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-emerald-300"
                     >
                       <User className="h-4 w-4 text-gray-500" />
                       {t('common.profile', 'Profile')}
@@ -486,7 +603,7 @@ export default function DashboardLayout({
                     <Link
                       to={`/${userRole}/settings`}
                       onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-[#123D78] dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-emerald-300"
                     >
                       <Settings className="h-4 w-4 text-gray-500" />
                       {t('common.settings', 'Settings')}
@@ -510,10 +627,43 @@ export default function DashboardLayout({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 w-full p-3 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden">
+        <main
+          className={`flex-1 min-w-0 w-full overflow-x-hidden ${
+            isChatPage
+              ? 'p-0 md:p-3 overflow-hidden flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)]'
+              : 'p-3 sm:p-5 lg:p-6 overflow-y-auto'
+          }`}
+        >
           {children || <Outlet />}
         </main>
       </div>
+
+      {/* Student Follow-up & Lesson Reminders Modal */}
+      {remindersModalOpen && (
+        <StudentRemindersModal
+          isOpen={remindersModalOpen}
+          onClose={() => setRemindersModalOpen(false)}
+        />
+      )}
+
+      {/* Telegram-style Image Cropper Modal for Avatar */}
+      <ImageCropperModal
+        isOpen={Boolean(cropAvatarFile)}
+        imageFile={cropAvatarFile}
+        onClose={() => setCropAvatarFile(null)}
+        onCrop={async (croppedDataUrl, croppedFile) => {
+          setCropAvatarFile(null);
+          const uid = profile?.id || user?.id;
+          if (uid) {
+            try {
+              await uploadAvatar(uid, croppedFile || croppedDataUrl);
+            } catch (err) {
+              console.error('Avatar upload failed:', err);
+            }
+          }
+        }}
+        title={t('users.editAvatar', 'Profil rasmini moslashtirish')}
+      />
     </div>
   );
 }

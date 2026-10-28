@@ -102,12 +102,33 @@ export async function getUsers({
 
   if (search && search.trim()) {
     const q = search.trim().toLowerCase();
-    list = list.filter(
-      (u) =>
-        u.username.toLowerCase().includes(q) ||
-        u.fullName.toLowerCase().includes(q) ||
-        (u.phone && u.phone.includes(q))
-    );
+    const qDigits = q.replace(/\D/g, '');
+    list = list.filter((u) => {
+      const full = (u.fullName || `${u.first_name || ''} ${u.last_name || ''}`).toLowerCase();
+      const first = (u.first_name || '').toLowerCase();
+      const last = (u.last_name || '').toLowerCase();
+      const user = (u.username || '').toLowerCase();
+      const phone = (u.phone || '').toLowerCase();
+      const father = (u.father_phone || '').toLowerCase();
+      const mother = (u.mother_phone || '').toLowerCase();
+
+      const matchText =
+        full.includes(q) ||
+        first.includes(q) ||
+        last.includes(q) ||
+        user.includes(q) ||
+        phone.includes(q) ||
+        father.includes(q) ||
+        mother.includes(q);
+
+      const matchDigits =
+        qDigits.length >= 3 &&
+        ((u.phone || '').replace(/\D/g, '').includes(qDigits) ||
+          (u.father_phone || '').replace(/\D/g, '').includes(qDigits) ||
+          (u.mother_phone || '').replace(/\D/g, '').includes(qDigits));
+
+      return matchText || matchDigits;
+    });
   }
 
   const from = (page - 1) * limit;

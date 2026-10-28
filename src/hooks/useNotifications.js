@@ -115,8 +115,17 @@ export default function useNotifications() {
       )
       .subscribe();
 
+    const handleLocalUpdate = () => {
+      fetchNotifications();
+    };
+
+    window.addEventListener('educo-notification-update', handleLocalUpdate);
+    window.addEventListener('educo-data-sync', handleLocalUpdate);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('educo-notification-update', handleLocalUpdate);
+      window.removeEventListener('educo-data-sync', handleLocalUpdate);
     };
   }, [user?.id, fetchNotifications]);
 

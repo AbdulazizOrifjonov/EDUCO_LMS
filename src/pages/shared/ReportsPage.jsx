@@ -13,9 +13,10 @@ import {
   ArrowRight,
   TrendingUp,
   FileSpreadsheet,
+  GraduationCap,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { Button, Card, Badge, Input, EmptyState, LoadingSpinner } from '@/components/ui';
+import { Button, Card, Badge, Input, Select, EmptyState, LoadingSpinner } from '@/components/ui';
 import {
   generateAttendanceReport,
   generateGradeReport,
@@ -183,7 +184,7 @@ export default function ReportsPage() {
   ];
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -223,7 +224,7 @@ export default function ReportsPage() {
                 p-5 rounded-xl border cursor-pointer transition-all duration-150
                 ${
                   isSelected
-                    ? 'border-brand-navy dark:border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 shadow-sm ring-1 ring-brand-navy dark:ring-blue-500'
+                    ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-sm ring-1 ring-emerald-600 dark:ring-emerald-500'
                     : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary hover:border-gray-300 dark:hover:border-gray-700'
                 }
               `}
@@ -268,41 +269,43 @@ export default function ReportsPage() {
             />
           </div>
 
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-              {t('reports.groupFilter')}
-            </label>
-            <select
-              value={selectedGroupId}
-              onChange={(e) => setSelectedGroupId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary px-3.5 py-2 text-sm text-gray-900 dark:text-gray-100"
-            >
-              <option value="ALL">{t('reports.allGroups')}</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('reports.groupFilter', 'O‘quv guruhi')}
+            value={selectedGroupId}
+            onChange={(e) => setSelectedGroupId(e.target.value)}
+            placeholder={t('reports.allGroups', 'Barcha guruhlar')}
+            headerTitle={t('groups.title', 'Guruh bo‘yicha hisobot')}
+            icon={Users}
+            size="sm"
+            options={[
+              { value: 'ALL', label: t('reports.allGroups', 'Barcha guruhlar') },
+              ...groups.map((g) => ({
+                value: g.id,
+                label: g.name,
+                subtitle: g.courseName || 'Kurs fani',
+                color: g.courseColor || '#123D78',
+              })),
+            ]}
+          />
 
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-              {t('reports.teacherFilter')}
-            </label>
-            <select
-              value={selectedTeacherId}
-              onChange={(e) => setSelectedTeacherId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary px-3.5 py-2 text-sm text-gray-900 dark:text-gray-100"
-            >
-              <option value="ALL">{t('reports.allTeachers')}</option>
-              {teachers.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.full_name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('reports.teacherFilter', 'O‘qituvchi')}
+            value={selectedTeacherId}
+            onChange={(e) => setSelectedTeacherId(e.target.value)}
+            placeholder={t('reports.allTeachers', 'Barcha o‘qituvchilar')}
+            headerTitle={t('users.teachers', 'O‘qituvchilar')}
+            icon={GraduationCap}
+            size="sm"
+            options={[
+              { value: 'ALL', label: t('reports.allTeachers', 'Barcha o‘qituvchilar') },
+              ...teachers.map((teach) => ({
+                value: teach.id,
+                label: teach.full_name || teach.fullName || 'Ustoz',
+                subtitle: teach.phone || 'O‘qituvchi',
+                color: '#123D78',
+              })),
+            ]}
+          />
 
           <div>
             <Button

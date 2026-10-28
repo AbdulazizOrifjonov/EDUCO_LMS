@@ -8,7 +8,7 @@ import {
   Award,
   CheckCircle2,
   BookOpen,
-  FileText,
+  MessageSquare,
   Bell,
   Sparkles,
   AlertCircle,
@@ -91,6 +91,16 @@ export default function StudentDashboard() {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    const handleSync = () => {
+      if (user?.id) {
+        loadData(false);
+      }
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [user?.id]);
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
@@ -103,20 +113,24 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-brand-navy via-brand-navy-light to-blue-900 text-white shadow-xl relative overflow-hidden">
+      {/* Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20">
+        {/* Decorative ambient blur glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-sky-400/10 dark:bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+
         <div className="space-y-1 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/90 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>{t('dashboard.studentLearningSpace', 'Student Learning Space')}</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 dark:bg-emerald-500/20 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/95 dark:text-emerald-200 border border-white/20 dark:border-emerald-400/40 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-blue-200 dark:text-emerald-300" />
+            <span>{t('dashboard.studentLearningSpace', 'Talaba o‘quv markazi')}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {t('dashboard.welcome', { name: studentName, defaultValue: `Welcome back, ${studentName}` })}
+            {t('dashboard.welcome', { name: studentName, defaultValue: `Xush kelibsiz, ${studentName}` })}
           </h1>
-          <p className="text-sm text-blue-100/80 max-w-xl">
+          <p className="text-sm text-blue-100 dark:text-emerald-100/80 max-w-xl">
             {currentGroup
-              ? `You are enrolled in ${currentGroup.name} (${currentGroup.courseName}). Keep up the great work!`
-              : 'Review your upcoming homework, view daily classes, and track your learning progress.'}
+              ? `Siz ${currentGroup.name} (${currentGroup.courseName}) guruhidasiz. Darslaringizda omad tilaymiz!`
+              : 'Dars jadvali, berilgan vazifalar va shaxsiy o‘zlashtirish ko‘rsatkichlaringiz.'}
           </p>
         </div>
 
@@ -125,21 +139,21 @@ export default function StudentDashboard() {
             type="button"
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur text-sm font-medium transition-colors border border-white/10 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 dark:hover:bg-emerald-500/20 backdrop-blur text-sm font-medium transition-colors border border-white/15 dark:border-emerald-400/20 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">
-              {refreshing ? t('common.refreshing', 'Refreshing...') : t('common.refresh', 'Refresh')}
+              {refreshing ? t('common.refreshing', 'Yangilanmoqda...') : t('common.refresh', 'Yangilash')}
             </span>
           </button>
           <Button
-            onClick={() => navigate('/student/homework')}
+            onClick={() => navigate('/student/grades')}
             variant="danger"
             size="md"
-            icon={FileText}
+            icon={Award}
             className="bg-brand-red hover:bg-brand-red-dark text-white shadow-md"
           >
-            {t('dashboard.myHomework', 'My Homework')}
+            {t('dashboard.myGrades', 'Baholarim')}
           </Button>
         </div>
       </div>
@@ -179,16 +193,19 @@ export default function StudentDashboard() {
                   {currentGroup.courseName}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Classroom: <span className="font-semibold text-gray-700 dark:text-gray-300">{currentGroup.room || 'Room 101'}</span>
+                  {t('dashboard.classroomLabel', 'Dars xonasi:')}{' '}
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">
+                    {currentGroup.room ? `${currentGroup.room}-xona` : '101-xona'}
+                  </span>
                 </p>
               </>
             ) : (
               <div className="py-2">
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                  Not Enrolled in an Active Group
+                  {t('dashboard.notEnrolledInGroup', 'Faol guruhga biriktirilmagan')}
                 </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Contact center administration to complete cohort assignment.
+                  {t('dashboard.notEnrolledInGroupDesc', 'Guruhga qabul qilinish uchun markaz ma‘muriyatiga murojaat qiling.')}
                 </p>
               </div>
             )}
@@ -227,7 +244,7 @@ export default function StudentDashboard() {
               </p>
             </div>
             <div className="text-right">
-              <span className="text-2xl font-black text-brand-navy dark:text-blue-400">
+              <span className="text-2xl font-black text-[#123D78] dark:text-emerald-400">
                 {attendanceSummary.rate}%
               </span>
               <span className="block text-[11px] text-gray-400 dark:text-gray-500 font-medium uppercase">
@@ -239,7 +256,7 @@ export default function StudentDashboard() {
           {/* Visual Percentage Progress Stack */}
           <div className="w-full h-3 rounded-full bg-gray-100 dark:bg-surface-dark-tertiary overflow-hidden flex mb-5">
             <div
-              className="bg-emerald-500 h-full transition-all duration-300"
+              className="bg-blue-600 dark:bg-emerald-500 h-full transition-all duration-300"
               style={{ width: `${attendanceSummary.presentPercent}%` }}
               title={`Present: ${attendanceSummary.presentPercent}%`}
             />
@@ -257,11 +274,11 @@ export default function StudentDashboard() {
 
           {/* Breakdown stat pills */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/40">
-              <span className="text-[11px] font-semibold uppercase text-emerald-800 dark:text-emerald-300 block">
+            <div className="p-3 rounded-xl bg-blue-50 dark:bg-emerald-950/40 border border-blue-100 dark:border-emerald-900/40">
+              <span className="text-[11px] font-semibold uppercase text-blue-800 dark:text-emerald-300 block">
                 {t('attendance.present', 'Present')}
               </span>
-              <span className="text-lg font-bold text-emerald-900 dark:text-emerald-200">
+              <span className="text-lg font-bold text-blue-900 dark:text-emerald-200">
                 {attendanceSummary.present} <span className="text-xs font-normal opacity-80">({attendanceSummary.presentPercent}%)</span>
               </span>
             </div>
@@ -319,7 +336,7 @@ export default function StudentDashboard() {
                     className="p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-brand-navy dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-emerald-950/40 text-blue-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
@@ -327,7 +344,7 @@ export default function StudentDashboard() {
                           {lesson.title}
                         </h4>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {lesson.courseName} &bull; Room {lesson.room}
+                          {lesson.courseName} &bull; {lesson.room ? `${lesson.room}-xona` : ''}
                         </p>
                       </div>
                     </div>
@@ -337,7 +354,7 @@ export default function StudentDashboard() {
                         {lesson.startTime} - {lesson.endTime}
                       </span>
                       <Badge variant="primary" size="sm" className="mt-1">
-                        {t('common.active', 'Scheduled')}
+                        {t('common.active', 'Rejalashtirilgan')}
                       </Badge>
                     </div>
                   </div>
@@ -348,24 +365,24 @@ export default function StudentDashboard() {
 
           {/* Recent Grades (1-5 with visual bars) */}
           <Card
-            title={t('dashboard.myGrades', 'Recent Grades')}
-            subtitle="Scores assigned on the standard 1 - 5 academic scale"
+            title={t('dashboard.myGrades', 'Mening baholarim')}
+            subtitle={t('dashboard.recentGradesSubtitle', '1 - 5 shkala bo‘yicha qo‘yilgan ballar')}
             headerAction={
               <Button
                 onClick={() => navigate('/student/grades')}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-brand-navy dark:text-blue-400"
+                className="text-xs text-brand-navy dark:text-blue-400 font-semibold"
               >
-                {t('common.viewAll', 'View All')} &rarr;
+                {t('common.viewAll', 'Barchasini ko‘rish')} &rarr;
               </Button>
             }
           >
             {grades.length === 0 ? (
               <EmptyState
                 icon={Award}
-                title={t('grades.noStudentGrades', 'No grades posted yet')}
-                description="Evaluation scores from your teacher will show up here."
+                title={t('grades.noStudentGrades', 'Hali baholar mavjud emas')}
+                description={t('dashboard.noGradesRecordedDesc', 'O‘qituvchi tomonidan qo‘yilgan baholar bu yerda ko‘rinadi.')}
               />
             ) : (
               <div className="space-y-4">
@@ -375,7 +392,7 @@ export default function StudentDashboard() {
                   const percentage = Math.min(100, Math.max(20, (score / 5) * 100));
                   const scoreColor =
                     score >= 4.5
-                      ? 'bg-emerald-500 text-emerald-700'
+                      ? 'bg-blue-600 dark:bg-emerald-500 text-blue-700 dark:text-emerald-700'
                       : score >= 3.5
                       ? 'bg-blue-500 text-blue-700'
                       : score >= 2.5
@@ -406,7 +423,7 @@ export default function StudentDashboard() {
                         <div
                           className={`h-full rounded-full ${
                             score >= 4.5
-                              ? 'bg-emerald-500'
+                              ? 'bg-blue-600 dark:bg-emerald-500'
                               : score >= 3.5
                               ? 'bg-brand-navy dark:bg-blue-500'
                               : score >= 2.5
@@ -432,55 +449,60 @@ export default function StudentDashboard() {
 
         {/* Right Column: Upcoming Homework Deadlines & Announcements */}
         <div className="space-y-6">
-          {/* Upcoming Homework Deadlines */}
+          {/* Group Chat Access */}
           <Card
-            title={t('homework.title', 'Upcoming Deadlines')}
-            subtitle="Assignments due soon"
+            title={t('nav.chat', 'Guruh muloqoti')}
+            subtitle="Ustoz va guruhdoshlar bilan jonli chat"
             headerAction={
               <Button
-                onClick={() => navigate('/student/homework')}
+                onClick={() => navigate('/student/chat')}
                 variant="ghost"
                 size="sm"
                 className="text-xs text-brand-navy dark:text-blue-400"
               >
-                {t('nav.homework', 'All Homework')} &rarr;
+                {t('nav.chat', 'Chatga o‘tish')} &rarr;
               </Button>
             }
           >
-            {homeworkDeadlines.length === 0 ? (
-              <EmptyState
-                icon={CheckCircle2}
-                title={t('homework.noHomework', 'No pending homework')}
-                description="You are completely caught up on your assignments!"
-              />
-            ) : (
-              <div className="space-y-3">
-                {homeworkDeadlines.map((hw) => (
-                  <div
-                    key={hw.id}
-                    className="p-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-surface-dark-tertiary/20"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <h4 className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                        {hw.title}
-                      </h4>
-                      <Badge variant="warning" size="sm">
-                        Due {new Date(hw.due_date).toLocaleDateString()}
-                      </Badge>
-                    </div>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
-                      {hw.description}
-                    </p>
-                  </div>
-                ))}
+            <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-surface-dark-tertiary/20 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-600 dark:bg-emerald-500/15 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-gray-900 dark:text-white">
+                    {currentGroup ? currentGroup.name : 'Guruh chati'}
+                  </h4>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                    Savollar va jonli muloqot xonasi
+                  </p>
+                </div>
               </div>
-            )}
+              <Button
+                onClick={() => navigate('/student/chat')}
+                variant="primary"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-xs shrink-0"
+              >
+                Ochish
+              </Button>
+            </div>
           </Card>
 
           {/* Recent Announcements */}
           <Card
             title={t('nav.announcements', 'Center Announcements')}
             subtitle="Important updates from the EDUCO team"
+            headerAction={
+              <Button
+                onClick={() => navigate('/student/chat?channel=announcements')}
+                variant="ghost"
+                size="sm"
+                className="text-xs text-brand-navy dark:text-blue-400"
+              >
+                E&apos;lonlar kanali &rarr;
+              </Button>
+            }
           >
             {announcements.length === 0 ? (
               <EmptyState
@@ -500,7 +522,7 @@ export default function StudentDashboard() {
                         {ann.title}
                       </span>
                       {ann.isPinned && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-brand-navy font-semibold">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-semibold">
                           Pinned
                         </span>
                       )}

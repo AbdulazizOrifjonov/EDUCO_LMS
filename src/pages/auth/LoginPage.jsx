@@ -21,10 +21,11 @@ import useTheme from '@/hooks/useTheme';
 import Button from '@/components/ui/Button';
 import { SUPPORTED_LANGUAGES, ROLES } from '@/lib/constants';
 import { LanguageFlag } from '@/components/LanguageSelector';
+import { formatUzPhone, cleanUzPhone } from '@/utils/phoneFormat';
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username or email is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  username: z.string().min(1, 'Telefon raqam yoki login kiritilishi shart'),
+  password: z.string().min(1, 'Parol kiritilishi shart'),
   rememberMe: z.boolean().optional(),
 });
 
@@ -38,28 +39,48 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [quickLoggingInRole, setQuickLoggingInRole] = useState(null);
 
   const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
   const isRTL = currentLang.dir === 'rtl';
+
+  const remembered =
+    typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function'
+      ? window.localStorage.getItem('educo_remember_username') || ''
+      : '';
+  const initialUsername = remembered
+    ? (remembered.startsWith('+') || /^\d+$/.test(remembered) ? formatUzPhone(remembered) : remembered)
+    : '+998 ';
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: '',
+      username: initialUsername,
       password: '',
-      rememberMe: false,
+      rememberMe: Boolean(remembered),
     },
   });
+
+  const usernameValue = watch('username');
 
   const onSubmit = async (values) => {
     setServerError('');
     try {
-      const identifier = values.username.trim();
+      const identifier = (values.username || '').trim();
+      const digits = identifier.replace(/\D/g, '');
+      const hasAlpha = /[a-zA-Z]/.test(identifier);
+
+      if (!hasAlpha && (!digits || digits === '998')) {
+        setServerError('Iltimos, telefon raqamingizni yoki loginingizni to‘liq kiriting!');
+        return;
+      }
+
       const { data, error } = await signIn(identifier, values.password);
 
       if (error) {
@@ -67,34 +88,42 @@ export default function LoginPage() {
         return;
       }
 
-      if (values.rememberMe) {
-        localStorage.setItem('educo_remember_username', values.username);
-      } else {
-        localStorage.removeItem('educo_remember_username');
-      }
+      try {
+        if (values.rememberMe) {
+          window.localStorage?.setItem?.('educo_remember_username', values.username);
+        } else {
+          window.localStorage?.removeItem?.('educo_remember_username');
+        }
+      } catch (_) {}
 
       // Check role and redirect to role dashboard or intended destination
-      const userRole = data?.user?.user_metadata?.role || 'student';
+      const rawRole = data?.user?.user_metadata?.role || 'student';
+      const userRole = String(rawRole).toLowerCase().trim();
       const from = location.state?.from?.pathname;
 
-      if (from && from !== '/login') {
+      // Only redirect to 'from' if it safely belongs to the user's role prefix
+      if (from && from !== '/login' && from !== '/unauthorized' && from.startsWith(`/${userRole}`)) {
         navigate(from, { replace: true });
         return;
       }
 
       switch (userRole) {
         case ROLES.OWNER:
-          navigate('/owner', { replace: true });
+        case 'owner':
+          navigate('/owner/dashboard', { replace: true });
           break;
         case ROLES.ADMIN:
-          navigate('/admin', { replace: true });
+        case 'admin':
+          navigate('/admin/dashboard', { replace: true });
           break;
         case ROLES.TEACHER:
-          navigate('/teacher', { replace: true });
+        case 'teacher':
+          navigate('/teacher/dashboard', { replace: true });
           break;
         case ROLES.STUDENT:
+        case 'student':
         default:
-          navigate('/student', { replace: true });
+          navigate('/student/dashboard', { replace: true });
           break;
       }
     } catch (err) {
@@ -102,10 +131,42 @@ export default function LoginPage() {
     }
   };
 
+  const handleQuickLogin = async (loginIdentifier, password, roleKey = '') => {
+    setServerError('');
+    setQuickLoggingInRole(roleKey || loginIdentifier);
+    setValue('username', loginIdentifier);
+    setValue('password', password);
+    try {
+      const { data, error } = await signIn(loginIdentifier, password);
+      if (error) {
+        setServerError(error.message || t('auth.invalidCredentials', 'Invalid username or password'));
+        setQuickLoggingInRole(null);
+        return;
+      }
+      const rawRole = data?.user?.user_metadata?.role || data?.profile?.role || roleKey || 'student';
+      const userRole = String(rawRole).toLowerCase().trim();
+      const targetPath = `/${userRole}/dashboard`;
+
+      navigate(targetPath, { replace: true });
+
+      // Safety fallback to ensure page transitions even on browser edge cases
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          if (window.location.pathname === '/login' || window.location.pathname === '/') {
+            window.location.replace(targetPath);
+          }
+        }, 150);
+      }
+    } catch (err) {
+      setServerError(err.message || 'Kirishda xatolik yuz berdi');
+      setQuickLoggingInRole(null);
+    }
+  };
+
   const changeLanguage = (langCode) => {
     i18n.changeLanguage(langCode);
     try {
-      localStorage.setItem('educo-lang', langCode);
+      window.localStorage?.setItem?.('educo-lang', langCode);
     } catch (e) {}
     setLangDropdownOpen(false);
     const selected = SUPPORTED_LANGUAGES.find((l) => l.code === langCode);
@@ -225,7 +286,29 @@ export default function LoginPage() {
                     type="text"
                     autoComplete="username"
                     placeholder="+998 90 123 45 67 yoki username"
-                    {...register('username')}
+                    value={usernameValue ?? ''}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === '') {
+                        setValue('username', '', { shouldValidate: true });
+                        return;
+                      }
+                      if (/[a-zA-Z]/.test(raw)) {
+                        setValue('username', raw, { shouldValidate: true });
+                        return;
+                      }
+                      if (raw === '+') {
+                        setValue('username', '+', { shouldValidate: true });
+                        return;
+                      }
+                      const formatted = formatUzPhone(raw);
+                      setValue('username', formatted, { shouldValidate: true });
+                    }}
+                    onFocus={(e) => {
+                      if (!e.target.value || !e.target.value.trim()) {
+                        setValue('username', '+998 ', { shouldValidate: false });
+                      }
+                    }}
                     className={`w-full rounded-xl border bg-white dark:bg-surface-dark-tertiary text-gray-900 dark:text-white text-sm py-2.5 pl-10 rtl:pl-3.5 rtl:pr-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-surface-dark transition-colors ${
                       errors.username
                         ? 'border-brand-red focus:border-brand-red focus:ring-brand-red'
@@ -316,56 +399,192 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Quick Demo Roles Access */}
+            {/* Quick Demo Access - Dedicated Teachers Section */}
             <div className="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2.5 text-center">
-                {t('common.quickDemo', 'Quick Demo Access / Test accounts')}:
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base">👨‍🏫</span>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    {t('common.teacherDemoAccounts', "O'qituvchilar kabineti (Demo kirish)")}
+                  </h3>
+                </div>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                  1-klikda kirish
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">
+                {t('common.teacherDemoHint', "Istalgan o'qituvchi kartasini bosing va to'g'ridan-to'g'ri o'qituvchi profiliga kiring:")}
               </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setValue('username', 'owner@educo.app');
-                    setValue('password', 'Educo#2026!Pro');
+
+              {/* 3 Teachers Cards */}
+              <div className="space-y-2 mb-4">
+                {/* Teacher 1: Bobur Mirzayev */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleQuickLogin('+998 90 333 44 55', 'Bobur#2026!', 'teacher')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleQuickLogin('+998 90 333 44 55', 'Bobur#2026!', 'teacher');
+                    }
                   }}
-                  className="p-2.5 rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30 text-brand-navy dark:text-blue-300 font-medium hover:bg-blue-100/60 dark:hover:bg-blue-900/40 transition-colors text-left flex items-center justify-between shadow-xs"
+                  className="p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/50 transition-all flex items-center justify-between gap-2 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
                 >
-                  <span className="font-semibold">👑 {t('roles.owner', 'Owner')}</span>
-                  <span className="text-[10px] opacity-75">Auto-fill</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setValue('username', 'admin@educo.app');
-                    setValue('password', 'Educo#2026!Pro');
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
+                        Bobur Mirzayev
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-medium">
+                        IT & Backend
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
+                      <span>+998 90 333 44 55</span>
+                      <span className="text-[10px] text-gray-400">•</span>
+                      <span className="text-gray-600 dark:text-gray-300 font-semibold">Bobur#2026!</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isSubmitting || authLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickLogin('+998 90 333 44 55', 'Bobur#2026!', 'teacher');
+                    }}
+                    className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{quickLoggingInRole === 'teacher' && watch('username') === '+998 90 333 44 55' ? 'Kirilmoqda...' : 'Kirish'}</span>
+                    <span className="text-[10px]">→</span>
+                  </button>
+                </div>
+
+                {/* Teacher 2: Nilufar Usmonova */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleQuickLogin('+998 90 444 55 66', 'Nilufar#2026!', 'teacher')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleQuickLogin('+998 90 444 55 66', 'Nilufar#2026!', 'teacher');
+                    }
                   }}
-                  className="p-2.5 rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 font-medium hover:bg-purple-100/60 dark:hover:bg-purple-900/40 transition-colors text-left flex items-center justify-between shadow-xs"
+                  className="p-2.5 rounded-xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20 hover:bg-teal-100/70 dark:hover:bg-teal-950/50 transition-all flex items-center justify-between gap-2 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
                 >
-                  <span className="font-semibold">🛡️ {t('roles.admin', 'Admin')}</span>
-                  <span className="text-[10px] opacity-75">Auto-fill</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setValue('username', 'teacher@educo.app');
-                    setValue('password', 'Educo#2026!Pro');
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">
+                        Nilufar Usmonova
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300 font-medium">
+                        Ingliz tili (IELTS)
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
+                      <span>+998 90 444 55 66</span>
+                      <span className="text-[10px] text-gray-400">•</span>
+                      <span className="text-gray-600 dark:text-gray-300 font-semibold">Nilufar#2026!</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isSubmitting || authLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickLogin('+998 90 444 55 66', 'Nilufar#2026!', 'teacher');
+                    }}
+                    className="shrink-0 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{quickLoggingInRole === 'teacher' && watch('username') === '+998 90 444 55 66' ? 'Kirilmoqda...' : 'Kirish'}</span>
+                    <span className="text-[10px]">→</span>
+                  </button>
+                </div>
+
+                {/* Teacher 3: Abdulazizbek Orifjonov */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleQuickLogin('+998 93 582 17 74', 'Ltmy$95W2', 'teacher')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleQuickLogin('+998 93 582 17 74', 'Ltmy$95W2', 'teacher');
+                    }
                   }}
-                  className="p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 font-medium hover:bg-emerald-100/60 dark:hover:bg-emerald-900/40 transition-colors text-left flex items-center justify-between shadow-xs"
+                  className="p-2.5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-950/50 transition-all flex items-center justify-between gap-2 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
                 >
-                  <span className="font-semibold">👨‍🏫 {t('roles.teacher', 'Teacher')}</span>
-                  <span className="text-[10px] opacity-75">Auto-fill</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setValue('username', 'student@educo.app');
-                    setValue('password', 'Educo#2026!Pro');
-                  }}
-                  className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 font-medium hover:bg-amber-100/60 dark:hover:bg-amber-900/40 transition-colors text-left flex items-center justify-between shadow-xs"
-                >
-                  <span className="font-semibold">🎓 {t('roles.student', 'Student')}</span>
-                  <span className="text-[10px] opacity-75">Auto-fill</span>
-                </button>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+                        Abdulazizbek Orifjonov
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-medium">
+                        Frontend & Web
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
+                      <span>+998 93 582 17 74</span>
+                      <span className="text-[10px] text-gray-400">•</span>
+                      <span className="text-gray-600 dark:text-gray-300 font-semibold">Ltmy$95W2</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isSubmitting || authLoading}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickLogin('+998 93 582 17 74', 'Ltmy$95W2', 'teacher');
+                    }}
+                    className="shrink-0 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{quickLoggingInRole === 'teacher' && watch('username') === '+998 93 582 17 74' ? 'Kirilmoqda...' : 'Kirish'}</span>
+                    <span className="text-[10px]">→</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Other Roles Demo Access */}
+              <div className="pt-3 border-t border-dashed border-gray-200 dark:border-gray-800">
+                <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                  {t('common.otherRolesDemo', 'Boshqa rollar (1-klikda tezkor kirish):')}
+                </p>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <button
+                    type="button"
+                    disabled={isSubmitting || authLoading}
+                    onClick={() => handleQuickLogin('+998 90 111 22 33', 'Educo#2026!Pro', 'owner')}
+                    className="p-2.5 rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30 text-brand-navy dark:text-blue-300 font-medium hover:bg-blue-100/70 dark:hover:bg-blue-900/50 active:scale-95 transition-all text-center shadow-xs flex flex-col items-center gap-0.5 cursor-pointer"
+                  >
+                    <span className="font-bold text-xs">👑 Rahbar</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                      {quickLoggingInRole === 'owner' ? 'Kirilmoqda...' : 'Alisher Q.'}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting || authLoading}
+                    onClick={() => handleQuickLogin('+998 90 222 33 44', 'Malika#2026!', 'admin')}
+                    className="p-2.5 rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 font-medium hover:bg-purple-100/70 dark:hover:bg-purple-900/50 active:scale-95 transition-all text-center shadow-xs flex flex-col items-center gap-0.5 cursor-pointer"
+                  >
+                    <span className="font-bold text-xs">🛡️ Admin</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                      {quickLoggingInRole === 'admin' ? 'Kirilmoqda...' : 'Malika K.'}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting || authLoading}
+                    onClick={() => handleQuickLogin('+998 90 555 66 77', 'Jasur#2026!', 'student')}
+                    className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 font-medium hover:bg-amber-100/70 dark:hover:bg-amber-900/50 active:scale-95 transition-all text-center shadow-xs flex flex-col items-center gap-0.5 cursor-pointer"
+                  >
+                    <span className="font-bold text-xs">🎓 O'quvchi</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                      {quickLoggingInRole === 'student' ? 'Kirilmoqda...' : 'Jasur R.'}
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
 

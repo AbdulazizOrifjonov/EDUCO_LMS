@@ -19,6 +19,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
+import Select from '@/components/ui/Select';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from '@/components/ui/Toast';
 import HomeworkForm from './HomeworkForm';
@@ -202,7 +203,7 @@ export default function HomeworkPage() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -235,19 +236,24 @@ export default function HomeworkPage() {
       {/* Filter Bar */}
       <Card noPadding>
         <div className="p-4 flex items-center justify-between gap-4 flex-wrap">
-          <div className="w-full sm:w-72">
-            <select
+          <div className="w-full sm:w-80">
+            <Select
               value={groupFilter}
               onChange={(e) => setGroupFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('groups.allGroups', 'All Cohort Groups')}</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
+              placeholder={t('groups.allGroups', 'Barcha o‘quv guruhlari')}
+              headerTitle={t('groups.title', 'Guruh bo‘yicha vazifalar')}
+              icon={Users}
+              size="sm"
+              options={[
+                { value: 'all', label: t('groups.allGroups', 'Barcha o‘quv guruhlari') },
+                ...groups.map((g) => ({
+                  value: g.id,
+                  label: g.name,
+                  subtitle: g.courseName || 'Kurs fani',
+                  color: g.courseColor || '#123D78',
+                })),
+              ]}
+            />
           </div>
         </div>
 

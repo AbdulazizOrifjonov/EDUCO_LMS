@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, Select } from '@/components/ui';
 
 const paymentSchema = z.object({
   student_id: z.string().min(1, 'Please select a student'),
@@ -26,6 +26,7 @@ export default function PaymentForm({ defaultStudentId, onSubmit, onCancel, isLo
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(paymentSchema),
@@ -77,35 +78,22 @@ export default function PaymentForm({ defaultStudentId, onSubmit, onCancel, isLo
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-          {t('users.student', 'Student')} <span className="text-brand-red">*</span>
-        </label>
-        <select
-          {...register('student_id')}
+        <Select
+          label={t('users.student', 'Talaba')}
+          required
+          value={watch('student_id')}
+          onChange={(e) => setValue('student_id', e.target.value, { shouldValidate: true })}
           disabled={loadingStudents || Boolean(defaultStudentId)}
-          className={`
-            w-full rounded-lg border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm
-            px-3.5 py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1
-            dark:focus:ring-offset-surface-dark
-            ${
-              errors.student_id
-                ? 'border-brand-red focus:border-brand-red focus:ring-brand-red'
-                : 'border-gray-300 dark:border-gray-600 focus:border-brand-navy focus:ring-brand-navy'
-            }
-          `}
-        >
-          <option value="" disabled>
-            {loadingStudents ? t('common.loading', 'Loading students...') : t('tuition.selectStudent', 'Select a student')}
-          </option>
-          {students.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.full_name || t('users.student', 'Student')} ({s.email || s.phone_number || s.id.slice(0, 8)})
-            </option>
-          ))}
-        </select>
-        {errors.student_id && (
-          <p className="text-xs text-brand-red mt-1">{errors.student_id.message}</p>
-        )}
+          placeholder={loadingStudents ? t('common.loading', 'Yuklanmoqda...') : t('tuition.selectStudent', 'Talabani tanlang')}
+          headerTitle="Talabalar ro‘yxati"
+          error={errors.student_id?.message}
+          options={students.map((s) => ({
+            value: s.id,
+            label: s.full_name || t('users.student', 'Talaba'),
+            subtitle: s.email || s.phone_number || s.id.slice(0, 8),
+            color: '#10b981',
+          }))}
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -121,22 +109,15 @@ export default function PaymentForm({ defaultStudentId, onSubmit, onCancel, isLo
         </div>
 
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-            {t('tuition.paymentMethod', 'Payment Method')} <span className="text-brand-red">*</span>
-          </label>
-          <select
-            {...register('payment_method')}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm px-3.5 py-2"
-          >
-            {methodOptions.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-          {errors.payment_method && (
-            <p className="text-xs text-brand-red mt-1">{errors.payment_method.message}</p>
-          )}
+          <Select
+            label={t('tuition.paymentMethod', 'To‘lov usuli')}
+            required
+            value={watch('payment_method')}
+            onChange={(e) => setValue('payment_method', e.target.value, { shouldValidate: true })}
+            headerTitle="To‘lov usulini tanlang"
+            error={errors.payment_method?.message}
+            options={methodOptions}
+          />
         </div>
       </div>
 

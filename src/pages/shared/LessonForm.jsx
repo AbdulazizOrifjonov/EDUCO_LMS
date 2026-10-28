@@ -7,6 +7,8 @@ import { Calendar, Clock, Building2, CheckCircle2, AlertTriangle } from 'lucide-
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
+import TimePicker from '@/components/ui/TimePicker';
 import { toast } from '@/components/ui/Toast';
 import { localStore } from '@/lib/localStore';
 import { getGroups } from '@/services/groupService';
@@ -236,25 +238,22 @@ export default function LessonForm({
         )}
 
         {/* Group Selector */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-            {t('groups.group', 'O‘quv guruhi')} <span className="text-brand-red">*</span>
-          </label>
-          <select
-            className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            {...register('groupId')}
-          >
-            <option value="">{t('groups.selectGroup', 'Guruhni tanlang...')}</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name} {g.courseName ? `(${g.courseName})` : ''}
-              </option>
-            ))}
-          </select>
-          {errors.groupId && (
-            <p className="text-xs text-brand-red font-medium">{errors.groupId.message}</p>
-          )}
-        </div>
+        <Select
+          label={t('groups.group', 'O‘quv guruhi')}
+          required
+          options={[
+            { value: '', label: t('groups.selectGroup', 'Guruhni tanlang...') },
+            ...groups.map((g) => ({
+              value: g.id,
+              label: g.name + (g.courseName ? ` (${g.courseName})` : ''),
+            })),
+          ]}
+          value={selectedGroup || ''}
+          onChange={(e) => setValue('groupId', e.target.value, { shouldValidate: true })}
+          error={errors.groupId?.message}
+          color="emerald"
+          searchable
+        />
 
         {/* 2-Option Day Pattern Selector: Toq kunlar vs Juft kunlar */}
         <div className="flex flex-col gap-2">
@@ -334,21 +333,17 @@ export default function LessonForm({
 
         {/* Start & End Times */}
         <div className="grid grid-cols-2 gap-4">
-          <Input
+          <TimePicker
             label={t('schedule.startTime', 'Boshlanish vaqti')}
-            type="time"
-            icon={Clock}
-            required
+            value={selectedStart || '09:00'}
+            onChange={(val) => setValue('startTime', val, { shouldValidate: true, shouldDirty: true })}
             error={errors.startTime?.message}
-            {...register('startTime')}
           />
-          <Input
+          <TimePicker
             label={t('schedule.endTime', 'Tugash vaqti')}
-            type="time"
-            icon={Clock}
-            required
+            value={selectedEnd || '10:30'}
+            onChange={(val) => setValue('endTime', val, { shouldValidate: true, shouldDirty: true })}
             error={errors.endTime?.message}
-            {...register('endTime')}
           />
         </div>
 

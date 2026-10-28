@@ -80,6 +80,14 @@ export default function AdminDashboard() {
     loadData();
   }, [user?.id]);
 
+  useEffect(() => {
+    const handleSync = () => {
+      loadData(false);
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, []);
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
@@ -94,8 +102,8 @@ export default function AdminDashboard() {
       title: t('dashboard.totalStudents', 'Jami talabalar'),
       value: stats.totalStudents,
       icon: GraduationCap,
-      color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-500/15 dark:bg-blue-500/20',
+      color: 'text-blue-600 dark:text-emerald-400',
+      bgColor: 'bg-blue-500/15 dark:bg-emerald-500/20',
       trend: t('dashboard.activeStudentsTrend', 'Faol o‘quvchilar'),
       onClick: () => navigate('/admin/users?role=student'),
     },
@@ -103,8 +111,8 @@ export default function AdminDashboard() {
       title: t('dashboard.totalTeachers', "Jami o'qituvchilar"),
       value: stats.totalTeachers,
       icon: Users,
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bgColor: 'bg-indigo-500/15 dark:bg-indigo-500/20',
+      color: 'text-amber-600 dark:text-amber-400',
+      bgColor: 'bg-amber-500/15 dark:bg-amber-500/20',
       trend: t('dashboard.activeTeachersTrend', 'Guruhlarga biriktirilgan'),
       onClick: () => navigate('/admin/users?role=teacher'),
     },
@@ -121,8 +129,8 @@ export default function AdminDashboard() {
       title: t('dashboard.totalCourses', 'Jami kurslar'),
       value: stats.totalCourses,
       icon: BookOpen,
-      color: 'text-emerald-600 dark:text-emerald-400',
-      bgColor: 'bg-emerald-500/15 dark:bg-emerald-500/20',
+      color: 'text-blue-600 dark:text-emerald-400',
+      bgColor: 'bg-blue-500/15 dark:bg-emerald-500/20',
       trend: t('dashboard.coursesTrend', 'Barcha yo‘nalishlar'),
       onClick: () => navigate('/admin/courses'),
     },
@@ -130,18 +138,22 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-brand-navy via-brand-navy-light to-blue-900 text-white shadow-xl relative overflow-hidden">
+      {/* Header Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20">
+        {/* Decorative ambient blur glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-sky-400/10 dark:bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+
         <div className="space-y-1 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/90 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-            <span>{t('dashboard.adminPortal', 'Administrator Control Panel')}</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 dark:bg-emerald-500/20 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/95 dark:text-emerald-200 border border-white/20 dark:border-emerald-400/40 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-blue-200 dark:text-emerald-300" />
+            <span>{t('dashboard.adminPortal', 'Administrator boshqaruv paneli')}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {t('dashboard.welcome', { name: userName, defaultValue: `Welcome back, ${userName}` })}
+            {t('dashboard.welcome', { name: userName, defaultValue: `Xush kelibsiz, ${userName}` })}
           </h1>
-          <p className="text-sm text-blue-100/80 max-w-xl">
-            {t('dashboard.adminBannerSubtitle', 'Monitor real-time academic operations, faculty timetables, and student enrollment.')}
+          <p className="text-sm text-blue-100 dark:text-emerald-100/80 max-w-xl">
+            {t('dashboard.adminBannerSubtitle', 'Akademik jarayonlar, o‘qituvchilar dars jadvali va talabalar qabuli markazi.')}
           </p>
         </div>
 
@@ -150,11 +162,11 @@ export default function AdminDashboard() {
             type="button"
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur text-sm font-medium transition-colors border border-white/10 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 dark:hover:bg-emerald-500/20 backdrop-blur text-sm font-medium transition-colors border border-white/15 dark:border-emerald-400/20 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">
-              {refreshing ? t('common.refreshing', 'Refreshing...') : t('common.refresh', 'Refresh')}
+              {refreshing ? t('common.refreshing', 'Yangilanmoqda...') : t('common.refresh', 'Yangilash')}
             </span>
           </button>
           <Button
@@ -164,7 +176,7 @@ export default function AdminDashboard() {
             icon={PlusCircle}
             className="bg-brand-red hover:bg-brand-red-dark text-white shadow-md"
           >
-            {t('groups.createGroup', 'Create New Group')}
+            {t('groups.createGroup', 'Yangi guruh yaratish')}
           </Button>
         </div>
       </div>
@@ -183,55 +195,51 @@ export default function AdminDashboard() {
       )}
 
       {/* Quick Action Buttons for Admin */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mr-2 shrink-0">
-          {t('dashboard.adminQuickActions', 'Admin Quick Actions:')}
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5">
+        <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-emerald-400 mr-1 shrink-0 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5" />
+          {t('dashboard.adminQuickActions', 'Tezkor amallar:')}
         </span>
-        <Button
+        <button
+          type="button"
           onClick={() => navigate('/admin/users?role=student')}
-          variant="outline"
-          size="sm"
-          icon={UserPlus}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-500/15 text-blue-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-blue-500/30 dark:border-emerald-500/30 hover:bg-blue-500/25 dark:hover:bg-emerald-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('users.createStudent', "Yangi o'quvchi qo'shish")}
-        </Button>
-        <Button
+          <UserPlus className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
+          <span>{t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/admin/users?role=teacher')}
-          variant="outline"
-          size="sm"
-          icon={UserPlus}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('users.createTeacher', "O'qituvchi qo'shish")}
-        </Button>
-        <Button
+          <UserPlus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          <span>{t('users.createTeacher', "O'qituvchi qo'shish")}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/admin/schedule')}
-          variant="outline"
-          size="sm"
-          icon={Calendar}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30 hover:bg-teal-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('schedule.title', 'Manage Schedule')}
-        </Button>
-        <Button
+          <Calendar className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+          <span>{t('schedule.title', 'Dars jadvali')}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/admin/attendance')}
-          variant="outline"
-          size="sm"
-          icon={FileSpreadsheet}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('attendance.title', 'Attendance Center')}
-        </Button>
-        <Button
+          <FileSpreadsheet className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+          <span>{t('attendance.title', 'Davomat markazi')}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/admin/announcements')}
-          variant="outline"
-          size="sm"
-          icon={PlusCircle}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 hover:bg-purple-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('announcements.newAnnouncement', 'Post Announcement')}
-        </Button>
+          <PlusCircle className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+          <span>{t('announcements.newAnnouncement', "E'lon berish")}</span>
+        </button>
       </div>
 
       {/* 4 Stats Cards */}
@@ -258,7 +266,7 @@ export default function AdminDashboard() {
                 <h3 className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1 leading-snug break-words">
                   {item.title}
                 </h3>
-                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium leading-tight">
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-blue-600 dark:text-emerald-400 font-medium leading-tight">
                   <TrendingUp className="w-3 h-3 shrink-0" />
                   <span>{item.trend}</span>
                 </div>
@@ -280,7 +288,7 @@ export default function AdminDashboard() {
                 onClick={() => navigate('/schedule')}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-brand-navy dark:text-blue-400"
+                className="text-xs text-blue-600 dark:text-emerald-400 hover:text-blue-700 dark:hover:text-emerald-300 font-semibold"
               >
                 {t('dashboard.scheduleGrid', 'Schedule Grid →')}
               </Button>
@@ -302,7 +310,7 @@ export default function AdminDashboard() {
                     className="p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-brand-navy dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-emerald-500/20 text-blue-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
@@ -318,7 +326,7 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {lesson.groupName} &bull; Room: {lesson.room}
+                          {lesson.groupName} &bull; {lesson.room ? `${lesson.room}-xona` : ''}
                         </p>
                       </div>
                     </div>
@@ -332,7 +340,7 @@ export default function AdminDashboard() {
                         size="sm"
                         className="mt-1"
                       >
-                        {lesson.status}
+                        {lesson.status === 'completed' ? t('common.completed', 'Tugallangan') : t('common.active', 'Faol')}
                       </Badge>
                     </div>
                   </div>
@@ -345,38 +353,38 @@ export default function AdminDashboard() {
         {/* Recent Enrollments (1 col) */}
         <div>
           <Card
-            title={t('dashboard.recentEnrollments', 'Recent Enrollments')}
-            subtitle={t('dashboard.enrollmentSubtitle', 'Latest students added to groups')}
+            title={t('dashboard.recentEnrollments', 'So‘nggi qabullar')}
+            subtitle={t('dashboard.enrollmentSubtitle', 'Guruhlarga qabul qilingan so‘nggi o‘quvchilar')}
             headerAction={
               <Button
-                onClick={() => navigate('/groups')}
+                onClick={() => navigate('/admin/groups')}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-brand-navy dark:text-blue-400"
+                className="text-xs text-blue-600 dark:text-emerald-400 hover:text-blue-700 dark:hover:text-emerald-300 font-semibold"
               >
-                {t('common.viewAll', 'View All →')}
+                {t('common.viewAll', 'Barchasini ko‘rish →')}
               </Button>
             }
           >
             {recentEnrollments.length === 0 ? (
               <EmptyState
                 icon={Users}
-                title={t('dashboard.noRecentEnrollments', 'No recent enrollments')}
-                description={t('dashboard.noEnrollmentsDesc', 'Students enrolled into courses will be listed here.')}
+                title={t('dashboard.noRecentEnrollments', 'So‘nggi qabullar yo‘q')}
+                description={t('dashboard.noEnrollmentsDesc', 'Kurslarga qabul qilingan talabalar bu yerda aks etadi.')}
               />
             ) : (
               <div className="space-y-3">
                 {recentEnrollments.map((enr) => {
                   const student = enr.profiles;
                   const group = enr.groups;
-                  const fullName = student ? `${student.first_name} ${student.last_name}` : 'Student';
+                  const fullName = student ? `${student.first_name} ${student.last_name}` : 'Talaba';
                   return (
                     <div
                       key={enr.id}
-                      className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-surface-dark-tertiary/20"
+                      className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-surface-dark-tertiary/20 hover:border-blue-500/20 dark:hover:border-emerald-500/30 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 text-brand-navy dark:text-blue-300 flex items-center justify-center font-bold text-xs uppercase">
+                        <div className="w-8 h-8 rounded-full bg-blue-500/15 dark:bg-emerald-500/25 text-blue-700 dark:text-emerald-300 flex items-center justify-center font-bold text-xs uppercase">
                           {fullName.charAt(0)}
                         </div>
                         <div>
@@ -384,13 +392,13 @@ export default function AdminDashboard() {
                             {fullName}
                           </h4>
                           <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                            {t('groups.enrolled', 'Enrolled')} in {group?.name || 'Group'}
+                            {group?.name || 'Guruh'}ga qabul qilingan
                           </p>
                         </div>
                       </div>
 
                       <Badge variant="success" size="sm">
-                        {t('groups.enrolled', 'Enrolled')}
+                        {t('common.active', 'Faol')}
                       </Badge>
                     </div>
                   );

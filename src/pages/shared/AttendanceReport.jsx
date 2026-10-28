@@ -9,11 +9,16 @@ import {
   HelpCircle,
   XCircle,
   TrendingUp,
+  Users,
+  GraduationCap,
+  Calendar,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
 import { getAttendanceReport } from '@/services/attendanceService';
 import { getGroups } from '@/services/groupService';
@@ -74,13 +79,14 @@ export default function AttendanceReport() {
   }, [fetchReport]);
 
   const handleExportCSV = () => {
-    if (!report.records.length) {
+    const records = report?.records || [];
+    if (!records.length) {
       toast.warning(t('common.noData', 'No records to export'));
       return;
     }
 
     const headers = ['Date', 'Student', 'Cohort/Group', 'Status', 'Remark'];
-    const rows = report.records.map((r) => [
+    const rows = records.map((r) => [
       `"${r.lessons?.lesson_date || ''}"`,
       `"${r.profiles?.first_name || ''} ${r.profiles?.last_name || ''}"`,
       `"${r.lessons?.groups?.name || ''}"`,
@@ -151,10 +157,11 @@ export default function AttendanceReport() {
     },
   ];
 
-  const stats = report.stats;
+  const stats = report?.stats || { total: 0, rate: 0, present: 0, late: 0, excused: 0, absent: 0 };
+  const records = report?.records || [];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -172,7 +179,7 @@ export default function AttendanceReport() {
           size="md"
           icon={Download}
           onClick={handleExportCSV}
-          disabled={report.records.length === 0}
+          disabled={records.length === 0}
         >
           {t('common.export', 'Export to CSV')}
         </Button>
@@ -242,49 +249,95 @@ export default function AttendanceReport() {
             />
           </div>
 
-          <div>
-            <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300 block mb-1">
-              {t('groups.group', 'Cohort Group')}
-            </label>
-            <select
-              value={groupId}
-              onChange={(e) => setGroupId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('groups.allGroups', 'All Study Groups')}</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('groups.group', 'O‘quv guruhi')}
+            value={groupId}
+            onChange={(e) => setGroupId(e.target.value)}
+            placeholder={t('groups.allGroups', 'Barcha guruhlar')}
+            headerTitle={t('groups.title', 'Guruh tanlang')}
+            icon={Users}
+            size="sm"
+            options={[
+              { value: 'all', label: t('groups.allGroups', 'Barcha guruhlar') },
+              ...groups.map((g) => ({
+                value: g.id,
+                label: g.name,
+                subtitle: g.courseName || 'Kurs fani',
+                color: g.courseColor || '#123D78',
+              })),
+            ]}
+          />
 
-          <div>
-            <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300 block mb-1">
-              {t('users.student', 'Individual Student')}
-            </label>
-            <select
-              value={studentId}
-              onChange={(e) => setStudentId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('users.allStudents', 'All Enrolled Students')}</option>
-              {students.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.fullName}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('users.student', 'Talaba')}
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+            placeholder={t('users.allStudents', 'Barcha talabalar')}
+            headerTitle={t('users.students', 'Talabalar ro‘yxati')}
+            icon={GraduationCap}
+            size="sm"
+            options={[
+              { value: 'all', label: t('users.allStudents', 'Barcha talabalar') },
+              ...students.map((st) => ({
+                value: st.id,
+                label: st.fullName,
+                subtitle: st.phone || 'Talaba',
+                color: '#10b981',
+              })),
+            ]}
+          />
         </div>
 
-        <Table
-          columns={columns}
-          data={report.records}
-          isLoading={loading}
-          emptyMessage={t('attendance.noRecords', 'No attendance entries found for the selected date range.')}
-        />
+        {/* Mobile View: Clean responsive cards (no horizontal overflow) */}
+        <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+          {loading ? (
+            <div className="p-8 text-center text-gray-500">
+              <LoadingSpinner size="md" />
+              <p className="mt-2 text-xs">{t('common.loading', 'Yuklanmoqda...')}</p>
+            </div>
+          ) : !records || records.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              <p className="text-sm">{t('attendance.noRecords', 'No attendance entries found for the selected date range.')}</p>
+            </div>
+          ) : (
+            records.map((row, idx) => (
+              <div key={row.id || idx} className="p-4 bg-white dark:bg-surface-dark-secondary rounded-xl mb-3 border border-gray-100 dark:border-gray-800 shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    {row.lessons?.lesson_date || '—'}
+                  </span>
+                  <Badge variant={statusBadgeMap[row.status] || 'default'} size="sm">
+                    <span className="capitalize">{row.status}</span>
+                  </Badge>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {row.profiles?.first_name} {row.profiles?.last_name}
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {t('groups.group', 'Guruh')}: {row.lessons?.groups?.name || '—'}
+                  </p>
+                </div>
+                {row.remark && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-surface-dark-tertiary p-2 rounded-lg italic">
+                    {t('attendance.remark', 'Sabab')}: {row.remark}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Full Table */}
+        <div className="hidden md:block">
+          <Table
+            columns={columns}
+            data={records}
+            isLoading={loading}
+            emptyMessage={t('attendance.noRecords', 'No attendance entries found for the selected date range.')}
+          />
+        </div>
       </Card>
     </div>
   );

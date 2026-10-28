@@ -8,17 +8,14 @@ import {
   Calendar,
   CheckSquare,
   Award,
-  FileText,
-  FolderOpen,
-  Megaphone,
   MessageSquare,
-  CreditCard,
   Receipt,
   BarChart3,
-  ShieldCheck,
   Bell,
+  BellRing,
   Settings,
   KeyRound,
+  Smartphone,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -60,6 +57,12 @@ const OWNER_NAV_ITEMS = [
     icon: Calendar,
   },
   {
+    labelKey: 'nav.reminders',
+    label: 'Eslatmalar',
+    path: '/owner/reminders',
+    icon: BellRing,
+  },
+  {
     labelKey: 'nav.attendance',
     label: 'Attendance',
     path: '/owner/attendance',
@@ -72,34 +75,10 @@ const OWNER_NAV_ITEMS = [
     icon: Award,
   },
   {
-    labelKey: 'nav.homework',
-    label: 'Homework',
-    path: '/owner/homework',
-    icon: FileText,
-  },
-  {
-    labelKey: 'nav.materials',
-    label: 'Materials',
-    path: '/owner/materials',
-    icon: FolderOpen,
-  },
-  {
-    labelKey: 'nav.announcements',
-    label: 'Announcements',
-    path: '/owner/announcements',
-    icon: Megaphone,
-  },
-  {
     labelKey: 'nav.chat',
     label: 'Chat',
     path: '/owner/chat',
     icon: MessageSquare,
-  },
-  {
-    labelKey: 'nav.payroll',
-    label: 'Payroll',
-    path: '/owner/payroll',
-    icon: CreditCard,
   },
   {
     labelKey: 'nav.tuition',
@@ -108,16 +87,16 @@ const OWNER_NAV_ITEMS = [
     icon: Receipt,
   },
   {
+    labelKey: 'nav.sms',
+    label: 'SMS Xabarnomalar',
+    path: '/owner/sms',
+    icon: Smartphone,
+  },
+  {
     labelKey: 'nav.reports',
     label: 'Reports',
     path: '/owner/reports',
     icon: BarChart3,
-  },
-  {
-    labelKey: 'nav.audit',
-    label: 'Audit Log',
-    path: '/owner/audit',
-    icon: ShieldCheck,
   },
   {
     labelKey: 'nav.notifications',

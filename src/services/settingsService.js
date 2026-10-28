@@ -236,7 +236,9 @@ export async function changePassword(currentPassword, newPassword, userId = null
  * @param {File} file
  * @returns {Promise<string>}
  */
-function fileToCompressedDataUrl(file, maxSize = 256) {
+export function fileToCompressedDataUrl(file, maxSize = 256) {
+  if (!file) return Promise.resolve('');
+  if (typeof file === 'string') return Promise.resolve(file);
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('Rasmni o‘qib bo‘lmadi'));

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   BookOpen,
@@ -12,33 +13,45 @@ import {
   Layers,
   Sparkles,
 } from 'lucide-react';
+import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import Modal from '@/components/ui/Modal';
+import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
-import CourseForm from './CourseForm';
 import {
   getCourses,
   archiveCourse,
   getLearningDirections,
 } from '@/services/courseService';
+import { useSearch } from '@/context/SearchContext';
 
 export default function CourseManagement() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { profile } = useAuth();
+  const currentUserRole = profile?.role || 'owner';
+  const { searchQuery, setSearchQuery } = useSearch();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchQuery || '');
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  // Synchronize with global navbar search bar
+  useEffect(() => {
+    if (searchQuery !== undefined) {
+      setSearch(searchQuery);
+      setPage(1);
+    }
+  }, [searchQuery]);
+
   // Modals
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState(null);
   const [isDirectionsModalOpen, setIsDirectionsModalOpen] = useState(false);
   const [directions, setDirections] = useState([]);
 
@@ -127,11 +140,11 @@ export default function CourseManagement() {
       ),
     },
     {
-      header: t('courses.fee', 'Tuition Fee'),
+      header: t('courses.fee', 'Oylik to‘lov'),
       key: 'monthly_fee',
       render: (row) => (
-        <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">
-          ${Number(row.monthly_fee || 0).toFixed(2)} {t('courses.perMonth', '/mo')}
+        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
+          {Number(row.monthly_fee || 0).toLocaleString()} so‘m / oy
         </span>
       ),
     },
@@ -156,10 +169,7 @@ export default function CourseManagement() {
             size="sm"
             className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
             title={t('common.edit', 'Edit Course')}
-            onClick={() => {
-              setSelectedCourse(row);
-              setIsFormOpen(true);
-            }}
+            onClick={() => navigate(`/${currentUserRole}/courses/edit/${row.id}`)}
           >
             <Edit2 className="w-4 h-4" />
           </Button>
@@ -182,7 +192,7 @@ export default function CourseManagement() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -208,10 +218,7 @@ export default function CourseManagement() {
             variant="primary"
             size="md"
             icon={Plus}
-            onClick={() => {
-              setSelectedCourse(null);
-              setIsFormOpen(true);
-            }}
+            onClick={() => navigate(`/${currentUserRole}/courses/create`)}
           >
             {t('courses.createCourse', 'New Course')}
           </Button>
@@ -228,25 +235,28 @@ export default function CourseManagement() {
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
+                setSearchQuery(e.target.value);
                 setPage(1);
               }}
             />
           </div>
 
-          <div>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('courses.allStatuses', 'All Statuses')}</option>
-              <option value="active">{t('common.active', 'Active Courses')}</option>
-              <option value="archived">{t('common.archived', 'Archived Courses')}</option>
-            </select>
-          </div>
+          <Select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            placeholder={t('courses.allStatuses', 'Barcha holatlar')}
+            headerTitle={t('common.status', 'Kurs holati')}
+            icon={BookOpen}
+            size="sm"
+            options={[
+              { value: 'all', label: t('courses.allStatuses', 'Barcha holatlar') },
+              { value: 'active', label: t('common.active', 'Faol kurslar'), color: '#10b981', subtitle: 'Guruhlar ochilgan kurslar' },
+              { value: 'archived', label: t('common.archived', 'Arxivlangan kurslar'), color: '#ef4444', subtitle: 'To‘xtatilgan kurslar' },
+            ]}
+          />
         </div>
 
         {/* Desktop Table View */}
@@ -355,18 +365,7 @@ export default function CourseManagement() {
         </div>
       </Card>
 
-      {/* Course Create/Edit Modal */}
-      {isFormOpen && (
-        <CourseForm
-          isOpen={isFormOpen}
-          onClose={() => {
-            setIsFormOpen(false);
-            setSelectedCourse(null);
-          }}
-          course={selectedCourse}
-          onSuccess={fetchCourses}
-        />
-      )}
+
 
       {/* Learning Directions Modal */}
       <Modal

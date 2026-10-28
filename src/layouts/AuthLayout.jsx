@@ -124,8 +124,8 @@ export default function AuthLayout() {
             <div className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#123D78] to-[#1a4f9a] text-white shadow-xl shadow-blue-950/30 ring-4 ring-white/50 dark:ring-gray-800">
               <GraduationCap className="h-9 w-9 text-white" />
               <div className="absolute -top-1 -right-1 flex h-4 w-4">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F12D3A] opacity-75" />
-                <span className="relative inline-flex h-4 w-4 rounded-full bg-[#F12D3A] border-2 border-white dark:border-gray-900" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 dark:bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex h-4 w-4 rounded-full bg-blue-500 dark:bg-emerald-500 border-2 border-white dark:border-gray-900" />
               </div>
             </div>
 
@@ -133,7 +133,7 @@ export default function AuthLayout() {
               <h1 className="text-2xl font-black tracking-wider text-[#123D78] dark:text-white sm:text-3xl">
                 EDUCO
               </h1>
-              <span className="rounded-lg bg-[#F12D3A] px-2 py-0.5 text-xs font-extrabold uppercase tracking-widest text-white shadow-sm">
+              <span className="rounded-lg bg-blue-600 dark:bg-emerald-500 px-2 py-0.5 text-xs font-extrabold uppercase tracking-widest text-white shadow-sm">
                 LMS
               </span>
             </div>

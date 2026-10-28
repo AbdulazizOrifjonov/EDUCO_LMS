@@ -16,6 +16,7 @@ import {
   Sparkles,
   User,
   Phone,
+  BookOpen,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -23,23 +24,22 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
-import Modal from '@/components/ui/Modal';
-import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
+import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
-import GroupForm from './GroupForm';
 import {
   getGroups,
   updateGroup,
 } from '@/services/groupService';
 import { getCourses } from '@/services/courseService';
-import { getTeachers, createStudent } from '@/services/userService';
-import { cleanUzPhone } from '@/utils/phoneFormat';
+import { getTeachers } from '@/services/userService';
+import { useSearch } from '@/context/SearchContext';
 
 export default function GroupManagement() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useAuth();
   const currentUserRole = profile?.role || 'owner';
+  const { searchQuery, setSearchQuery } = useSearch();
 
   const [groups, setGroups] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -47,31 +47,22 @@ export default function GroupManagement() {
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchQuery || '');
   const [courseFilter, setCourseFilter] = useState('all');
   const [teacherFilter, setTeacherFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
   const [page, setPage] = useState(1);
+
+  // Synchronize with global navbar search bar
+  useEffect(() => {
+    if (searchQuery !== undefined) {
+      setSearch(searchQuery);
+      setPage(1);
+    }
+  }, [searchQuery]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-
-  // Student creation modal
-  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
-  const [newStudentData, setNewStudentData] = useState({
-    firstName: '',
-    lastName: '',
-    fatherPhone: '',
-    motherPhone: '',
-    phone: '',
-    password: '',
-    groupId: '',
-  });
-  const [isSubmittingStudent, setIsSubmittingStudent] = useState(false);
-
-  // Modals
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState(null);
 
   const fetchFilters = async () => {
     try {
@@ -131,64 +122,7 @@ export default function GroupManagement() {
     }
   };
 
-  const handleCreateStudent = async (e) => {
-    e?.preventDefault?.();
-    if (!newStudentData.firstName.trim() || !newStudentData.lastName.trim()) {
-      toast.error(t('errors.required', 'Ism va familiya kiritilishi shart'));
-      return;
-    }
-    const cleanFather = cleanUzPhone(newStudentData.fatherPhone);
-    const cleanMother = cleanUzPhone(newStudentData.motherPhone);
-    const cleanPhone = cleanUzPhone(newStudentData.phone);
-    if (!cleanFather && !cleanMother && !cleanPhone) {
-      toast.error(t('users.atLeastOneParentPhone', 'Otasining yoki onasining telefon raqamini kiritish shart'));
-      return;
-    }
 
-    const trimmedPwd = (newStudentData.password || '').trim();
-    if (!trimmedPwd) {
-      toast.error(t('users.passwordRequired', 'Kabinetga kirish uchun parol kiritish shart!'));
-      return;
-    }
-    if (!evaluatePasswordStrength(trimmedPwd).allMet) {
-      toast.error(
-        t(
-          'users.passwordMustBeStrong',
-          'Parol xavfsiz (yashil) bo‘lishi uchun katta-kichik harf, raqam va maxsus belgi (!@#$) ishtirok etishi shart!'
-        )
-      );
-      return;
-    }
-
-    setIsSubmittingStudent(true);
-    try {
-      await createStudent({
-        firstName: newStudentData.firstName,
-        lastName: newStudentData.lastName,
-        fatherPhone: cleanFather,
-        motherPhone: cleanMother,
-        phone: cleanPhone,
-        password: trimmedPwd,
-        groupId: newStudentData.groupId || null,
-      });
-      toast.success(t('users.studentCreatedAndEnrolled', 'Yangi o‘quvchi yaratildi va guruhga biriktirildi!'));
-      setNewStudentData({
-        firstName: '',
-        lastName: '',
-        fatherPhone: '',
-        motherPhone: '',
-        phone: '',
-        password: '',
-        groupId: '',
-      });
-      setIsAddStudentOpen(false);
-      fetchGroups();
-    } catch (err) {
-      toast.error(err.message || 'Xatolik yuz berdi');
-    } finally {
-      setIsSubmittingStudent(false);
-    }
-  };
 
   const getStatusBadgeVariant = (status) => {
     switch (status) {
@@ -211,10 +145,18 @@ export default function GroupManagement() {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm"
-            style={{ backgroundColor: row.courseColor || '#123D78' }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm overflow-hidden"
+            style={{ backgroundColor: row.courseColor || '#064e3b' }}
           >
-            <Users className="w-5 h-5" />
+            {row.avatar_url || row.image_url ? (
+              <img
+                src={row.avatar_url || row.image_url}
+                alt={row.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Users className="w-5 h-5" />
+            )}
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -255,7 +197,7 @@ export default function GroupManagement() {
             <div className="w-full bg-gray-100 dark:bg-surface-dark-tertiary h-1.5 rounded-full overflow-hidden">
               <div
                 className={`h-full ${
-                  percent >= 100 ? 'bg-brand-red' : percent > 80 ? 'bg-amber-500' : 'bg-brand-navy'
+                  percent >= 100 ? 'bg-brand-red' : percent > 80 ? 'bg-amber-500' : 'bg-emerald-500'
                 }`}
                 style={{ width: `${percent}%` }}
               />
@@ -274,6 +216,18 @@ export default function GroupManagement() {
             : t('schedule.noSchedule', 'No timetable')}
         </span>
       ),
+    },
+    {
+      header: t('courses.fee', 'Oylik to‘lov'),
+      key: 'monthly_price',
+      render: (row) => {
+        const fee = Number(row.monthly_price || row.monthly_fee || 0);
+        return (
+          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
+            {fee > 0 ? `${fee.toLocaleString()} so‘m` : 'Belgilanmagan'}
+          </span>
+        );
+      },
     },
     {
       header: t('common.status', 'Status'),
@@ -298,7 +252,7 @@ export default function GroupManagement() {
             size="sm"
             className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
             title={t('groups.viewDetail', 'View Group Detail')}
-            onClick={() => navigate(`/owner/groups/${row.id}`)}
+            onClick={() => navigate(`/${currentUserRole}/groups/${row.id}`)}
           >
             <Eye className="w-4 h-4" />
           </Button>
@@ -307,10 +261,7 @@ export default function GroupManagement() {
             size="sm"
             className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
             title={t('common.edit', 'Edit Group')}
-            onClick={() => {
-              setSelectedGroup(row);
-              setIsFormOpen(true);
-            }}
+            onClick={() => navigate(`/${currentUserRole}/groups/edit/${row.id}`)}
           >
             <Edit2 className="w-4 h-4" />
           </Button>
@@ -337,7 +288,7 @@ export default function GroupManagement() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -355,7 +306,7 @@ export default function GroupManagement() {
             variant="outline"
             size="md"
             icon={GraduationCap}
-            onClick={() => setIsAddStudentOpen(true)}
+            onClick={() => navigate(`/${currentUserRole}/users/create?role=student`)}
           >
             {t('users.createStudent', '+ Yangi o‘quvchi qo‘shish')}
           </Button>
@@ -363,10 +314,7 @@ export default function GroupManagement() {
             variant="primary"
             size="md"
             icon={Plus}
-            onClick={() => {
-              setSelectedGroup(null);
-              setIsFormOpen(true);
-            }}
+            onClick={() => navigate(`/${currentUserRole}/groups/create`)}
           >
             {t('groups.createGroup', 'New Study Group')}
           </Button>
@@ -375,66 +323,82 @@ export default function GroupManagement() {
 
       {/* Filters Bar */}
       <Card noPadding>
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
           <Input
             icon={Search}
+            size="md"
             placeholder={t('groups.searchPlaceholder', 'Search group or room...')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
+              setSearchQuery(e.target.value);
               setPage(1);
             }}
           />
 
           {/* Course Filter */}
-          <select
+          <Select
             value={courseFilter}
+            size="md"
             onChange={(e) => {
               setCourseFilter(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          >
-            <option value="all">{t('courses.allCourses', 'All Courses')}</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            placeholder={t('courses.allCourses', 'Barcha kurslar')}
+            headerTitle={t('courses.title', 'Kurs bo‘yicha saralash')}
+            icon={BookOpen}
+            options={[
+              { value: 'all', label: t('courses.allCourses', 'Barcha kurslar'), subtitle: `${courses.length} ta umumiy kurs` },
+              ...courses.map((c) => ({
+                value: c.id,
+                label: c.name,
+                subtitle: c.code || 'Kurs fani',
+                color: c.color || '#10b981',
+                badge: c.groupsCount ? `${c.groupsCount} ta guruh` : null,
+              })),
+            ]}
+          />
 
           {/* Teacher Filter */}
-          <select
+          <Select
             value={teacherFilter}
+            size="md"
             onChange={(e) => {
               setTeacherFilter(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          >
-            <option value="all">{t('groups.allTeachers', 'All Teachers')}</option>
-            {teachers.map((teach) => (
-              <option key={teach.id} value={teach.id}>
-                {teach.fullName}
-              </option>
-            ))}
-          </select>
+            placeholder={t('groups.allTeachers', 'Barcha ustozlar')}
+            headerTitle={t('users.filterByTeacher', 'Ustoz bo‘yicha saralash')}
+            icon={Users}
+            options={[
+              { value: 'all', label: t('groups.allTeachers', 'Barcha ustozlar'), subtitle: `${teachers.length} ta o‘qituvchi` },
+              ...teachers.map((teach) => ({
+                value: teach.id,
+                label: teach.fullName,
+                subtitle: teach.phone || 'O‘qituvchi',
+                color: '#123D78',
+              })),
+            ]}
+          />
 
           {/* Status Filter */}
-          <select
+          <Select
             value={statusFilter}
+            size="md"
             onChange={(e) => {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          >
-            <option value="all">{t('groups.allStatuses', 'All Statuses')}</option>
-            <option value="active">{t('common.active', 'Active')}</option>
-            <option value="upcoming">{t('groups.upcoming', 'Upcoming')}</option>
-            <option value="completed">{t('groups.completed', 'Completed')}</option>
-            <option value="archived">{t('common.archived', 'Archived')}</option>
-          </select>
+            placeholder={t('groups.allStatuses', 'Barcha holatlar')}
+            headerTitle={t('common.status', 'Guruh holati')}
+            options={[
+              { value: 'all', label: t('groups.allStatuses', 'Barcha holatlar') },
+              { value: 'active', label: t('common.active', 'Faol guruhlar'), subtitle: 'Darslar olib borilmoqda', color: '#10b981' },
+              { value: 'upcoming', label: t('groups.upcoming', 'Boshlanadigan'), subtitle: 'Qabul davom etmoqda', color: '#3b82f6' },
+              { value: 'completed', label: t('groups.completed', 'Yakunlangan'), subtitle: 'Darslar tugallangan', color: '#6b7280' },
+              { value: 'archived', label: t('common.archived', 'Arxivlangan'), subtitle: 'Muzlatilgan / arxiv', color: '#ef4444' },
+            ]}
+          />
         </div>
 
         {/* Desktop Table View */}
@@ -478,10 +442,18 @@ export default function GroupManagement() {
                     <div className="flex items-start justify-between gap-2.5">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div
-                          className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm"
-                          style={{ backgroundColor: group.courseColor || '#123D78' }}
+                          className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm overflow-hidden"
+                          style={{ backgroundColor: group.courseColor || '#064e3b' }}
                         >
-                          <Users className="w-5 h-5" />
+                          {group.avatar_url || group.image_url ? (
+                            <img
+                              src={group.avatar_url || group.image_url}
+                              alt={group.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Users className="w-5 h-5" />
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -539,7 +511,7 @@ export default function GroupManagement() {
                               ? 'bg-brand-red'
                               : percent > 80
                               ? 'bg-amber-500'
-                              : 'bg-brand-navy dark:bg-blue-500'
+                              : 'bg-emerald-500 dark:bg-emerald-500'
                           }`}
                           style={{ width: `${percent}%` }}
                         />
@@ -562,10 +534,7 @@ export default function GroupManagement() {
                         size="sm"
                         icon={Edit2}
                         className="flex-1 justify-center text-xs py-1.5"
-                        onClick={() => {
-                          setSelectedGroup(group);
-                          setIsFormOpen(true);
-                        }}
+                        onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
                       >
                         {t('common.edit', 'Tahrirlash')}
                       </Button>
@@ -594,141 +563,6 @@ export default function GroupManagement() {
           )}
         </div>
       </Card>
-
-      {/* Group Create/Edit Modal */}
-      {isFormOpen && (
-        <GroupForm
-          isOpen={isFormOpen}
-          onClose={() => {
-            setIsFormOpen(false);
-            setSelectedGroup(null);
-          }}
-          group={selectedGroup}
-          onSuccess={fetchGroups}
-        />
-      )}
-
-      {/* Student Create Modal */}
-      <Modal
-        isOpen={isAddStudentOpen}
-        onClose={() => setIsAddStudentOpen(false)}
-        title={t('users.createStudent', 'Yangi o‘quvchi qo‘shish')}
-        subtitle={t('users.createStudentSubtitle', "O'quvchini tizimga kiritish va o'quv guruhiga biriktirish")}
-        size="lg"
-      >
-        <form onSubmit={handleCreateStudent} className="space-y-4">
-          <div className="p-3.5 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 text-xs text-brand-navy dark:text-blue-300">
-            <p className="font-semibold">{t('users.parentsContact', "Ota-onasi bilan bog'lanish")}</p>
-            <p className="text-gray-600 dark:text-gray-400 mt-0.5">
-              {t('users.parentPhoneNote', "Otasining yoki onasining (yoki ikkalasining) telefon raqamini kiriting.")}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label={t('common.firstName', 'Ism')}
-              icon={User}
-              required
-              placeholder="Masalan: Jasur"
-              value={newStudentData.firstName}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, firstName: e.target.value })
-              }
-            />
-            <Input
-              label={t('common.lastName', 'Familiya')}
-              icon={User}
-              required
-              placeholder="Masalan: Rustamov"
-              value={newStudentData.lastName}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, lastName: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label={t('users.fatherPhone', 'Otasining telefon raqami')}
-              icon={Phone}
-              placeholder="+998 90 111 22 33"
-              value={newStudentData.fatherPhone}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, fatherPhone: e.target.value })
-              }
-            />
-            <Input
-              label={t('users.motherPhone', 'Onasining telefon raqami')}
-              icon={Phone}
-              placeholder="+998 90 222 33 44"
-              value={newStudentData.motherPhone}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, motherPhone: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label={t('users.studentPhoneOptional', "O'quvchining shaxsiy telefoni (ixtiyoriy)")}
-              icon={Phone}
-              placeholder="+998 90 333 44 55"
-              value={newStudentData.phone}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, phone: e.target.value })
-              }
-            />
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300">
-                {t('users.assignToGroup', "O'quv guruhiga biriktirish")}
-              </label>
-              <select
-                value={newStudentData.groupId}
-                onChange={(e) =>
-                  setNewStudentData({ ...newStudentData, groupId: e.target.value })
-                }
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              >
-                <option value="">{t('users.unassignedGroup', "Guruhsiz / Keyinroq biriktirish")}</option>
-                {groups.map((grp) => (
-                  <option key={grp.id} value={grp.id}>
-                    {grp.name} ({grp.studentCount || grp.enrolled_count || 0} / {grp.capacity || 20})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-surface-dark-tertiary/30">
-            <PasswordStrengthInput
-              label={t('users.cabinetPassword', 'LMS kabinetga kirish paroli')}
-              required
-              value={newStudentData.password}
-              onValueChange={(val) =>
-                setNewStudentData({ ...newStudentData, password: val })
-              }
-              placeholder="Masalan: Jasur#2026!"
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setIsAddStudentOpen(false)}
-            >
-              {t('common.cancel', 'Bekor qilish')}
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              isLoading={isSubmittingStudent}
-            >
-              {t('common.create', 'Qo‘shish')}
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }

@@ -14,7 +14,7 @@ import {
   Activity,
   PlusCircle,
   FileText,
-  DollarSign,
+  ClipboardCheck,
   AlertCircle,
   RefreshCw,
   ArrowUpRight,
@@ -28,6 +28,11 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import EmptyState from '@/components/ui/EmptyState';
+
+// Dynamic vertical 5-stop gradient for each attendance bar:
+// Eng pasti: qizil (#f43f5e) -> sal teparog'i: sabzirang (#f97316) -> o'rtasi: sariq (#facc15) -> keyin: och yashil (#a3e635) -> eng tepasi: yashil (#10b981)
+const ATTENDANCE_BAR_GRADIENT =
+  'linear-gradient(to top, #f43f5e 0%, #f97316 25%, #facc15 50%, #a3e635 75%, #10b981 100%)';
 
 export default function OwnerDashboard() {
   const { t } = useTranslation();
@@ -88,6 +93,14 @@ export default function OwnerDashboard() {
     loadDashboardData();
   }, [user?.id]);
 
+  useEffect(() => {
+    const handleSync = () => {
+      loadDashboardData(false);
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, []);
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[60vh]">
@@ -102,9 +115,9 @@ export default function OwnerDashboard() {
       title: t('dashboard.totalStudents', 'Jami talabalar'),
       value: stats.totalStudents,
       icon: GraduationCap,
-      color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-500/15 dark:bg-blue-500/20',
-      borderColor: 'hover:border-blue-500/40',
+      color: 'text-blue-600 dark:text-emerald-400',
+      bgColor: 'bg-blue-500/15 dark:bg-emerald-500/20',
+      borderColor: 'hover:border-blue-500/40 dark:hover:border-emerald-500/40',
       trend: t('dashboard.activeStudentsTrend', 'Faol o‘quvchilar'),
       trendUp: true,
       onClick: () => navigate('/owner/users?role=student'),
@@ -113,9 +126,9 @@ export default function OwnerDashboard() {
       title: t('dashboard.totalTeachers', "Jami o'qituvchilar"),
       value: stats.totalTeachers,
       icon: Users,
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bgColor: 'bg-indigo-500/15 dark:bg-indigo-500/20',
-      borderColor: 'hover:border-indigo-500/40',
+      color: 'text-amber-600 dark:text-amber-400',
+      bgColor: 'bg-amber-500/15 dark:bg-amber-500/20',
+      borderColor: 'hover:border-amber-500/40',
       trend: t('dashboard.activeTeachersTrend', 'Guruhlarga biriktirilgan'),
       trendUp: true,
       onClick: () => navigate('/owner/users?role=teacher'),
@@ -146,9 +159,9 @@ export default function OwnerDashboard() {
       title: t('dashboard.activeGroups', 'Faol guruhlar'),
       value: stats.activeGroups,
       icon: CheckCircle2,
-      color: 'text-emerald-600 dark:text-emerald-400',
-      bgColor: 'bg-emerald-500/15 dark:bg-emerald-500/20',
-      borderColor: 'hover:border-emerald-500/40',
+      color: 'text-blue-600 dark:text-emerald-400',
+      bgColor: 'bg-blue-500/15 dark:bg-emerald-500/20',
+      borderColor: 'hover:border-blue-500/40 dark:hover:border-emerald-500/40',
       trend: t('dashboard.operationalTrend', 'Darslar davom etmoqda'),
       trendUp: true,
       onClick: () => navigate('/owner/groups?status=active'),
@@ -168,46 +181,46 @@ export default function OwnerDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Top Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-brand-navy via-brand-navy-light to-blue-900 text-white shadow-xl relative overflow-hidden">
+      {/* Top Welcome Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/35">
         {/* Subtle decorative circles */}
-        <div className="absolute right-0 top-0 -mt-10 -mr-10 w-48 h-48 bg-white/5 rounded-full pointer-events-none blur-2xl" />
-        <div className="absolute right-40 bottom-0 -mb-10 w-32 h-32 bg-brand-red/10 rounded-full pointer-events-none blur-xl" />
+        <div className="absolute right-0 top-0 -mt-10 -mr-10 w-56 h-56 bg-white/10 dark:bg-emerald-400/15 rounded-full pointer-events-none blur-3xl" />
+        <div className="absolute right-40 bottom-0 -mb-10 w-36 h-36 bg-sky-400/10 dark:teal-400/10 rounded-full pointer-events-none blur-2xl" />
 
         <div className="relative z-10 space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/90 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>{t('dashboard.ownerPortal', 'Owner Executive Portal')}</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 dark:bg-emerald-500/20 text-white/95 dark:text-emerald-200 border border-white/20 dark:border-emerald-400/40 backdrop-blur-md text-xs font-semibold uppercase tracking-wider mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-blue-200 dark:text-emerald-300" />
+            <span>{t('dashboard.ownerPortal', 'Boshliq boshqaruv portali')}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {t('dashboard.welcome', { name: userName, defaultValue: `Welcome back, ${userName}` })}
+            {t('dashboard.welcome', { name: userName, defaultValue: `Xush kelibsiz, ${userName}` })}
           </h1>
-          <p className="text-sm text-blue-100/80 max-w-xl">
-            {t('dashboard.ownerBannerSubtitle', 'Here is your daily operational summary across students, courses, schedules, and center performance.')}
+          <p className="text-sm text-blue-100 dark:text-emerald-100/90 max-w-xl">
+            {t('dashboard.ownerBannerSubtitle', "O'quvchilar, kurslar, dars jadvallari va o'quv markazi samaradorligining kunlik hisoboti.")}
           </p>
         </div>
 
-        {/* Action button */}
+        {/* Action buttons */}
         <div className="relative z-10 flex items-center gap-3">
           <button
             type="button"
             onClick={() => loadDashboardData(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur text-sm font-medium transition-colors border border-white/10 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-white dark:text-emerald-100 backdrop-blur text-sm font-medium transition-colors border border-white/15 dark:border-emerald-400/30 disabled:opacity-50 shadow-xs cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">
-              {refreshing ? t('common.refreshing', 'Refreshing...') : t('common.refresh', 'Refresh')}
+              {refreshing ? t('common.refreshing', 'Yangilanmoqda...') : t('common.refresh', 'Yangilash')}
             </span>
           </button>
           <Button
-            onClick={() => navigate('/owner/payroll')}
-            variant="danger"
+            onClick={() => navigate('/owner/attendance')}
+            variant="primary"
             size="md"
-            icon={DollarSign}
-            className="bg-brand-red hover:bg-brand-red-dark text-white shadow-lg"
+            icon={ClipboardCheck}
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-lg font-bold"
           >
-            {t('nav.payroll', 'Payroll Overview')}
+            {t('nav.attendance', 'Davomat')}
           </Button>
         </div>
       </div>
@@ -225,56 +238,51 @@ export default function OwnerDashboard() {
         </div>
       )}
 
-      {/* Quick Action Buttons Row */}
+      {/* Quick Action Buttons Row (Colorful and welcoming) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mr-2 shrink-0">
-          {t('dashboard.quickActions', 'Quick Actions')}:
+          {t('dashboard.quickActions', 'Tezkor amallar')}:
         </span>
-        <Button
+        <button
+          type="button"
           onClick={() => navigate('/owner/users?role=student')}
-          variant="outline"
-          size="sm"
-          icon={PlusCircle}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-500/15 text-blue-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-blue-500/30 dark:border-emerald-500/30 hover:bg-blue-500/25 dark:hover:bg-emerald-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('users.createStudent', "Yangi o'quvchi qo'shish")}
-        </Button>
-        <Button
+          <PlusCircle className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
+          <span>{t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/owner/users?role=teacher')}
-          variant="outline"
-          size="sm"
-          icon={PlusCircle}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('users.createTeacher', "O'qituvchi qo'shish")}
-        </Button>
-        <Button
+          <PlusCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          <span>{t('users.createTeacher', "O'qituvchi qo'shish")}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/owner/groups')}
-          variant="outline"
-          size="sm"
-          icon={PlusCircle}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30 hover:bg-teal-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('groups.createGroup', 'New Group')}
-        </Button>
-        <Button
+          <PlusCircle className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+          <span>{t('groups.createGroup', 'Guruh yaratish')}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/owner/courses')}
-          variant="outline"
-          size="sm"
-          icon={BookOpen}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('nav.courses', 'Courses')}
-        </Button>
-        <Button
+          <BookOpen className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+          <span>{t('nav.courses', 'Kurslar')}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/owner/reports')}
-          variant="outline"
-          size="sm"
-          icon={FileText}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 hover:bg-purple-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('reports.title', 'Generate Reports')}
-        </Button>
+          <FileText className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+          <span>{t('reports.title', 'Hisobotlar')}</span>
+        </button>
       </div>
 
       {/* 6 Stats Cards Grid */}
@@ -301,7 +309,7 @@ export default function OwnerDashboard() {
                 <h3 className="text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1 leading-snug break-words">
                   {item.title}
                 </h3>
-                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium leading-tight">
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-blue-600 dark:text-emerald-400 font-medium leading-tight">
                   <TrendingUp className="w-3 h-3 shrink-0" />
                   <span>{item.trend}</span>
                 </div>
@@ -323,7 +331,7 @@ export default function OwnerDashboard() {
                 onClick={() => navigate('/owner/schedule')}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-brand-navy dark:text-blue-400"
+                className="text-xs text-blue-600 dark:text-emerald-400 hover:text-blue-700 dark:hover:text-emerald-300 font-semibold"
               >
                 {t('dashboard.viewFullSchedule', 'View Full Schedule →')}
               </Button>
@@ -345,7 +353,7 @@ export default function OwnerDashboard() {
                     className="p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-brand-navy dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-emerald-500/20 text-blue-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
@@ -361,7 +369,7 @@ export default function OwnerDashboard() {
                           </span>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {lesson.groupName} &bull; Room: {lesson.room}
+                          {lesson.groupName} &bull; {lesson.room ? `${lesson.room}-xona` : ''}
                         </p>
                       </div>
                     </div>
@@ -375,7 +383,7 @@ export default function OwnerDashboard() {
                         size="sm"
                         className="mt-1"
                       >
-                        {lesson.status}
+                        {lesson.status === 'completed' ? t('common.completed', 'Tugallangan') : t('common.active', 'Faol')}
                       </Badge>
                     </div>
                   </div>
@@ -388,23 +396,35 @@ export default function OwnerDashboard() {
         {/* Weekly Attendance Overview Bar Chart Placeholder (1 col) */}
         <div>
           <Card
-            title={t('dashboard.attendanceOverview', 'Attendance Overview')}
-            subtitle={t('dashboard.attendanceSubtitle', 'Weekly attendance rates across all groups')}
+            title={t('dashboard.attendanceOverview', 'Davomat ko‘rsatkichlari')}
+            subtitle={t('dashboard.attendanceSubtitle', 'Barcha guruhlar bo‘yicha haftalik davomat')}
+            headerAction={
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-500/15 text-blue-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-blue-500/30 dark:border-emerald-500/30 shadow-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-emerald-500 animate-pulse" />
+                92.6% A'lo
+              </span>
+            }
           >
             <div className="space-y-4">
               <div className="h-44 flex items-end justify-between gap-2 pt-6 px-2">
                 {attendanceChart.map((bar, idx) => (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                    <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
+                    <span className="text-[10px] font-bold text-blue-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       {bar.rate}%
                     </span>
                     <div className="w-full bg-gray-100 dark:bg-surface-dark-tertiary rounded-t-lg h-32 relative overflow-hidden flex items-end">
                       <div
-                        className="w-full bg-brand-navy dark:bg-blue-500 rounded-t-md transition-all duration-500 group-hover:bg-brand-red"
-                        style={{ height: `${bar.rate}%` }}
-                      />
+                        className="w-full rounded-t-md transition-all duration-500 group-hover:brightness-110 relative flex flex-col justify-start shadow-md shadow-emerald-500/20"
+                        style={{
+                          height: `${bar.rate}%`,
+                          background: ATTENDANCE_BAR_GRADIENT,
+                        }}
+                      >
+                        {/* Bright top cap highlight (glowing light green) */}
+                        <div className="h-1 w-full bg-emerald-200 dark:bg-emerald-300 rounded-t-md opacity-90 shadow-sm" />
+                      </div>
                     </div>
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                       {bar.day}
                     </span>
                   </div>
@@ -412,12 +432,19 @@ export default function OwnerDashboard() {
               </div>
 
               <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-brand-navy dark:bg-blue-500" />
-                  Target: 90%+
+                <span className="flex items-center gap-1.5 font-medium text-blue-700 dark:text-emerald-300">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-emerald-500 shadow-sm" />
+                  {t('dashboard.targetRate', 'Maqsad: 90%+')}
                 </span>
                 <span className="font-semibold text-gray-900 dark:text-white">
-                  Avg. Rate: 92.6%
+                  {t('dashboard.avgRate', 'O‘rtacha ko‘rsatkich:')}{' '}
+                  {attendanceChart.length > 0
+                    ? (
+                        attendanceChart.reduce((acc, curr) => acc + Number(curr.rate || 0), 0) /
+                        attendanceChart.length
+                      ).toFixed(1)
+                    : '92.6'}
+                  %
                 </span>
               </div>
             </div>
@@ -430,16 +457,6 @@ export default function OwnerDashboard() {
         <Card
           title={t('dashboard.recentActivity', 'Recent Activity Feed')}
           subtitle={t('dashboard.activitySubtitle', 'System audit events, user activations, and enrollments')}
-          headerAction={
-            <Button
-              onClick={() => navigate('/owner/audit')}
-              variant="ghost"
-              size="sm"
-              className="text-xs text-brand-navy dark:text-blue-400"
-            >
-              {t('dashboard.viewAuditLogs', 'View Audit Logs →')}
-            </Button>
-          }
         >
           {recentActivity.length === 0 ? (
             <EmptyState
@@ -452,10 +469,10 @@ export default function OwnerDashboard() {
               {recentActivity.map((act) => (
                 <div
                   key={act.id}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-surface-dark-tertiary/20 hover:border-gray-200 dark:hover:border-gray-700 transition-colors"
+                  className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-surface-dark-tertiary/20 hover:border-blue-500/20 dark:hover:border-emerald-500/30 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-brand-navy dark:text-blue-300 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/15 dark:bg-emerald-500/20 text-blue-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                       <Activity className="w-4 h-4" />
                     </div>
                     <div>

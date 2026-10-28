@@ -203,7 +203,7 @@ export default function PayrollPage() {
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -303,7 +303,64 @@ export default function PayrollPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile View for Staff Rules */}
+          <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+            {loading ? (
+              <div className="py-12 text-center text-gray-500">
+                <LoadingSpinner size="md" />
+                <p className="mt-2 text-xs">{t('payroll.loadingRules')}</p>
+              </div>
+            ) : rules.length === 0 ? (
+              <div className="py-10">
+                <EmptyState
+                  icon={Users}
+                  title={t('payroll.noRulesTitle')}
+                  description={t('payroll.noRulesDesc')}
+                  actionText={t('payroll.createFirstRule')}
+                  onAction={() => {
+                    setEditingRule(null);
+                    setRuleModalOpen(true);
+                  }}
+                />
+              </div>
+            ) : (
+              rules.map((rule) => (
+                <div key={rule.id} className="p-4 bg-white dark:bg-surface-dark-secondary rounded-xl mb-3 border border-gray-100 dark:border-gray-800 shadow-sm space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{rule.staffName}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{rule.staffEmail}</div>
+                    </div>
+                    <Badge variant="primary" size="sm">{t('roles.' + rule.staffRole, { defaultValue: rule.staffRole })}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-xs bg-gray-50 dark:bg-surface-dark-tertiary p-2 rounded-lg">
+                    <span className="capitalize text-gray-600 dark:text-gray-400">
+                      {rule.method ? rule.method.replace('_', ' ') : t('payroll.fixedMonthly')}
+                    </span>
+                    <span className="font-bold text-brand-navy dark:text-blue-400 text-sm">
+                      {formatCurrency(rule.rate)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{formatDate(rule.effectiveDate)}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={Edit2}
+                      onClick={() => {
+                        setEditingRule(rule);
+                        setRuleModalOpen(true);
+                      }}
+                    >
+                      {t('common.edit')}
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left rtl:text-right text-sm">
               <thead className="bg-gray-50 dark:bg-surface-dark-tertiary text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                 <tr>
@@ -391,7 +448,70 @@ export default function PayrollPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile View for Periods */}
+          <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+            {loading ? (
+              <div className="py-12 text-center text-gray-500">
+                <LoadingSpinner size="md" />
+                <p className="mt-2 text-xs">{t('payroll.loadingPeriods')}</p>
+              </div>
+            ) : periods.length === 0 ? (
+              <div className="py-10">
+                <EmptyState
+                  icon={Calendar}
+                  title={t('payroll.noPeriodsTitle')}
+                  description={t('payroll.noPeriodsDesc')}
+                  actionText={t('payroll.createPeriod')}
+                  onAction={() => setPeriodModalOpen(true)}
+                />
+              </div>
+            ) : (
+              periods.map((period) => (
+                <div key={period.id} className="p-4 bg-white dark:bg-surface-dark-secondary rounded-xl mb-3 border border-gray-100 dark:border-gray-800 shadow-sm space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{period.name}</div>
+                    <Badge variant={period.status === 'closed' ? 'secondary' : 'success'}>
+                      {period.status === 'closed' ? t('payroll.closed') : t('payroll.open')}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-surface-dark-tertiary p-2 rounded-lg">
+                    <div>
+                      <span className="text-[10px] uppercase text-gray-400 block">{t('payroll.startDate')}</span>
+                      <span>{formatDate(period.startDate)}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase text-gray-400 block">{t('payroll.endDate')}</span>
+                      <span>{formatDate(period.endDate)}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPeriodId(period.id);
+                        setActiveTab('calculations');
+                      }}
+                    >
+                      {t('payroll.viewCalcs')}
+                    </Button>
+                    {period.status !== 'closed' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleClosePeriod(period.id)}
+                        isLoading={actionLoading}
+                      >
+                        {t('payroll.closePeriod')}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left rtl:text-right text-sm">
               <thead className="bg-gray-50 dark:bg-surface-dark-tertiary text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                 <tr>
@@ -480,20 +600,17 @@ export default function PayrollPage() {
           <Card>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="w-full sm:w-72">
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-                  {t('payroll.selectPeriod')}
-                </label>
-                <select
+                <Select
+                  label={t('payroll.selectPeriod')}
+                  options={periods.map((p) => ({
+                    value: p.id,
+                    label: p.name,
+                    badge: p.status === 'closed' ? t('payroll.closed') : t('payroll.open'),
+                  }))}
                   value={selectedPeriodId}
                   onChange={(e) => setSelectedPeriodId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                >
-                  {periods.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.status === 'closed' ? t('payroll.closed') : t('payroll.open')})
-                    </option>
-                  ))}
-                </select>
+                  color="blue"
+                />
               </div>
 
               <div className="flex items-center gap-3">
@@ -508,7 +625,57 @@ export default function PayrollPage() {
           </Card>
 
           <Card noPadding>
-            <div className="overflow-x-auto">
+            {/* Mobile View for Calculations */}
+            <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+              {calcLoading ? (
+                <div className="py-12 text-center text-gray-500">
+                  <LoadingSpinner size="md" />
+                  <p className="mt-2 text-xs">{t('payroll.computingTotals')}</p>
+                </div>
+              ) : calculations.length === 0 ? (
+                <div className="py-10">
+                  <EmptyState
+                    icon={DollarSign}
+                    title={t('payroll.noCalcsTitle')}
+                    description={t('payroll.noCalcsDesc')}
+                  />
+                </div>
+              ) : (
+                calculations.map((c) => (
+                  <div key={c.staffId} className="p-4 bg-white dark:bg-surface-dark-secondary rounded-xl mb-3 border border-gray-100 dark:border-gray-800 shadow-sm space-y-2.5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{c.staffName}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{c.staffEmail}</div>
+                      </div>
+                      <span className="capitalize text-xs font-medium text-gray-700 dark:text-gray-300">
+                        {c.method?.replace('_', ' ')}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs bg-gray-50 dark:bg-surface-dark-tertiary p-2 rounded-lg text-center">
+                      <div>
+                        <span className="text-[10px] text-gray-500 block">{t('payroll.baseSalary')}</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(c.baseSalary)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-emerald-600 block">{t('payroll.bonus')}</span>
+                        <span className="font-medium text-emerald-600">+{formatCurrency(c.bonus)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-brand-red block">{t('payroll.deduction')}</span>
+                        <span className="font-medium text-brand-red">-{formatCurrency(c.deductions)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs pt-1">
+                      <span className="font-medium text-gray-600 dark:text-gray-400">{t('payroll.netSalary')}:</span>
+                      <span className="font-bold text-brand-navy dark:text-blue-400 text-base">{formatCurrency(c.netSalary)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left rtl:text-right text-sm">
                 <thead className="bg-gray-50 dark:bg-surface-dark-tertiary text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                   <tr>
@@ -580,7 +747,61 @@ export default function PayrollPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile View for Payments */}
+          <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+            {calcLoading ? (
+              <div className="py-12 text-center text-gray-500">
+                <LoadingSpinner size="md" />
+                <p className="mt-2 text-xs">{t('payroll.loadingPeriods')}</p>
+              </div>
+            ) : payments.length === 0 ? (
+              <div className="py-10">
+                <EmptyState
+                  icon={CreditCard}
+                  title={t('payroll.noPayroll')}
+                  description={t('tuition.noPayments')}
+                />
+              </div>
+            ) : (
+              payments.map((p) => (
+                <div key={p.id} className="p-4 bg-white dark:bg-surface-dark-secondary rounded-xl mb-3 border border-gray-100 dark:border-gray-800 shadow-sm space-y-2.5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{p.staffName}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{p.staffEmail}</div>
+                    </div>
+                    <Badge variant={p.status === 'paid' ? 'success' : 'warning'}>
+                      {p.status === 'paid' ? t('payroll.paid') : t('payroll.unpaid')}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-xs bg-gray-50 dark:bg-surface-dark-tertiary p-2 rounded-lg">
+                    <span className="text-gray-600 dark:text-gray-400">{p.paymentMethod || 'Naqd pul'}</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100 text-base">{formatCurrency(p.netSalary)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="text-gray-500">{p.paidAt ? formatDate(p.paidAt) : '-'}</span>
+                    {p.status !== 'paid' ? (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        icon={CheckCircle}
+                        onClick={() => handleMarkAsPaid(p.id)}
+                        isLoading={actionLoading}
+                      >
+                        {t('payroll.markPaid')}
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" /> {t('payroll.settled')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left rtl:text-right text-sm">
               <thead className="bg-gray-50 dark:bg-surface-dark-tertiary text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                 <tr>

@@ -45,8 +45,8 @@ export default function EmojiPicker({ onEmojiSelect, onClose, isOpen }) {
   return (
     <div
       ref={pickerRef}
-      className={`absolute bottom-full mb-3 z-50 shadow-2xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${
-        isRtl ? 'right-2 md:right-4' : 'left-2 md:left-4'
+      className={`fixed sm:absolute bottom-20 sm:bottom-full left-4 sm:left-0 sm:mb-3 z-50 shadow-2xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-w-[calc(100vw-2rem)] ${
+        isRtl ? 'sm:right-0 sm:left-auto' : 'sm:left-0'
       }`}
     >
       <EmojiPickerReact
@@ -55,8 +55,8 @@ export default function EmojiPicker({ onEmojiSelect, onClose, isOpen }) {
         searchPlaceHolder="Search emoji..."
         lazyLoadEmojis
         previewConfig={{ showPreview: false }}
-        width={340}
-        height={380}
+        width={typeof window !== 'undefined' && window.innerWidth < 360 ? 280 : 320}
+        height={360}
       />
     </div>
   );

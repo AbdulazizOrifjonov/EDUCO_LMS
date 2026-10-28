@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
+import Select from '@/components/ui/Select';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from '@/components/ui/Toast';
 import {
@@ -153,7 +154,7 @@ export default function MaterialsPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -188,29 +189,38 @@ export default function MaterialsPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          <select
+          <Select
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          >
-            <option value="all">{t('groups.allGroups', 'All Cohort Groups')}</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
+            placeholder={t('groups.allGroups', 'Barcha o‘quv guruhlari')}
+            headerTitle={t('groups.title', 'Guruh bo‘yicha')}
+            icon={Users}
+            size="sm"
+            options={[
+              { value: 'all', label: t('groups.allGroups', 'Barcha o‘quv guruhlari') },
+              ...groups.map((g) => ({
+                value: g.id,
+                label: g.name,
+                subtitle: g.courseName || 'Kurs fani',
+                color: g.courseColor || '#123D78',
+              })),
+            ]}
+          />
 
-          <select
+          <Select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          >
-            <option value="all">{t('materials.allTypes', 'All Media Types')}</option>
-            <option value="pdf">{t('materials.pdfDocs', 'PDF Documents')}</option>
-            <option value="video">{t('materials.videoLectures', 'Video Lectures')}</option>
-            <option value="zip">{t('materials.zipArchives', 'Archive / ZIP Files')}</option>
-          </select>
+            placeholder={t('materials.allTypes', 'Barcha fayl turlari')}
+            headerTitle={t('materials.title', 'Fayl formati')}
+            icon={FolderArchive}
+            size="sm"
+            options={[
+              { value: 'all', label: t('materials.allTypes', 'Barcha fayl turlari') },
+              { value: 'pdf', label: t('materials.pdfDocs', 'PDF Hujjatlar'), subtitle: 'Darslik va qo‘llanmalar', color: '#ef4444' },
+              { value: 'video', label: t('materials.videoLectures', 'Video Darslar'), subtitle: 'Yozib olingan darslar', color: '#3b82f6' },
+              { value: 'zip', label: t('materials.zipArchives', 'ZIP Arxivlar'), subtitle: 'Loyiha fayllari', color: '#f59e0b' },
+            ]}
+          />
         </div>
       </Card>
 
@@ -306,22 +316,22 @@ export default function MaterialsPage() {
             onChange={(e) => setNewTitle(e.target.value)}
           />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-              {t('groups.group', 'Target Cohort Group')} <span className="text-brand-red">*</span>
-            </label>
-            <select
-              value={newGroupId}
-              onChange={(e) => setNewGroupId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label={t('groups.group', 'O‘quv guruhi')}
+            required
+            value={newGroupId}
+            onChange={(e) => setNewGroupId(e.target.value)}
+            placeholder={t('groups.selectGroup', 'Guruhni tanlang')}
+            headerTitle={t('groups.title', 'O‘quv guruhlari')}
+            icon={Users}
+            size="sm"
+            options={groups.map((g) => ({
+              value: g.id,
+              label: g.name,
+              subtitle: g.courseName || 'Kurs fani',
+              color: g.courseColor || '#123D78',
+            }))}
+          />
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">

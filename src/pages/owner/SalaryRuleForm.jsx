@@ -85,65 +85,30 @@ export default function SalaryRuleForm({ initialData, onSubmit, onCancel, isLoad
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <div>
-        <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-          {t('payroll.staffMember')} <span className="text-brand-red">*</span>
-        </label>
-        <select
-          {...register('staff_id')}
-          disabled={loadingStaff || Boolean(initialData?.staffId)}
-          className={`
-            w-full rounded-lg border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm
-            px-3.5 py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1
-            dark:focus:ring-offset-surface-dark
-            ${
-              errors.staff_id
-                ? 'border-brand-red focus:border-brand-red focus:ring-brand-red'
-                : 'border-gray-300 dark:border-gray-600 focus:border-brand-navy focus:ring-brand-navy'
-            }
-          `}
-        >
-          <option value="" disabled>
-            {loadingStaff ? t('payroll.loadingStaff') : t('payroll.selectStaff')}
-          </option>
-          {staffOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        {errors.staff_id && (
-          <p className="text-xs text-brand-red mt-1">{errors.staff_id.message}</p>
-        )}
-      </div>
+      <Select
+        label={t('payroll.staffMember')}
+        required
+        options={[
+          { value: '', label: loadingStaff ? t('payroll.loadingStaff') : t('payroll.selectStaff') },
+          ...staffOptions,
+        ]}
+        value={watch('staff_id') || ''}
+        onChange={(e) => setValue('staff_id', e.target.value, { shouldValidate: true })}
+        disabled={loadingStaff || Boolean(initialData?.staffId)}
+        error={errors.staff_id?.message}
+        color="blue"
+        searchable
+      />
 
-      <div>
-        <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-          {t('payroll.method')} <span className="text-brand-red">*</span>
-        </label>
-        <select
-          {...register('method')}
-          className={`
-            w-full rounded-lg border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm
-            px-3.5 py-2 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1
-            dark:focus:ring-offset-surface-dark
-            ${
-              errors.method
-                ? 'border-brand-red focus:border-brand-red focus:ring-brand-red'
-                : 'border-gray-300 dark:border-gray-600 focus:border-brand-navy focus:ring-brand-navy'
-            }
-          `}
-        >
-          {methodOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        {errors.method && (
-          <p className="text-xs text-brand-red mt-1">{errors.method.message}</p>
-        )}
-      </div>
+      <Select
+        label={t('payroll.method')}
+        required
+        options={methodOptions}
+        value={watch('method') || 'fixed_monthly'}
+        onChange={(e) => setValue('method', e.target.value, { shouldValidate: true })}
+        error={errors.method?.message}
+        color="emerald"
+      />
 
       <div>
         <Input

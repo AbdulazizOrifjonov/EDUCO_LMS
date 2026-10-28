@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { Button, Card, Badge, Input, EmptyState, LoadingSpinner } from '@/components/ui';
+import Select from '@/components/ui/Select';
 import { getAuditLogs } from '@/services/auditService';
 import { formatDate } from '@/utils/csvExport';
 
@@ -111,7 +112,7 @@ export default function AuditLogPage() {
   };
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -150,27 +151,24 @@ export default function AuditLogPage() {
             />
           </div>
 
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1.5">
-              {t('audit.actionCategory')}
-            </label>
-            <select
-              value={actionFilter}
-              onChange={(e) => {
-                setActionFilter(e.target.value);
-                setPage(1);
-              }}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary px-3.5 py-2 text-sm text-gray-900 dark:text-gray-100"
-            >
-              <option value="ALL">{t('audit.allActions')}</option>
-              <option value="RECORD_PAYMENT">RECORD_PAYMENT</option>
-              <option value="CREATE_SALARY_RULE">CREATE_SALARY_RULE</option>
-              <option value="MARK_SALARY_PAID">MARK_SALARY_PAID</option>
-              <option value="UPDATE_SETTINGS">UPDATE_SETTINGS</option>
-              <option value="UPDATE_PROFILE">UPDATE_PROFILE</option>
-              <option value="CHANGE_PASSWORD">CHANGE_PASSWORD</option>
-            </select>
-          </div>
+          <Select
+            label={t('audit.actionCategory')}
+            options={[
+              { value: 'ALL', label: t('audit.allActions') },
+              { value: 'RECORD_PAYMENT', label: 'RECORD_PAYMENT' },
+              { value: 'CREATE_SALARY_RULE', label: 'CREATE_SALARY_RULE' },
+              { value: 'MARK_SALARY_PAID', label: 'MARK_SALARY_PAID' },
+              { value: 'UPDATE_SETTINGS', label: 'UPDATE_SETTINGS' },
+              { value: 'UPDATE_PROFILE', label: 'UPDATE_PROFILE' },
+              { value: 'CHANGE_PASSWORD', label: 'CHANGE_PASSWORD' },
+            ]}
+            value={actionFilter}
+            onChange={(e) => {
+              setActionFilter(e.target.value);
+              setPage(1);
+            }}
+            color="blue"
+          />
 
           <div>
             <Input
@@ -209,7 +207,67 @@ export default function AuditLogPage() {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile View: Clean responsive cards */}
+        <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800 p-2">
+          {loading ? (
+            <div className="py-12 text-center text-gray-500">
+              <LoadingSpinner size="md" />
+              <p className="mt-2 text-xs">{t('audit.loadingAudit')}</p>
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="py-10">
+              <EmptyState
+                icon={ShieldAlert}
+                title={t('audit.noAuditTitle')}
+                description={t('audit.noAuditDesc')}
+              />
+            </div>
+          ) : (
+            logs.map((log) => {
+              const userDetail = log.profiles || {};
+              return (
+                <div key={log.id} className="p-4 bg-white dark:bg-surface-dark-secondary rounded-xl mb-3 border border-gray-100 dark:border-gray-800 shadow-sm space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    {getActionBadge(log.action)}
+                    <span className="font-mono text-[11px] text-gray-500 dark:text-gray-400">
+                      {formatDate(log.created_at, 'en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <span className="font-medium text-gray-900 dark:text-gray-100 block">
+                        {userDetail.full_name || 'System / Service'}
+                      </span>
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                        {userDetail.email || (log.user_id ? log.user_id.slice(0, 8) : 'Automated')}
+                      </span>
+                    </div>
+                    {log.target && (
+                      <span className="font-mono text-[11px] bg-gray-100 dark:bg-surface-dark-tertiary px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">
+                        {log.target}
+                      </span>
+                    )}
+                  </div>
+
+                  {log.details && (
+                    <div className="text-[11px] font-mono text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-surface-dark-tertiary p-2 rounded-lg break-all">
+                      {typeof log.details === 'object' ? JSON.stringify(log.details) : String(log.details)}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop View: Full Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left rtl:text-right text-sm">
             <thead className="bg-gray-50 dark:bg-surface-dark-tertiary text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
               <tr>

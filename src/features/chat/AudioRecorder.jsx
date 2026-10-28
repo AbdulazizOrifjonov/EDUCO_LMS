@@ -270,17 +270,17 @@ export default function AudioRecorder({ onRecordingComplete, onCancel }) {
   }
 
   return (
-    <div className="flex items-center justify-between w-full p-2.5 px-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm">
+    <div className="flex items-center justify-between w-full max-w-full p-2 sm:p-2.5 px-3 sm:px-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm min-w-0 overflow-hidden">
       {/* Recording State */}
       {isRecording ? (
-        <div className="flex items-center space-x-3 rtl:space-x-reverse flex-1">
-          <div className="flex items-center space-x-2 rtl:space-x-reverse text-red-600 dark:text-red-400 font-mono font-medium text-sm">
-            <span className="w-3 h-3 rounded-full bg-red-600 animate-ping inline-block" />
-            <Mic className="w-4 h-4 text-red-600" />
+        <div className="flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse flex-1 min-w-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 rtl:space-x-reverse text-red-600 dark:text-red-400 font-mono font-medium text-xs sm:text-sm shrink-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping inline-block" />
+            <Mic className="w-3.5 h-3.5 text-red-600" />
             <span>{formatSeconds(recordDuration)}</span>
           </div>
 
-          <div className="flex-1 flex items-center justify-center space-x-1 rtl:space-x-reverse h-6 overflow-hidden max-w-xs">
+          <div className="hidden sm:flex flex-1 items-center justify-center space-x-1 rtl:space-x-reverse h-6 overflow-hidden max-w-xs">
             <span className="w-1 h-3 bg-red-500 rounded-full animate-pulse" />
             <span className="w-1 h-5 bg-red-500 rounded-full animate-pulse delay-75" />
             <span className="w-1 h-2 bg-red-500 rounded-full animate-pulse delay-150" />

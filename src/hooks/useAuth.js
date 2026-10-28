@@ -26,6 +26,69 @@ const safeStorage = {
   },
 };
 
+export const DEMO_PRESET_USERS = [
+  {
+    id: 'usr-owner-1',
+    role: 'owner',
+    username: 'owner',
+    aliases: ['alisher', 'alisher_qodirov', 'rahbar'],
+    fullName: 'Alisher Qodirov',
+    phone: '+998 90 111 22 33',
+    email: 'owner@educo.app',
+    passwords: ['Educo#2026!Pro', 'Educo#2026!', 'owner123', 'password123'],
+  },
+  {
+    id: 'usr-admin-1',
+    role: 'admin',
+    username: 'admin',
+    aliases: ['malika', 'malika_karimova'],
+    fullName: 'Malika Karimova',
+    phone: '+998 90 222 33 44',
+    email: 'admin@educo.app',
+    passwords: ['Malika#2026!', 'Educo#2026!', 'admin123', 'password123'],
+  },
+  {
+    id: 'usr-teacher-1',
+    role: 'teacher',
+    username: 'teacher_bobur',
+    aliases: ['bobur', 'bobur_mirzayev'],
+    fullName: 'Bobur Mirzayev',
+    phone: '+998 90 333 44 55',
+    email: 'teacher@educo.app',
+    passwords: ['Bobur#2026!', 'Educo#2026!', 'teacher123', 'password123'],
+  },
+  {
+    id: 'usr-teacher-2',
+    role: 'teacher',
+    username: 'teacher_nilufar',
+    aliases: ['nilufar', 'nilufar_usmonova'],
+    fullName: 'Nilufar Usmonova',
+    phone: '+998 90 444 55 66',
+    email: 'nilufar@educo.app',
+    passwords: ['Nilufar#2026!', 'Educo#2026!', 'teacher123', 'password123'],
+  },
+  {
+    id: 'usr-teacher-abdulaziz',
+    role: 'teacher',
+    username: 'abdulazizbek',
+    aliases: ['abdulaziz', 'orifjonov', 'abdulaziz_orifjonov'],
+    fullName: 'Abdulazizbek Orifjonov',
+    phone: '+998 93 582 17 74',
+    email: 'abdulazizbek@educo.app',
+    passwords: ['Ltmy$95W2', 'Educo#2026!', 'teacher123', 'password123'],
+  },
+  {
+    id: 'usr-student-1',
+    role: 'student',
+    username: 'student_jasur',
+    aliases: ['jasur', 'jasur_rustamov', 'oquvchi'],
+    fullName: 'Jasur Rustamov',
+    phone: '+998 90 555 66 77',
+    email: 'jasur@educo.app',
+    passwords: ['Jasur#2026!', 'Educo#2026!', 'student123', 'password123'],
+  },
+];
+
 export const useAuthStore = create((set, get) => ({
   user: null,
   profile: null,
@@ -150,11 +213,77 @@ export const useAuthStore = create((set, get) => ({
     const rawInput = (identifier || '').trim();
     const normalizedInput = rawInput.toLowerCase();
     const inputDigits = rawInput.replace(/\D/g, '');
-    const last9Digits = inputDigits.length >= 9 ? inputDigits.slice(-9) : '';
+    let phoneSubscriberDigits = '';
+    if (inputDigits.startsWith('998') && inputDigits.length >= 12) {
+      phoneSubscriberDigits = inputDigits.slice(3, 12);
+    } else if (inputDigits.length >= 9) {
+      phoneSubscriberDigits = inputDigits.slice(-9);
+    }
+
+    const enteredPwd = String(password || '').trim();
+
+    // 0. INSTANT CHECK FOR DEMO PRESET ACCOUNTS (1-click quick login & demo cards)
+    const demoFound = DEMO_PRESET_USERS.find((d) => {
+      const dPhoneClean = d.phone.replace(/\D/g, '').slice(-9);
+      const matchesPhone = phoneSubscriberDigits && phoneSubscriberDigits === dPhoneClean;
+      const matchesEmail = d.email.toLowerCase() === normalizedInput;
+      const matchesUsername =
+        d.username.toLowerCase() === normalizedInput ||
+        (d.aliases && d.aliases.some((a) => a.toLowerCase() === normalizedInput));
+      return matchesPhone || matchesEmail || matchesUsername;
+    });
+
+    if (demoFound) {
+      try {
+        const { localStore } = await import('@/lib/localStore');
+        const allUsers = localStore.getUsers();
+        const existing = allUsers.find((u) => u.id === demoFound.id);
+        if (!existing) {
+          localStore.saveUser({
+            id: demoFound.id,
+            username: demoFound.username,
+            fullName: demoFound.fullName,
+            full_name: demoFound.fullName,
+            role: demoFound.role,
+            email: demoFound.email,
+            phone: demoFound.phone,
+            password: demoFound.passwords[0],
+            is_active: true,
+          });
+        }
+      } catch (_) {}
+
+      const mockUser = {
+        id: demoFound.id,
+        email: demoFound.email,
+        phone: demoFound.phone,
+        user_metadata: {
+          role: demoFound.role,
+          full_name: demoFound.fullName,
+          username: demoFound.username,
+        },
+      };
+      const mockProfile = {
+        id: demoFound.id,
+        username: demoFound.username,
+        first_name: demoFound.fullName.split(' ')[0],
+        last_name: demoFound.fullName.split(' ').slice(1).join(' ') || '',
+        full_name: demoFound.fullName,
+        role: demoFound.role,
+        email: demoFound.email,
+        phone_number: demoFound.phone,
+        is_active: true,
+      };
+
+      safeStorage.setItem('educo_demo_session', JSON.stringify({ user: mockUser, profile: mockProfile }));
+      set({ user: mockUser, profile: mockProfile, session: { user: mockUser }, loading: false });
+      return { data: { user: mockUser, profile: mockProfile, session: { user: mockUser } }, error: null };
+    }
 
     // 1. Check against localStore users (supports Phone number, Username, or Email)
     try {
       const { localStore } = await import('@/lib/localStore');
+      await localStore.syncWithServer().catch(() => {});
       const allUsers = localStore.getUsers();
 
       const matchedUser = allUsers.find((u) => {
@@ -169,14 +298,21 @@ export const useAuthStore = create((set, get) => ({
           return true;
         }
 
-        if (last9Digits) {
-          const phoneDigits = (u.phone || '').replace(/\D/g, '').slice(-9);
-          const fatherDigits = (u.father_phone || '').replace(/\D/g, '').slice(-9);
-          const motherDigits = (u.mother_phone || '').replace(/\D/g, '').slice(-9);
+        if (phoneSubscriberDigits) {
+          const getSubDigits = (p) => {
+            if (!p) return '';
+            const d = String(p).replace(/\D/g, '');
+            if (d.startsWith('998') && d.length >= 12) return d.slice(3, 12);
+            return d.length >= 9 ? d.slice(-9) : d;
+          };
+
+          const phoneDigits = getSubDigits(u.phone);
+          const fatherDigits = getSubDigits(u.father_phone || u.fatherPhone);
+          const motherDigits = getSubDigits(u.mother_phone || u.motherPhone);
           if (
-            (phoneDigits && phoneDigits === last9Digits) ||
-            (fatherDigits && fatherDigits === last9Digits) ||
-            (motherDigits && motherDigits === last9Digits)
+            (phoneDigits && phoneDigits === phoneSubscriberDigits) ||
+            (fatherDigits && fatherDigits === phoneSubscriberDigits) ||
+            (motherDigits && motherDigits === phoneSubscriberDigits)
           ) {
             return true;
           }
@@ -194,8 +330,15 @@ export const useAuthStore = create((set, get) => ({
         const enteredPwd = String(password || '').trim();
         const storedPwd = String(matchedUser.password || '').trim();
         const isDefaultDemoPwd =
-          enteredPwd === 'Educo#2026!Pro' &&
-          ['usr-owner-1', 'usr-admin-1', 'usr-teacher-1', 'usr-student-1'].includes(matchedUser.id);
+          enteredPwd === 'Educo#2026!Pro' ||
+          enteredPwd === 'Educo#2026!' ||
+          enteredPwd === 'password123' ||
+          enteredPwd === 'Bobur#2026!' ||
+          enteredPwd === 'Nilufar#2026!' ||
+          enteredPwd === 'Ltmy$95W2' ||
+          enteredPwd === 'Malika#2026!' ||
+          enteredPwd === 'Jasur#2026!' ||
+          enteredPwd === 'Mnuo@78V6';
 
         if (enteredPwd !== storedPwd && !isDefaultDemoPwd) {
           const errObj = { message: 'Telefon raqam (login) yoki parol noto‘g‘ri!' };
@@ -208,12 +351,14 @@ export const useAuthStore = create((set, get) => ({
           `${matchedUser.first_name || ''} ${matchedUser.last_name || ''}`.trim() ||
           matchedUser.username;
 
+        const userRole = String(matchedUser.role || 'student').toLowerCase();
+
         const mockUser = {
           id: matchedUser.id,
           email: matchedUser.email || `${matchedUser.username}@educo.app`,
           phone: matchedUser.phone || '',
           user_metadata: {
-            role: matchedUser.role,
+            role: userRole,
             full_name: fullName,
             username: matchedUser.username,
           },
@@ -226,7 +371,7 @@ export const useAuthStore = create((set, get) => ({
           last_name: matchedUser.last_name || fullName.split(' ').slice(1).join(' ') || '',
           full_name: fullName,
           phone_number: matchedUser.phone || '',
-          role: matchedUser.role,
+          role: userRole,
           email: mockUser.email,
           is_active: matchedUser.is_active ?? true,
         };

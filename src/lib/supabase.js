@@ -109,6 +109,8 @@ function createMockTable(tableName) {
         rows = localStore.getAttendance();
       } else if (tableName === 'announcements') {
         rows = localStore.getAnnouncements();
+      } else if (tableName === 'notifications') {
+        rows = localStore.getNotifications();
       } else {
         rows = [];
       }
@@ -129,6 +131,8 @@ function createMockTable(tableName) {
             saved.push(localStore.saveGrade(item));
           } else if (tableName === 'student_attendance') {
             saved.push(localStore.saveAttendance(item));
+          } else if (tableName === 'notifications') {
+            saved.push(localStore.saveNotification(item));
           } else {
             saved.push({ id: `mock-${Date.now()}-${Math.random()}`, ...item });
           }
@@ -140,6 +144,10 @@ function createMockTable(tableName) {
       if (operation === 'update') {
         if (tableName === 'lesson_schedules') {
           localStore.saveSchedule(payload);
+        } else if (tableName === 'notifications') {
+          if (payload?.is_read) {
+            localStore.markAllNotificationsRead();
+          }
         }
         return { data: payload, count: 1, error: null };
       }

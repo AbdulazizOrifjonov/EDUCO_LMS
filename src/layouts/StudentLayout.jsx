@@ -6,8 +6,6 @@ import {
   Calendar,
   Award,
   CheckSquare,
-  FileText,
-  FolderOpen,
   MessageSquare,
   Bell,
   Settings,
@@ -44,18 +42,6 @@ const STUDENT_NAV_ITEMS = [
     label: 'Attendance',
     path: '/student/attendance',
     icon: CheckSquare,
-  },
-  {
-    labelKey: 'nav.homework',
-    label: 'Homework',
-    path: '/student/homework',
-    icon: FileText,
-  },
-  {
-    labelKey: 'nav.materials',
-    label: 'Materials',
-    path: '/student/materials',
-    icon: FolderOpen,
   },
   {
     labelKey: 'nav.chat',

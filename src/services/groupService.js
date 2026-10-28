@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { localStore } from '@/lib/localStore';
+import { fileToCompressedDataUrl } from '@/services/settingsService';
 
 const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
 
@@ -88,7 +89,10 @@ export async function getGroups({
             ...g,
             courseName: g.courses?.name || 'Unassigned Course',
             courseCode: g.courses?.code || '',
-            courseColor: g.courses?.color || '#123D78',
+            courseColor: g.courses?.color || '#064e3b',
+            monthly_price: Number(g.monthly_price || g.courses?.monthly_fee || 0),
+            avatar_url: g.avatar_url || g.image_url || null,
+            image_url: g.image_url || g.avatar_url || null,
             studentCount: activeStudents.length,
             capacity: g.capacity || 20,
             primaryTeacher: primaryTeacher
@@ -135,14 +139,23 @@ export async function getGroups({
 
   if (search && search.trim()) {
     const q = search.trim().toLowerCase();
-    list = list.filter((g) => g.name.toLowerCase().includes(q) || (g.room && g.room.toLowerCase().includes(q)));
+    list = list.filter(
+      (g) =>
+        (g.name || '').toLowerCase().includes(q) ||
+        (g.code || '').toLowerCase().includes(q) ||
+        (g.course_name || '').toLowerCase().includes(q) ||
+        (g.teacher_name || '').toLowerCase().includes(q) ||
+        (g.room && g.room.toLowerCase().includes(q))
+    );
   }
 
   const from = (page - 1) * limit;
   const paginated = list.slice(from, from + limit).map((g) => ({
     ...g,
+    avatar_url: g.avatar_url || g.image_url || null,
+    image_url: g.image_url || g.avatar_url || null,
     courseName: g.course_name || 'Frontend React',
-    courseColor: '#123D78',
+    courseColor: '#064e3b',
     studentCount: g.enrolled_count || 0,
     primaryTeacher: g.teacher_name ? { fullName: g.teacher_name } : null,
   }));
@@ -164,19 +177,70 @@ export async function getGroupById(id) {
   const found = groups.find((g) => g.id === id);
   if (found) {
     const allUsers = localStore.getUsers();
+    const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+    const groupMemberIds = memberships
+      .filter((m) => m.group_id === id && m.is_active !== false)
+      .map((m) => localStore.normalizeUserId(m.student_id));
+
     let groupStudents = [];
-    if (Array.isArray(found.student_ids)) {
-      groupStudents = allUsers.filter((u) => found.student_ids.includes(u.id));
+    if (Array.isArray(found.student_ids) && found.student_ids.length > 0) {
+      groupStudents = allUsers.filter((u) =>
+        found.student_ids.includes(u.id) || groupMemberIds.includes(localStore.normalizeUserId(u.id))
+      );
+    } else if (groupMemberIds.length > 0) {
+      groupStudents = allUsers.filter((u) => groupMemberIds.includes(localStore.normalizeUserId(u.id)));
+      found.student_ids = groupStudents.map((s) => s.id);
     } else {
-      groupStudents = allUsers.filter((u) => u.role === 'student').slice(0, found.enrolled_count || 3);
+      groupStudents = allUsers.filter((u) => u.role === 'student').slice(0, found.enrolled_count || 6);
       found.student_ids = groupStudents.map((s) => s.id);
     }
+
+    const studentMemberships = memberships.filter((m) => m.group_id === id && m.is_active !== false);
+    const baseFee = Number(found.monthly_price || 0);
+
+    const enrichedStudents = groupStudents.map((s) => {
+      const normId = localStore.normalizeUserId(s.id);
+      const mem = studentMemberships.find((m) => localStore.normalizeUserId(m.student_id) === normId);
+
+      let effectiveFee = baseFee;
+      let discountLabel = '';
+
+      if (mem?.custom_price != null && mem?.custom_price !== '') {
+        effectiveFee = Number(mem.custom_price);
+        discountLabel = "Kelishilgan maxsus to'lov";
+      } else if (Number(mem?.discount_percent) > 0) {
+        const pct = Number(mem.discount_percent);
+        const discountVal = Math.round(baseFee * (pct / 100));
+        effectiveFee = Math.max(0, baseFee - discountVal);
+        discountLabel = `${pct}% chegirma (-${discountVal.toLocaleString()} so'm)`;
+      } else if (Number(mem?.discount_amount) > 0) {
+        const amt = Number(mem.discount_amount);
+        effectiveFee = Math.max(0, baseFee - amt);
+        discountLabel = `-${amt.toLocaleString()} so'm chegirma`;
+      }
+
+      return {
+        ...s,
+        membership_id: mem?.id || null,
+        custom_price: mem?.custom_price ?? null,
+        discount_type: mem?.discount_type || null,
+        discount_percent: Number(mem?.discount_percent || 0),
+        discount_amount: Number(mem?.discount_amount || 0),
+        discount_reason: mem?.discount_reason || '',
+        effective_price: effectiveFee,
+        discount_label: discountLabel,
+      };
+    });
+
     return {
       ...found,
+      monthly_price: baseFee,
+      avatar_url: found.avatar_url || found.image_url || null,
+      image_url: found.image_url || found.avatar_url || null,
       courseName: found.course_name || 'Course',
-      students: groupStudents,
+      students: enrichedStudents,
       teachers: allUsers.filter((u) => u.role === 'teacher').slice(0, 1),
-      studentCount: groupStudents.length,
+      studentCount: enrichedStudents.length,
       capacity: found.capacity || 20,
       schedules: [],
     };
@@ -194,13 +258,20 @@ export async function createGroup({
   room,
   capacity = 20,
   status = 'active',
+  monthly_price,
+  monthlyPrice,
   startDate,
   endDate,
+  avatar_url,
+  image_url,
 }) {
   const allCourses = localStore.getCourses();
   const allUsers = localStore.getUsers();
   const course = allCourses.find((c) => c.id === courseId);
   const teacher = allUsers.find((u) => u.id === teacherId);
+
+  const groupAvatar = avatar_url || image_url || null;
+  const price = Number(monthly_price !== undefined ? monthly_price : (monthlyPrice !== undefined ? monthlyPrice : (course?.monthly_fee || 0)));
 
   if (!isPlaceholder) {
     try {
@@ -212,8 +283,10 @@ export async function createGroup({
           room,
           capacity: Number(capacity) || 20,
           status: status || 'active',
+          monthly_price: price,
           start_date: startDate || null,
           end_date: endDate || null,
+          avatar_url: groupAvatar,
         })
         .select()
         .single();
@@ -228,6 +301,9 @@ export async function createGroup({
         }
         localStore.saveGroup({
           ...newGroup,
+          monthly_price: price,
+          avatar_url: groupAvatar,
+          image_url: groupAvatar,
           course_name: course?.name,
           teacher_name: teacher?.fullName,
         });
@@ -247,10 +323,23 @@ export async function createGroup({
     room: room || '101-xona',
     capacity: Number(capacity) || 20,
     status: status || 'active',
+    monthly_price: price,
     enrolled_count: 0,
     start_date: startDate,
     end_date: endDate,
+    avatar_url: groupAvatar,
+    image_url: groupAvatar,
   });
+
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo_group_updated', {
+          detail: { groupId: created.id, group: created },
+        })
+      );
+    }
+  } catch (e) {}
 
   return created;
 }
@@ -259,13 +348,64 @@ export async function createGroup({
  * Update an existing group
  */
 export async function updateGroup(id, payload) {
-  return localStore.saveGroup({ id, ...payload });
+  const updated = localStore.saveGroup({ id, ...payload });
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo_group_updated', {
+          detail: { groupId: id, group: updated },
+        })
+      );
+    }
+  } catch (e) {}
+  return updated;
 }
 
 /**
- * Enroll student into group
+ * Upload an avatar/picture for a group and update it everywhere.
+ * @param {string} groupId 
+ * @param {File|null} file - Pass null to remove avatar
+ * @returns {Promise<string>}
  */
-export async function enrollStudent(groupId, studentId) {
+export async function uploadGroupAvatar(groupId, file) {
+  if (!groupId) throw new Error('Group ID is required');
+  const avatarUrl = file ? await fileToCompressedDataUrl(file, 320) : '';
+  const groups = localStore.getGroups();
+  const target = groups.find((g) => g.id === groupId);
+  if (target) {
+    target.avatar_url = avatarUrl;
+    target.image_url = avatarUrl;
+    localStore.saveGroup(target);
+  }
+
+  if (!isPlaceholder) {
+    try {
+      await supabase
+        .from('groups')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', groupId);
+    } catch (e) {
+      console.warn('Supabase group avatar update note:', e);
+    }
+  }
+
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo_group_updated', {
+          detail: { groupId, avatar_url: avatarUrl },
+        })
+      );
+    }
+  } catch (e) {}
+
+  return avatarUrl;
+}
+
+/**
+ * Enroll student into group with optional discount / custom pricing
+ */
+export async function enrollStudent(groupId, studentId, options = {}) {
   const groups = localStore.getGroups();
   const target = groups.find((g) => g.id === groupId);
   if (target) {
@@ -279,7 +419,79 @@ export async function enrollStudent(groupId, studentId) {
     target.enrolled_count = target.student_ids.length;
     localStore.saveGroup(target);
   }
+  if (localStore.saveMembership) {
+    localStore.saveMembership({
+      id: `mem-${groupId}-${studentId}`,
+      group_id: groupId,
+      student_id: studentId,
+      is_active: true,
+      custom_price: options.custom_price !== undefined ? options.custom_price : null,
+      discount_type: options.discount_type || null,
+      discount_percent: Number(options.discount_percent || 0),
+      discount_amount: Number(options.discount_amount || 0),
+      discount_reason: options.discount_reason || '',
+      enrolled_at: new Date().toISOString(),
+    });
+  }
   return { success: true };
+}
+
+/**
+ * Update student's tuition discount or custom price in a group
+ */
+export async function updateStudentDiscount(groupId, studentId, discountData) {
+  const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+  const normalizedStudentId = localStore.normalizeUserId(studentId);
+  let mem = memberships.find(
+    (m) => m.group_id === groupId && localStore.normalizeUserId(m.student_id) === normalizedStudentId
+  );
+
+  const updatedMembership = {
+    ...(mem || {}),
+    id: mem?.id || `mem-${groupId}-${studentId}`,
+    group_id: groupId,
+    student_id: studentId,
+    is_active: true,
+    custom_price: discountData.custom_price !== undefined ? discountData.custom_price : (mem?.custom_price ?? null),
+    discount_type: discountData.discount_type !== undefined ? discountData.discount_type : (mem?.discount_type ?? null),
+    discount_percent: discountData.discount_percent !== undefined ? Number(discountData.discount_percent || 0) : Number(mem?.discount_percent || 0),
+    discount_amount: discountData.discount_amount !== undefined ? Number(discountData.discount_amount || 0) : Number(mem?.discount_amount || 0),
+    discount_reason: discountData.discount_reason !== undefined ? discountData.discount_reason : (mem?.discount_reason || ''),
+    updated_at: new Date().toISOString(),
+  };
+
+  localStore.saveMembership(updatedMembership);
+
+  if (!isPlaceholder) {
+    try {
+      await supabase
+        .from('group_memberships')
+        .upsert({
+          id: updatedMembership.id,
+          group_id: groupId,
+          student_id: studentId,
+          custom_price: updatedMembership.custom_price,
+          discount_percent: updatedMembership.discount_percent,
+          discount_amount: updatedMembership.discount_amount,
+          discount_reason: updatedMembership.discount_reason,
+          is_active: true,
+        });
+    } catch (e) {
+      console.warn('Supabase updateStudentDiscount note:', e);
+    }
+  }
+
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo_student_discount_updated', {
+          detail: { groupId, studentId, membership: updatedMembership },
+        })
+      );
+    }
+  } catch (_) {}
+
+  return updatedMembership;
 }
 
 /**
@@ -296,6 +508,15 @@ export async function removeStudent(groupId, studentId) {
     target.student_ids = target.student_ids.filter((id) => id !== studentId);
     target.enrolled_count = target.student_ids.length;
     localStore.saveGroup(target);
+  }
+  if (localStore.getMemberships) {
+    const list = localStore.getMemberships().map((m) => {
+      if (m.group_id === groupId && localStore.normalizeUserId(m.student_id) === localStore.normalizeUserId(studentId)) {
+        return { ...m, is_active: false };
+      }
+      return m;
+    });
+    localStore.setItem('educo_db_memberships', list);
   }
   return { success: true };
 }

@@ -17,6 +17,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
+import Select from '@/components/ui/Select';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from '@/components/ui/Toast';
 import {
@@ -136,7 +137,7 @@ export default function AnnouncementsPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -164,28 +165,37 @@ export default function AnnouncementsPage() {
       {/* Filter Bar */}
       <Card noPadding>
         <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <select
+          <Select
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          >
-            <option value="all">{t('groups.allGroups', 'All Audiences & Cohorts')}</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
+            placeholder={t('groups.allGroups', 'Barcha auditoriya va guruhlar')}
+            headerTitle={t('groups.title', 'Guruh bo‘yicha e‘lonlar')}
+            icon={Users}
+            size="sm"
+            options={[
+              { value: 'all', label: t('groups.allGroups', 'Barcha auditoriya va guruhlar') },
+              ...groups.map((g) => ({
+                value: g.id,
+                label: g.name,
+                subtitle: g.courseName || 'Kurs fani',
+                color: g.courseColor || '#123D78',
+              })),
+            ]}
+          />
 
-          <select
+          <Select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-          >
-            <option value="all">{t('users.allRoles', 'All Target Roles')}</option>
-            <option value="student">{t('roles.student', 'Students Only')}</option>
-            <option value="teacher">{t('roles.teacher', 'Teachers Only')}</option>
-          </select>
+            placeholder={t('users.allRoles', 'Barcha foydalanuvchilar')}
+            headerTitle={t('users.role', 'Rol bo‘yicha')}
+            icon={Shield}
+            size="sm"
+            options={[
+              { value: 'all', label: t('users.allRoles', 'Barcha foydalanuvchilar (Hammaga)') },
+              { value: 'student', label: t('roles.student', 'Faqat talabalar'), subtitle: 'Barcha guruh o‘quvchilari', color: '#10b981' },
+              { value: 'teacher', label: t('roles.teacher', 'Faqat o‘qituvchilar'), subtitle: 'Ustozlar va xodimlar', color: '#3b82f6' },
+            ]}
+          />
         </div>
       </Card>
 
@@ -312,38 +322,39 @@ export default function AnnouncementsPage() {
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300">
-                {t('announcements.targetGroup', 'Target Group')}
-              </label>
-              <select
-                value={groupId}
-                onChange={(e) => setGroupId(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              >
-                <option value="">{t('announcements.allGroups', 'All Groups (Campus-Wide)')}</option>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label={t('announcements.targetGroup', 'Target Group')}
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+              placeholder={t('announcements.allGroups', 'Barcha guruhlar (Umumiy)')}
+              headerTitle={t('groups.title', 'Auditoriya guruhi')}
+              icon={Users}
+              size="sm"
+              options={[
+                { value: '', label: t('announcements.allGroups', 'Barcha guruhlar (Umumiy markaz)') },
+                ...groups.map((g) => ({
+                  value: g.id,
+                  label: g.name,
+                  subtitle: g.courseName || 'Kurs fani',
+                  color: g.courseColor || '#123D78',
+                })),
+              ]}
+            />
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300">
-                {t('announcements.targetRole', 'Target Role')}
-              </label>
-              <select
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              >
-                <option value="all">{t('announcements.everyone', 'Everyone')}</option>
-                <option value="student">{t('roles.student', 'Students')}</option>
-                <option value="teacher">{t('roles.teacher', 'Teachers')}</option>
-              </select>
-            </div>
+            <Select
+              label={t('announcements.targetRole', 'Target Role')}
+              value={targetRole}
+              onChange={(e) => setTargetRole(e.target.value)}
+              placeholder={t('announcements.everyone', 'Barcha qatnashuvchilar')}
+              headerTitle={t('users.role', 'Rol bo‘yicha')}
+              icon={Shield}
+              size="sm"
+              options={[
+                { value: 'all', label: t('announcements.everyone', 'Barcha qatnashuvchilar (Hammaga)') },
+                { value: 'student', label: t('roles.student', 'Talabalar'), subtitle: 'Barcha guruh o‘quvchilari', color: '#10b981' },
+                { value: 'teacher', label: t('roles.teacher', 'O‘qituvchilar'), subtitle: 'Pedagoglar jamoasi', color: '#3b82f6' },
+              ]}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">

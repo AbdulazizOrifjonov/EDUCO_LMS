@@ -72,6 +72,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'uz', name: 'Uzbek', nativeName: "O'zbek", flag: '🇺🇿', dir: 'ltr' },
   { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺', dir: 'ltr' },
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', dir: 'ltr' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', dir: 'rtl' },
 ];
 
 export const THEME_MODES = {

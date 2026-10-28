@@ -10,7 +10,6 @@ import {
   BookOpen,
   FileCheck,
   CheckCircle2,
-  PlusCircle,
   AlertCircle,
   RefreshCw,
   Sparkles,
@@ -18,6 +17,7 @@ import {
   UserPlus,
   User,
   Phone,
+  MessageSquare,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import dashboardService from '@/services/dashboardService';
@@ -27,6 +27,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
 import { toast } from '@/components/ui/Toast';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -41,19 +42,6 @@ export default function TeacherDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-
-  // New Student Modal state
-  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
-  const [newStudentData, setNewStudentData] = useState({
-    firstName: '',
-    lastName: '',
-    fatherPhone: '',
-    motherPhone: '',
-    phone: '',
-    password: '',
-    groupId: '',
-  });
-  const [isSubmittingStudent, setIsSubmittingStudent] = useState(false);
 
   const [teacherData, setTeacherData] = useState({
     myGroupsCount: 0,
@@ -107,64 +95,17 @@ export default function TeacherDashboard() {
     }
   }, [user?.id]);
 
-  const handleCreateStudent = async (e) => {
-    e?.preventDefault?.();
-    if (!newStudentData.firstName.trim() || !newStudentData.lastName.trim()) {
-      toast.error(t('errors.required', 'Ism va familiya kiritilishi shart'));
-      return;
-    }
-    const cleanFather = cleanUzPhone(newStudentData.fatherPhone);
-    const cleanMother = cleanUzPhone(newStudentData.motherPhone);
-    const cleanPhone = cleanUzPhone(newStudentData.phone);
-    if (!cleanFather && !cleanMother && !cleanPhone) {
-      toast.error(t('users.atLeastOneParentPhone', 'Otasining yoki onasining telefon raqamini kiritish shart'));
-      return;
-    }
+  useEffect(() => {
+    const handleSync = () => {
+      if (user?.id) {
+        loadData(false);
+      }
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [user?.id]);
 
-    const trimmedPwd = (newStudentData.password || '').trim();
-    if (!trimmedPwd) {
-      toast.error(t('users.passwordRequired', 'Kabinetga kirish uchun parol kiritish shart!'));
-      return;
-    }
-    if (!evaluatePasswordStrength(trimmedPwd).allMet) {
-      toast.error(
-        t(
-          'users.passwordMustBeStrong',
-          'Parol xavfsiz (yashil) bo‘lishi uchun katta-kichik harf, raqam va maxsus belgi (!@#$) ishtirok etishi shart!'
-        )
-      );
-      return;
-    }
 
-    setIsSubmittingStudent(true);
-    try {
-      await createStudent({
-        firstName: newStudentData.firstName,
-        lastName: newStudentData.lastName,
-        fatherPhone: cleanFather,
-        motherPhone: cleanMother,
-        phone: cleanPhone,
-        password: trimmedPwd,
-        groupId: newStudentData.groupId || null,
-      });
-      toast.success(t('users.userCreated', 'Yangi o‘quvchi muvaffaqiyatli qo‘shildi!'));
-      setNewStudentData({
-        firstName: '',
-        lastName: '',
-        fatherPhone: '',
-        motherPhone: '',
-        phone: '',
-        password: '',
-        groupId: '',
-      });
-      setIsAddStudentOpen(false);
-      loadData(true);
-    } catch (err) {
-      toast.error(err.message || 'Xatolik yuz berdi');
-    } finally {
-      setIsSubmittingStudent(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -176,18 +117,22 @@ export default function TeacherDashboard() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-brand-navy via-brand-navy-light to-blue-900 text-white shadow-xl relative overflow-hidden">
+      {/* Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20">
+        {/* Decorative ambient blur glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-sky-400/10 dark:bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
+
         <div className="space-y-1 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/90 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>{t('dashboard.teacherPortal', 'Teacher Portal')}</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 dark:bg-emerald-500/20 backdrop-blur text-xs font-semibold uppercase tracking-wider text-white/95 dark:text-emerald-200 border border-white/20 dark:border-emerald-400/40 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-blue-200 dark:text-emerald-300" />
+            <span>{t('dashboard.teacherPortal', 'O‘qituvchi o‘quv markazi')}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {t('dashboard.welcome', { name: teacherName, defaultValue: `Welcome back, ${teacherName}` })}
+            {t('dashboard.welcome', { name: teacherName, defaultValue: `Xush kelibsiz, ${teacherName}` })}
           </h1>
-          <p className="text-sm text-blue-100/80 max-w-xl">
-            {t('dashboard.teacherBannerSubtitle', 'Manage your classroom groups, mark lesson attendance, evaluate assignments, and track student grades.')}
+          <p className="text-sm text-blue-100 dark:text-emerald-100/80 max-w-xl">
+            {t('dashboard.teacherBannerSubtitle', 'Guruhlarni boshqarish, dars davomati olish, topshiriqlarni tekshirish va baholash portali.')}
           </p>
         </div>
 
@@ -196,11 +141,11 @@ export default function TeacherDashboard() {
             type="button"
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur text-sm font-medium transition-colors border border-white/10 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 dark:hover:bg-emerald-500/20 backdrop-blur text-sm font-medium transition-colors border border-white/15 dark:border-emerald-400/20 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">
-              {refreshing ? t('common.refreshing', 'Refreshing...') : t('common.refresh', 'Refresh')}
+              {refreshing ? t('common.refreshing', 'Yangilanmoqda...') : t('common.refresh', 'Yangilash')}
             </span>
           </button>
           <Button
@@ -210,7 +155,7 @@ export default function TeacherDashboard() {
             icon={CheckCircle2}
             className="bg-brand-red hover:bg-brand-red-dark text-white shadow-md"
           >
-            {t('attendance.markAttendance', 'Mark Attendance')}
+            {t('attendance.markAttendance', 'Davomat olish')}
           </Button>
         </div>
       </div>
@@ -229,61 +174,57 @@ export default function TeacherDashboard() {
       )}
 
       {/* Quick Action Buttons */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mr-2 shrink-0">
-          {t('dashboard.teacherQuickActions', 'Teacher Quick Actions:')}
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5">
+        <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-emerald-400 mr-1 shrink-0 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5" />
+          {t('dashboard.teacherQuickActions', 'Tezkor amallar:')}
         </span>
-        <Button
-          onClick={() => setIsAddStudentOpen(true)}
-          variant="primary"
-          size="sm"
-          icon={UserPlus}
-          className="shrink-0 text-xs py-1.5 shadow-sm"
+        <button
+          type="button"
+          onClick={() => navigate('/teacher/students/create')}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-500/15 text-blue-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-blue-500/30 dark:border-emerald-500/30 hover:bg-blue-500/25 dark:hover:bg-emerald-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('dashboard.addNewStudentQuick', "+ Yangi o'quvchi qo'shish")}
-        </Button>
-        <Button
+          <UserPlus className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
+          <span>{t('dashboard.addNewStudentQuick', "+ Yangi o'quvchi qo'shish")}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/teacher/attendance')}
-          variant="outline"
-          size="sm"
-          icon={CheckCircle2}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-500/30 hover:bg-teal-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('attendance.markAttendance', 'Mark Attendance')}
-        </Button>
-        <Button
+          <CheckCircle2 className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+          <span>{t('attendance.markAttendance', 'Davomat olish')}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/teacher/grades')}
-          variant="outline"
-          size="sm"
-          icon={Award}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('grades.addGrade', 'Add Grade')}
-        </Button>
-        <Button
-          onClick={() => navigate('/teacher/homework')}
-          variant="outline"
-          size="sm"
-          icon={PlusCircle}
-          className="shrink-0 text-xs py-1.5"
+          <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+          <span>{t('grades.addGrade', 'Baho qo‘yish')}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/teacher/chat')}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('homework.createHomework', 'Create Homework')}
-        </Button>
-        <Button
+          <MessageSquare className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+          <span>{t('nav.chat', 'Guruh chatlari')}</span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/teacher/schedule')}
-          variant="outline"
-          size="sm"
-          icon={Calendar}
-          className="shrink-0 text-xs py-1.5"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 hover:bg-purple-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          {t('dashboard.mySchedule', 'My Timetable')}
-        </Button>
+          <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+          <span>{t('dashboard.mySchedule', 'Dars jadvali')}</span>
+        </button>
       </div>
 
       {/* Stats Summary Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card noPadding className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/15 dark:bg-blue-500/20 text-brand-navy dark:text-blue-400 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/15 dark:bg-emerald-500/20 text-blue-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Layers className="w-6 h-6" />
           </div>
           <div>
@@ -297,7 +238,7 @@ export default function TeacherDashboard() {
         </Card>
 
         <Card noPadding className="p-5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-blue-500/15 dark:bg-emerald-500/20 text-blue-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Users className="w-6 h-6" />
           </div>
           <div>
@@ -312,14 +253,14 @@ export default function TeacherDashboard() {
 
         <Card noPadding className="p-5 flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-amber-500/15 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-            <FileCheck className="w-6 h-6" />
+            <Clock className="w-6 h-6" />
           </div>
           <div>
             <span className="text-2xl font-black text-gray-900 dark:text-white block">
-              {teacherData.pendingHomework}
+              {todayLessons.length}
             </span>
             <p className="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide">
-              {t('dashboard.pendingHomework', 'Tekshirish kutilmoqda')}
+              {t('dashboard.todayLessons', 'Bugungi darslar')}
             </p>
           </div>
         </Card>
@@ -330,24 +271,24 @@ export default function TeacherDashboard() {
         {/* My Groups List with Student Counts (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           <Card
-            title={t('dashboard.myGroups', 'My Groups')}
-            subtitle="Active academic groups assigned to your supervision"
+            title={t('dashboard.myGroups', 'Mening guruhlarim')}
+            subtitle={t('dashboard.myGroupsSubtitle', 'Sizga biriktirilgan faol o‘quv guruhlari')}
             headerAction={
               <Button
                 onClick={() => navigate('/teacher/groups')}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-brand-navy dark:text-blue-400"
+                className="text-xs text-brand-navy dark:text-blue-400 font-semibold"
               >
-                Manage Groups &rarr;
+                {t('dashboard.manageGroupsLink', 'Guruhlarni boshqarish →')}
               </Button>
             }
           >
             {teacherData.myGroups.length === 0 ? (
               <EmptyState
                 icon={Layers}
-                title="No groups assigned yet"
-                description="When the administration assigns you to instructional groups, they will show up here."
+                title={t('dashboard.noGroupsAssigned', 'Hali guruhlar biriktirilmagan')}
+                description={t('dashboard.noGroupsAssignedDesc', 'Ma‘muriyat sizga o‘quv guruhlarini biriktirganda, ular bu yerda ko‘rinadi.')}
               />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -365,7 +306,7 @@ export default function TeacherDashboard() {
                           {grp.courseName}
                         </span>
                         <Badge variant="primary" size="sm">
-                          Room: {grp.room}
+                          {t('dashboard.roomNumber', { room: grp.room, defaultValue: `${grp.room}-xona` })}
                         </Badge>
                       </div>
                       <h4 className="text-base font-bold text-gray-900 dark:text-white">
@@ -375,15 +316,15 @@ export default function TeacherDashboard() {
 
                     <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs">
                       <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5 font-medium">
-                        <Users className="w-3.5 h-3.5 text-brand-navy dark:text-blue-400" />
-                        {grp.studentCount} / {grp.capacity} Students
+                        <Users className="w-3.5 h-3.5 text-blue-700 dark:text-emerald-400" />
+                        {t('dashboard.studentsCapacity', { count: grp.studentCount, capacity: grp.capacity, defaultValue: `${grp.studentCount} / ${grp.capacity} talaba` })}
                       </span>
                       <button
                         type="button"
                         onClick={() => navigate(`/teacher/groups/${grp.id}`)}
-                        className="text-brand-navy dark:text-blue-400 font-semibold hover:underline flex items-center gap-1"
+                        className="text-blue-700 dark:text-emerald-400 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
                       >
-                        Details <ArrowRight className="w-3 h-3" />
+                        {t('common.details', 'Batafsil')} <ArrowRight className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
@@ -394,14 +335,14 @@ export default function TeacherDashboard() {
 
           {/* Today's Lessons */}
           <Card
-            title={t('dashboard.todayLessons', "Today's Lessons")}
-            subtitle="Classes scheduled on your calendar for today"
+            title={t('dashboard.todayLessons', "Bugungi darslar")}
+            subtitle={t('dashboard.todayLessonsSubtitle', "Bugungi taqvimingizdagi rejalashtirilgan darslar")}
           >
             {todayLessons.length === 0 ? (
               <EmptyState
                 icon={Calendar}
-                title="No classes scheduled today"
-                description="You have no teaching periods scheduled for today."
+                title={t('dashboard.noClassesScheduledToday', "Bugun darslar rejalashtirilmagan")}
+                description={t('dashboard.noClassesScheduledTodayDesc', "Bugungi kunda siz uchun o‘quv mashg‘ulotlari belgilanmagan.")}
               />
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800 -mx-5 -my-5">
@@ -411,7 +352,7 @@ export default function TeacherDashboard() {
                     className="p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-brand-navy dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-emerald-950/40 text-blue-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
@@ -419,7 +360,7 @@ export default function TeacherDashboard() {
                           {l.title}
                         </h4>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {l.groupName} &bull; Room {l.room} &bull; {l.courseName}
+                          {l.groupName} &bull; {l.room ? `${l.room}-xona` : ''} &bull; {l.courseName}
                         </p>
                       </div>
                     </div>
@@ -434,7 +375,7 @@ export default function TeacherDashboard() {
                         variant="primary"
                         className="mt-1.5 text-xs py-1"
                       >
-                        Take Attendance
+                        {t('dashboard.takeAttendance', 'Davomat olish')}
                       </Button>
                     </div>
                   </div>
@@ -448,14 +389,14 @@ export default function TeacherDashboard() {
         <div className="space-y-6">
           {/* Upcoming Schedule */}
           <Card
-            title={t('dashboard.upcomingLessons', 'Upcoming Schedule')}
-            subtitle="Classes over the coming days"
+            title={t('dashboard.upcomingLessons', 'Kutilayotgan darslar')}
+            subtitle={t('dashboard.upcomingClassesSubtitle', 'Yaqin kunlardagi dars mashg‘ulotlari')}
           >
             {upcomingSchedule.length === 0 ? (
               <EmptyState
                 icon={Calendar}
-                title="No upcoming classes"
-                description="No additional scheduled lessons found for this week."
+                title={t('dashboard.noUpcomingClasses', 'Kutilayotgan darslar yo‘q')}
+                description={t('dashboard.noUpcomingClassesDesc', 'Bu hafta uchun boshqa rejalashtirilgan darslar topilmadi.')}
               />
             ) : (
               <div className="space-y-3">
@@ -473,7 +414,7 @@ export default function TeacherDashboard() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                      <span>{item.groups?.name || 'Group'}</span>
+                      <span>{item.groups?.name || 'Guruh'}</span>
                       <span>
                         {item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}
                       </span>
@@ -486,31 +427,31 @@ export default function TeacherDashboard() {
 
           {/* Recent Grades Given */}
           <Card
-            title="Recent Grades Given"
-            subtitle="Latest marks submitted to the gradebook"
+            title={t('dashboard.recentGradesGiven', 'So‘nggi qo‘yilgan baholar')}
+            subtitle={t('dashboard.recentGradesSubtitle', 'Baholar jurnaliga kiritilgan so‘nggi ballar')}
             headerAction={
               <Button
-                onClick={() => navigate('/grades')}
+                onClick={() => navigate('/teacher/grades')}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-brand-navy dark:text-blue-400"
+                className="text-xs text-brand-navy dark:text-blue-400 font-semibold"
               >
-                Gradebook &rarr;
+                {t('dashboard.gradebookLink', 'Baholar jurnali →')}
               </Button>
             }
           >
             {recentGrades.length === 0 ? (
               <EmptyState
                 icon={Award}
-                title="No grades recorded"
-                description="Grades assigned to students will appear here."
+                title={t('dashboard.noGradesRecorded', 'Hali baholar qayd etilmagan')}
+                description={t('dashboard.noGradesRecordedDesc', 'O‘quvchilarga qo‘yilgan baholar bu yerda ko‘rinadi.')}
               />
             ) : (
               <div className="space-y-3">
                 {recentGrades.map((g) => {
                   const studentName = g.student
                     ? `${g.student.first_name} ${g.student.last_name}`
-                    : 'Student';
+                    : 'Talaba';
                   return (
                     <div
                       key={g.id}
@@ -521,7 +462,7 @@ export default function TeacherDashboard() {
                           {studentName}
                         </h4>
                         <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                          {g.lesson?.title || 'Lesson'}
+                          {g.lesson?.title || 'Dars'}
                         </p>
                       </div>
 
@@ -539,127 +480,6 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
-      {/* Modal: Add New Student for Teacher */}
-      <Modal
-        isOpen={isAddStudentOpen}
-        onClose={() => setIsAddStudentOpen(false)}
-        title={t('groups.addNewStudent', "Yangi o'quvchi qo'shish")}
-        subtitle={t('users.createSubtitle', "EDUCO LMS tizimiga yangi a‘zo qo‘shish")}
-        size="lg"
-      >
-        <form onSubmit={handleCreateStudent} className="space-y-4">
-          <div className="p-3.5 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 text-xs text-brand-navy dark:text-blue-300">
-            <p className="font-semibold">{t('users.parentsContact', "Ota-onasi bilan bog'lanish")}</p>
-            <p className="text-gray-600 dark:text-gray-400 mt-0.5">
-              {t('users.parentPhoneNote', "Otasining yoki onasining (yoki ikkalasining) telefon raqamini kiriting.")}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label={t('common.firstName', 'Ism')}
-              icon={User}
-              required
-              placeholder="Masalan: Jasur"
-              value={newStudentData.firstName}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, firstName: e.target.value })
-              }
-            />
-            <Input
-              label={t('common.lastName', 'Familiya')}
-              icon={User}
-              required
-              placeholder="Masalan: Rustamov"
-              value={newStudentData.lastName}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, lastName: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label={t('users.fatherPhone', 'Otasining telefon raqami')}
-              icon={Phone}
-              placeholder="+998 90 111 22 33"
-              value={newStudentData.fatherPhone}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, fatherPhone: e.target.value })
-              }
-            />
-            <Input
-              label={t('users.motherPhone', 'Onasining telefon raqami')}
-              icon={Phone}
-              placeholder="+998 90 222 33 44"
-              value={newStudentData.motherPhone}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, motherPhone: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label={t('users.studentPhoneOptional', "O'quvchining shaxsiy telefoni (ixtiyoriy)")}
-              icon={Phone}
-              placeholder="+998 90 333 44 55"
-              value={newStudentData.phone}
-              onChange={(e) =>
-                setNewStudentData({ ...newStudentData, phone: e.target.value })
-              }
-            />
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300">
-                {t('groups.group', "O'quv guruhi")}
-              </label>
-              <select
-                value={newStudentData.groupId}
-                onChange={(e) =>
-                  setNewStudentData({ ...newStudentData, groupId: e.target.value })
-                }
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              >
-                <option value="">{t('groups.unassigned', 'Guruhsiz (faqat ro‘yxatga olish)')}</option>
-                {teacherData.myGroups.map((grp) => (
-                  <option key={grp.id} value={grp.id}>
-                    {grp.name} ({grp.studentCount || grp.enrolled_count || 0} o‘quvchi)
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-surface-dark-tertiary/30">
-            <PasswordStrengthInput
-              label={t('users.cabinetPassword', 'LMS kabinetga kirish paroli')}
-              required
-              value={newStudentData.password}
-              onValueChange={(val) =>
-                setNewStudentData({ ...newStudentData, password: val })
-              }
-              placeholder="Masalan: Jasur#2026!"
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setIsAddStudentOpen(false)}
-            >
-              {t('common.cancel', 'Bekor qilish')}
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              isLoading={isSubmittingStudent}
-            >
-              {t('common.create', 'Qo‘shish')}
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }

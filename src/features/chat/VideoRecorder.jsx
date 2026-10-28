@@ -1,21 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Video,
-  Square,
   Play,
   Pause,
   RotateCcw,
   Send,
   X,
-  Upload,
   Camera,
   RefreshCw,
   AlertCircle,
-  CheckCircle,
+  Check,
+  Trash2,
+  Lock,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export default function VideoRecorder({ onRecordingComplete, onCancel, uploadProgress = null }) {
+export default function VideoRecorder({
+  onRecordingComplete,
+  onCancel,
+  uploadProgress = null,
+  autoStart = false,
+}) {
   const { t } = useTranslation();
 
   const [hasCameraSupport, setHasCameraSupport] = useState(true);
@@ -30,6 +35,9 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
   const [videoUrl, setVideoUrl] = useState(null);
   const [uploadMode, setUploadMode] = useState(false);
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
+  const [isSwitchingCamera, setIsSwitchingCamera] = useState(false);
+  const [cameraNotification, setCameraNotification] = useState('');
+  const autoStartedRef = useRef(false);
 
   const videoLiveRef = useRef(null);
   const videoPreviewRef = useRef(null);
@@ -41,7 +49,7 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
   const rearCameraInputRef = useRef(null);
   const frontCameraInputRef = useRef(null);
 
-  const MAX_SECONDS = 60; // 60 seconds strict limit
+  const MAX_SECONDS = 60; // 60 seconds Telegram video note limit
 
   useEffect(() => {
     checkBrowserCapabilities();
@@ -87,7 +95,6 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
         setUploadMode(true);
         return;
       }
-      // Start camera stream
       startCameraStream(facingMode);
     } catch (err) {
       console.warn('Error enumerating devices:', err);
@@ -99,34 +106,32 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
     stopMediaStream();
     setPermissionError(null);
 
+    // Square 1:1 aspect ratio for circular video note
     const videoConstraints = deviceId
       ? { deviceId: { exact: deviceId } }
       : {
           facingMode: targetFacing,
-          width: { ideal: 1280 },
+          width: { ideal: 720 },
           height: { ideal: 720 },
-          aspectRatio: { ideal: 1.7777777778 }, // 16:9 rectangular
+          aspectRatio: { ideal: 1 },
         };
 
     let stream = null;
 
-    // 1. Try with video + audio
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         video: videoConstraints,
         audio: true,
       });
     } catch (err1) {
-      console.warn('Initial video+audio getUserMedia failed, trying basic video+audio:', err1);
-      // 2. Try basic video + audio
+      console.warn('Video+audio failed, trying basic:', err1);
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
       } catch (err2) {
-        console.warn('Video+audio failed, trying video only (no microphone):', err2);
-        // 3. Fallback to video only in case PC has no microphone
+        console.warn('Trying video only:', err2);
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             video: true,
@@ -157,7 +162,6 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
     }
   };
 
-  // Ensure live video element gets the stream when it mounts or re-renders
   useEffect(() => {
     if (videoLiveRef.current && streamRef.current && !videoUrl && !uploadMode) {
       videoLiveRef.current.srcObject = streamRef.current;
@@ -165,40 +169,80 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
     }
   }, [uploadMode, videoUrl]);
 
+  // Auto-start recording when autoStart prop is true and stream is ready
+  useEffect(() => {
+    if (
+      autoStart &&
+      !autoStartedRef.current &&
+      hasCameraSupport &&
+      streamRef.current &&
+      !isRecording &&
+      !videoBlob &&
+      !uploadMode
+    ) {
+      autoStartedRef.current = true;
+      const t = setTimeout(() => {
+        startRecording();
+      }, 350);
+      return () => clearTimeout(t);
+    }
+  }, [autoStart, hasCameraSupport, uploadMode, isRecording, videoBlob]);
+
   const switchCameraFacing = async () => {
     const nextFacing = facingMode === 'user' ? 'environment' : 'user';
-    setFacingMode(nextFacing);
-    setSelectedDeviceId(null);
+    setIsSwitchingCamera(true);
 
-    // If currently live and mediaDevices exists, attempt dynamic track flip
     if (navigator.mediaDevices?.getUserMedia && streamRef.current) {
       try {
-        const newStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: nextFacing },
-          audio: false,
-        });
-        const newVideoTrack = newStream.getVideoTracks()[0];
+        let newStream = null;
+        try {
+          newStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: nextFacing },
+              width: { ideal: 720 },
+              height: { ideal: 720 },
+              aspectRatio: { ideal: 1 },
+            },
+            audio: false,
+          });
+        } catch {
+          newStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: nextFacing },
+            audio: false,
+          });
+        }
+
+        const newVideoTrack = newStream?.getVideoTracks()[0];
         const oldVideoTrack = streamRef.current.getVideoTracks()[0];
         if (oldVideoTrack && newVideoTrack) {
           streamRef.current.removeTrack(oldVideoTrack);
           oldVideoTrack.stop();
           streamRef.current.addTrack(newVideoTrack);
+          setFacingMode(nextFacing);
+          setSelectedDeviceId(null);
+
           if (videoLiveRef.current) {
             videoLiveRef.current.srcObject = streamRef.current;
             videoLiveRef.current.play().catch(() => {});
           }
+
+          const label = nextFacing === 'environment' ? 'Orqa kamera' : 'Old kamera';
+          setCameraNotification(`Kamera: ${label}`);
+          setTimeout(() => setCameraNotification(''), 2000);
+          setIsSwitchingCamera(false);
           return;
         }
       } catch (e) {
-        console.warn('Live track switch fallback to full restart:', e);
+        console.warn('Live track switch note:', e);
       }
     }
-    startCameraStream(nextFacing);
-  };
 
-  const selectDevice = (deviceId) => {
-    setSelectedDeviceId(deviceId);
-    startCameraStream(facingMode, deviceId);
+    if (!isRecording) {
+      setFacingMode(nextFacing);
+      setSelectedDeviceId(null);
+      startCameraStream(nextFacing);
+    }
+    setIsSwitchingCamera(false);
   };
 
   const startRecording = () => {
@@ -241,7 +285,7 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
         stopMediaStream();
       };
 
-      recorder.start(500);
+      recorder.start(400);
       setIsRecording(true);
 
       timerRef.current = setInterval(() => {
@@ -255,7 +299,7 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
       }, 1000);
     } catch (err) {
       console.error('Failed to start MediaRecorder:', err);
-      setPermissionError('Video yozishni boshlab boʻlmadi.');
+      setPermissionError('Video yozishni boshlab bo‘lmadi.');
     }
   };
 
@@ -281,9 +325,31 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
   };
 
   const handleSend = () => {
+    if (isRecording) {
+      // If user clicks send while recording, stop and send immediately
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.onstop = () => {
+          const type = mediaRecorderRef.current?.mimeType || 'video/webm';
+          const blob = new Blob(chunksRef.current, { type });
+          const ext = blob.type.includes('mp4') ? 'mp4' : 'webm';
+          const file = new File([blob], `video_note_${Date.now()}.${ext}`, {
+            type: blob.type || 'video/webm',
+          });
+          stopMediaStream();
+          onRecordingComplete?.(file);
+        };
+        mediaRecorderRef.current.stop();
+        return;
+      }
+    }
+
     if (!videoBlob) return;
     const ext = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
-    const file = new File([videoBlob], `video_${Date.now()}.${ext}`, {
+    const file = new File([videoBlob], `video_note_${Date.now()}.${ext}`, {
       type: videoBlob.type || 'video/webm',
     });
     onRecordingComplete?.(file);
@@ -293,11 +359,15 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('video/')) {
-      alert(t('chat.validVideoAlert', 'Please select a valid video file'));
+      alert(t('chat.validVideoAlert', 'Iltimos, video fayl tanlang'));
       return;
     }
-    setVideoBlob(file);
-    const url = URL.createObjectURL(file);
+    // Rename as video_note so it renders as a circular video note
+    const videoNoteFile = new File([file], `video_note_${Date.now()}_${file.name}`, {
+      type: file.type,
+    });
+    setVideoBlob(videoNoteFile);
+    const url = URL.createObjectURL(videoNoteFile);
     setVideoUrl(url);
     setUploadMode(false);
   };
@@ -319,277 +389,221 @@ export default function VideoRecorder({ onRecordingComplete, onCancel, uploadPro
     }
   };
 
-  const formatCountdown = (secondsElapsed) => {
-    const remaining = Math.max(0, MAX_SECONDS - secondsElapsed);
-    const mins = Math.floor(remaining / 60);
-    const secs = remaining % 60;
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  // Circular progress calculation
+  // Circle radius 136, circumference = 2 * PI * 136 ≈ 854.5
+  const circleRadius = 136;
+  const circumference = 2 * Math.PI * circleRadius;
+  const progressRatio = recordingSeconds / MAX_SECONDS;
+  const strokeDashoffset = circumference - progressRatio * circumference;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60">
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <Video className="w-5 h-5 text-[#123D78] dark:text-blue-400" />
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-              {t('chat.recordVideo', 'Record Video')}
-            </h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium">
-              {t('chat.maxDuration', { seconds: MAX_SECONDS, defaultValue: `Max ${MAX_SECONDS}s` })}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200 select-none">
+      <div className="relative w-full max-w-sm flex flex-col items-center justify-center gap-6 text-center">
+        {/* Top Header / Timer & Status */}
+        <div className="flex items-center justify-between w-full px-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-white text-xs font-bold tracking-wider uppercase">
+              Dumaloq video xabar
             </span>
           </div>
 
+          {/* Close / Cancel Button */}
           <button
             type="button"
             onClick={handleClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+            title="Bekor qilish"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Video Area - MUST BE RECTANGULAR: aspect-video */}
-        <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
-          {/* Upload fallback or chosen upload mode */}
-          {uploadMode && !videoUrl ? (
-            <div className="flex flex-col items-center justify-center p-6 text-center text-white space-y-4 max-w-md mx-auto">
-              <div className="w-16 h-16 rounded-2xl bg-[#123D78]/50 border border-blue-500/40 flex items-center justify-center shadow-lg">
-                <Video className="w-8 h-8 text-blue-400" />
-              </div>
-              <div>
-                <h4 className="text-base font-bold text-white">
-                  Kamera orqali video yozish
-                </h4>
-                <p className="text-xs text-gray-300 mt-1">
-                  Maksimal 60 soniya. Kerakli kamerani tanlang va yozishni boshlang:
-                </p>
-              </div>
+        {/* Camera switch notification */}
+        {cameraNotification && (
+          <div className="absolute top-10 px-3 py-1 bg-emerald-600/90 text-white text-xs font-medium rounded-full shadow-lg z-20 animate-fade-in">
+            {cameraNotification}
+          </div>
+        )}
 
-              {/* Native Mobile Camera Capture inputs */}
-              <input
-                ref={rearCameraInputRef}
-                type="file"
-                accept="video/*"
-                capture="environment"
-                onChange={handleFileUpload}
-                className="hidden"
+        {/* Fallback upload UI if camera not supported */}
+        {uploadMode && !videoUrl ? (
+          <div className="w-72 h-72 rounded-full border-4 border-dashed border-emerald-500/50 bg-gray-900 flex flex-col items-center justify-center p-6 text-white space-y-3">
+            <Video className="w-10 h-10 text-emerald-400" />
+            <p className="text-xs text-gray-300">
+              Kameraga to‘g‘ridan-to‘g‘ri ulanib bo‘lmadi.
+            </p>
+            <input
+              ref={frontCameraInputRef}
+              type="file"
+              accept="video/*"
+              capture="user"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => frontCameraInputRef.current?.click()}
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-xs font-bold shadow-md"
+            >
+              Kamerani ochish
+            </button>
+          </div>
+        ) : (
+          /* TELEGRAM-STYLE CIRCULAR VIEWFINDER */
+          <div className="relative w-72 h-72 sm:w-80 sm:h-80 aspect-square flex items-center justify-center">
+            {/* SVG Progress Ring */}
+            <svg
+              className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none z-10"
+              viewBox="0 0 300 300"
+            >
+              {/* Background circle track */}
+              <circle
+                cx="150"
+                cy="150"
+                r={circleRadius}
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.15)"
+                strokeWidth="6"
               />
-              <input
-                ref={frontCameraInputRef}
-                type="file"
-                accept="video/*"
-                capture="user"
-                onChange={handleFileUpload}
-                className="hidden"
+              {/* Progress active bar */}
+              <circle
+                cx="150"
+                cy="150"
+                r={circleRadius}
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="6"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                className="transition-all duration-300 ease-linear"
               />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="video/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
+            </svg>
 
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-                <button
-                  type="button"
-                  onClick={() => rearCameraInputRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#F12D3A] hover:bg-[#d41f2b] text-white font-semibold text-xs shadow-md transition-transform active:scale-95"
+            {/* Inner Video Circle (Telegram Mask) */}
+            <div className="w-[264px] h-[264px] sm:w-[294px] sm:h-[294px] rounded-full overflow-hidden bg-black relative shadow-[0_0_50px_rgba(16,185,129,0.3)] border-2 border-emerald-500/40">
+              {videoUrl ? (
+                /* Preview Mode */
+                <div
+                  className="w-full h-full relative cursor-pointer group"
+                  onClick={togglePreviewPlay}
                 >
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Orqa kamera (Asosiy)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => frontCameraInputRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#123D78] hover:bg-[#0e2f5c] text-white font-semibold text-xs shadow-md transition-transform active:scale-95"
-                >
-                  <Camera className="w-4 h-4" />
-                  <span>Old kamera (Selfie)</span>
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-xs text-gray-400 hover:text-white underline transition-colors pt-1"
-              >
-                Yoki galereyadan tayyor video yuklash
-              </button>
-            </div>
-          ) : videoUrl ? (
-            /* Recorded Preview (Rectangular) */
-            <div className="relative w-full h-full flex items-center justify-center">
-              <video
-                ref={videoPreviewRef}
-                src={videoUrl}
-                playsInline
-                className="w-full h-full object-contain"
-                onPlay={() => setIsPlayingPreview(true)}
-                onPause={() => setIsPlayingPreview(false)}
-                onEnded={() => setIsPlayingPreview(false)}
-              />
-              <button
-                type="button"
-                onClick={togglePreviewPlay}
-                className="absolute p-4 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm transition-transform active:scale-95"
-              >
-                {isPlayingPreview ? (
-                  <Pause className="w-6 h-6 fill-current" />
-                ) : (
-                  <Play className="w-6 h-6 fill-current ml-0.5 rtl:ml-0 rtl:mr-0.5" />
-                )}
-              </button>
-            </div>
-          ) : (
-            /* Live Camera Stream (Rectangular) */
-            <div className="relative w-full h-full">
-              <video
-                ref={videoLiveRef}
-                autoPlay
-                muted
-                playsInline
-                className={`w-full h-full object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
-              />
-
-              {/* Countdown overlay during recording */}
-              {isRecording && (
-                <div className="absolute top-4 left-4 flex items-center space-x-2 rtl:space-x-reverse bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full text-white font-mono text-xs z-10">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping inline-block" />
-                  <span className="text-red-500 font-bold">REC</span>
-                  <span>{formatCountdown(recordingSeconds)}</span>
+                  <video
+                    ref={videoPreviewRef}
+                    src={videoUrl}
+                    playsInline
+                    loop
+                    autoPlay
+                    className="w-full h-full object-cover"
+                    onPlay={() => setIsPlayingPreview(true)}
+                    onPause={() => setIsPlayingPreview(false)}
+                  />
+                  {!isPlayingPreview && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <div className="w-12 h-12 rounded-full bg-emerald-600/90 text-white flex items-center justify-center shadow-lg">
+                        <Play className="w-6 h-6 fill-current ml-0.5" />
+                      </div>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                /* Live Camera Stream */
+                <video
+                  ref={videoLiveRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className={`w-full h-full object-cover ${
+                    facingMode === 'user' ? 'scale-x-[-1]' : ''
+                  }`}
+                />
               )}
 
-              {/* Camera Switch Controls (Always accessible) */}
-              <div className="absolute top-4 right-4 flex items-center space-x-2 rtl:space-x-reverse z-10">
-                <button
-                  type="button"
-                  onClick={switchCameraFacing}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black/90 text-white backdrop-blur-md shadow-md transition-transform active:scale-95 text-xs font-semibold"
-                  title={t('chat.switchCamera', 'Kamerani almashtirish')}
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>{facingMode === 'user' ? 'Orqa kamera' : 'Old kamera'}</span>
-                </button>
-              </div>
+              {/* Live recording timer badge inside circle */}
+              {isRecording && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-mono font-bold border border-red-500/40 z-20">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                  <span className="text-red-400">REC</span>
+                  <span>{formatTimer(recordingSeconds)}</span>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Upload progress bar if uploading */}
-          {uploadProgress !== null && (
-            <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-6 text-white z-20">
-              <div className="w-48 bg-gray-700 h-2.5 rounded-full overflow-hidden mb-3">
-                <div
-                  className="bg-[#123D78] h-full transition-all duration-150"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-              <p className="text-sm font-medium">
-                {t('chat.uploading', 'Uploading...')} {uploadProgress}%
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Controls */}
-        <div className="flex items-center justify-between p-4 px-6 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-800">
+        {/* Bottom Control Actions */}
+        <div className="flex items-center justify-center gap-4 w-full pt-1">
           {videoUrl ? (
-            /* Review & Action controls */
-            <div className="flex items-center justify-between w-full">
+            /* Controls after recording stopped: Retake or Send */
+            <div className="flex items-center gap-4 animate-fade-in">
               <button
                 type="button"
                 onClick={handleRetake}
-                className="flex items-center space-x-1.5 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm transition-transform active:scale-95"
               >
-                <RotateCcw className="w-4 h-4" />
-                <span>{t('chat.rerecord', 'Re-record')}</span>
+                <Trash2 className="w-4 h-4 text-rose-400" />
+                <span>Qayta olish</span>
               </button>
 
-              <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-4 py-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm font-medium"
-                >
-                  {t('common.cancel', 'Cancel')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSend}
-                  className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-[#123D78] hover:bg-[#0e2f5c] text-white text-sm font-semibold shadow-md transition-transform active:scale-95"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>{t('chat.send', 'Send')}</span>
-                </button>
-              </div>
-            </div>
-          ) : uploadMode ? (
-            /* Upload mode controls */
-            <div className="flex items-center justify-between w-full">
-              {hasCameraSupport && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUploadMode(false);
-                    startCameraStream(facingMode);
-                  }}
-                  className="flex items-center space-x-1.5 text-xs text-[#123D78] dark:text-blue-400 font-medium hover:underline"
-                >
-                  <Camera className="w-4 h-4" />
-                  <span>{t('chat.tryCameraAgain', 'Try Camera Again')}</span>
-                </button>
-              )}
-              <div className="flex-1" />
               <button
                 type="button"
-                onClick={handleClose}
-                className="px-4 py-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm font-medium"
+                onClick={handleSend}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-sm font-bold shadow-lg shadow-blue-600/40 dark:shadow-emerald-600/40 transition-transform active:scale-95"
               >
-                {t('common.cancel', 'Cancel')}
+                <Send className="w-4 h-4" />
+                <span>Yuborish</span>
               </button>
             </div>
           ) : (
-            /* Live Recording controls */
-            <div className="flex items-center justify-between w-full">
+            /* Live Recording Controls */
+            <div className="flex items-center gap-5">
+              {/* Camera Flip Button */}
               <button
                 type="button"
-                onClick={() => setUploadMode(true)}
-                className="flex items-center space-x-1.5 text-xs text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 font-medium"
+                onClick={switchCameraFacing}
+                disabled={isSwitchingCamera}
+                className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-transform active:scale-90"
+                title="Kamerani almashtirish (Old/Orqa)"
               >
-                <Upload className="w-4 h-4" />
-                <span>{t('chat.uploadFile', 'Upload file')}</span>
+                <RefreshCw className={`w-5 h-5 ${isSwitchingCamera ? 'animate-spin' : ''}`} />
               </button>
 
-              {/* Start / Stop Recording Button */}
+              {/* Main Record / Stop Button */}
               {isRecording ? (
                 <button
                   type="button"
-                  onClick={stopRecording}
-                  className="flex items-center space-x-2 px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-lg animate-pulse"
+                  onClick={handleSend}
+                  className="w-16 h-16 rounded-full bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white flex items-center justify-center shadow-xl shadow-blue-600/50 dark:shadow-emerald-600/50 transition-transform active:scale-95 ring-4 ring-blue-400/30 dark:ring-emerald-400/30"
+                  title="Yozishni yakunlash va yuborish"
                 >
-                  <Square className="w-4 h-4 fill-current" />
-                  <span>{t('chat.stopRecording', 'Stop Recording')}</span>
+                  <Send className="w-7 h-7" />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={startRecording}
-                  className="flex items-center space-x-2 px-6 py-2.5 rounded-full bg-[#F12D3A] hover:bg-[#d41f2b] text-white font-semibold text-sm shadow-lg transition-transform active:scale-95"
+                  className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center shadow-xl shadow-red-600/50 transition-transform active:scale-95 ring-4 ring-red-400/30"
+                  title="Video xabar yozishni boshlash"
                 >
-                  <span className="w-3 h-3 rounded-full bg-white inline-block" />
-                  <span>{t('chat.startRecording', 'Start Recording')}</span>
+                  <div className="w-6 h-6 rounded-full bg-white animate-pulse" />
                 </button>
               )}
 
+              {/* Cancel Button */}
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-sm font-medium"
+                className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-transform active:scale-90"
+                title="Bekor qilish"
               >
-                {t('common.cancel', 'Cancel')}
+                <X className="w-5 h-5" />
               </button>
             </div>
           )}

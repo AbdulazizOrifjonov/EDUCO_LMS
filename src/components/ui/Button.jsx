@@ -16,11 +16,13 @@ export default function Button({
   ...props
 }) {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98]';
+    'inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none select-none active:scale-[0.98]';
 
   const variants = {
     primary:
-      'bg-brand-navy hover:bg-brand-navy-light text-white focus:ring-brand-navy dark:focus:ring-offset-surface-dark shadow-sm',
+      'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white focus:ring-blue-500 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:focus:ring-emerald-500 shadow-sm transition-all font-semibold',
+    navy:
+      'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white focus:ring-blue-500 dark:bg-emerald-600 dark:hover:bg-emerald-500 dark:focus:ring-emerald-500 shadow-sm transition-all font-semibold',
     danger:
       'bg-brand-red hover:bg-brand-red-dark text-white focus:ring-brand-red dark:focus:ring-offset-surface-dark shadow-sm',
     secondary:
@@ -28,7 +30,7 @@ export default function Button({
     ghost:
       'bg-transparent hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 focus:ring-gray-400',
     outline:
-      'border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-surface-dark-secondary text-gray-700 dark:text-gray-200 focus:ring-brand-navy',
+      'border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-surface-dark-secondary text-gray-700 dark:text-gray-200 focus:ring-blue-500 dark:focus:ring-emerald-500',
   };
 
   const sizes = {
@@ -39,11 +41,20 @@ export default function Button({
 
   const isActuallyDisabled = disabled || isLoading;
 
+  const handleClick = (e) => {
+    if (isActuallyDisabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    onClick?.(e);
+  };
+
   return (
     <button
       type={type}
       disabled={isActuallyDisabled}
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         ${baseStyles}
         ${variants[variant] || variants.primary}

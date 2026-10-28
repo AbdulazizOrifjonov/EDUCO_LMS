@@ -40,7 +40,6 @@ export const toast = {
 export function ToastContainer() {
   const { toasts, removeToast } = useToastStore();
 
-
   const iconMap = {
     success: CheckCircle2,
     danger: AlertCircle,
@@ -49,23 +48,27 @@ export function ToastContainer() {
   };
 
   const styleMap = {
-    success: 'border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-100',
-    danger: 'border-brand-red bg-red-50/90 dark:bg-red-950/80 text-red-900 dark:text-red-100',
-    warning: 'border-amber-500 bg-amber-50/90 dark:bg-amber-950/80 text-amber-900 dark:text-amber-100',
-    info: 'border-brand-navy bg-blue-50/90 dark:bg-slate-900/90 text-blue-900 dark:text-blue-100',
+    success:
+      'border-emerald-500/40 bg-white/95 dark:bg-[#0c1f17]/95 text-gray-900 dark:text-emerald-100 shadow-xl shadow-emerald-950/15 ring-1 ring-emerald-500/20',
+    danger:
+      'border-rose-500/40 bg-white/95 dark:bg-[#200d11]/95 text-gray-900 dark:text-rose-100 shadow-xl shadow-rose-950/15 ring-1 ring-rose-500/20',
+    warning:
+      'border-amber-500/40 bg-white/95 dark:bg-[#20180a]/95 text-gray-900 dark:text-amber-100 shadow-xl shadow-amber-950/15 ring-1 ring-amber-500/20',
+    info:
+      'border-blue-500/40 bg-white/95 dark:bg-[#0f172a]/95 text-gray-900 dark:text-blue-100 shadow-xl shadow-blue-950/15 ring-1 ring-blue-500/20',
   };
 
   const iconColorMap = {
     success: 'text-emerald-600 dark:text-emerald-400',
-    danger: 'text-brand-red dark:text-red-400',
+    danger: 'text-rose-600 dark:text-rose-400',
     warning: 'text-amber-600 dark:text-amber-400',
-    info: 'text-brand-navy dark:text-blue-400',
+    info: 'text-blue-600 dark:text-blue-400',
   };
 
   return (
     <div
       aria-live="polite"
-      className="fixed bottom-4 right-4 rtl:right-auto rtl:left-4 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"
+      className="fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:right-5 rtl:sm:right-auto rtl:sm:left-5 z-50 flex flex-col items-center sm:items-end gap-2 w-auto max-w-[calc(100vw-32px)] sm:max-w-md pointer-events-none transition-all duration-200"
     >
       {toasts.map((item) => {
         const Icon = iconMap[item.type] || Info;
@@ -73,26 +76,29 @@ export function ToastContainer() {
           <div
             key={item.id}
             className={`
-              pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-lg backdrop-blur-sm
-              animate-slide-up transition-all duration-200
+              pointer-events-auto flex items-center gap-2.5 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl sm:rounded-2xl border backdrop-blur-md
+              animate-slide-up transition-all duration-200 w-auto max-w-full
               ${styleMap[item.type] || styleMap.info}
             `}
           >
-            <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${iconColorMap[item.type] || iconColorMap.info}`} />
-            <div className="flex-1 min-w-0">
+            <Icon className={`w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0 ${iconColorMap[item.type] || iconColorMap.info}`} />
+            <div className="flex-1 min-w-0 pr-1">
               {item.title && (
-                <p className="text-sm font-semibold mb-0.5 leading-tight">
+                <p className="text-xs font-bold leading-tight mb-0.5">
                   {item.title}
                 </p>
               )}
-              <p className="text-xs leading-relaxed">{item.message}</p>
+              <p className="text-[11px] sm:text-xs font-semibold leading-snug break-words">
+                {item.message}
+              </p>
             </div>
             <button
               type="button"
               onClick={() => removeToast(item.id)}
-              className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors p-0.5 rounded"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 -mr-1 rounded-lg shrink-0 cursor-pointer"
+              aria-label="Yopish"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         );

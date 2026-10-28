@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Users,
   UserPlus,
@@ -17,6 +17,7 @@ import {
   XCircle,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   MoreVertical,
   Phone,
 } from 'lucide-react';
@@ -26,6 +27,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
+import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
 import UserForm from './UserForm';
 import {
@@ -36,23 +38,34 @@ import {
 } from '@/services/userService';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone } from '@/utils/phoneFormat';
+import { useSearch } from '@/context/SearchContext';
 
 export default function UserManagement() {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const currentUserRole = profile?.role || ROLES.OWNER;
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlRole = searchParams.get('role');
+  const { searchQuery, setSearchQuery } = useSearch();
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchQuery || '');
   const [roleFilter, setRoleFilter] = useState(urlRole || 'all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 10;
+
+  // Synchronize with global navbar search bar
+  useEffect(() => {
+    if (searchQuery !== undefined) {
+      setSearch(searchQuery);
+      setPage(1);
+    }
+  }, [searchQuery]);
 
   // Modal state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -124,8 +137,8 @@ export default function UserManagement() {
   const roleBadgeVariants = {
     [ROLES.OWNER]: 'danger',
     [ROLES.ADMIN]: 'purple',
-    [ROLES.TEACHER]: 'primary',
-    [ROLES.STUDENT]: 'info',
+    [ROLES.TEACHER]: 'warning',
+    [ROLES.STUDENT]: 'success',
   };
 
   const columns = [
@@ -142,9 +155,16 @@ export default function UserManagement() {
         const avatarSrc =
           row.avatar_url ||
           (row.id === profile?.id ? profile?.avatar_url : '');
+        const avatarGradients = {
+          [ROLES.OWNER]: 'from-rose-500 to-red-600',
+          [ROLES.ADMIN]: 'from-purple-600 to-indigo-600',
+          [ROLES.TEACHER]: 'from-amber-500 to-orange-600',
+          [ROLES.STUDENT]: 'from-blue-600 to-indigo-600',
+        };
+        const grad = avatarGradients[row.role] || 'from-blue-600 to-indigo-600';
         return (
           <div className="flex items-center gap-3 whitespace-nowrap">
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr from-[#123D78] to-blue-600 text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm ring-2 ring-gray-100 dark:ring-gray-800">
+            <div className={`w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr ${grad} text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm ring-2 ring-gray-100 dark:ring-gray-800`}>
               {avatarSrc ? (
                 <img
                   src={avatarSrc}
@@ -165,11 +185,19 @@ export default function UserManagement() {
       key: 'role',
       className: 'whitespace-nowrap',
       cellClassName: 'whitespace-nowrap',
-      render: (row) => (
-        <Badge variant={roleBadgeVariants[row.role] || 'default'} size="sm">
-          <span className="capitalize">{t(`roles.${row.role}`, row.role)}</span>
-        </Badge>
-      ),
+      render: (row) => {
+        const roleStyles = {
+          [ROLES.OWNER]: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30',
+          [ROLES.ADMIN]: 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30',
+          [ROLES.TEACHER]: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30',
+          [ROLES.STUDENT]: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30',
+        };
+        return (
+          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${roleStyles[row.role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'}`}>
+            <span>{t(`roles.${row.role}`, row.role)}</span>
+          </span>
+        );
+      },
     },
     {
       header: t('common.phone', 'Phone'),
@@ -178,34 +206,72 @@ export default function UserManagement() {
       cellClassName: 'whitespace-nowrap',
       render: (row) => {
         const primaryPhone = row.phone || row.father_phone || row.mother_phone || '';
+        const hasParentPhone = row.role === 'student' && (row.father_phone || row.mother_phone);
+
         return (
-          <div className="flex flex-col gap-1.5 whitespace-nowrap">
-            <span className="inline-flex items-center gap-1.5 w-fit font-mono text-xs font-bold text-gray-800 dark:text-gray-200 bg-gray-100/90 dark:bg-gray-800/90 px-2.5 py-1 rounded-xl border border-gray-200 dark:border-gray-700/80">
-              <Phone className="w-3 h-3 text-brand-navy dark:text-blue-400 shrink-0" />
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            {/* Primary Phone Badge */}
+            <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-gray-800 dark:text-gray-200 bg-gray-100/90 dark:bg-gray-800/90 px-2.5 py-1 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-xs">
+              <Phone className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
               {primaryPhone ? formatUzPhone(primaryPhone) : '—'}
             </span>
-            {row.role === 'student' && (row.father_phone || row.mother_phone) && (
-              <div className="flex flex-col gap-1">
-                {row.father_phone && (
-                  <span className="inline-flex items-center gap-1.5 w-fit rounded-lg bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/50 px-2 py-0.5 text-[11px]">
-                    <span className="text-[10px] font-bold uppercase text-indigo-600 dark:text-indigo-400">
-                      {t('groups.father', 'Otasi')}:
+
+            {/* Compact Parent Popover Badge (Zero row-height inflation!) */}
+            {hasParentPhone && (
+              <div className="relative group/parent inline-block">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all cursor-pointer shadow-xs"
+                  title={t('groups.parentContacts', 'Ota-onasi raqamlari')}
+                >
+                  <Users className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>{t('groups.parents', 'Ota-onasi')}</span>
+                  <ChevronDown className="w-2.5 h-2.5 opacity-70 group-hover/parent:rotate-180 transition-transform" />
+                </button>
+
+                {/* Floating Popover on Hover */}
+                <div className="invisible group-hover/parent:visible opacity-0 group-hover/parent:opacity-100 transition-all duration-200 pointer-events-none group-hover/parent:pointer-events-auto absolute left-0 top-full mt-1.5 w-64 p-3 rounded-2xl bg-white dark:bg-[#1a2332] shadow-2xl border border-gray-200 dark:border-gray-700 z-50 text-left">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-400 mb-2 pb-1.5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                    <span>{t('groups.parentContacts', 'Ota-onasi raqamlari')}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">
+                      Aloqa
                     </span>
-                    <span className="font-mono font-semibold text-gray-700 dark:text-gray-300">
-                      {formatUzPhone(row.father_phone)}
-                    </span>
-                  </span>
-                )}
-                {row.mother_phone && (
-                  <span className="inline-flex items-center gap-1.5 w-fit rounded-lg bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/50 px-2 py-0.5 text-[11px]">
-                    <span className="text-[10px] font-bold uppercase text-rose-600 dark:text-rose-400">
-                      {t('groups.mother', 'Onasi')}:
-                    </span>
-                    <span className="font-mono font-semibold text-gray-700 dark:text-gray-300">
-                      {formatUzPhone(row.mother_phone)}
-                    </span>
-                  </span>
-                )}
+                  </div>
+                  <div className="space-y-1.5">
+                    {row.father_phone && (
+                      <a
+                        href={`tel:${row.father_phone}`}
+                        className="flex items-center justify-between p-2 rounded-xl bg-indigo-50/70 hover:bg-indigo-100/70 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/50 border border-indigo-200/50 dark:border-indigo-800/50 transition-colors group/call"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold uppercase text-indigo-600 dark:text-indigo-400">
+                            {t('groups.father', 'Otasi')}
+                          </span>
+                          <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
+                            {formatUzPhone(row.father_phone)}
+                          </span>
+                        </div>
+                        <Phone className="w-3.5 h-3.5 text-indigo-500 group-hover/call:scale-110 transition-transform shrink-0" />
+                      </a>
+                    )}
+                    {row.mother_phone && (
+                      <a
+                        href={`tel:${row.mother_phone}`}
+                        className="flex items-center justify-between p-2 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/50 dark:border-rose-800/50 transition-colors group/call"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold uppercase text-rose-600 dark:text-rose-400">
+                            {t('groups.mother', 'Onasi')}
+                          </span>
+                          <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
+                            {formatUzPhone(row.mother_phone)}
+                          </span>
+                        </div>
+                        <Phone className="w-3.5 h-3.5 text-rose-500 group-hover/call:scale-110 transition-transform shrink-0" />
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -216,9 +282,20 @@ export default function UserManagement() {
       header: t('common.status', 'Status'),
       key: 'status',
       render: (row) => (
-        <Badge variant={row.is_active ? 'success' : 'danger'} size="sm">
-          {row.is_active ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
-        </Badge>
+        <span
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
+            row.is_active
+              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs ring-1 ring-emerald-500/20'
+              : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shadow-xs ring-1 ring-rose-500/20'
+          }`}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              row.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+            }`}
+          />
+          {row.is_active ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol')}
+        </span>
       ),
     },
     {
@@ -240,20 +317,17 @@ export default function UserManagement() {
           <Button
             variant="ghost"
             size="sm"
-            className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
-            title={t('common.edit', 'Edit')}
-            onClick={() => {
-              setSelectedUser(row);
-              setIsFormOpen(true);
-            }}
+            className="!p-1.5 h-8 w-8 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15 rounded-lg"
+            title={t('common.edit', 'Tahrirlash')}
+            onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
           >
             <Edit2 className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-amber-600"
-            title={t('auth.resetPassword', 'Reset Password')}
+            className="!p-1.5 h-8 w-8 text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 rounded-lg"
+            title={t('auth.resetPassword', 'Parolni tiklash')}
             onClick={() => handleResetPassword(row)}
           >
             <KeyRound className="w-4 h-4" />
@@ -262,12 +336,12 @@ export default function UserManagement() {
             <Button
               variant="ghost"
               size="sm"
-              className={`!p-1.5 h-8 w-8 ${
+              className={`!p-1.5 h-8 w-8 rounded-lg ${
                 row.is_active
-                  ? 'text-gray-500 hover:text-brand-red'
-                  : 'text-gray-500 hover:text-emerald-600'
+                  ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-500/15'
+                  : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15'
               }`}
-              title={row.is_active ? t('users.suspend', 'Suspend') : t('users.activate', 'Activate')}
+              title={row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faollashtirish')}
               onClick={() => handleToggleStatus(row)}
             >
               {row.is_active ? (
@@ -283,7 +357,7 @@ export default function UserManagement() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -310,12 +384,8 @@ export default function UserManagement() {
             variant="outline"
             size="md"
             icon={UserCheck}
-            className="border-blue-300 text-brand-navy hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-950/40"
-            onClick={() => {
-              setSelectedUser(null);
-              setFormDefaultRole(ROLES.TEACHER);
-              setIsFormOpen(true);
-            }}
+            className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold"
+            onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.TEACHER}`)}
           >
             + {t('users.createTeacher', "O'qituvchi qo'shish")}
           </Button>
@@ -324,12 +394,8 @@ export default function UserManagement() {
             variant="primary"
             size="md"
             icon={GraduationCap}
-            className="shadow-sm"
-            onClick={() => {
-              setSelectedUser(null);
-              setFormDefaultRole(ROLES.STUDENT);
-              setIsFormOpen(true);
-            }}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold"
+            onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.STUDENT}`)}
           >
             + {t('users.createStudent', "Yangi o'quvchi qo'shish")}
           </Button>
@@ -339,11 +405,8 @@ export default function UserManagement() {
               variant="ghost"
               size="md"
               icon={Shield}
-              onClick={() => {
-                setSelectedUser(null);
-                setFormDefaultRole(ROLES.ADMIN);
-                setIsFormOpen(true);
-              }}
+              className="text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-300/60 dark:border-purple-800/50 font-semibold"
+              onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.ADMIN}`)}
             >
               + {t('users.createAdmin', "Admin")}
             </Button>
@@ -352,95 +415,119 @@ export default function UserManagement() {
       </div>
 
       {/* Role Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 overflow-x-auto">
-        {[
-          { key: 'all', label: t('users.allMembersTab', 'Barcha foydalanuvchilar'), icon: Users },
-          { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap },
-          { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), icon: UserCheck },
-          ...(currentUserRole === ROLES.OWNER
-            ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), icon: Shield }]
-            : []),
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = roleFilter === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => {
-                setRoleFilter(tab.key);
-                setSearchParams(tab.key === 'all' ? {} : { role: tab.key });
-                setPage(1);
-              }}
-              className={`
-                flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shrink-0
-                ${
-                  isActive
-                    ? 'bg-brand-navy text-white shadow-sm dark:bg-blue-600'
-                    : 'bg-white dark:bg-surface-dark-secondary text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary border border-gray-200/80 dark:border-gray-700/60'
-                }
-              `}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+      <div className="flex items-center gap-1.5 sm:gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 flex-wrap">
+        {(() => {
+          const tabColorMap = {
+            all: {
+              active: 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 ring-2 ring-blue-400/40 dark:ring-emerald-400/40',
+              inactive: 'bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary border border-gray-200/80 dark:border-gray-700/60',
+            },
+            [ROLES.STUDENT]: {
+              active: 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/60',
+              inactive: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300/80 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40',
+            },
+            [ROLES.TEACHER]: {
+              active: 'bg-amber-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-400/60',
+              inactive: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-300/80 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900/40',
+            },
+            [ROLES.ADMIN]: {
+              active: 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-300/60',
+              inactive: 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border border-purple-300/80 dark:border-purple-800/60 hover:bg-purple-100 dark:hover:bg-purple-900/40',
+            },
+          };
+
+          return [
+            { key: 'all', label: t('users.allMembersTab', 'Barcha foydalanuvchilar'), icon: Users },
+            { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap },
+            { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), icon: UserCheck },
+            ...(currentUserRole === ROLES.OWNER
+              ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), icon: Shield }]
+              : []),
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = roleFilter === tab.key;
+            const cfg = tabColorMap[tab.key] || tabColorMap.all;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => {
+                  setRoleFilter(tab.key);
+                  setSearchParams(tab.key === 'all' ? {} : { role: tab.key });
+                  setPage(1);
+                }}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shrink-0 cursor-pointer
+                  ${isActive ? cfg.active : cfg.inactive}
+                `}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          });
+        })()}
       </div>
 
       {/* Filter and Search Bar */}
       <Card noPadding>
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
           {/* Search */}
           <div className="lg:col-span-2">
             <Input
               icon={Search}
-              placeholder={t('users.searchPlaceholder', 'Search by name, username...')}
+              size="md"
+              placeholder={t('users.searchPlaceholder', 'Ism, foydalanuvchi nomi yoki telefon bo‘yicha qidirish...')}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
+                setSearchQuery(e.target.value);
                 setPage(1);
               }}
             />
           </div>
 
           {/* Role Filter */}
-          <div>
-            <select
-              value={roleFilter}
-              onChange={(e) => {
-                setRoleFilter(e.target.value);
-                setPage(1);
-              }}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('users.allRoles', 'All Roles')}</option>
-              {currentUserRole === 'owner' && (
-                <>
-                  <option value={ROLES.OWNER}>{t('roles.owner', 'Owner')}</option>
-                  <option value={ROLES.ADMIN}>{t('roles.admin', 'Admin')}</option>
-                </>
-              )}
-              <option value={ROLES.TEACHER}>{t('roles.teacher', 'Teacher')}</option>
-              <option value={ROLES.STUDENT}>{t('roles.student', 'Student')}</option>
-            </select>
-          </div>
+          <Select
+            value={roleFilter}
+            size="md"
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              setPage(1);
+            }}
+            placeholder={t('users.allRoles', 'Barcha rollar')}
+            headerTitle={t('users.filterByRole', 'Rol bo‘yicha saralash')}
+            icon={Shield}
+            options={[
+              { value: 'all', label: t('users.allRoles', 'Barcha rollar') },
+              ...(currentUserRole === 'owner'
+                ? [
+                    { value: ROLES.OWNER, label: t('roles.owner', 'Asoschi (Owner)'), color: '#f59e0b', subtitle: 'Tizim rahbari' },
+                    { value: ROLES.ADMIN, label: t('roles.admin', 'Administrator'), color: '#8b5cf6', subtitle: 'Markaz ma’muri' },
+                  ]
+                : []),
+              { value: ROLES.TEACHER, label: t('roles.teacher', 'O‘qituvchi'), color: '#3b82f6', subtitle: 'Pedagog / Ustoz' },
+              { value: ROLES.STUDENT, label: t('roles.student', 'O‘quvchi'), color: '#10b981', subtitle: 'Tinglovchi / Talaba' },
+            ]}
+          />
 
           {/* Status Filter */}
-          <div>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('users.allStatuses', 'All Statuses')}</option>
-              <option value="active">{t('common.active', 'Active')}</option>
-              <option value="inactive">{t('common.inactive', 'Inactive')}</option>
-            </select>
-          </div>
+          <Select
+            value={statusFilter}
+            size="md"
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            placeholder={t('users.allStatuses', 'Barcha holatlar')}
+            headerTitle={t('common.status', 'Akkaunt holati')}
+            icon={CheckCircle}
+            options={[
+              { value: 'all', label: t('users.allStatuses', 'Barcha holatlar') },
+              { value: 'active', label: t('common.active', 'Faol akkauntlar'), color: '#10b981', subtitle: 'Kirish huquqiga ega' },
+              { value: 'inactive', label: t('common.inactive', 'Nofaol / Bloklangan'), color: '#ef4444', subtitle: 'Kirish cheklangan' },
+            ]}
+          />
         </div>
 
         {/* Desktop User Table */}
@@ -481,7 +568,15 @@ export default function UserManagement() {
                     {/* Header: Avatar, Name, Role, Status */}
                     <div className="flex items-start justify-between gap-2.5">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 h-10 rounded-full bg-brand-navy/10 text-brand-navy dark:text-blue-300 font-bold flex items-center justify-center text-sm uppercase shrink-0 overflow-hidden">
+                        <div className={`w-10 h-10 rounded-full bg-gradient-to-tr ${
+                          row.role === ROLES.OWNER
+                            ? 'from-rose-500 to-red-600'
+                            : row.role === ROLES.ADMIN
+                            ? 'from-purple-600 to-indigo-600'
+                            : row.role === ROLES.TEACHER
+                            ? 'from-amber-500 to-orange-600'
+                            : 'from-blue-600 to-indigo-600'
+                        } text-white font-bold flex items-center justify-center text-xs uppercase shrink-0 overflow-hidden shadow-sm ring-2 ring-gray-100 dark:ring-gray-800`}>
                           {avatarSrc ? (
                             <img src={avatarSrc} alt={row.fullName} className="w-full h-full object-cover" />
                           ) : (
@@ -493,51 +588,95 @@ export default function UserManagement() {
                             {row.fullName}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <Badge variant={roleBadgeVariants[row.role] || 'default'} size="sm">
-                              <span className="capitalize">{t(`roles.${row.role}`, row.role)}</span>
-                            </Badge>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              row.role === ROLES.OWNER
+                                ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30'
+                                : row.role === ROLES.ADMIN
+                                ? 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30'
+                                : row.role === ROLES.TEACHER
+                                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
+                                : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
+                            }`}>
+                              {t(`roles.${row.role}`, row.role)}
+                            </span>
                           </div>
                         </div>
                       </div>
 
-                      <Badge variant={row.is_active ? 'success' : 'danger'} size="sm" className="shrink-0">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold shrink-0 ${
+                          row.is_active
+                            ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 ring-1 ring-emerald-500/20'
+                            : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 ring-1 ring-rose-500/20'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${row.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
                         {row.is_active ? t('common.active', 'Faol') : t('common.inactive', 'Nofaol')}
-                      </Badge>
+                      </span>
                     </div>
 
-                    {/* Phones Row */}
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800 space-y-1.5 text-xs">
-                      {primaryPhone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-3.5 h-3.5 text-brand-navy dark:text-blue-400 shrink-0" />
-                          <span className="font-mono font-bold text-gray-800 dark:text-gray-200">
-                            {formatUzPhone(primaryPhone)}
-                          </span>
+                    {/* Phones Row (Compact 1-row layout with parents popover) */}
+                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-2 text-xs">
+                      {primaryPhone ? (
+                        <div className="flex items-center gap-2 font-mono font-bold text-gray-800 dark:text-gray-200 bg-gray-100/80 dark:bg-gray-800/80 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700/80 text-[11px]">
+                          <Phone className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <span>{formatUzPhone(primaryPhone)}</span>
                         </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
                       )}
 
                       {row.role === 'student' && (row.father_phone || row.mother_phone) && (
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {row.father_phone && (
-                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/50 px-2 py-0.5 text-[11px]">
-                              <span className="text-[10px] font-bold uppercase text-indigo-600 dark:text-indigo-400">
-                                {t('groups.father', 'Otasi')}:
-                              </span>
-                              <span className="font-mono font-semibold text-gray-700 dark:text-gray-300">
-                                {formatUzPhone(row.father_phone)}
-                              </span>
-                            </span>
-                          )}
-                          {row.mother_phone && (
-                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/50 px-2 py-0.5 text-[11px]">
-                              <span className="text-[10px] font-bold uppercase text-rose-600 dark:text-rose-400">
-                                {t('groups.mother', 'Onasi')}:
-                              </span>
-                              <span className="font-mono font-semibold text-gray-700 dark:text-gray-300">
-                                {formatUzPhone(row.mother_phone)}
-                              </span>
-                            </span>
-                          )}
+                        <div className="relative group/mobileParent inline-block">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 shadow-xs cursor-pointer"
+                          >
+                            <Users className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>{t('groups.parents', 'Ota-onasi')}</span>
+                            <ChevronDown className="w-2.5 h-2.5 opacity-70 group-hover/mobileParent:rotate-180 transition-transform" />
+                          </button>
+
+                          {/* Floating Popover on Hover/Focus */}
+                          <div className="invisible group-hover/mobileParent:visible opacity-0 group-hover/mobileParent:opacity-100 transition-all duration-200 pointer-events-none group-hover/mobileParent:pointer-events-auto absolute right-0 bottom-full mb-1.5 w-60 p-2.5 rounded-xl bg-white dark:bg-[#1a2332] shadow-2xl border border-gray-200 dark:border-gray-700 z-50 text-left">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5 pb-1 border-b border-gray-100 dark:border-gray-700/60">
+                              {t('groups.parentContacts', 'Ota-onasi raqamlari')}
+                            </div>
+                            <div className="space-y-1.5">
+                              {row.father_phone && (
+                                <a
+                                  href={`tel:${row.father_phone}`}
+                                  className="flex items-center justify-between p-1.5 rounded-lg bg-indigo-50/70 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/50 border border-indigo-200/50 dark:border-indigo-800/50 transition-colors"
+                                >
+                                  <div>
+                                    <span className="text-[9px] font-bold uppercase text-indigo-600 dark:text-indigo-400 block">
+                                      {t('groups.father', 'Otasi')}
+                                    </span>
+                                    <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
+                                      {formatUzPhone(row.father_phone)}
+                                    </span>
+                                  </div>
+                                  <Phone className="w-3 h-3 text-indigo-500" />
+                                </a>
+                              )}
+                              {row.mother_phone && (
+                                <a
+                                  href={`tel:${row.mother_phone}`}
+                                  className="flex items-center justify-between p-1.5 rounded-lg bg-rose-50/70 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/50 dark:border-rose-800/50 transition-colors"
+                                >
+                                  <div>
+                                    <span className="text-[9px] font-bold uppercase text-rose-600 dark:text-rose-400 block">
+                                      {t('groups.mother', 'Onasi')}
+                                    </span>
+                                    <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
+                                      {formatUzPhone(row.mother_phone)}
+                                    </span>
+                                  </div>
+                                  <Phone className="w-3 h-3 text-rose-500" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -548,11 +687,8 @@ export default function UserManagement() {
                         variant="outline"
                         size="sm"
                         icon={Edit2}
-                        className="flex-1 justify-center text-xs py-1.5"
-                        onClick={() => {
-                          setSelectedUser(row);
-                          setIsFormOpen(true);
-                        }}
+                        className="flex-1 justify-center text-xs py-1.5 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                        onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
                       >
                         {t('common.edit', 'Tahrirlash')}
                       </Button>
@@ -560,7 +696,7 @@ export default function UserManagement() {
                         variant="ghost"
                         size="sm"
                         icon={KeyRound}
-                        className="flex-1 justify-center text-xs py-1.5 text-gray-600 dark:text-gray-300"
+                        className="flex-1 justify-center text-xs py-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                         title={t('users.resetPassword', 'Parolni tiklash')}
                         onClick={() => handleResetPassword(row)}
                       >
@@ -569,10 +705,10 @@ export default function UserManagement() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`!p-2 shrink-0 ${
+                        className={`!p-2 shrink-0 rounded-lg ${
                           row.is_active
-                            ? 'text-gray-400 hover:text-brand-red'
-                            : 'text-gray-400 hover:text-emerald-600'
+                            ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40'
+                            : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
                         }`}
                         title={row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faollashtirish')}
                         onClick={() => handleToggleStatus(row)}

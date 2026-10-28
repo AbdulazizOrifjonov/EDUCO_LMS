@@ -26,7 +26,7 @@ import {
 import { formatDate } from '@/utils/csvExport';
 
 export default function NotificationsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -115,23 +115,30 @@ export default function NotificationsPage() {
     }
   };
 
+  const getLocale = () => {
+    if (i18n.language === 'uz') return 'uz-UZ';
+    if (i18n.language === 'ru') return 'ru-RU';
+    if (i18n.language === 'ar') return 'ar-SA';
+    return 'en-US';
+  };
+
   return (
-    <div className="space-y-6 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Notification Center
+              {t('notifications.notificationCenter', 'Bildirishnomalar markazi')}
             </h1>
             {unreadCount > 0 && (
               <Badge variant="danger" size="md">
-                {unreadCount} Unread
+                {unreadCount} {t('notifications.unread', 'O‘qilmagan')}
               </Badge>
             )}
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Realtime updates regarding tuition, payroll, attendance, and center messages
+            {t('notifications.subtitle', 'To‘lovlar, ish haqi, davomat va markaz yangiliklari bo‘yicha bildirishnomalar')}
           </p>
         </div>
 
@@ -142,7 +149,7 @@ export default function NotificationsPage() {
             onClick={handleMarkAllRead}
             disabled={unreadCount === 0}
           >
-            Mark All as Read
+            {t('notifications.markAllRead', 'Barchasini o‘qilgan deb belgilash')}
           </Button>
         )}
       </div>
@@ -150,14 +157,14 @@ export default function NotificationsPage() {
       {/* Filter Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-3">
         <span className="text-xs font-semibold text-gray-500 uppercase flex items-center gap-1.5 mr-2">
-          <Filter className="w-3.5 h-3.5" /> Filter:
+          <Filter className="w-3.5 h-3.5" /> {t('notifications.filter', 'Filtr')}:
         </span>
         {[
-          { id: 'ALL', label: 'All Notifications' },
-          { id: 'PAYMENT', label: 'Payments' },
-          { id: 'SALARY', label: 'Payroll' },
-          { id: 'ATTENDANCE', label: 'Attendance' },
-          { id: 'SYSTEM', label: 'System' },
+          { id: 'ALL', label: t('notifications.filterAll', 'Barcha bildirishnomalar') },
+          { id: 'PAYMENT', label: t('notifications.filterPayment', 'To‘lovlar') },
+          { id: 'SALARY', label: t('notifications.filterSalary', 'Ish haqi') },
+          { id: 'ATTENDANCE', label: t('notifications.filterAttendance', 'Davomat') },
+          { id: 'SYSTEM', label: t('notifications.filterSystem', 'Tizim') },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -181,14 +188,14 @@ export default function NotificationsPage() {
         {loading ? (
           <div className="py-16 text-center text-gray-500">
             <LoadingSpinner size="lg" />
-            <p className="mt-2 text-xs">Loading notifications...</p>
+            <p className="mt-2 text-xs">{t('notifications.loading', 'Bildirishnomalar yuklanmoqda...')}</p>
           </div>
         ) : notifications.length === 0 ? (
           <div className="py-16">
             <EmptyState
               icon={Bell}
-              title="No notifications"
-              description="You're all caught up! When you receive alerts or updates, they'll show up right here."
+              title={t('notifications.emptyTitle', 'Bildirishnomalar mavjud emas')}
+              description={t('notifications.emptyDescription', 'Barcha yangiliklardan xabardorsiz! Yangi bildirishnomalar shu yerda paydo bo‘ladi.')}
             />
           </div>
         ) : (
@@ -231,7 +238,7 @@ export default function NotificationsPage() {
                         )}
                       </div>
                       <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                        {formatDate(item.created_at, 'en-US', {
+                        {formatDate(item.created_at, getLocale(), {
                           month: 'short',
                           day: 'numeric',
                           hour: '2-digit',
@@ -246,7 +253,7 @@ export default function NotificationsPage() {
 
                     {item.link && (
                       <div className="mt-2 flex items-center gap-1 text-xs text-brand-navy dark:text-blue-400 font-medium hover:underline">
-                        <span>View details</span>
+                        <span>{t('notifications.viewDetails', 'Batafsil ko‘rish')}</span>
                         <ExternalLink className="w-3 h-3" />
                       </div>
                     )}
@@ -256,8 +263,8 @@ export default function NotificationsPage() {
                   {isUnread && (
                     <button
                       onClick={(e) => handleMarkAsRead(item.id, e)}
-                      title="Mark as read"
-                      className="p-1.5 text-gray-400 hover:text-brand-navy dark:hover:text-blue-400 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary shrink-0"
+                      title={t('notifications.markRead', 'O‘qilgan deb belgilash')}
+                      className="p-1.5 text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary shrink-0"
                     >
                       <Check className="w-4 h-4" />
                     </button>

@@ -11,10 +11,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  Users,
+  GraduationCap,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
 import { localStore } from '@/lib/localStore';
 import LessonForm from './LessonForm';
@@ -48,6 +51,7 @@ export default function ScheduleManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [initialSlot, setInitialSlot] = useState({ day: 1, time: '09:00' });
+  const [mobileDay, setMobileDay] = useState(1);
 
   const fetchScheduleData = useCallback(async () => {
     setLoading(true);
@@ -120,7 +124,7 @@ export default function ScheduleManagement() {
   });
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -148,8 +152,8 @@ export default function ScheduleManagement() {
       </div>
 
       {/* Filters */}
-      <Card noPadding>
-        <div className="p-4 space-y-3">
+      <Card noPadding overflow="visible" className="relative z-30">
+        <div className="p-4 space-y-3 overflow-visible">
           {/* Quick Odd / Even Days Toggle */}
           <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-gray-100 dark:border-gray-800">
             <button
@@ -157,7 +161,7 @@ export default function ScheduleManagement() {
               onClick={() => setPatternFilter('all')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 patternFilter === 'all'
-                  ? 'bg-brand-navy text-white shadow-sm'
+                  ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-sm shadow-blue-600/30 dark:shadow-emerald-600/30'
                   : 'bg-gray-100 dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200'
               }`}
             >
@@ -168,7 +172,7 @@ export default function ScheduleManagement() {
               onClick={() => setPatternFilter('odd')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 patternFilter === 'odd'
-                  ? 'bg-brand-navy text-white shadow-sm'
+                  ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-sm shadow-blue-600/30 dark:shadow-emerald-600/30'
                   : 'bg-gray-100 dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200'
               }`}
             >
@@ -180,7 +184,7 @@ export default function ScheduleManagement() {
               onClick={() => setPatternFilter('even')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 patternFilter === 'even'
-                  ? 'bg-brand-navy text-white shadow-sm'
+                  ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-sm shadow-blue-600/30 dark:shadow-emerald-600/30'
                   : 'bg-gray-100 dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200'
               }`}
             >
@@ -191,52 +195,67 @@ export default function ScheduleManagement() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Group Filter */}
-            <select
+            <Select
               value={groupFilter}
               onChange={(e) => setGroupFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('groups.allGroups', 'Barcha o‘quv guruhlari')}</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
+              placeholder={t('groups.allGroups', 'Barcha o‘quv guruhlari')}
+              headerTitle={t('groups.title', 'Guruh bo‘yicha jadval')}
+              icon={Users}
+              size="sm"
+              options={[
+                { value: 'all', label: t('groups.allGroups', 'Barcha o‘quv guruhlari'), subtitle: `${groups.length} ta guruh` },
+                ...groups.map((g) => ({
+                  value: g.id,
+                  label: g.name,
+                  subtitle: `${g.courseName || 'Kurs'} • ${g.room ? g.room + '-xona' : ''}`,
+                  color: g.courseColor || '#123D78',
+                })),
+              ]}
+            />
 
             {/* Teacher Filter */}
-            <select
+            <Select
               value={teacherFilter}
               onChange={(e) => setTeacherFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('groups.allTeachers', 'Barcha o‘qituvchilar')}</option>
-              {teachers.map((teach) => (
-                <option key={teach.id} value={teach.id}>
-                  {teach.fullName}
-                </option>
-              ))}
-            </select>
+              placeholder={t('groups.allTeachers', 'Barcha o‘qituvchilar')}
+              headerTitle={t('users.filterByTeacher', 'Ustoz bo‘yicha jadval')}
+              icon={GraduationCap}
+              size="sm"
+              options={[
+                { value: 'all', label: t('groups.allTeachers', 'Barcha o‘qituvchilar'), subtitle: `${teachers.length} ta o‘qituvchi` },
+                ...teachers.map((teach) => ({
+                  value: teach.id,
+                  label: teach.fullName,
+                  subtitle: teach.phone || 'O‘qituvchi',
+                  color: '#123D78',
+                })),
+              ]}
+            />
 
             {/* Room Filter */}
-            <select
+            <Select
               value={roomFilter}
               onChange={(e) => setRoomFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="all">{t('schedule.allRooms', 'Barcha xonalar')}</option>
-              {distinctRooms.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+              placeholder={t('schedule.allRooms', 'Barcha xonalar')}
+              headerTitle={t('schedule.rooms', 'Xona bo‘yicha')}
+              icon={Building2}
+              size="sm"
+              options={[
+                { value: 'all', label: t('schedule.allRooms', 'Barcha xonalar'), subtitle: `${distinctRooms.length} ta xona` },
+                ...distinctRooms.map((r) => ({
+                  value: r,
+                  label: `${r}-xona`,
+                  subtitle: 'Dars xonasi',
+                  color: '#059669',
+                })),
+              ]}
+            />
           </div>
         </div>
       </Card>
 
-      {/* Weekly Grid View */}
-      <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary shadow-card">
+      {/* Desktop Weekly Grid View */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary shadow-card">
         <div className="min-w-[850px]">
           {/* Day Headers */}
           <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-surface-dark-tertiary">
@@ -302,8 +321,8 @@ export default function ScheduleManagement() {
                         className="rounded-xl p-3 border shadow-sm relative group transition-all hover:shadow-md"
                         style={{
                           borderLeftWidth: '4px',
-                          borderLeftColor: item.color || '#123D78',
-                          backgroundColor: `${item.color || '#123D78'}0d`,
+                          borderLeftColor: item.color || '#064e3b',
+                          backgroundColor: `${item.color || '#064e3b'}0d`,
                         }}
                       >
                         <div className="flex items-start justify-between gap-1 mb-1">
@@ -376,6 +395,173 @@ export default function ScheduleManagement() {
             })}
           </div>
         </div>
+      </div>
+
+      {/* Mobile Day-by-Day View (Zero horizontal scroll) */}
+      <div className="block md:hidden space-y-3.5">
+        {/* 7-Day Quick Selector Grid */}
+        <div className="grid grid-cols-7 gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-surface-dark-tertiary">
+          {DAYS.map((day) => {
+            const isSelected = mobileDay === day.id;
+            const count = filteredSchedules.filter((s) => Number(s.day_of_week) === day.id).length;
+            return (
+              <button
+                key={day.id}
+                type="button"
+                onClick={() => setMobileDay(day.id)}
+                className={`py-2 px-1 rounded-xl text-center transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-brand-navy text-white shadow-sm font-bold scale-[1.03]'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-800/60'
+                }`}
+              >
+                <div className="text-[11px] leading-tight">{day.short}</div>
+                <div
+                  className={`text-[10px] mt-0.5 font-bold ${
+                    isSelected ? 'text-emerald-100' : 'text-gray-400'
+                  }`}
+                >
+                  {count}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Day Header & Add Button */}
+        {(() => {
+          const currentDayObj = DAYS.find((d) => d.id === mobileDay) || DAYS[0];
+          const currentDayLessons = filteredSchedules
+            .filter((s) => Number(s.day_of_week) === mobileDay)
+            .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''));
+
+          return (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">
+                    {t(`schedule.${currentDayObj.key}`, currentDayObj.name)}
+                  </h3>
+                  {currentDayObj.pattern !== 'sunday' && (
+                    <span
+                      className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                        currentDayObj.pattern === 'odd'
+                          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300'
+                          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300'
+                      }`}
+                    >
+                      {currentDayObj.pattern === 'odd' ? 'Toq kun' : 'Juft kun'}
+                    </span>
+                  )}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={Plus}
+                  className="text-xs py-1 px-2.5 h-8"
+                  onClick={() => {
+                    setSelectedLesson(null);
+                    setInitialSlot({ day: mobileDay, time: '09:00' });
+                    setIsFormOpen(true);
+                  }}
+                >
+                  + Dars qo‘shish
+                </Button>
+              </div>
+
+              {/* Day Lessons List */}
+              {currentDayLessons.length === 0 ? (
+                <div
+                  onClick={() => {
+                    setSelectedLesson(null);
+                    setInitialSlot({ day: mobileDay, time: '09:00' });
+                    setIsFormOpen(true);
+                  }}
+                  className="py-10 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary flex flex-col items-center justify-center text-gray-400 hover:text-brand-navy hover:border-brand-navy cursor-pointer transition-colors p-4 text-center shadow-xs"
+                >
+                  <Plus className="w-8 h-8 mb-2 text-gray-300 dark:text-gray-600" />
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                    {currentDayObj.name} kuniga dars rejalashtirilmagan
+                  </p>
+                  <span className="text-[11px] text-brand-navy dark:text-blue-400 mt-1">
+                    + Yangi dars qo‘shish uchun bosing
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {currentDayLessons.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-2xl p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary shadow-sm space-y-2.5 transition-all"
+                      style={{
+                        borderLeftWidth: '5px',
+                        borderLeftColor: item.color || '#123D78',
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                            {item.groupName}
+                          </h4>
+                          {item.courseName && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                              {item.courseName}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedLesson(item);
+                              setIsFormOpen(true);
+                            }}
+                            className="p-1.5 hover:text-brand-navy text-gray-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            title={t('common.edit', 'Tahrirlash')}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteLesson(item.id)}
+                            className="p-1.5 hover:text-brand-red text-gray-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                            title={t('common.delete', 'O‘chirish')}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
+                        <div className="flex items-center gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
+                          <Clock className="w-3.5 h-3.5 shrink-0" />
+                          <span>
+                            {item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}
+                          </span>
+                        </div>
+
+                        {item.room && (
+                          <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                            <Building2 className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                            <span className="truncate">{item.room}-xona</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {item.teachers?.[0] && (
+                        <p className="text-[11px] text-gray-400 pt-0.5">
+                          O‘qituvchi: {item.teachers[0].first_name} {item.teachers[0].last_name}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Lesson Modal */}

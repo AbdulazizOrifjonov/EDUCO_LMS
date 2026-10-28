@@ -10,6 +10,7 @@ const Input = forwardRef(function Input(
     iconPosition = 'left',
     type = 'text',
     isPhone = false,
+    size = 'md',
     className = '',
     inputClassName = '',
     disabled = false,
@@ -126,13 +127,13 @@ const Input = forwardRef(function Input(
           onClick={handleClick}
           placeholder={resolvedPlaceholder}
           className={`
-            w-full rounded-lg border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm
-            placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-150
+            w-full rounded-xl border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 transition-colors duration-150
+            ${size === 'sm' ? 'h-10 text-xs px-3' : size === 'lg' ? 'h-12 text-base px-4' : 'h-11 text-sm px-3.5'}
+            placeholder-gray-400 dark:placeholder-gray-500
             focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-surface-dark
             disabled:bg-gray-100 dark:disabled:bg-surface-dark-tertiary disabled:cursor-not-allowed disabled:text-gray-400
-            ${Icon && iconPosition === 'left' ? 'pl-9 rtl:pl-3 rtl:pr-9' : 'pl-3.5'}
-            ${Icon && iconPosition === 'right' ? 'pr-9 rtl:pr-3 rtl:pl-9' : 'pr-3.5'}
-            py-2
+            ${Icon && iconPosition === 'left' ? '!pl-9 rtl:!pl-3.5 rtl:!pr-9' : ''}
+            ${Icon && iconPosition === 'right' ? '!pr-9 rtl:!pr-3.5 rtl:!pl-9' : ''}
             ${
               error
                 ? 'border-brand-red focus:border-brand-red focus:ring-brand-red'

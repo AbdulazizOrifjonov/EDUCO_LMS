@@ -7,6 +7,7 @@ import { FileText, Calendar, Users, Paperclip, Upload } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
 import { createHomework, updateHomework } from '@/services/homeworkService';
 import { getGroups } from '@/services/groupService';
@@ -38,6 +39,8 @@ export default function HomeworkForm({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(homeworkSchema),
@@ -164,25 +167,22 @@ export default function HomeworkForm({
 
         {/* Group & Deadline */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-              {t('groups.group', 'Assigned Cohort Group')} <span className="text-brand-red">*</span>
-            </label>
-            <select
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              {...register('groupId')}
-            >
-              <option value="">{t('groups.selectGroup', 'Select Group...')}</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name} ({g.courseName})
-                </option>
-              ))}
-            </select>
-            {errors.groupId && (
-              <p className="text-xs text-brand-red font-medium">{errors.groupId.message}</p>
-            )}
-          </div>
+          <Select
+            label={t('groups.group', 'Assigned Cohort Group')}
+            required
+            options={[
+              { value: '', label: t('groups.selectGroup', 'Select Group...') },
+              ...groups.map((g) => ({
+                value: g.id,
+                label: g.name + (g.courseName ? ` (${g.courseName})` : ''),
+              })),
+            ]}
+            value={watch('groupId') || ''}
+            onChange={(e) => setValue('groupId', e.target.value, { shouldValidate: true })}
+            error={errors.groupId?.message}
+            color="emerald"
+            searchable
+          />
 
           <Input
             label={t('homework.deadline', 'Submission Deadline')}

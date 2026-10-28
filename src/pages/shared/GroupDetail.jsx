@@ -17,14 +17,20 @@ import {
   CheckCircle2,
   User,
   Phone,
+  ChevronDown,
+  Camera,
+  Tag,
+  Percent,
+  DollarSign,
+  Edit3,
 } from 'lucide-react';
+import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import Modal from '@/components/ui/Modal';
-import Input from '@/components/ui/Input';
-import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
+import Select from '@/components/ui/Select';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from '@/components/ui/Toast';
 import {
@@ -33,16 +39,22 @@ import {
   enrollStudent,
   removeStudent,
   transferStudent,
+  uploadGroupAvatar,
+  updateStudentDiscount,
 } from '@/services/groupService';
-import { getStudents, createStudent } from '@/services/userService';
+import { getStudents } from '@/services/userService';
+import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { getGradesByGroup } from '@/services/gradeService';
 import { getAttendanceReport } from '@/services/attendanceService';
-import { cleanUzPhone } from '@/utils/phoneFormat';
+import { formatUzPhone } from '@/utils/phoneFormat';
 
 export default function GroupDetail({ groupId: propGroupId }) {
   const { t } = useTranslation();
   const { id: paramGroupId } = useParams();
   const navigate = useNavigate();
+  const { profile } = useAuth();
+  const currentUserRole = profile?.role || 'owner';
+  const isTeacher = currentUserRole === 'teacher';
   const groupId = propGroupId || paramGroupId;
 
   const [group, setGroup] = useState(null);
@@ -52,25 +64,68 @@ export default function GroupDetail({ groupId: propGroupId }) {
   // Modals for student management
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
-  const [addStudentMode, setAddStudentMode] = useState('existing'); // 'existing' | 'new'
-  const [newStudentData, setNewStudentData] = useState({
-    firstName: '',
-    lastName: '',
-    fatherPhone: '',
-    motherPhone: '',
-    phone: '',
-    password: '',
-  });
-  const [isSubmittingNewStudent, setIsSubmittingNewStudent] = useState(false);
   const [availableStudents, setAvailableStudents] = useState([]);
   const [otherGroups, setOtherGroups] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [targetGroupId, setTargetGroupId] = useState('');
   const [studentToTransfer, setStudentToTransfer] = useState(null);
 
+  // Student Discount Modal
+  const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
+  const [discountStudent, setDiscountStudent] = useState(null);
+  const [discountType, setDiscountType] = useState('none'); // 'none' | 'percent' | 'fixed' | 'custom'
+  const [discountValue, setDiscountValue] = useState('');
+  const [discountReason, setDiscountReason] = useState('');
+  const [savingDiscount, setSavingDiscount] = useState(false);
+
   // Data for Attendance & Grades tabs
   const [grades, setGrades] = useState([]);
   const [attendanceStats, setAttendanceStats] = useState(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const [cropModalFile, setCropModalFile] = useState(null);
+
+  const handleAvatarSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCropModalFile(file);
+    }
+    e.target.value = '';
+  };
+
+  const handleApplyCroppedAvatar = async (croppedDataUrl, croppedFile) => {
+    setCropModalFile(null);
+    const file = croppedFile || croppedDataUrl;
+
+    if (!file || !groupId) return;
+    try {
+      setAvatarUploading(true);
+      const uploadedUrl = await uploadGroupAvatar(groupId, file);
+      setGroup((prev) => ({ ...prev, avatar_url: uploadedUrl, image_url: uploadedUrl }));
+      toast.success(t('groups.avatarUpdated', "Guruh profil rasmi muvaffaqiyatli saqlandi!"));
+    } catch (err) {
+      console.error('Failed to upload group avatar:', err);
+      toast.error("Rasmni yuklab bo'lmadi");
+    } finally {
+      setAvatarUploading(false);
+
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!groupId) return;
+    if (!window.confirm("Guruh profil rasmini olib tashlashni tasdiqlaysizmi?")) return;
+    try {
+      setAvatarUploading(true);
+      await uploadGroupAvatar(groupId, null);
+      setGroup((prev) => ({ ...prev, avatar_url: '', image_url: '' }));
+      toast.success(t('groups.avatarRemoved', "Guruh profil rasmi olib tashlandi."));
+    } catch (err) {
+      console.error('Failed to remove group avatar:', err);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const fetchGroup = useCallback(async () => {
     if (!groupId) return;
@@ -101,7 +156,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
     fetchGroup();
   }, [fetchGroup]);
 
-  // Open Add Student Modal
+  // Open Add Student Modal (Existing students)
   const handleOpenAddStudent = async () => {
     try {
       const allStudents = await getStudents();
@@ -109,15 +164,6 @@ export default function GroupDetail({ groupId: propGroupId }) {
       const notEnrolled = allStudents.filter((s) => !enrolledIds.has(s.id));
       setAvailableStudents(notEnrolled);
       setSelectedStudentId(notEnrolled[0]?.id || '');
-      setAddStudentMode(notEnrolled.length > 0 ? 'existing' : 'new');
-      setNewStudentData({
-        firstName: '',
-        lastName: '',
-        fatherPhone: '',
-        motherPhone: '',
-        phone: '',
-        password: '',
-      });
       setIsAddStudentOpen(true);
     } catch (err) {
       toast.error('Could not load students');
@@ -133,57 +179,6 @@ export default function GroupDetail({ groupId: propGroupId }) {
       fetchGroup();
     } catch (err) {
       toast.error(err.message || 'Enrollment failed');
-    }
-  };
-
-  const handleCreateAndEnrollStudent = async (e) => {
-    e?.preventDefault?.();
-    if (!newStudentData.firstName.trim() || !newStudentData.lastName.trim()) {
-      toast.error(t('errors.required', 'Ism va familiya kiritilishi shart'));
-      return;
-    }
-    const cleanFather = cleanUzPhone(newStudentData.fatherPhone);
-    const cleanMother = cleanUzPhone(newStudentData.motherPhone);
-    const cleanPhone = cleanUzPhone(newStudentData.phone);
-    if (!cleanFather && !cleanMother && !cleanPhone) {
-      toast.error(t('users.atLeastOneParentPhone', 'Otasining yoki onasining telefon raqamini kiritish shart'));
-      return;
-    }
-
-    const trimmedPwd = (newStudentData.password || '').trim();
-    if (!trimmedPwd) {
-      toast.error(t('users.passwordRequired', 'Kabinetga kirish uchun parol kiritish shart!'));
-      return;
-    }
-    if (!evaluatePasswordStrength(trimmedPwd).allMet) {
-      toast.error(
-        t(
-          'users.passwordMustBeStrong',
-          'Parol xavfsiz (yashil) bo‘lishi uchun katta-kichik harf, raqam va maxsus belgi (!@#$) ishtirok etishi shart!'
-        )
-      );
-      return;
-    }
-
-    setIsSubmittingNewStudent(true);
-    try {
-      await createStudent({
-        firstName: newStudentData.firstName,
-        lastName: newStudentData.lastName,
-        fatherPhone: cleanFather,
-        motherPhone: cleanMother,
-        phone: cleanPhone,
-        password: trimmedPwd,
-        groupId,
-      });
-      toast.success(t('groups.studentEnrolled', 'Talaba muvaffaqiyatli qabul qilindi!'));
-      setNewStudentData({ firstName: '', lastName: '', fatherPhone: '', motherPhone: '', phone: '', password: '' });
-      setIsAddStudentOpen(false);
-      fetchGroup();
-    } catch (err) {
-      toast.error(err.message || 'Xatolik yuz berdi');
-    } finally {
-      setIsSubmittingNewStudent(false);
     }
   };
 
@@ -226,6 +221,64 @@ export default function GroupDetail({ groupId: propGroupId }) {
     }
   };
 
+  const handleOpenDiscountModal = (student) => {
+    setDiscountStudent(student);
+    if (student.custom_price != null && student.custom_price !== '') {
+      setDiscountType('custom');
+      setDiscountValue(String(student.custom_price));
+    } else if (Number(student.discount_percent) > 0) {
+      setDiscountType('percent');
+      setDiscountValue(String(student.discount_percent));
+    } else if (Number(student.discount_amount) > 0) {
+      setDiscountType('fixed');
+      setDiscountValue(String(student.discount_amount));
+    } else {
+      setDiscountType('none');
+      setDiscountValue('');
+    }
+    setDiscountReason(student.discount_reason || '');
+    setIsDiscountModalOpen(true);
+  };
+
+  const handleSaveDiscount = async () => {
+    if (!discountStudent) return;
+    try {
+      setSavingDiscount(true);
+      const baseFee = Number(group.monthly_price || 0);
+      let payload = {
+        discount_type: discountType === 'none' ? null : discountType,
+        discount_reason: discountReason.trim(),
+        custom_price: null,
+        discount_percent: 0,
+        discount_amount: 0,
+      };
+
+      if (discountType === 'percent') {
+        const pct = Math.min(100, Math.max(0, Number(discountValue) || 0));
+        payload.discount_percent = pct;
+        payload.discount_amount = Math.round(baseFee * (pct / 100));
+      } else if (discountType === 'fixed') {
+        const amt = Math.max(0, Number(discountValue) || 0);
+        payload.discount_amount = amt;
+      } else if (discountType === 'custom') {
+        const customPrice = Math.max(0, Number(discountValue) || 0);
+        payload.custom_price = customPrice;
+        payload.discount_amount = Math.max(0, baseFee - customPrice);
+      }
+
+      await updateStudentDiscount(groupId, discountStudent.id, payload);
+      toast.success("Talaba to‘lovi va chegirmasi muvaffaqiyatli saqlandi!");
+      setIsDiscountModalOpen(false);
+      setDiscountStudent(null);
+      fetchGroup();
+    } catch (err) {
+      console.error(err);
+      toast.error("Chegirmani saqlashda xatolik yuz berdi");
+    } finally {
+      setSavingDiscount(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 min-h-[300px]">
@@ -256,41 +309,122 @@ export default function GroupDetail({ groupId: propGroupId }) {
   const daysOfWeek = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 animate-fade-in">
       {/* Header & Back Button */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          icon={ArrowLeft}
-          onClick={() => navigate(-1)}
-          className="!p-2 h-9 w-9"
-        />
-        <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{group.name}</h1>
-            <Badge variant="primary" size="md">
-              {group.courses?.name || 'General Course'}
-            </Badge>
-            <Badge
-              variant={group.status === 'active' ? 'success' : 'secondary'}
-              size="sm"
+      {/* Group Profile Header Card */}
+      <Card className="p-5 sm:p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+          <Button
+            variant="outline"
+            size="sm"
+            icon={ArrowLeft}
+            onClick={() => navigate(-1)}
+            className="!p-2 h-9 w-9 shrink-0 self-start"
+            title="Orqaga"
+          />
+
+          {/* Group Avatar with Camera Upload */}
+          <div className="relative group shrink-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-600 dark:border-emerald-500 flex items-center justify-center text-3xl font-extrabold text-emerald-800 dark:text-emerald-300 shadow-md">
+              {group.avatar_url || group.image_url ? (
+                <img
+                  src={group.avatar_url || group.image_url}
+                  alt={group.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                group.name?.charAt(0) || 'G'
+              )}
+            </div>
+
+            <label
+              title="Guruhga profil rasmi qo‘yish"
+              className="absolute -bottom-1 -right-1 p-2 bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105"
             >
-              <span className="capitalize">{group.status}</span>
-            </Badge>
+              <Camera className="w-4 h-4" />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarSelect}
+                disabled={avatarUploading}
+              />
+            </label>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-4 flex-wrap">
-            <span className="flex items-center gap-1">
-              <GraduationCap className="w-3.5 h-3.5 text-brand-navy" />
-              Teacher: {group.teachers?.[0]?.fullName || t('groups.unassigned', 'Not Assigned')}
-            </span>
-            <span className="flex items-center gap-1">
-              <Building2 className="w-3.5 h-3.5 text-gray-400" />
-              Room: {group.room || 'TBD'}
-            </span>
-          </p>
+
+          {/* Group Info & Actions */}
+          <div className="flex-1 text-center sm:text-left rtl:sm:text-right space-y-2 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-wrap justify-center sm:justify-start">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{group.name}</h1>
+              <Badge variant="primary" size="md">
+                {group.courses?.name || group.courseName || 'General Course'}
+              </Badge>
+              <Badge
+                variant={group.status === 'active' ? 'success' : 'secondary'}
+                size="sm"
+              >
+                <span className="capitalize">{group.status}</span>
+              </Badge>
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-4 flex-wrap justify-center sm:justify-start">
+              <span className="flex items-center gap-1 font-medium text-gray-700 dark:text-gray-300">
+                <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+                Ustoz: {group.teachers?.[0]?.fullName || group.teacher_name || t('groups.unassigned', 'Not Assigned')}
+              </span>
+              <span className="flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                <DollarSign className="w-3.5 h-3.5" />
+                Oylik to‘lov: {Number(group.monthly_price || 0).toLocaleString()} so‘m / oy
+              </span>
+              <span className="flex items-center gap-1">
+                <Building2 className="w-3.5 h-3.5 text-gray-400" />
+                Xona: {group.room || 'TBD'}
+              </span>
+              {group.schedule && (
+                <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400 font-mono">
+                  <Clock className="w-3.5 h-3.5 text-emerald-600" />
+                  {group.schedule}
+                </span>
+              )}
+            </p>
+
+            {/* Avatar action buttons */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer shadow-xs transition-colors">
+                <Camera className="w-3.5 h-3.5" />
+                <span>
+                  {group.avatar_url || group.image_url
+                    ? "Rasmni almashtirish"
+                    : "Guruh profiliga rasm qo‘yish"}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarSelect}
+                  disabled={avatarUploading}
+                />
+              </label>
+
+              {(group.avatar_url || group.image_url) && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  disabled={avatarUploading}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 text-xs font-semibold transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Rasmni o‘chirish</span>
+                </button>
+              )}
+
+              {avatarUploading && (
+                <span className="text-xs text-emerald-600 animate-pulse font-medium">Yuklanmoqda...</span>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {/* Overview Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -311,7 +445,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
                   ? 'bg-brand-red'
                   : fillPercent > 80
                   ? 'bg-amber-500'
-                  : 'bg-brand-navy'
+                  : 'bg-emerald-500'
               }`}
               style={{ width: `${fillPercent}%` }}
             />
@@ -377,7 +511,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
                   flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap
                   ${
                     isSelected
-                      ? 'border-brand-navy text-brand-navy dark:border-blue-400 dark:text-blue-400 font-semibold'
+                      ? 'border-emerald-600 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400 font-semibold'
                       : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                   }
                 `}
@@ -388,7 +522,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
                   <span
                     className={`ml-1.5 px-2 py-0.5 rounded-full text-xs ${
                       isSelected
-                        ? 'bg-brand-navy/10 text-brand-navy dark:bg-blue-900/40 dark:text-blue-300 font-bold'
+                        ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 font-bold'
                         : 'bg-gray-100 dark:bg-surface-dark-tertiary text-gray-600 dark:text-gray-400'
                     }`}
                   >
@@ -404,19 +538,37 @@ export default function GroupDetail({ groupId: propGroupId }) {
       {/* Tab 1: Students */}
       {activeTab === 'students' && (
         <Card noPadding>
-          <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+          <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 flex-wrap gap-2">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">
               {t('groups.enrolledList', 'Cohort Student Roster')}
             </h3>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={UserPlus}
-              onClick={handleOpenAddStudent}
-              disabled={enrolledCount >= capacity}
-            >
-              {t('groups.enrollStudent', 'Enroll Student')}
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Users}
+                onClick={handleOpenAddStudent}
+                disabled={enrolledCount >= capacity}
+              >
+                {t('groups.enrollExisting', 'Mavjud talabani biriktirish')}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={UserPlus}
+                onClick={() => {
+                  if (isTeacher) {
+                    navigate(`/teacher/students/create?groupId=${groupId}`);
+                  } else {
+                    navigate(`/${currentUserRole}/users/create?role=student&groupId=${groupId}`);
+                  }
+                }}
+                disabled={enrolledCount >= capacity}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+              >
+                {t('groups.addNewStudent', "+ Yangi talaba yaratish")}
+              </Button>
+            </div>
           </div>
 
           <Table
@@ -437,34 +589,121 @@ export default function GroupDetail({ groupId: propGroupId }) {
                 ),
               },
               {
-                header: t('common.phone', 'Phone Number'),
+                header: t('common.phone', 'Telefon va Ota-onasi'),
                 key: 'phone',
-                render: (row) => (
-                  <span className="text-xs text-gray-600 dark:text-gray-300">
-                    {row.phone || '—'}
-                  </span>
-                ),
+                className: 'whitespace-nowrap',
+                cellClassName: 'whitespace-nowrap',
+                render: (row) => {
+                  const primaryPhone = row.phone || row.father_phone || row.mother_phone || '';
+                  const hasParentPhone = row.father_phone || row.mother_phone;
+
+                  return (
+                    <div className="flex items-center gap-2 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-100/90 dark:bg-gray-800/90 px-2.5 py-1 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-xs">
+                        <Phone className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        {primaryPhone ? formatUzPhone(primaryPhone) : '—'}
+                      </span>
+
+                      {hasParentPhone && (
+                        <div className="relative group/parent inline-block">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all cursor-pointer shadow-xs"
+                            title={t('groups.parentContacts', 'Ota-onasi raqamlari')}
+                          >
+                            <Users className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>{t('groups.parents', 'Ota-onasi')}</span>
+                            <ChevronDown className="w-2.5 h-2.5 opacity-70 group-hover/parent:rotate-180 transition-transform" />
+                          </button>
+
+                          {/* Floating Popover on Hover */}
+                          <div className="invisible group-hover/parent:visible opacity-0 group-hover/parent:opacity-100 transition-all duration-200 pointer-events-none group-hover/parent:pointer-events-auto absolute left-0 top-full mt-1.5 w-60 p-2.5 rounded-xl bg-white dark:bg-[#1a2332] shadow-2xl border border-gray-200 dark:border-gray-700 z-50 text-left">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1.5 pb-1 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                              <span>{t('groups.parentContacts', 'Ota-onasi raqamlari')}</span>
+                              <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">Aloqa</span>
+                            </div>
+                            <div className="space-y-1.5">
+                              {row.father_phone && (
+                                <a
+                                  href={`tel:${row.father_phone}`}
+                                  className="flex items-center justify-between p-1.5 rounded-lg bg-indigo-50/70 hover:bg-indigo-100/70 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/50 border border-indigo-200/50 dark:border-indigo-800/50 transition-colors"
+                                >
+                                  <div>
+                                    <span className="text-[9px] font-bold uppercase text-indigo-600 dark:text-indigo-400 block">
+                                      {t('groups.father', 'Otasi')}
+                                    </span>
+                                    <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
+                                      {formatUzPhone(row.father_phone)}
+                                    </span>
+                                  </div>
+                                  <Phone className="w-3 h-3 text-indigo-500" />
+                                </a>
+                              )}
+                              {row.mother_phone && (
+                                <a
+                                  href={`tel:${row.mother_phone}`}
+                                  className="flex items-center justify-between p-1.5 rounded-lg bg-rose-50/70 hover:bg-rose-100/70 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/50 dark:border-rose-800/50 transition-colors"
+                                >
+                                  <div>
+                                    <span className="text-[9px] font-bold uppercase text-rose-600 dark:text-rose-400 block">
+                                      {t('groups.mother', 'Onasi')}
+                                    </span>
+                                    <span className="font-mono text-xs font-bold text-gray-800 dark:text-gray-200">
+                                      {formatUzPhone(row.mother_phone)}
+                                    </span>
+                                  </div>
+                                  <Phone className="w-3 h-3 text-rose-500" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                },
               },
               {
-                header: t('groups.parentsPhone', "Ota-onasi telefoni"),
-                key: 'parentsPhone',
-                render: (row) => (
-                  <div className="flex flex-col gap-0.5 text-xs text-gray-600 dark:text-gray-300">
-                    {row.father_phone && (
-                      <span className="flex items-center gap-1">
-                        <span className="font-semibold text-gray-500 dark:text-gray-400">{t('groups.father', 'Otasi')}:</span>
-                        {row.father_phone}
-                      </span>
-                    )}
-                    {row.mother_phone && (
-                      <span className="flex items-center gap-1">
-                        <span className="font-semibold text-gray-500 dark:text-gray-400">{t('groups.mother', 'Onasi')}:</span>
-                        {row.mother_phone}
-                      </span>
-                    )}
-                    {!row.father_phone && !row.mother_phone && <span>—</span>}
-                  </div>
-                ),
+                header: "Oylik to‘lov va Chegirma",
+                key: 'pricing',
+                render: (row) => {
+                  const baseFee = Number(group.monthly_price || 0);
+                  const effective = row.effective_price !== undefined ? row.effective_price : baseFee;
+                  const hasDiscount = Boolean(row.discount_label);
+
+                  return (
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <div className="flex items-center gap-1.5 font-bold text-gray-900 dark:text-gray-100 text-xs">
+                          <span>{effective.toLocaleString()} so‘m / oy</span>
+                          {hasDiscount && (
+                            <span className="text-[10px] line-through text-gray-400 font-normal">
+                              {baseFee.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        {hasDiscount ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-500/20">
+                            <Tag className="w-2.5 h-2.5 text-amber-600" />
+                            {row.discount_label}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                            Standart to‘lov
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDiscountModal(row)}
+                        className="p-1 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors cursor-pointer"
+                        title="Chegirma yoki individual narx belgilash"
+                      >
+                        <Percent className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                },
               },
               {
                 header: t('groups.enrolledDate', 'Enrolled Date'),
@@ -482,6 +721,15 @@ export default function GroupDetail({ groupId: propGroupId }) {
                 cellClassName: 'text-right rtl:text-left',
                 render: (row) => (
                   <div className="flex items-center justify-end gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                      title="Chegirma va to‘lovni sozlash"
+                      onClick={() => handleOpenDiscountModal(row)}
+                    >
+                      <Percent className="w-4 h-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -645,153 +893,54 @@ export default function GroupDetail({ groupId: propGroupId }) {
         </Card>
       )}
 
-      {/* Modal: Enroll Student */}
+      {/* Modal: Enroll Existing Student */}
       <Modal
         isOpen={isAddStudentOpen}
         onClose={() => setIsAddStudentOpen(false)}
-        title={t('groups.enrollStudent', 'Guruhga talaba qabul qilish')}
-        subtitle={`${group.name} — ${t('groups.enrollSubtitle', 'yangi talaba qo‘shish yoki mavjud talabani biriktirish')}`}
-        size="lg"
+        title={t('groups.enrollStudent', 'Guruhga mavjud talabani biriktirish')}
+        subtitle={`${group.name} — ${t('groups.enrollExistingSubtitle', 'ro‘yxatdan o‘tgan talabani ushbu guruhga qabul qilish')}`}
+        size="md"
       >
         <div className="space-y-4">
-          {/* Mode Switcher */}
-          <div className="flex p-1 rounded-xl bg-gray-100 dark:bg-surface-dark-tertiary">
-            <button
-              type="button"
-              onClick={() => setAddStudentMode('new')}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                addStudentMode === 'new'
-                  ? 'bg-white dark:bg-surface-dark-secondary text-brand-navy dark:text-blue-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-              }`}
-            >
-              + {t('groups.addNewStudent', "Yangi o'quvchi qo'shish")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setAddStudentMode('existing')}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                addStudentMode === 'existing'
-                  ? 'bg-white dark:bg-surface-dark-secondary text-brand-navy dark:text-blue-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-              }`}
-            >
-              {t('groups.existingStudent', "Mavjud o'quvchi")} ({availableStudents.length})
-            </button>
-          </div>
-
-          {addStudentMode === 'new' ? (
-            <form onSubmit={handleCreateAndEnrollStudent} className="space-y-4">
-              <div className="p-3.5 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 text-xs text-brand-navy dark:text-blue-300">
-                <p className="font-semibold">{t('users.parentsContact', "Ota-onasi bilan bog'lanish")}</p>
-                <p className="text-gray-600 dark:text-gray-400 mt-0.5">
-                  {t('users.parentPhoneNote', "Otasining yoki onasining (yoki ikkalasining) telefon raqamini kiriting.")}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label={t('common.firstName', 'Ism')}
-                  icon={User}
-                  required
-                  placeholder="Masalan: Aziz"
-                  value={newStudentData.firstName}
-                  onChange={(e) =>
-                    setNewStudentData({ ...newStudentData, firstName: e.target.value })
+          {availableStudents.length === 0 ? (
+            <div className="text-center py-6 space-y-3">
+              <p className="text-sm text-gray-500">
+                {t('groups.allStudentsEnrolled', 'Barcha talabalar guruhlarga biriktirilgan yoki tizimda bo‘sh talabalar yo‘q.')}
+              </p>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={UserPlus}
+                onClick={() => {
+                  setIsAddStudentOpen(false);
+                  if (isTeacher) {
+                    navigate(`/teacher/students/create?groupId=${groupId}`);
+                  } else {
+                    navigate(`/${currentUserRole}/users/create?role=student&groupId=${groupId}`);
                   }
-                />
-                <Input
-                  label={t('common.lastName', 'Familiya')}
-                  icon={User}
-                  required
-                  placeholder="Masalan: Karimov"
-                  value={newStudentData.lastName}
-                  onChange={(e) =>
-                    setNewStudentData({ ...newStudentData, lastName: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label={t('users.fatherPhone', 'Otasining telefon raqami')}
-                  icon={Phone}
-                  placeholder="+998 90 111 22 33"
-                  value={newStudentData.fatherPhone}
-                  onChange={(e) =>
-                    setNewStudentData({ ...newStudentData, fatherPhone: e.target.value })
-                  }
-                />
-                <Input
-                  label={t('users.motherPhone', 'Onasining telefon raqami')}
-                  icon={Phone}
-                  placeholder="+998 90 222 33 44"
-                  value={newStudentData.motherPhone}
-                  onChange={(e) =>
-                    setNewStudentData({ ...newStudentData, motherPhone: e.target.value })
-                  }
-                />
-              </div>
-
-              <Input
-                label={t('users.studentPhoneOptional', "O'quvchining shaxsiy telefoni (ixtiyoriy)")}
-                icon={Phone}
-                placeholder="+998 90 333 44 55"
-                value={newStudentData.phone}
-                onChange={(e) =>
-                  setNewStudentData({ ...newStudentData, phone: e.target.value })
-                }
-              />
-
-              <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-surface-dark-tertiary/30">
-                <PasswordStrengthInput
-                  label={t('users.cabinetPassword', 'LMS kabinetga kirish paroli')}
-                  required
-                  value={newStudentData.password}
-                  onValueChange={(val) =>
-                    setNewStudentData({ ...newStudentData, password: val })
-                  }
-                  placeholder="Masalan: Jasur#2026!"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                <Button variant="ghost" type="button" onClick={() => setIsAddStudentOpen(false)}>
-                  {t('common.cancel', 'Bekor qilish')}
-                </Button>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  isLoading={isSubmittingNewStudent}
-                >
-                  {t('groups.createAndEnroll', 'Yaratish va guruhga qabul qilish')}
-                </Button>
-              </div>
-            </form>
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {t('groups.addNewStudent', "+ Yangi talaba yaratish (Katta oyna)")}
+              </Button>
+            </div>
           ) : (
             <div className="space-y-4">
-              {availableStudents.length === 0 ? (
-                <p className="text-sm text-gray-500 py-3">
-                  {t('groups.allStudentsEnrolled', 'Barcha mavjud talabalar guruhlarga biriktirilgan.')}
-                </p>
-              ) : (
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300">
-                    {t('users.student', 'Talabani tanlang')}
-                  </label>
-                  <select
-                    value={selectedStudentId}
-                    onChange={(e) => setSelectedStudentId(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-                  >
-                    {availableStudents.map((st) => (
-                      <option key={st.id} value={st.id}>
-                        {st.fullName} (@{st.username}) {st.phone ? `— ${st.phone}` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              <Select
+                label={t('users.student', 'Talabani tanlang')}
+                value={selectedStudentId}
+                onChange={(e) => setSelectedStudentId(e.target.value)}
+                placeholder={t('tuition.selectStudent', 'Talabani tanlang')}
+                headerTitle={t('users.students', 'Mavjud talabalar')}
+                icon={GraduationCap}
+                size="sm"
+                options={availableStudents.map((st) => ({
+                  value: st.id,
+                  label: st.fullName,
+                  subtitle: `@${st.username} • ${st.phone || 'Talaba'}`,
+                  color: '#10b981',
+                }))}
+              />
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <Button variant="ghost" onClick={() => setIsAddStudentOpen(false)}>
@@ -799,10 +948,11 @@ export default function GroupDetail({ groupId: propGroupId }) {
                 </Button>
                 <Button
                   variant="primary"
-                  disabled={availableStudents.length === 0}
+                  disabled={availableStudents.length === 0 || !selectedStudentId}
                   onClick={handleEnrollStudent}
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
                 >
-                  {t('groups.confirmEnroll', 'Guruhga qabul qilish')}
+                  {t('groups.confirmEnroll', 'Guruhga biriktirish')}
                 </Button>
               </div>
             </div>
@@ -826,22 +976,22 @@ export default function GroupDetail({ groupId: propGroupId }) {
               {t('groups.noOtherGroups', 'No other active cohorts available for transfer.')}
             </p>
           ) : (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300">
-                {t('groups.targetGroup', 'Target Study Group')}
-              </label>
-              <select
-                value={targetGroupId}
-                onChange={(e) => setTargetGroupId(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              >
-                {otherGroups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name} ({g.courseName}) — {g.studentCount}/{g.capacity}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label={t('groups.targetGroup', 'Ko‘chiriladigan guruh')}
+              value={targetGroupId}
+              onChange={(e) => setTargetGroupId(e.target.value)}
+              placeholder={t('groups.selectGroup', 'Guruhni tanlang')}
+              headerTitle={t('groups.title', 'O‘quv guruhlari')}
+              icon={Users}
+              size="sm"
+              options={otherGroups.map((g) => ({
+                value: g.id,
+                label: g.name,
+                subtitle: g.courseName || 'Kurs fani',
+                badge: `${g.studentCount}/${g.capacity}`,
+                color: g.courseColor || '#123D78',
+              }))}
+            />
           )}
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
@@ -864,6 +1014,179 @@ export default function GroupDetail({ groupId: propGroupId }) {
           </div>
         </div>
       </Modal>
+
+      {/* Modal: Student Tuition & Discount Management */}
+      <Modal
+        isOpen={isDiscountModalOpen}
+        onClose={() => {
+          if (!savingDiscount) {
+            setIsDiscountModalOpen(false);
+            setDiscountStudent(null);
+          }
+        }}
+        title="Talaba oylik to‘lovi va chegirmasini sozlash"
+        size="md"
+      >
+        {discountStudent && (
+          <div className="space-y-4">
+            {/* Student info banner */}
+            <div className="p-3.5 rounded-xl bg-gray-50 dark:bg-surface-dark-secondary border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">
+                  {discountStudent.fullName}
+                </p>
+                <p className="text-xs text-gray-500">@{discountStudent.username}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-gray-400 block uppercase font-bold">Guruh narxi</span>
+                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  {Number(group.monthly_price || 0).toLocaleString()} so‘m / oy
+                </span>
+              </div>
+            </div>
+
+            {/* Discount Type Selection */}
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-2">
+                Chegirma turi yoki individual narx
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'none', label: "Chegirmasiz (Standart)", desc: "Guruh narxi bo'yicha" },
+                  { id: 'percent', label: "Foizli chegirma (%)", desc: "Masalan: 10%, 20%, 50%" },
+                  { id: 'fixed', label: "Qat'iy chegirma (so'm)", desc: "Masalan: 100 000 so'm ayirish" },
+                  { id: 'custom', label: "Maxsus to'lov (so'm)", desc: "Masalan: 450 000 so'm belgilash" },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setDiscountType(item.id);
+                      if (item.id === 'none') setDiscountValue('');
+                    }}
+                    className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer ${
+                      discountType === item.id
+                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold ring-1 ring-emerald-500'
+                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold">{item.label}</div>
+                    <div className="text-[10px] opacity-70 mt-0.5">{item.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Value Input */}
+            {discountType !== 'none' && (
+              <div className="space-y-1">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                  {discountType === 'percent'
+                    ? "Chegirma foizi (%)"
+                    : discountType === 'fixed'
+                    ? "Chegirma summasi (so'm)"
+                    : "Belgilangan yakuniy oylik to'lov summasi (so'm)"}
+                </label>
+                <Input
+                  type="number"
+                  placeholder={
+                    discountType === 'percent'
+                      ? "Masalan: 20"
+                      : discountType === 'fixed'
+                      ? "Masalan: 100000"
+                      : "Masalan: 450000"
+                  }
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Real-time Calculation Breakdown Box */}
+            {(() => {
+              const base = Number(group.monthly_price || 0);
+              let val = Number(discountValue) || 0;
+              let finalDue = base;
+              let discountSub = 0;
+
+              if (discountType === 'percent') {
+                val = Math.min(100, Math.max(0, val));
+                discountSub = Math.round(base * (val / 100));
+                finalDue = Math.max(0, base - discountSub);
+              } else if (discountType === 'fixed') {
+                discountSub = Math.min(base, Math.max(0, val));
+                finalDue = Math.max(0, base - discountSub);
+              } else if (discountType === 'custom') {
+                finalDue = Math.max(0, val);
+                discountSub = Math.max(0, base - finalDue);
+              }
+
+              return (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-gray-600 dark:text-gray-400">
+                    <span>Standart kurs narxi:</span>
+                    <span>{base.toLocaleString()} so‘m</span>
+                  </div>
+                  {discountType !== 'none' && (
+                    <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 font-medium">
+                      <span>Chegirma:</span>
+                      <span>-{discountSub.toLocaleString()} so‘m</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between font-bold text-gray-900 dark:text-white pt-1.5 border-t border-emerald-500/20 text-sm">
+                    <span>Talaba to‘lashi kerak:</span>
+                    <span className="text-emerald-700 dark:text-emerald-400">{finalDue.toLocaleString()} so‘m / oy</span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Reason */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Chegirma sababi / Izoh
+              </label>
+              <Input
+                placeholder="Masalan: Olimpiada g‘olibi, Oila a‘zolari birga o‘qiydi, Grant..."
+                value={discountReason}
+                onChange={(e) => setDiscountReason(e.target.value)}
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setIsDiscountModalOpen(false);
+                  setDiscountStudent(null);
+                }}
+                disabled={savingDiscount}
+              >
+                Bekor qilish
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSaveDiscount}
+                disabled={savingDiscount}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {savingDiscount ? "Saqlanmoqda..." : "Saqlash"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Telegram-style Image Cropper Modal for Group Avatar */}
+      <ImageCropperModal
+        isOpen={Boolean(cropModalFile)}
+        imageFile={cropModalFile}
+        onClose={() => setCropModalFile(null)}
+        onCrop={handleApplyCroppedAvatar}
+        title="Guruh profil rasmini moslashtirish"
+        subtitle="Rasmni suring, kattalashtiring va o‘lchamini sozlang"
+      />
     </div>
   );
 }

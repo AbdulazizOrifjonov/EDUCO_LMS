@@ -144,7 +144,7 @@ export async function createCourse({
   code,
   description,
   monthlyFee = 0,
-  color = '#123D78',
+  color = '#064e3b',
   isActive = true,
 }) {
   if (!isPlaceholder) {
@@ -156,7 +156,7 @@ export async function createCourse({
           code: code || `CRS-${Math.floor(1000 + Math.random() * 9000)}`,
           description,
           monthly_fee: Number(monthlyFee) || 0,
-          color: color || '#123D78',
+          color: color || '#064e3b',
           is_active: isActive,
         })
         .select()

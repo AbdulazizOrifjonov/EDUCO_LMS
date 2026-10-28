@@ -1,6 +1,7 @@
 import React, { useState, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Lock, Eye, EyeOff, Check, Sparkles, ShieldAlert, Shield, ShieldCheck } from 'lucide-react';
+import { Lock, Eye, EyeOff, Check, Copy, Sparkles, ShieldAlert, Shield, ShieldCheck } from 'lucide-react';
+import { toast } from '@/components/ui/Toast';
 
 /**
  * Evaluates password strength based on:
@@ -91,12 +92,41 @@ const PasswordStrengthInput = forwardRef(function PasswordStrengthInput(
 ) {
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const strength = evaluatePasswordStrength(value);
 
   const handleInputChange = (e) => {
     if (onChange) onChange(e);
     if (onValueChange) onValueChange(e.target.value);
+  };
+
+  const handleCopy = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (!value) {
+      toast.warning(t('users.noPasswordToCopy', 'Nusxalash uchun avval parol kiriting!'));
+      return;
+    }
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(String(value));
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = String(value);
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopied(true);
+      toast.success(t('common.copied', 'Parol nusxalandi!'));
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Copy failed:', err);
+      toast.error('Nusxalashda xatolik yuz berdi');
+    }
   };
 
   const handleGenerate = () => {
@@ -180,7 +210,7 @@ const PasswordStrengthInput = forwardRef(function PasswordStrengthInput(
 
   return (
     <div className={`w-full space-y-2 ${className}`}>
-      {/* Label & Optional Generator Button */}
+      {/* Label & Generator / Copy Buttons */}
       <div className="flex items-center justify-between">
         {label && (
           <label
@@ -192,16 +222,34 @@ const PasswordStrengthInput = forwardRef(function PasswordStrengthInput(
           </label>
         )}
 
-        {showGenerator && (
-          <button
-            type="button"
-            onClick={handleGenerate}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#123D78] hover:text-[#F12D3A] dark:text-blue-400 dark:hover:text-amber-400 transition-colors"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{t('users.generatePassword', 'Avto-parol')}</span>
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {value ? (
+            <button
+              type="button"
+              onClick={handleCopy}
+              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-md transition-colors ${
+                copied
+                  ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400'
+                  : 'text-gray-600 hover:text-brand-navy dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}
+              title="Paroldan nusxa olish"
+            >
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? t('common.copied', 'Nusxalandi!') : t('common.copy', 'Nusxa olish')}</span>
+            </button>
+          ) : null}
+
+          {showGenerator && (
+            <button
+              type="button"
+              onClick={handleGenerate}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#123D78] hover:text-[#F12D3A] dark:text-blue-400 dark:hover:text-amber-400 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{t('users.generatePassword', 'Avto-parol')}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Input Box */}
@@ -219,18 +267,37 @@ const PasswordStrengthInput = forwardRef(function PasswordStrengthInput(
           onChange={handleInputChange}
           placeholder={placeholder}
           autoComplete="new-password"
-          className={`w-full rounded-xl border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-white text-sm py-2.5 pl-10 pr-10 focus:outline-none focus:ring-2 transition-all font-medium ${getInputBorderClasses()}`}
+          className={`w-full rounded-xl border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-white text-sm py-2.5 pl-10 pr-20 focus:outline-none focus:ring-2 transition-all font-medium ${getInputBorderClasses()}`}
           {...rest}
         />
 
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
-          tabIndex={-1}
-        >
-          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
+        <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center gap-1">
+          {value ? (
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors focus:outline-none"
+              title={copied ? "Nusxalandi!" : "Paroldan nusxa olish"}
+              tabIndex={-1}
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors focus:outline-none"
+            title={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
 
       {/* Live Strength Progress Bar (4 segments: Red -> Orange -> Green) */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,6 +18,8 @@ import useTheme from '@/hooks/useTheme';
 import { SUPPORTED_LANGUAGES, ROLES } from '@/lib/constants';
 import { LanguageFlag } from '@/components/LanguageSelector';
 import { uploadAvatar } from '@/services/settingsService';
+import ImageCropperModal from '@/components/ui/ImageCropperModal';
+import { localStore } from '@/lib/localStore';
 
 export default function Sidebar({
   items = [],
@@ -33,6 +35,16 @@ export default function Sidebar({
   const { user, profile, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [cropAvatarFile, setCropAvatarFile] = useState(null);
+
+  // Dismiss mobile virtual keyboard whenever sidebar opens
+  useEffect(() => {
+    if (mobileOpen) {
+      if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+    }
+  }, [mobileOpen]);
 
   // Derived user details
   const displayName =
@@ -52,6 +64,18 @@ export default function Sidebar({
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join('') || 'U';
+
+  // Live due reminders count for Owner & Admin
+  const dueRemindersCount = React.useMemo(() => {
+    if (!['owner', 'admin'].includes(userRole)) return 0;
+    try {
+      const all = localStore.getStudentReminders ? localStore.getStudentReminders() : [];
+      const today = new Date().toISOString().split('T')[0];
+      return all.filter((r) => r.status === 'pending' && r.due_date <= today).length;
+    } catch {
+      return 0;
+    }
+  }, [userRole]);
 
   const handleLogout = async () => {
     try {
@@ -79,17 +103,17 @@ export default function Sidebar({
     switch (r) {
       case ROLES.OWNER:
       case 'owner':
-        return 'bg-amber-500/20 text-amber-200 border-amber-400/30';
+        return 'bg-rose-500/25 text-rose-200 border-rose-400/40';
       case ROLES.ADMIN:
       case 'admin':
-        return 'bg-indigo-500/20 text-indigo-200 border-indigo-400/30';
+        return 'bg-purple-500/25 text-purple-200 border-purple-400/40';
       case ROLES.TEACHER:
       case 'teacher':
-        return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30';
+        return 'bg-amber-500/25 text-amber-200 border-amber-400/40';
       case ROLES.STUDENT:
       case 'student':
       default:
-        return 'bg-blue-500/20 text-blue-200 border-blue-400/30';
+        return 'bg-emerald-500/25 text-emerald-200 border-emerald-400/40';
     }
   };
 
@@ -117,14 +141,19 @@ export default function Sidebar({
       {mobileOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity lg:hidden"
-          onClick={onCloseMobile}
+          onClick={() => {
+            if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
+              document.activeElement.blur();
+            }
+            onCloseMobile();
+          }}
           aria-hidden="true"
         />
       )}
 
       {/* Main Sidebar Element */}
       <aside
-        className={`fixed top-0 bottom-0 z-50 flex flex-col bg-[#123D78] text-white shadow-2xl transition-all duration-300 ease-in-out dark:bg-[#101827] dark:border-r dark:border-gray-800/80
+        className={`fixed top-0 bottom-0 z-50 flex flex-col bg-gradient-to-b from-[#123D78] via-[#1b4b8a] to-[#2563EB] text-white shadow-2xl transition-all duration-300 ease-in-out dark:bg-none dark:bg-[#101827] dark:border-r dark:border-gray-800/80
           ${isRtl ? 'right-0' : 'left-0'}
           ${collapsed ? 'lg:w-20' : 'lg:w-64'}
           w-72
@@ -137,6 +166,11 @@ export default function Sidebar({
           }
         `}
       >
+        {/* Light Mode Glow / Shula (banner-inspired vertical sheen, strictly hidden in dark mode) */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden dark:hidden" aria-hidden="true">
+          <div className="absolute -bottom-10 -right-10 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute bottom-1/3 -left-10 h-48 w-48 rounded-full bg-sky-300/10 blur-3xl" />
+        </div>
         {/* Header / Logo Section */}
         <div
           className={`relative flex h-16 items-center border-b border-white/10 dark:border-gray-800 ${
@@ -152,12 +186,12 @@ export default function Sidebar({
             {/* Logo Icon (Always 100% visible) */}
             <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/25 to-white/10 shadow-md backdrop-blur-sm border border-white/25">
               <GraduationCap className="h-6 w-6 text-white" />
-              <span className="absolute -bottom-1 px-1 py-[1px] rounded bg-[#F12D3A] text-[8px] font-black uppercase tracking-wider text-white shadow-sm leading-none">
+              <span className="absolute -bottom-1 px-1 py-[1px] rounded bg-blue-600 dark:bg-emerald-600 text-[8px] font-black uppercase tracking-wider text-white shadow-sm leading-none">
                 EDUCO
               </span>
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#F12D3A] opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#F12D3A]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 dark:bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-300 dark:bg-emerald-400" />
               </span>
             </div>
 
@@ -168,7 +202,7 @@ export default function Sidebar({
                   <span className="text-xl font-black tracking-wider text-white">
                     EDUCO
                   </span>
-                  <span className="rounded-md bg-[#F12D3A] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                  <span className="rounded-md bg-blue-500 dark:bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
                     LMS
                   </span>
                 </div>
@@ -195,7 +229,7 @@ export default function Sidebar({
             onClick={onToggleCollapse}
             className={`hidden lg:flex items-center justify-center transition-all ${
               collapsed && !mobileOpen
-                ? 'absolute -right-3 top-1/2 -translate-y-1/2 z-50 h-6 w-6 rounded-full bg-[#F12D3A] text-white shadow-lg ring-2 ring-white dark:ring-gray-900 hover:scale-110'
+                ? 'absolute -right-3 top-1/2 -translate-y-1/2 z-50 h-6 w-6 rounded-full bg-blue-600 dark:bg-emerald-600 text-white shadow-lg ring-2 ring-white dark:ring-gray-900 hover:scale-110'
                 : 'rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white'
             }`}
             title={collapsed ? t('common.expand', 'Yon panelni kengaytirish') : t('common.collapse', 'Yon panelni yig‘ish')}
@@ -230,6 +264,11 @@ export default function Sidebar({
               : location.pathname === item.path ||
                 location.pathname.startsWith(`${item.path}/`);
 
+            let badgeCount = item.badge;
+            if (item.path && item.path.includes('/reminders') && dueRemindersCount > 0) {
+              badgeCount = dueRemindersCount;
+            }
+
             return (
               <NavLink
                 key={item.path || index}
@@ -240,8 +279,8 @@ export default function Sidebar({
                   group relative flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm transition-all duration-200
                   ${
                     isActiveRoute
-                      ? 'bg-gradient-to-r from-[#F12D3A] to-[#d91e2b] text-white font-semibold shadow-lg shadow-red-600/30 ring-1 ring-white/25'
-                      : 'font-medium text-white/75 hover:bg-white/10 hover:text-white dark:text-gray-300 dark:hover:bg-gray-800/70 dark:hover:text-white'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 dark:from-emerald-600 dark:to-teal-700 text-white font-semibold shadow-lg shadow-blue-950/50 dark:shadow-emerald-950/50 ring-1 ring-white/25 dark:ring-emerald-400/25'
+                      : 'font-medium text-white/80 hover:bg-white/10 hover:text-white dark:text-gray-300 dark:hover:bg-gray-800/70 dark:hover:text-white'
                   }
                   ${collapsed && !mobileOpen ? 'justify-center px-2' : ''}
                 `}
@@ -259,17 +298,21 @@ export default function Sidebar({
                 )}
 
                 {/* Badge if present */}
-                {item.badge !== undefined && item.badge !== null && item.badge > 0 && (
+                {badgeCount !== undefined && badgeCount !== null && badgeCount > 0 && (
                   <span
-                    className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold
+                    className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-black
                       ${
-                        collapsed && !mobileOpen
-                          ? 'absolute top-1 right-1 h-4 min-w-[16px] text-[10px] bg-red-500 text-white'
+                        item.path && item.path.includes('/reminders')
+                          ? collapsed && !mobileOpen
+                            ? 'absolute top-1 right-1 h-4 min-w-[16px] text-[10px] bg-amber-500 text-white animate-pulse shadow-sm'
+                            : 'bg-amber-500 text-white font-black shadow-xs animate-pulse'
+                          : collapsed && !mobileOpen
+                          ? 'absolute top-1 right-1 h-4 min-w-[16px] text-[10px] bg-blue-500 dark:bg-emerald-600 text-white'
                           : 'bg-white/20 text-white backdrop-blur-sm'
                       }
                     `}
                   >
-                    {item.badge}
+                    {badgeCount}
                   </span>
                 )}
               </NavLink>
@@ -316,7 +359,7 @@ export default function Sidebar({
                       className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-colors
                         ${
                           i18n.language === lang.code
-                            ? 'bg-[#F12D3A] text-white'
+                            ? 'bg-blue-600 dark:bg-emerald-600 text-white'
                             : 'text-white/80 hover:bg-white/10 hover:text-white dark:text-gray-300 dark:hover:bg-gray-800'
                         }
                       `}
@@ -368,7 +411,7 @@ export default function Sidebar({
             {/* Avatar with direct photo upload */}
             <label
               title={t('users.uploadAvatar', 'Profil rasmini yuklash yoki o‘zgartirish')}
-              className="group relative flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-gradient-to-tr from-[#F12D3A] to-rose-400 font-bold text-white shadow-md ring-2 ring-white/20 overflow-visible"
+              className="group relative flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 dark:from-emerald-600 dark:to-teal-500 font-bold text-white shadow-md ring-2 ring-white/20 overflow-visible"
             >
               <div className="h-full w-full rounded-full overflow-hidden flex items-center justify-center">
                 {profile?.avatar_url ? (
@@ -384,22 +427,17 @@ export default function Sidebar({
               <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <Camera className="h-4 w-4 text-white" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-[#123D78] bg-[#F12D3A] text-white shadow-sm dark:border-gray-900">
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-[#1b4b8a] bg-blue-600 dark:bg-emerald-600 text-white shadow-sm dark:border-gray-900">
                 <Camera className="h-2.5 w-2.5" />
               </span>
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={async (e) => {
+                onChange={(e) => {
                   const file = e.target.files?.[0];
-                  const uid = profile?.id || user?.id;
-                  if (file && uid) {
-                    try {
-                      await uploadAvatar(uid, file);
-                    } catch (err) {
-                      console.error('Avatar upload error:', err);
-                    }
+                  if (file) {
+                    setCropAvatarFile(file);
                   }
                   e.target.value = '';
                 }}
@@ -419,13 +457,17 @@ export default function Sidebar({
                 <p className="truncate text-xs font-semibold text-white">
                   {displayName}
                 </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                   <span
-                    className={`inline-block truncate rounded-full border px-1.5 py-0.2 text-[10px] font-semibold uppercase tracking-wider ${getRoleBadgeClasses(
+                    className={`inline-block whitespace-nowrap shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getRoleBadgeClasses(
                       userRole
                     )}`}
                   >
                     {t(`roles.${userRole}`, userRole)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-blue-200 dark:text-emerald-300 font-medium shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sky-300 dark:bg-emerald-400 animate-pulse" />
+                    Online
                   </span>
                 </div>
               </div>
@@ -459,6 +501,25 @@ export default function Sidebar({
           )}
         </div>
       </aside>
+
+      {/* Telegram-style Image Cropper Modal for Avatar */}
+      <ImageCropperModal
+        isOpen={Boolean(cropAvatarFile)}
+        imageFile={cropAvatarFile}
+        onClose={() => setCropAvatarFile(null)}
+        onCrop={async (croppedDataUrl, croppedFile) => {
+          setCropAvatarFile(null);
+          const uid = profile?.id || user?.id;
+          if (uid) {
+            try {
+              await uploadAvatar(uid, croppedFile || croppedDataUrl);
+            } catch (err) {
+              console.error('Avatar upload error:', err);
+            }
+          }
+        }}
+        title={t('users.editAvatar', 'Profil rasmini moslashtirish')}
+      />
     </>
   );
 }

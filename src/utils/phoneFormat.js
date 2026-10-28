@@ -17,6 +17,9 @@ export function formatUzPhone(rawInput) {
 
   // Extract subscriber digits (up to 9 digits after 998)
   let subscriber = digits;
+  while (subscriber.startsWith('998') && subscriber.length > 9) {
+    subscriber = subscriber.slice(3);
+  }
   if (subscriber.startsWith('998')) {
     subscriber = subscriber.slice(3);
   }

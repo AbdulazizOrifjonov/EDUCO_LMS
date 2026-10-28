@@ -7,6 +7,7 @@ import { KeyRound, Shield, User, Phone, RefreshCw, Users, GraduationCap } from '
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Select from '@/components/ui/Select';
 import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
 import { toast } from '@/components/ui/Toast';
 import { createUser, updateUser } from '@/services/userService';
@@ -122,6 +123,7 @@ export default function UserForm({
         ];
 
   const onSubmit = async (data) => {
+    if (isSubmitting) return;
     if (!isEditing && data.role === ROLES.OWNER) {
       toast.error('Tizimda faqat 1 ta Boshliq (Owner) bo‘lishi mumkin!');
       return;
@@ -152,17 +154,9 @@ export default function UserForm({
       return;
     }
 
-    if (trimmedPwd) {
-      const pwdCheck = evaluatePasswordStrength(trimmedPwd);
-      if (!pwdCheck.allMet) {
-        toast.error(
-          t(
-            'users.passwordMustBeStrong',
-            'Parol xavfsiz (yashil) bo‘lishi uchun katta-kichik harf, raqam va maxsus belgi (!@#$) ishtirok etishi shart!'
-          )
-        );
-        return;
-      }
+    if (trimmedPwd && trimmedPwd.length < 6) {
+      toast.error(t('users.passwordTooShort', 'Parol kamida 6 ta belgidan iborat bo‘lishi kerak!'));
+      return;
     }
 
     setIsSubmitting(true);
@@ -292,9 +286,9 @@ export default function UserForm({
 
         {/* Phone & Login Credentials Section */}
         {selectedRole === ROLES.STUDENT ? (
-          <div className="p-4 rounded-xl border border-blue-200/80 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-950/20 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-navy dark:text-blue-300">
-              <Users className="w-4 h-4 shrink-0 text-brand-navy dark:text-blue-400" />
+          <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+              <Users className="w-4 h-4 shrink-0 text-emerald-700 dark:text-emerald-400" />
               <span>{t('users.parentsContact', "Ota-onasi bilan bog'lanish va Login raqami")}</span>
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -353,26 +347,26 @@ export default function UserForm({
 
         {/* Group Assignment (for Student role) */}
         {selectedRole === ROLES.STUDENT && !isEditing && (
-          <div className="flex flex-col gap-1.5 p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-surface-dark-tertiary/30">
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <GraduationCap className="w-4 h-4 text-brand-navy dark:text-blue-400" />
-                <span>{t('users.assignToGroup', "O'quv guruhiga biriktirish")}</span>
-              </span>
-              <span className="text-gray-400 font-normal lowercase text-[11px]">({t('common.optional', 'ixtiyoriy')})</span>
-            </label>
-            <select
+          <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-surface-dark-tertiary/30">
+            <Select
+              label={t('users.assignToGroup', "O'quv guruhiga biriktirish")}
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
-            >
-              <option value="">{t('users.unassignedGroup', "Guruhsiz (keyinroq biriktirish)")}</option>
-              {groupsList.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name} ({g.courseName || g.course_name}) — {g.studentCount || g.enrolled_count || 0}/{g.capacity} ta o‘quvchi
-                </option>
-              ))}
-            </select>
+              placeholder={t('users.unassignedGroup', "Guruhsiz (keyinroq biriktirish)")}
+              headerTitle={t('groups.title', 'O‘quv guruhlari')}
+              icon={GraduationCap}
+              size="sm"
+              options={[
+                { value: '', label: t('users.unassignedGroup', "Guruhsiz (keyinroq biriktirish)") },
+                ...groupsList.map((g) => ({
+                  value: g.id,
+                  label: g.name,
+                  subtitle: g.courseName || g.course_name || 'Kurs fani',
+                  badge: `${g.studentCount || g.enrolled_count || 0}/${g.capacity} ta o‘quvchi`,
+                  color: g.color || g.courseColor || '#064e3b',
+                })),
+              ]}
+            />
           </div>
         )}
 
@@ -393,7 +387,7 @@ export default function UserForm({
             onClick={() => setValue('isActive', !isActive)}
             className={`
               relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none
-              ${isActive ? 'bg-brand-navy' : 'bg-gray-300 dark:bg-gray-700'}
+              ${isActive ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-700'}
             `}
           >
             <span

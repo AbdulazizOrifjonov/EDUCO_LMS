@@ -8,13 +8,11 @@ import {
   Calendar,
   CheckSquare,
   Award,
-  FileText,
-  FolderOpen,
-  Megaphone,
   MessageSquare,
   Receipt,
   BarChart3,
   Bell,
+  BellRing,
   Settings,
   KeyRound,
 } from 'lucide-react';
@@ -58,6 +56,12 @@ const ADMIN_NAV_ITEMS = [
     icon: Calendar,
   },
   {
+    labelKey: 'nav.reminders',
+    label: 'Eslatmalar',
+    path: '/admin/reminders',
+    icon: BellRing,
+  },
+  {
     labelKey: 'nav.attendance',
     label: 'Attendance',
     path: '/admin/attendance',
@@ -68,24 +72,6 @@ const ADMIN_NAV_ITEMS = [
     label: 'Grades',
     path: '/admin/grades',
     icon: Award,
-  },
-  {
-    labelKey: 'nav.homework',
-    label: 'Homework',
-    path: '/admin/homework',
-    icon: FileText,
-  },
-  {
-    labelKey: 'nav.materials',
-    label: 'Materials',
-    path: '/admin/materials',
-    icon: FolderOpen,
-  },
-  {
-    labelKey: 'nav.announcements',
-    label: 'Announcements',
-    path: '/admin/announcements',
-    icon: Megaphone,
   },
   {
     labelKey: 'nav.chat',
