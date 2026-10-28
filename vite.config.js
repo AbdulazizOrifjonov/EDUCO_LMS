@@ -290,12 +290,11 @@ function syncStoragePlugin() {
                 return;
               }
 
-              // Demo / Simulation check for placeholder tokens
+              // Demo / Simulation check for explicit placeholder tokens
               const authHeader = headers['Authorization'] || headers['authorization'] || '';
               const isSampleToken =
-                authHeader.includes('SXP6_F:_8_-fv9uvdsyrp') ||
-                authHeader.includes('educo_gw_backup_secret') ||
-                url.includes('placeholder');
+                authHeader.includes('demo_token_educo') ||
+                url.includes('placeholder.domain');
 
               if (isSampleToken) {
                 res.statusCode = 200;

@@ -45,9 +45,9 @@ const INITIAL_SMS_SETTINGS = {
 const INITIAL_SMS_DEVICES = [
   {
     id: 'dev-primary-1',
-    name: 'Asosiy Android Gateway (Bulutli / 4G)',
+    name: 'Asosiy Android Gateway (SMS Gate Cloud)',
     device_role: 'primary',
-    gateway_url: 'https://api.sms-gate.app/3rdparty/v1/message',
+    gateway_url: 'https://api.sms-gate.app/3rdparty/v1/messages',
     api_token: 'SXP6_F:_8_-fv9uvdsyrp',
     is_active: true,
     status: 'online',
@@ -58,11 +58,11 @@ const INITIAL_SMS_DEVICES = [
   },
   {
     id: 'dev-backup-2',
-    name: 'Zaxira Android Gateway (Redmi)',
+    name: 'Zaxira Android Gateway (Lokal Wi-Fi server)',
     device_role: 'backup',
-    gateway_url: 'http://192.168.1.151:8080/send',
+    gateway_url: 'http://192.168.1.151:8080/message',
     api_token: 'educo_gw_backup_secret',
-    is_active: true,
+    is_active: false,
     status: 'offline',
     last_seen_at: null,
     last_error: null,

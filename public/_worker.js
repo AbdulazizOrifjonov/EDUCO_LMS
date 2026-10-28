@@ -89,17 +89,11 @@ export default {
             return jsonResponse({ error: 'url is required' }, 400);
           }
 
-          // Demo / Simulation check: if targetUrl has the sample token, is placeholder demo, or local IP in cloud environment
+          // Demo / Simulation check: only for explicit placeholder or demo tokens
           const authHeader = headers['Authorization'] || headers['authorization'] || '';
           const isSampleToken =
-            authHeader.includes('SXP6_F:_8_-fv9uvdsyrp') ||
-            authHeader.includes('educo_gw_backup_secret') ||
-            /demo|sample|test/i.test(authHeader) ||
-            /placeholder|example\.com|demo|test/i.test(targetUrl) ||
-            targetUrl.includes('192.168.') ||
-            targetUrl.includes('10.') ||
-            targetUrl.includes('localhost') ||
-            targetUrl.includes('127.0.0.1');
+            authHeader.includes('demo_token_educo') ||
+            /placeholder|example\.com/i.test(targetUrl);
 
           if (isSampleToken) {
             return jsonResponse({

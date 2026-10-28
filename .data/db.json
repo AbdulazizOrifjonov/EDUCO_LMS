@@ -36,7 +36,7 @@
       "full_name": "Abdulazizbek",
       "father_phone": "",
       "mother_phone": "",
-      "updated_at": "2026-10-27T12:52:01.878Z"
+      "updated_at": "2026-10-28T08:50:50.005Z"
     },
     {
       "id": "usr-admin-1",
@@ -2183,31 +2183,29 @@
   "educo_db_sms_devices": [
     {
       "id": "dev-primary-1",
-      "name": "Asosiy Android Gateway (Bulutli / 4G)",
+      "name": "Asosiy Android Gateway (SMS Gate Cloud)",
       "device_role": "primary",
-      "gateway_url": "https://api.sms-gate.app/3rdparty/v1/message",
+      "gateway_url": "https://api.sms-gate.app/3rdparty/v1/messages",
       "api_token": "SXP6_F:_8_-fv9uvdsyrp",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-10-27T09:40:55.984Z",
+      "last_seen_at": "2026-10-28T09:31:43.245Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-25T17:07:53.516Z",
-      "battery_level": null,
-      "updated_at": "2026-10-27T09:40:55.984Z"
+      "created_at": "2026-10-28T09:31:43.263Z"
     },
     {
       "id": "dev-backup-2",
-      "name": "Zaxira Android Gateway (Redmi)",
+      "name": "Zaxira Android Gateway (Lokal Wi-Fi server)",
       "device_role": "backup",
-      "gateway_url": "http://192.168.1.151:8080/send",
+      "gateway_url": "http://192.168.1.151:8080/message",
       "api_token": "educo_gw_backup_secret",
-      "is_active": true,
+      "is_active": false,
       "status": "offline",
       "last_seen_at": null,
       "last_error": null,
       "phone_number": "+998 93 987 65 43",
-      "created_at": "2026-10-25T17:07:53.517Z"
+      "created_at": "2026-10-28T09:31:43.263Z"
     }
   ],
   "educo_db_memberships": [

@@ -144,20 +144,10 @@ export function isDemoGateway(device, targetUrl = '') {
   const url = (targetUrl || device?.gateway_url || '').trim().toLowerCase();
   const name = (device?.name || '').trim().toLowerCase();
 
-  // Known demo tokens or placeholder endpoints
-  if (!token || token === 'SXP6_F:_8_-fv9uvdsyrp' || token === 'educo_gw_backup_secret') return true;
-  if (/demo|sample|placeholder|test_secret|test/i.test(token)) return true;
-  if (/placeholder|example\.com|demo|test/i.test(url)) return true;
-  if (/demo|test/i.test(name)) return true;
-  if (url.includes('api.sms-gate.app') && token.startsWith('SXP6_F:')) return true;
-  if (url.includes('192.168.1.150') && token === 'educo_gw_backup_secret') return true;
-
-  // On HTTPS web (e.g. Cloudflare Pages), local IPs cannot be reached from cloud proxy
-  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const isLocalIp = /^http:\/\/((192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|localhost|127\.0\.0\.1))/i.test(url);
-  if (isHttps && isLocalIp) {
-    return true;
-  }
+  // Explicit demo/placeholder tokens only (never treat real SXP6_F credentials as demo)
+  if (!token || token === 'demo_token_educo' || token === 'demo_token_123') return true;
+  if (/^demo$|^placeholder$/i.test(token)) return true;
+  if (/placeholder|example\.com/i.test(url)) return true;
 
   return false;
 }
@@ -173,11 +163,17 @@ function buildGatewayHeaders(device) {
   if (device && device.api_token) {
     const token = device.api_token.trim();
     if (token.includes(':')) {
+      let b64 = '';
       try {
-        headers['Authorization'] = `Basic ${btoa(token)}`;
+        if (typeof btoa === 'function') {
+          b64 = btoa(token);
+        } else if (typeof Buffer !== 'undefined') {
+          b64 = Buffer.from(token).toString('base64');
+        }
       } catch (_) {
-        headers['Authorization'] = `Basic ${token}`;
+        b64 = token;
       }
+      headers['Authorization'] = `Basic ${b64}`;
     } else {
       headers['Authorization'] = `Bearer ${token}`;
       headers['X-Api-Key'] = token;
@@ -235,11 +231,11 @@ async function executeGatewayRequest(targetUrl, method, headers, payload) {
   const isHttpsPage = typeof window !== 'undefined' && window.location.protocol === 'https:';
 
   if (isLocalIp && isHttpsPage && targetUrl.startsWith('http:')) {
-    throw new Error('Brauzer xavfsizlik cheklovi (Mixed Content): HTTPS saytdan lokal HTTP (192.168.x.x) manziliga so‘rov yuborib bo‘lmaydi. Android ilovada Cloud rejimi (SMS Gate Cloud) yoki ngrok/Cloudflare HTTPS tunnel manzilini kiriting.');
+    throw new Error('Brauzer xavfsizlik cheklovi (Mixed Content): HTTPS saytdan lokal HTTP (192.168.x.x) manziliga so‘rov yuborib bo‘lmaydi. Android ilovada Cloud server (SMS Gate Cloud) rejimini yoqing.');
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10000);
+  const timer = setTimeout(() => controller.abort(), 12000);
   try {
     const res = await fetch(targetUrl, {
       method,
@@ -252,9 +248,15 @@ async function executeGatewayRequest(targetUrl, method, headers, payload) {
     return { ok: res.ok, status: res.status, data };
   } catch (netErr) {
     if (netErr.name === 'AbortError') {
-      throw new Error('Qurilma bilan aloqa uzildi (Timeout 10s)');
+      if (isLocalIp) {
+        throw new Error('Lokal Gateway bilan aloqa o‘rnatilmadi (Timeout 12s). Telefoningizda "Local server" tugmasi yoqilganini, telefon va kompyuter bitta Wi-Fi tarmog‘ida ekanini va IP manzil to‘g‘riligini tekshiring.');
+      }
+      throw new Error('Qurilma bilan aloqa uzildi (Timeout 12s)');
     }
     if (netErr.message && netErr.message.includes('Failed to fetch')) {
+      if (isLocalIp) {
+        throw new Error('Lokal serverga ulanib bo‘lmadi. Android ilovada "Local server" yoqilganini tekshiring.');
+      }
       throw new Error('SMS Gateway bilan aloqa o‘rnatilmadi. Qurilma yoqilganini, Gateway ilovasi faolligini va internet aloqasini tekshiring.');
     }
     throw netErr;
@@ -295,16 +297,22 @@ export async function pingDevice(device) {
   }
 
   // 2. Real Gateway Ping
-  const rawUrl = device.gateway_url.trim().replace(/\/+$/, '');
+  let pingUrl = device.gateway_url.trim().replace(/\/+$/, '');
+  if (pingUrl.includes('api.sms-gate.app')) {
+    pingUrl = 'https://api.sms-gate.app/3rdparty/v1/device';
+  } else if (!/\/(message|messages|device|status|ping|health)/i.test(pingUrl)) {
+    pingUrl = `${pingUrl}/message`;
+  }
   const headers = buildGatewayHeaders(device);
 
   try {
-    const res = await executeGatewayRequest(rawUrl, 'GET', headers, null);
+    const res = await executeGatewayRequest(pingUrl, 'GET', headers, null);
     const isOnline = res.ok || res.status === 200 || res.status === 204 || res.status === 401 || res.status === 405;
 
+    const devInfo = Array.isArray(res.data) ? res.data[0] : res.data;
     const updates = {
       status: isOnline ? 'online' : 'error',
-      last_seen_at: isOnline ? now : device.last_seen_at,
+      last_seen_at: isOnline ? (devInfo?.lastSeen || devInfo?.updatedAt || now) : device.last_seen_at,
       last_error: isOnline ? null : `HTTP Status: ${res.status}`,
     };
 
@@ -318,6 +326,7 @@ export async function pingDevice(device) {
       status: updates.status,
       last_seen_at: updates.last_seen_at,
       error: updates.last_error,
+      deviceInfo: devInfo || null,
     };
   } catch (err) {
     const errorMsg = err.name === 'AbortError' ? 'Ulanish vaqti tugadi (Timeout 10s)' : err.message;
@@ -386,8 +395,9 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
   }
 
   let cleanUrl = device.gateway_url.trim();
-  // If user only entered base URL (e.g. http://192.168.1.150:8080), append /message (standard for SMS Gate)
-  if (!/\/(message|messages|send|v1)/i.test(cleanUrl)) {
+  if (cleanUrl.includes('api.sms-gate.app')) {
+    cleanUrl = 'https://api.sms-gate.app/3rdparty/v1/messages';
+  } else if (!/\/(message|messages|send|v1)/i.test(cleanUrl)) {
     cleanUrl = `${cleanUrl.replace(/\/+$/, '')}/message`;
   }
 
@@ -423,13 +433,16 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
 
   const headers = buildGatewayHeaders(device);
 
-  // Compatible payload format supporting Capcom6 SMS Gate and other Android SMS apps
+  // Compatible payload format supporting Capcom6 SMS Gate Cloud, Capcom6 Local Server, and generic gateways
   const payload = {
     phoneNumbers: [normalizedPhone],
-    to: normalizedPhone,
-    phone: normalizedPhone,
+    textMessage: {
+      text: cleanMsg,
+    },
     message: cleanMsg,
     text: cleanMsg,
+    to: normalizedPhone,
+    phone: normalizedPhone,
   };
 
   const sendExecution = (async () => {

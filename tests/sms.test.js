@@ -22,6 +22,17 @@ describe('SMS Service - Comprehensive Suite', () => {
     // Reset localStore SMS queue & logs if any
     localStore.setItem('educo_db_sms_queue', []);
     localStore.setItem('educo_db_sms_logs', []);
+    localStore.setItem('educo_db_sms_devices', [
+      {
+        id: 'dev-demo-test',
+        name: 'Demo SMS Gateway',
+        device_role: 'primary',
+        gateway_url: 'https://example.com/placeholder',
+        api_token: 'demo_token_educo',
+        is_active: true,
+        status: 'online',
+      },
+    ]);
   });
 
   describe('normalizePhone', () => {
@@ -63,10 +74,10 @@ describe('SMS Service - Comprehensive Suite', () => {
 
   describe('isDemoGateway', () => {
     it('correctly identifies default demo devices and tokens', () => {
-      expect(isDemoGateway({ api_token: 'SXP6_F:_8_-fv9uvdsyrp' })).toBe(true);
-      expect(isDemoGateway({ api_token: 'educo_gw_backup_secret' })).toBe(true);
+      expect(isDemoGateway({ api_token: 'demo_token_educo' })).toBe(true);
       expect(isDemoGateway({ api_token: 'demo_token_123' })).toBe(true);
       expect(isDemoGateway(null, 'https://example.com/placeholder')).toBe(true);
+      expect(isDemoGateway({ api_token: 'SXP6_F:_8_-fv9uvdsyrp' })).toBe(false);
       expect(isDemoGateway({ api_token: 'my_real_secret_token_987654321', gateway_url: 'https://my-real-gateway.com/send' })).toBe(false);
     });
   });
@@ -77,8 +88,8 @@ describe('SMS Service - Comprehensive Suite', () => {
         id: 'dev-demo-test-1',
         name: 'Demo Gateway',
         device_role: 'primary',
-        gateway_url: 'https://api.sms-gate.app/3rdparty/v1/message',
-        api_token: 'SXP6_F:_8_-fv9uvdsyrp',
+        gateway_url: 'https://example.com/placeholder',
+        api_token: 'demo_token_educo',
         is_active: true,
       };
 
