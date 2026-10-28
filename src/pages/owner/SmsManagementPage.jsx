@@ -1655,6 +1655,50 @@ export default function SmsManagementPage() {
       {/* ========================================================================= */}
       {activeTab === 'devices' && (
         <div className="space-y-6 sm:space-y-8">
+          {/* SMS Speed Optimization Box (Xiaomi / MIUI / Android) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 border border-amber-200/80 dark:border-amber-900/60 shadow-xs">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <span>⚡ SMS xabarlarini 1 soniyada yuborish (Tezlikni oshirish siri)</span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">
+                    Muhim qo‘llanma
+                  </span>
+                </h4>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                  Agar telefon ekrani o‘chiq bo‘lsa, Xiaomi (MIUI/HyperOS) batareyani tejash maqsadida ilovalarni uxlab qo‘yadi (Doze rejimi) va xabarlar kechikib boradi. SMS lar <strong>bir zumda (1-2 soniyada)</strong> yuborilishi uchun Android telefonda quyidagi 3 ta sozlamani qilib qo‘ying:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 text-xs">
+                  <div className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-amber-100 dark:border-gray-700">
+                    <strong className="block text-gray-900 dark:text-white font-semibold">1. Avtomatik ishga tushirish (Autostart)</strong>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 block">
+                      Telefonda Sozlamalar &rarr; Ilovalar &rarr; SMS Gateway &rarr; <strong>Avto-startni YOQING</strong>.
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-amber-100 dark:border-gray-700">
+                    <strong className="block text-gray-900 dark:text-white font-semibold">2. Batareya tejash (Cheklovlarsiz)</strong>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 block">
+                      Batareya tejash (Battery saver) bo‘limiga kirib, <strong>"Cheklovlarsiz" (No restrictions)</strong> ni tanlang.
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-amber-100 dark:border-gray-700">
+                    <strong className="block text-gray-900 dark:text-white font-semibold">3. Ilovani qulflang (Lock)</strong>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 block">
+                      Oxirgi ilovalar (Recent Apps) oynasida SMS Gateway kartasini bosib turib <strong>Qulf (Zamok)</strong> belgisini qo‘ying.
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-2 text-[11px] text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>Server ping oralig‘i <strong>15 soniyaga</strong> qisqartirildi — telefon uyg‘oq tursa, xabar 1 soniyada GSM SIM-karta orqali jo‘natiladi!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {/* Primary Device Card */}
             {(() => {

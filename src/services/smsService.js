@@ -316,6 +316,13 @@ export async function pingDevice(device) {
       last_error: isOnline ? null : `HTTP Status: ${res.status}`,
     };
 
+    // Auto-optimize Cloud settings: keep polling interval fast (15s) instead of default 15min
+    if (pingUrl.includes('api.sms-gate.app') && isOnline) {
+      executeGatewayRequest('https://api.sms-gate.app/3rdparty/v1/settings', 'PATCH', headers, {
+        ping: { interval_seconds: 15 },
+      }).catch(() => {});
+    }
+
     try {
       await supabase.from('sms_devices').update(updates).eq('id', device.id);
     } catch (_) {}
