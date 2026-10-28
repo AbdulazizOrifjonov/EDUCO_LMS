@@ -205,15 +205,16 @@ async function executeGatewayRequest(targetUrl, method, headers, payload) {
       throw new Error(data?.error || `Autentifikatsiya xatosi (Login/Parol noto‘g‘ri - ${proxyRes.status})`);
     }
 
-    if (data?.error) {
-      throw new Error(data.error);
+    if (data?.error || data?.message) {
+      throw new Error(data.error || data.message);
     }
 
     // If proxy explicitly responded with 404 / 405 (proxy not deployed on worker yet)
     if (proxyRes.status === 404 || proxyRes.status === 405) {
       // Fall through to direct fetch below
     } else {
-      throw new Error(`SMS Gateway xatosi [HTTP ${proxyRes.status}]`);
+      const detail = data?.error || data?.message || data?.details || '';
+      throw new Error(`SMS Gateway xatosi [HTTP ${proxyRes.status}]${detail ? `: ${detail}` : ''}`);
     }
   } catch (proxyErr) {
     if (proxyErr.message && (
@@ -440,17 +441,19 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
 
   const headers = buildGatewayHeaders(device);
 
-  // Compatible payload format supporting Capcom6 SMS Gate Cloud, Capcom6 Local Server, and generic gateways
-  const payload = {
-    phoneNumbers: [normalizedPhone],
-    textMessage: {
-      text: cleanMsg,
-    },
-    message: cleanMsg,
-    text: cleanMsg,
-    to: normalizedPhone,
-    phone: normalizedPhone,
-  };
+  // Exact payload format strictly conforming to Capcom6 SMS Gate Cloud or Local Gateway
+  const isCloudGateway = cleanUrl.includes('api.sms-gate.app');
+  const payload = isCloudGateway
+    ? {
+        phoneNumbers: [normalizedPhone],
+        textMessage: {
+          text: cleanMsg,
+        },
+      }
+    : {
+        message: cleanMsg,
+        phoneNumbers: [normalizedPhone],
+      };
 
   const sendExecution = (async () => {
     try {

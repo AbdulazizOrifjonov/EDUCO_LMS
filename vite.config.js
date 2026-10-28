@@ -343,7 +343,7 @@ function syncStoragePlugin() {
 
       // 6. Autonomous 24/7 SMS Background Scheduler
       let isProcessingQueue = false;
-      setInterval(async () => {
+      const smsScheduler = setInterval(async () => {
         if (isProcessingQueue) return;
         try {
           const db = getDb();
@@ -382,13 +382,16 @@ function syncStoragePlugin() {
               }
             }
 
-            const payload = {
-              phoneNumbers: [item.recipient_phone],
-              to: item.recipient_phone,
-              phone: item.recipient_phone,
-              message: item.message_text,
-              text: item.message_text,
-            };
+            const isCloud = targetUrl.includes('api.sms-gate.app');
+            const payload = isCloud
+              ? {
+                  phoneNumbers: [item.recipient_phone],
+                  textMessage: { text: item.message_text },
+                }
+              : {
+                  message: item.message_text,
+                  phoneNumbers: [item.recipient_phone],
+                };
 
             const controller = new AbortController();
             const fetchTimer = setTimeout(() => controller.abort(), 12000);
@@ -438,6 +441,7 @@ function syncStoragePlugin() {
           isProcessingQueue = false;
         }
       }, 5000);
+      if (smsScheduler.unref) smsScheduler.unref();
     },
   };
 }
