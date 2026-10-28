@@ -8,7 +8,6 @@ describe('Owner Accounts Instant Login', () => {
 
   const ownerTestCases = [
     { name: 'Owner Abbosbek', phone: '+998 98 800 14 15', pass: 'AbbosBek1415', alias: 'abbos', expectedRole: 'owner' },
-    { name: 'Owner Abdulazizbek', phone: '+998 93 610 17 74', pass: 'Abdulazibek1774', alias: 'abdulaziz', expectedRole: 'owner' },
   ];
 
   for (const tc of ownerTestCases) {

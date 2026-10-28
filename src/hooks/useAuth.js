@@ -31,21 +31,11 @@ export const DEMO_PRESET_USERS = [
     id: 'usr-owner-1',
     role: 'owner',
     username: 'abbosbek',
-    aliases: ['abbos', 'owner1', '988001415', 'rahbar1', 'owner_abbosbek'],
+    aliases: ['abbos', 'owner1', 'owner', 'rahbar', '988001415', 'rahbar1', 'owner_abbosbek'],
     fullName: 'Abbosbek (Rahbar)',
     phone: '+998 98 800 14 15',
     email: 'abbosbek@educo.app',
     passwords: ['AbbosBek1415', 'Educo#2026!Pro'],
-  },
-  {
-    id: 'usr-owner-2',
-    role: 'owner',
-    username: 'abdulazizbek',
-    aliases: ['abdulaziz', 'owner2', 'owner', '936101774', 'rahbar2', 'owner_abdulazizbek'],
-    fullName: 'Abdulazizbek Orifjonov (Rahbar)',
-    phone: '+998 93 610 17 74',
-    email: 'abdulazizbek@educo.app',
-    passwords: ['Abdulazibek1774', 'Educo#2026!Pro'],
   },
 ];
 
@@ -359,7 +349,6 @@ export const useAuthStore = create((set, get) => ({
     const isPlaceholderSupabase = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
     const demoAccounts = {
       'abbosbek@educo.app': { id: 'usr-owner-1', role: 'owner', name: 'Abbosbek', username: 'abbosbek' },
-      'abdulazizbek@educo.app': { id: 'usr-owner-2', role: 'owner', name: 'Abdulazizbek Orifjonov', username: 'abdulazizbek' },
       'owner@educo.app': { id: 'usr-owner-1', role: 'owner', name: 'Abbosbek', username: 'abbosbek' },
     };
 

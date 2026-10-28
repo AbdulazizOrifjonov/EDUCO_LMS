@@ -413,11 +413,11 @@ export default function LoginPage() {
                 </span>
               </div>
               <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">
-                {t('common.ownerAccountsHint', 'Owner sifatida tizimga kirish uchun quyidagi rahbar hisoblaridan birini tanlang:')}
+                {t('common.ownerAccountsHint', 'Owner sifatida tizimga kirish uchun quyidagi rahbar hisobini tanlang:')}
               </p>
 
               <div className="space-y-2.5">
-                {/* Owner 1: Abbosbek */}
+                {/* Owner: Abbosbek */}
                 <div
                   role="button"
                   tabIndex={0}
@@ -436,7 +436,7 @@ export default function LoginPage() {
                         Abbosbek
                       </span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-semibold">
-                        👑 Rahbar (Owner 1)
+                        👑 Boshqaruvchi (Owner)
                       </span>
                     </div>
                     <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
@@ -455,48 +455,6 @@ export default function LoginPage() {
                     className="shrink-0 px-3.5 py-1.5 rounded-lg bg-brand-navy hover:bg-blue-900 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
                   >
                     <span>{quickLoggingInRole === 'owner' && watch('username') === '+998 98 800 14 15' ? 'Kirilmoqda...' : 'Kirish'}</span>
-                    <span className="text-[10px]">→</span>
-                  </button>
-                </div>
-
-                {/* Owner 2: Abdulazizbek Orifjonov */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => handleQuickLogin('+998 93 610 17 74', 'Abdulazibek1774', 'owner')}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleQuickLogin('+998 93 610 17 74', 'Abdulazibek1774', 'owner');
-                    }
-                  }}
-                  className="p-3 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-950/50 transition-all flex items-center justify-between gap-3 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
-                        Abdulazizbek Orifjonov
-                      </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold">
-                        👑 Rahbar (Owner 2)
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
-                      <span>+998 93 610 17 74</span>
-                      <span className="text-[10px] text-gray-400">•</span>
-                      <span className="text-gray-700 dark:text-gray-300 font-semibold">Abdulazibek1774</span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={isSubmitting || authLoading}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleQuickLogin('+998 93 610 17 74', 'Abdulazibek1774', 'owner');
-                    }}
-                    className="shrink-0 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>{quickLoggingInRole === 'owner' && watch('username') === '+998 93 610 17 74' ? 'Kirilmoqda...' : 'Kirish'}</span>
                     <span className="text-[10px]">→</span>
                   </button>
                 </div>

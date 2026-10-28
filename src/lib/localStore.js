@@ -89,21 +89,6 @@ const INITIAL_USERS = [
     is_active: true,
     created_at: new Date().toISOString(),
   },
-  {
-    id: 'usr-owner-2',
-    username: 'abdulazizbek',
-    first_name: 'Abdulazizbek',
-    last_name: 'Orifjonov',
-    fullName: 'Abdulazizbek Orifjonov',
-    full_name: 'Abdulazizbek Orifjonov',
-    role: 'owner',
-    email: 'abdulazizbek@educo.app',
-    phone: '+998 93 610 17 74',
-    password: 'Abdulazibek1774',
-    password_updated_at: new Date().toISOString(),
-    is_active: true,
-    created_at: new Date().toISOString(),
-  },
 ];
 
 const INITIAL_GROUPS = [];
@@ -118,11 +103,11 @@ class LocalStore {
   }
 
   ensureCleanStart() {
-    const WIPE_VERSION_KEY = 'educo_clean_start_v4';
+    const WIPE_VERSION_KEY = 'educo_clean_start_v6';
     try {
       if (typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function') {
-        if (window.localStorage.getItem(WIPE_VERSION_KEY) !== 'v4_done') {
-          // Reset all data to clean starting state: only the two Owners!
+        if (window.localStorage.getItem(WIPE_VERSION_KEY) !== 'v6_done') {
+          // Reset all data to clean starting state: only Abbosbek as Owner!
           window.localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
           window.localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify([]));
           window.localStorage.setItem(STORAGE_KEYS.GROUPS, JSON.stringify([]));
@@ -141,9 +126,9 @@ class LocalStore {
           window.localStorage.setItem(STORAGE_KEYS.SMS_QUEUE, JSON.stringify([]));
           window.localStorage.setItem(STORAGE_KEYS.SMS_LOGS, JSON.stringify([]));
 
-          // Clear any old active session so user logs in cleanly with the new owner credentials
+          // Clear any old active session so user logs in cleanly with the owner credentials
           window.localStorage.removeItem('educo_demo_session');
-          window.localStorage.setItem(WIPE_VERSION_KEY, 'v4_done');
+          window.localStorage.setItem(WIPE_VERSION_KEY, 'v6_done');
 
           // Sync clean slate to server
           this.pushToServer({
@@ -384,6 +369,7 @@ class LocalStore {
 
     // Purge legacy demo accounts that user requested to delete
     const legacyDemoIds = new Set([
+      'usr-owner-2',
       'usr-admin-1',
       'usr-teacher-1',
       'usr-teacher-2',
@@ -422,7 +408,7 @@ class LocalStore {
       return true;
     });
 
-    // Ensure all seed INITIAL_USERS exist in raw (Abbosbek and Abdulazizbek)
+    // Ensure all seed INITIAL_USERS exist in raw (Abbosbek)
     INITIAL_USERS.forEach((initUser) => {
       const initPhoneClean = (initUser.phone || '').replace(/\D/g, '').slice(-9);
       const exists = raw.some(
