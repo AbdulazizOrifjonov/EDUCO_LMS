@@ -1227,9 +1227,27 @@ class LocalStore {
 
   async syncWithServer() {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+    // Skip if offline or tab is completely hidden in background
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
+
     try {
-      const res = await fetch('/api/sync-store', { cache: 'no-store' });
+      const headers = { 'Cache-Control': 'no-cache' };
+      if (this._lastServerETag) {
+        headers['If-None-Match'] = this._lastServerETag;
+      }
+      const res = await fetch('/api/sync-store', { headers });
+      if (res.status === 304) {
+        // Data on server is unchanged - 0 bytes downloaded!
+        return;
+      }
       if (!res.ok) return;
+
+      const etag = res.headers.get('ETag') || res.headers.get('etag');
+      if (etag) {
+        this._lastServerETag = etag;
+      }
+
       const serverData = await res.json();
       if (!serverData || typeof serverData !== 'object') return;
 
@@ -2878,48 +2896,27 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
     }
   } catch (_) {}
 
-  // 2. Realtime Server-Sent Events (SSE) Stream across all network devices
-  let sseSource = null;
-  const connectSSE = () => {
-    try {
-      if (sseSource) {
-        sseSource.close();
-      }
-      sseSource = new EventSource('/api/realtime-stream');
-      sseSource.onmessage = (e) => {
-        try {
-          const parsed = JSON.parse(e.data);
-          if (parsed && parsed.payload) {
-            localStore.applyIncomingData(parsed.payload);
-          }
-        } catch (_) {}
-      };
-      sseSource.onerror = () => {
-        if (sseSource) {
-          sseSource.close();
-          sseSource = null;
-        }
-        setTimeout(connectSSE, 3000);
-      };
-    } catch (_) {
-      setTimeout(connectSSE, 4000);
-    }
-  };
-
-  setTimeout(connectSSE, 150);
-
-  // 3. Initial sync and periodic 2.5s fallback poll
+  // 2. Initial sync when tab opens
   setTimeout(() => {
     localStore.syncWithServer().catch(() => {});
-  }, 100);
+  }, 250);
 
-  setInterval(() => {
-    localStore.syncWithServer().catch(() => {});
-  }, 2500);
-
+  // 3. Sync immediately when user switches to this tab or window gets focus
   window.addEventListener('focus', () => {
     localStore.syncWithServer().catch(() => {});
   });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      localStore.syncWithServer().catch(() => {});
+    }
+  });
+
+  // 4. Gentle periodic sync (every 15s) ONLY when tab is active and visible
+  setInterval(() => {
+    if (typeof document !== 'undefined' && !document.hidden && navigator.onLine) {
+      localStore.syncWithServer().catch(() => {});
+    }
+  }, 15000);
 }
 
 export default localStore;

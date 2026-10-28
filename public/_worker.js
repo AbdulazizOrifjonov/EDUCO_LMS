@@ -4,6 +4,8 @@
 // In-memory fallback if D1 is not bound yet
 const memoryKV = new Map();
 const memoryMedia = new Map();
+let currentStoreVersion = 1;
+let lastStoreUpdatedAt = Date.now();
 
 // Helper to return JSON with CORS headers
 function jsonResponse(data, status = 200) {
@@ -158,8 +160,24 @@ export default {
       const db = env.DB;
       if (db) await initD1Tables(db);
 
-      // GET /api/sync-store - Fetch all shared data
+      // GET /api/sync-store - Fetch all shared data (supports 304 Not Modified ETag caching)
       if (request.method === 'GET') {
+        const clientETag = request.headers.get('if-none-match');
+        const currentETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
+
+        if (clientETag && clientETag === currentETag) {
+          return new Response(null, {
+            status: 304,
+            headers: {
+              'ETag': currentETag,
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-None-Match',
+              'Cache-Control': 'no-cache, must-revalidate',
+            },
+          });
+        }
+
         const store = {};
 
         if (db) {
@@ -184,7 +202,17 @@ export default {
           if (!store[k]) store[k] = v;
         }
 
-        return jsonResponse(store);
+        return new Response(JSON.stringify(store), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'ETag': currentETag,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-None-Match',
+            'Cache-Control': 'no-cache, must-revalidate',
+          },
+        });
       }
 
       // POST /api/sync-store - Save/merge shared data
@@ -192,6 +220,8 @@ export default {
         try {
           const payload = await request.json();
           if (payload && typeof payload === 'object') {
+            currentStoreVersion++;
+            lastStoreUpdatedAt = Date.now();
             const now = new Date().toISOString();
 
             for (const [key, value] of Object.entries(payload)) {
