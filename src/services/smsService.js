@@ -47,7 +47,7 @@ export async function updateSmsSettings(settingsData) {
       schedule_time: settingsData.schedule_time || '10:00',
       target_recipient: settingsData.target_recipient || 'father_first',
       message_template: settingsData.message_template,
-      send_interval_seconds: Number(settingsData.send_interval_seconds || 4),
+      send_interval_seconds: Number(settingsData.send_interval_seconds || 1.2),
       max_retries: Number(settingsData.max_retries || 3),
       anti_duplicate_days: Number(settingsData.anti_duplicate_days || 15),
       sender_name: settingsData.sender_name || 'EDUCO',
@@ -317,10 +317,10 @@ export async function pingDevice(device) {
       last_error: isOnline ? null : `HTTP Status: ${res.status}`,
     };
 
-    // Auto-optimize Cloud settings: keep polling interval fast (15s) instead of default 15min
+    // Auto-optimize Cloud settings: keep polling interval ultra-fast (5s) instead of default 15min
     if (pingUrl.includes('api.sms-gate.app') && isOnline) {
       executeGatewayRequest('https://api.sms-gate.app/3rdparty/v1/settings', 'PATCH', headers, {
-        ping: { interval_seconds: 15 },
+        ping: { interval_seconds: 5 },
       }).catch(() => {});
     }
 
@@ -966,7 +966,7 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     // In real gateway mode: 1200ms-2000ms delay between messages
     const intervalMs = isSimulatedBatch
       ? 150
-      : Math.min(Math.max((settings.send_interval_seconds || 1.5) * 1000, 1000), 3000);
+      : Math.min(Math.max((settings.send_interval_seconds || 1.2) * 1000, 800), 3000);
 
   for (let i = 0; i < pendingItems.length; i++) {
     const item = pendingItems[i];

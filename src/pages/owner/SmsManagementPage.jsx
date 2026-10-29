@@ -1693,7 +1693,7 @@ export default function SmsManagementPage() {
                 </div>
                 <div className="mt-2 text-[11px] text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                  <span>Server ping oralig‘i <strong>15 soniyaga</strong> qisqartirildi — telefon uyg‘oq tursa, xabar 1 soniyada GSM SIM-karta orqali jo‘natiladi!</span>
+                  <span>Server ping oralig‘i <strong>5 soniyaga</strong> qisqartirildi — telefon uyg‘oq tursa, xabar 5 soniyada GSM SIM-karta orqali jo‘natiladi!</span>
                 </div>
               </div>
             </div>

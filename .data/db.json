@@ -1373,10 +1373,12 @@
       "api_token": "SXP6_F:_8_-fv9uvdsyrp",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-10-28T17:19:23.716Z",
+      "last_seen_at": "2026-10-29T03:31:04.792Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-28T17:19:23.717Z"
+      "created_at": "2026-10-28T17:19:23.717Z",
+      "battery_level": null,
+      "updated_at": "2026-10-29T03:31:04.792Z"
     },
     {
       "id": "dev-backup-2",
@@ -1996,6 +1998,270 @@
     }
   ],
   "educo_db_sms_logs": [
+    {
+      "id": "sms-log-1793244664794-jioy",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "dFBLukDI8vRRUkhiEOaAZ",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:31:05.785+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998997287205",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:31:05.781074926Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:31:04.794Z"
+    },
+    {
+      "id": "sms-log-1793244651959-7bqj",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "SH70dCbRKVvaMq6_EkTgB",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:30:52.35+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998935821774",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:30:52.350459411Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:30:51.959Z"
+    },
+    {
+      "id": "sms-log-1793244559787-i219",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "g-W-SxxstvRs5TmzmyV3m",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:29:20.749+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998935821774",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:29:20.750137071Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:29:19.787Z"
+    },
+    {
+      "id": "sms-log-1793244502616-zzlf",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "rKds8K4wF1nrUnqrHLHOv",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:28:23.512+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998997287205",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:28:23.513349459Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:28:22.616Z"
+    },
+    {
+      "id": "sms-log-1793243317143-r58x",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "28k_ewEPq4JJstHQ3S33x",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:08:37.679+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998935821774",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:08:37.6792436Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:08:37.143Z"
+    },
+    {
+      "id": "sms-log-1793243112552-4bjy",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "lPsl0ohwD0bYGejIKOxgn",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:05:13.05+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998997287205",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:05:13.050246441Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!\n\naslom"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:05:12.552Z"
+    },
+    {
+      "id": "sms-log-1793243087574-08z0",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "DVi7yFTVwrAa9iVEJaaJf",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:04:48.051+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998997287205",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:04:48.051847184Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!\n\naslom"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:04:47.574Z"
+    },
+    {
+      "id": "sms-log-1793243022059-x4qi",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "_oZ1TzU85EemqdiHMZ1gP",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T06:03:42.578+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998997287205",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T03:03:42.576996713Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T03:03:42.059Z"
+    },
     {
       "id": "sms-log-1793191217010-7r3r",
       "queue_id": null,
