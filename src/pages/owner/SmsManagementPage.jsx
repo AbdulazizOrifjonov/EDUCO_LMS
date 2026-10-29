@@ -38,6 +38,7 @@ import {
   Phone,
   Check,
   UserX,
+  Download,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -61,6 +62,7 @@ import smsService, {
   getSmsLogs,
   processQueueBatch,
   retryQueueItem,
+  retryAllFailedQueueItems,
   cancelQueueItem,
   formatSmsMessage,
   normalizePhone,
@@ -122,6 +124,7 @@ export default function SmsManagementPage() {
   const [retryingId, setRetryingId] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
   const [refreshingQueue, setRefreshingQueue] = useState(false);
+  const [retryingAll, setRetryingAll] = useState(false);
 
   // Synchronous execution locks to immediately block rapid double-clicks
   const isSendingTestRef = useRef(false);
@@ -432,6 +435,26 @@ export default function SmsManagementPage() {
       setTimeout(() => {
         isCancellingIdRef.current = null;
       }, 1000);
+    }
+  };
+
+  // Retry All Failed Items
+  const handleRetryAllFailed = async () => {
+    if (retryingAll) return;
+    try {
+      setRetryingAll(true);
+      const count = await retryAllFailedQueueItems();
+      if (count > 0) {
+        toast.success(`${count} ta ketmagan SMS navbat oxiriga qaytadan qo‘yildi!`);
+      } else {
+        toast.info('Ketmagan xabarlar topilmadi');
+      }
+      const updatedQueue = await getSmsQueue();
+      setQueue(updatedQueue);
+    } catch (err) {
+      toast.error(`Xatolik: ${err.message}`);
+    } finally {
+      setRetryingAll(false);
     }
   };
 
@@ -1893,43 +1916,84 @@ export default function SmsManagementPage() {
             })()}
           </div>
 
-          {/* Android SMS Gateway Setup Guide Card */}
+          {/* Android SMS Gateway Setup Guide & Direct APK Download Card */}
           <Card className="p-5 sm:p-7 border border-blue-200/80 dark:border-gray-700/80 rounded-2xl">
-            <div className="flex items-center gap-3 pb-3.5 mb-6 border-b border-gray-100 dark:border-gray-800">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center shrink-0">
-                <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-6 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center shrink-0">
+                  <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm uppercase tracking-wide text-gray-900 dark:text-gray-100">
+                    Android Telefonni SMS Gateway qilib ulash va Ilovani yuklab olish
+                  </h4>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+                    Telefoningizdagi SIM-karta bepul SMS paketidan foydalanib 0 so‘m xarajat bilan cheksiz SMS tarqatish
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-bold text-sm uppercase tracking-wide text-gray-900 dark:text-gray-100">
-                  Android Telefonni SMS Gateway qilib ulash bo‘yicha qo‘llanma
-                </h4>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-normal mt-0.5">
-                  Oddiy Android telefoningiz orqali tizimdan avtomatik SMS yuborishni yo‘lga qo‘yish bo‘yicha 3 ta oson qadam
-                </p>
+
+              {/* Direct Download Buttons */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <a
+                  href="https://github.com/capcom6/android-sms-gateway/releases/download/v1.78.0/app-release.apk"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>APK yuklab olish (v1.78.0)</span>
+                </a>
+                <a
+                  href="https://github.com/capcom6/android-sms-gateway/releases/latest"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>GitHub Releases</span>
+                </a>
+                <a
+                  href="https://sms-gate.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>sms-gate.app</span>
+                </a>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
               <div className="p-4 sm:p-5 bg-gray-50/90 dark:bg-surface-dark-tertiary rounded-2xl border border-gray-200/80 dark:border-gray-700/80 space-y-2">
-                <span className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">1</span>
-                <div>
-                  <strong className="text-gray-900 dark:text-gray-100 block mb-1">Ilovani o‘rnating:</strong>
-                  Android telefonga bepul va ochiq kodli <em>"SMS Gate"</em> yoki <em>"SMS Gateway (Android)"</em> ilovasini o‘rnating.
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">1</span>
+                  <strong className="text-gray-900 dark:text-gray-100 text-sm">APK ni o‘rnating</strong>
                 </div>
+                <p>
+                  Yuqoridagi <strong>"APK yuklab olish"</strong> tugmasini bosing yoki brauzerda yuklab oling. Telefonda <em>"Noma’lum manbalardan o‘rnatish"</em>ga ruxsat berib ilovani o‘rnating.
+                </p>
               </div>
+
               <div className="p-4 sm:p-5 bg-gray-50/90 dark:bg-surface-dark-tertiary rounded-2xl border border-gray-200/80 dark:border-gray-700/80 space-y-2">
-                <span className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">2</span>
-                <div>
-                  <strong className="text-gray-900 dark:text-gray-100 block mb-1">Ruxsatlarni bering:</strong>
-                  Ilovaga <em>"Send SMS"</em> ruxsatini va Batareya sozlamalaridan <em>"Cheklovsiz (Unrestricted)"</em> rejimini yoqing.
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">2</span>
+                  <strong className="text-gray-900 dark:text-gray-100 text-sm">Ruxsatlar va Xiaomi</strong>
                 </div>
+                <p>
+                  Ilovaga <em>"SMS yuborish"</em> ruxsatini bering. Sozlamalardan <strong>"Avto-start"</strong>ni yoqing, <strong>"Batareya tejash"</strong>ni <em>"Cheklovlarsiz"</em>ga qo‘ying va ilovani qulflang.
+                </p>
               </div>
+
               <div className="p-4 sm:p-5 bg-gray-50/90 dark:bg-surface-dark-tertiary rounded-2xl border border-gray-200/80 dark:border-gray-700/80 space-y-2">
-                <span className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">3</span>
-                <div>
-                  <strong className="text-gray-900 dark:text-gray-100 block mb-1">LMS ga ulang:</strong>
-                  Ilova ekranda ko‘rsatgan IP-manzilni (masalan: <code className="font-mono text-blue-600 dark:text-emerald-400 bg-white dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">http://192.168.1.150:8080/send</code>) yuqoridagi kartaga kiriting.
+                <div className="flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-xs shadow-xs">3</span>
+                  <strong className="text-gray-900 dark:text-gray-100 text-sm">0 so‘m tejamkorlik</strong>
                 </div>
+                <p>
+                  Telefondagi Ucell SIM kartangiz (30 000 bepul SMS paketi) avtomatik ishlatiladi. LMS dagi xabarlar to‘g‘ridan-to‘g‘ri telefoningiz orqali ketadi — 1 tiyin ham xarajat yo‘q!
+                </p>
               </div>
             </div>
           </Card>
@@ -2005,6 +2069,19 @@ export default function SmsManagementPage() {
                 >
                   Yangilash
                 </Button>
+                {stats.failed > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={RotateCcw}
+                    isLoading={retryingAll}
+                    disabled={retryingAll}
+                    onClick={handleRetryAllFailed}
+                    className="!h-10 !min-h-[40px] !max-h-[40px] !py-0 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-3.5 rounded-xl"
+                  >
+                    Ketmaganlarni navbatga qo‘shish ({stats.failed})
+                  </Button>
+                )}
                 <Button
                   variant="primary"
                   size="sm"

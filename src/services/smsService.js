@@ -950,8 +950,14 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     }
 
     const allQueue = localStore.getSmsQueue();
+    // Sort pending items: scheduled earlier items first, newly retried items (with future scheduled_at) at the end
     const pendingItems = allQueue
       .filter((q) => q.status === 'pending')
+      .sort((a, b) => {
+        const timeA = new Date(a.scheduled_at || a.created_at || 0).getTime();
+        const timeB = new Date(b.scheduled_at || b.created_at || 0).getTime();
+        return timeA - timeB;
+      })
       .slice(0, limit);
 
     if (pendingItems.length === 0) {
@@ -970,6 +976,27 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
 
   for (let i = 0; i < pendingItems.length; i++) {
     const item = pendingItems[i];
+
+    // 0. Strict Anti-Duplicate Check: verify if this item was already sent
+    const currentQueue = localStore.getSmsQueue();
+    const alreadySentItem = currentQueue.find(
+      (q) => q.id !== item.id && q.idempotency_key === item.idempotency_key && q.status === 'sent'
+    );
+    const itemAlreadyDelivered = currentQueue.find((q) => q.id === item.id && q.status === 'sent');
+
+    if (alreadySentItem || itemAlreadyDelivered) {
+      console.warn(`[smsService] Dublikatsiya oldi olindi: ${item.recipient_phone} (${item.idempotency_key})`);
+      const skipUpdates = {
+        status: itemAlreadyDelivered ? 'sent' : 'cancelled',
+        error_message: 'Dublikatsiya oldi olindi (allaqachon muvaffaqiyatli yuborilgan)',
+      };
+      try {
+        await supabase.from('sms_queue').update(skipUpdates).eq('id', item.id);
+      } catch (_) {}
+      localStore.updateSmsQueueItem(item.id, skipUpdates);
+      continue;
+    }
+
     let activeDevice = primaryDevice;
     let delivered = false;
     let lastError = null;
@@ -1019,6 +1046,9 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     // 4. Update queue status and write log
     if (delivered) {
       sentCount++;
+      if (item._batchRetries) {
+        failedCount = Math.max(0, failedCount - 1);
+      }
       const updates = {
         status: 'sent',
         device_id: activeDevice.id,
@@ -1041,13 +1071,17 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     } else {
       failedCount++;
       const newAttempts = (item.attempts || 0) + 1;
-      const willRetry = newAttempts < (item.max_attempts || settings.max_retries || 3);
+      // Allow up to 10 retries so no message is lost until delivered!
+      const maxRetries = item.max_attempts || settings.max_retries || 10;
+      const willRetry = newAttempts < maxRetries;
 
       const updates = {
         status: willRetry ? 'pending' : 'failed',
         attempts: newAttempts,
         error_message: lastError,
         last_attempt_at: new Date().toISOString(),
+        // Push failed item to the end of the queue with 15s delay so other students proceed first
+        scheduled_at: new Date(Date.now() + 15000).toISOString(),
       };
       try {
         await supabase.from('sms_queue').update(updates).eq('id', item.id);
@@ -1059,9 +1093,19 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
         device_id: activeDevice?.id || null,
         recipient_phone: item.recipient_phone,
         recipient_name: item.recipient_name,
-        status: 'failed',
-        error_details: lastError,
+        status: willRetry ? 'retrying' : 'failed',
+        error_details: `${lastError} (Urinish: ${newAttempts}/${maxRetries}, navbat oxiriga surildi)`,
       });
+
+      // User requirement: Push to the very end of current batch so it retries after all other students
+      const batchRetries = (item._batchRetries || 0) + 1;
+      if (willRetry && batchRetries <= 2) {
+        pendingItems.push({
+          ...item,
+          attempts: newAttempts,
+          _batchRetries: batchRetries,
+        });
+      }
     }
 
     // Rate-limiting delay between messages to protect SIM card from telco spam block
@@ -1094,6 +1138,28 @@ export async function retryQueueItem(id) {
     await supabase.from('sms_queue').update(updates).eq('id', id);
   } catch (_) {}
   return localStore.updateSmsQueueItem(id, updates);
+}
+
+/**
+ * Retries all failed queue items at once by moving them back to pending
+ */
+export async function retryAllFailedQueueItems() {
+  const allQueue = localStore.getSmsQueue();
+  const failedItems = allQueue.filter((q) => q.status === 'failed');
+  for (const item of failedItems) {
+    const updates = {
+      status: 'pending',
+      attempts: 0,
+      error_message: null,
+      scheduled_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    try {
+      await supabase.from('sms_queue').update(updates).eq('id', item.id);
+    } catch (_) {}
+    localStore.updateSmsQueueItem(item.id, updates);
+  }
+  return failedItems.length;
 }
 
 /**
@@ -1184,6 +1250,7 @@ export default {
   getSmsLogs,
   processQueueBatch,
   retryQueueItem,
+  retryAllFailedQueueItems,
   cancelQueueItem,
   normalizePhone,
   isDemoGateway,
