@@ -39,6 +39,8 @@ export default function GroupManagement() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const currentUserRole = profile?.role || 'owner';
+  const isTeacher = currentUserRole === 'teacher';
+  const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
   const { searchQuery, setSearchQuery } = useSearch();
 
   const [groups, setGroups] = useState([]);
@@ -66,12 +68,18 @@ export default function GroupManagement() {
 
   const fetchFilters = async () => {
     try {
-      const [cRes, tRes] = await Promise.all([
-        getCourses({ limit: 100 }),
-        getTeachers(),
-      ]);
-      setCourses(cRes.courses || []);
-      setTeachers(tRes || []);
+      if (isTeacher) {
+        const cRes = await getCourses({ limit: 100 });
+        setCourses(cRes.courses || []);
+        setTeachers([]);
+      } else {
+        const [cRes, tRes] = await Promise.all([
+          getCourses({ limit: 100 }),
+          getTeachers(),
+        ]);
+        setCourses(cRes.courses || []);
+        setTeachers(tRes || []);
+      }
     } catch (e) {
       console.warn('Filter options fetch note:', e);
     }
@@ -80,24 +88,42 @@ export default function GroupManagement() {
   const fetchGroups = useCallback(async () => {
     setLoading(true);
     try {
+      const effectiveTeacherId = isTeacher ? (profile?.id || profile?.userId) : teacherFilter;
+      const effectiveTeacherName = isTeacher ? teacherFullName : '';
+
       const data = await getGroups({
         search,
         courseId: courseFilter,
-        teacherId: teacherFilter,
+        teacherId: effectiveTeacherId,
+        teacherName: effectiveTeacherName,
         status: statusFilter,
         page,
         limit: 12,
       });
-      setGroups(data.groups || []);
-      setTotalPages(data.totalPages || 1);
-      setTotalCount(data.totalCount || 0);
+
+      let fetchedGroups = data.groups || [];
+      if (isTeacher) {
+        const myName = teacherFullName.trim().toLowerCase();
+        const myId = profile?.id;
+        fetchedGroups = fetchedGroups.filter((g) => {
+          const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId || g.primaryTeacher?.id === myId));
+          const matchGt = Array.isArray(g.group_teachers) && g.group_teachers.some(t => (t.teacher_id || t.id || t.profiles?.id) === myId);
+          const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
+          const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
+          return matchId || matchGt || matchName;
+        });
+      }
+
+      setGroups(fetchedGroups);
+      setTotalPages(Math.ceil((fetchedGroups.length || data.totalCount || 1) / 12) || 1);
+      setTotalCount(fetchedGroups.length);
     } catch (err) {
       console.error(err);
       toast.error(t('groups.fetchError', 'Failed to load groups'));
     } finally {
       setLoading(false);
     }
-  }, [search, courseFilter, teacherFilter, statusFilter, page, t]);
+  }, [search, courseFilter, teacherFilter, statusFilter, page, isTeacher, profile?.id, profile?.userId, teacherFullName, t]);
 
   useEffect(() => {
     fetchFilters();
@@ -138,154 +164,175 @@ export default function GroupManagement() {
     }
   };
 
-  const columns = [
-    {
-      header: t('groups.group', 'Group Name'),
-      key: 'name',
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm overflow-hidden"
-            style={{ backgroundColor: row.courseColor || '#064e3b' }}
-          >
-            {row.avatar_url || row.image_url ? (
-              <img
-                src={row.avatar_url || row.image_url}
-                alt={row.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Users className="w-5 h-5" />
-            )}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-900 dark:text-gray-100">{row.name}</span>
-              {row.room && (
-                <span className="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-surface-dark-tertiary text-gray-600 dark:text-gray-300">
-                  {row.room}
-                </span>
+  const displayedCourses = useMemo(() => {
+    if (!isTeacher) return courses;
+    const myCourseIds = new Set(groups.map((g) => g.course_id || g.courseId).filter(Boolean));
+    const myCourseNames = new Set(groups.map((g) => g.courseName || g.course_name).filter(Boolean));
+    return courses.filter((c) => myCourseIds.has(c.id) || myCourseNames.has(c.name));
+  }, [isTeacher, courses, groups]);
+
+  const columns = useMemo(() => {
+    const cols = [
+      {
+        header: t('groups.group', 'Group Name'),
+        key: 'name',
+        render: (row) => (
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm overflow-hidden"
+              style={{ backgroundColor: row.courseColor || '#064e3b' }}
+            >
+              {row.avatar_url || row.image_url ? (
+                <img
+                  src={row.avatar_url || row.image_url}
+                  alt={row.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Users className="w-5 h-5" />
               )}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {row.courseName}
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      header: t('groups.primaryTeacher', 'Lead Teacher'),
-      key: 'teacher',
-      render: (row) => (
-        <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-          {row.primaryTeacher?.fullName || t('groups.unassigned', 'Not Assigned')}
-        </span>
-      ),
-    },
-    {
-      header: t('groups.capacity', 'Students / Capacity'),
-      key: 'capacity',
-      render: (row) => {
-        const percent = Math.min(Math.round(((row.studentCount || 0) / (row.capacity || 20)) * 100), 100);
-        return (
-          <div className="w-32">
-            <div className="flex items-center justify-between text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              <span>{row.studentCount} / {row.capacity}</span>
-              <span className="text-gray-400">{percent}%</span>
-            </div>
-            <div className="w-full bg-gray-100 dark:bg-surface-dark-tertiary h-1.5 rounded-full overflow-hidden">
-              <div
-                className={`h-full ${
-                  percent >= 100 ? 'bg-brand-red' : percent > 80 ? 'bg-amber-500' : 'bg-emerald-500'
-                }`}
-                style={{ width: `${percent}%` }}
-              />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{row.name}</span>
+                {row.room && (
+                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-surface-dark-tertiary text-gray-600 dark:text-gray-300">
+                    {row.room}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {row.courseName}
+              </p>
             </div>
           </div>
-        );
+        ),
       },
-    },
-    {
-      header: t('nav.schedule', 'Lessons'),
-      key: 'schedule',
-      render: (row) => (
-        <span className="text-xs text-gray-600 dark:text-gray-400">
-          {row.schedules?.length
-            ? `${row.schedules.length} ${t('schedule.perWeek', '/ week')}`
-            : t('schedule.noSchedule', 'No timetable')}
-        </span>
-      ),
-    },
-    {
-      header: t('courses.fee', 'Oylik to‘lov'),
-      key: 'monthly_price',
-      render: (row) => {
-        const fee = Number(row.monthly_price || row.monthly_fee || 0);
-        return (
-          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
-            {fee > 0 ? `${fee.toLocaleString()} so‘m` : 'Belgilanmagan'}
+    ];
+
+    if (!isTeacher) {
+      cols.push({
+        header: t('groups.primaryTeacher', 'Lead Teacher'),
+        key: 'teacher',
+        render: (row) => (
+          <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+            {row.primaryTeacher?.fullName || t('groups.unassigned', 'Not Assigned')}
           </span>
-        );
+        ),
+      });
+    }
+
+    cols.push(
+      {
+        header: t('groups.capacity', 'Students / Capacity'),
+        key: 'capacity',
+        render: (row) => {
+          const percent = Math.min(Math.round(((row.studentCount || 0) / (row.capacity || 20)) * 100), 100);
+          return (
+            <div className="w-32">
+              <div className="flex items-center justify-between text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <span>{row.studentCount} / {row.capacity}</span>
+                <span className="text-gray-400">{percent}%</span>
+              </div>
+              <div className="w-full bg-gray-100 dark:bg-surface-dark-tertiary h-1.5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${
+                    percent >= 100 ? 'bg-brand-red' : percent > 80 ? 'bg-amber-500' : 'bg-emerald-500'
+                  }`}
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+            </div>
+          );
+        },
       },
-    },
-    {
-      header: t('common.status', 'Status'),
-      key: 'status',
-      render: (row) => (
-        <Badge variant={getStatusBadgeVariant(row.status)} size="sm">
-          <span className="capitalize">
-            {t(`groups.${row.status}`, t(`common.${row.status}`, row.status))}
+      {
+        header: t('nav.schedule', 'Lessons'),
+        key: 'schedule',
+        render: (row) => (
+          <span className="text-xs text-gray-600 dark:text-gray-400">
+            {row.schedules?.length
+              ? `${row.schedules.length} ${t('schedule.perWeek', '/ week')}`
+              : t('schedule.noSchedule', 'No timetable')}
           </span>
-        </Badge>
-      ),
-    },
-    {
-      header: t('common.actions', 'Actions'),
-      key: 'actions',
-      className: 'text-right rtl:text-left',
-      cellClassName: 'text-right rtl:text-left',
-      render: (row) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
-            title={t('groups.viewDetail', 'View Group Detail')}
-            onClick={() => navigate(`/${currentUserRole}/groups/${row.id}`)}
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
-            title={t('common.edit', 'Edit Group')}
-            onClick={() => navigate(`/${currentUserRole}/groups/edit/${row.id}`)}
-          >
-            <Edit2 className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`!p-1.5 h-8 w-8 ${
-              row.status === 'archived'
-                ? 'text-gray-500 hover:text-emerald-600'
-                : 'text-gray-500 hover:text-brand-red'
-            }`}
-            title={row.status === 'archived' ? t('common.restore', 'Restore') : t('common.archive', 'Archive')}
-            onClick={() => handleToggleArchive(row)}
-          >
-            {row.status === 'archived' ? (
-              <RotateCcw className="w-4 h-4" />
-            ) : (
-              <Archive className="w-4 h-4" />
+        ),
+      },
+      {
+        header: t('courses.fee', 'Oylik to‘lov'),
+        key: 'monthly_price',
+        render: (row) => {
+          const fee = Number(row.monthly_price || row.monthly_fee || 0);
+          return (
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/20 whitespace-nowrap">
+              {fee > 0 ? `${fee.toLocaleString()} so‘m` : 'Belgilanmagan'}
+            </span>
+          );
+        },
+      },
+      {
+        header: t('common.status', 'Status'),
+        key: 'status',
+        render: (row) => (
+          <Badge variant={getStatusBadgeVariant(row.status)} size="sm">
+            <span className="capitalize">
+              {t(`groups.${row.status}`, t(`common.${row.status}`, row.status))}
+            </span>
+          </Badge>
+        ),
+      },
+      {
+        header: t('common.actions', 'Actions'),
+        key: 'actions',
+        className: 'text-right rtl:text-left',
+        cellClassName: 'text-right rtl:text-left',
+        render: (row) => (
+          <div className="flex items-center justify-end gap-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
+              title={t('groups.viewDetail', 'View Group Detail')}
+              onClick={() => navigate(`/${currentUserRole}/groups/${row.id}`)}
+            >
+              <Eye className="w-4 h-4" />
+            </Button>
+            {!isTeacher && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
+                  title={t('common.edit', 'Edit Group')}
+                  onClick={() => navigate(`/${currentUserRole}/groups/edit/${row.id}`)}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`!p-1.5 h-8 w-8 ${
+                    row.status === 'archived'
+                      ? 'text-gray-500 hover:text-emerald-600'
+                      : 'text-gray-500 hover:text-brand-red'
+                  }`}
+                  title={row.status === 'archived' ? t('common.restore', 'Restore') : t('common.archive', 'Archive')}
+                  onClick={() => handleToggleArchive(row)}
+                >
+                  {row.status === 'archived' ? (
+                    <RotateCcw className="w-4 h-4" />
+                  ) : (
+                    <Archive className="w-4 h-4" />
+                  )}
+                </Button>
+              </>
             )}
-          </Button>
-        </div>
-      ),
-    },
-  ];
+          </div>
+        ),
+      }
+    );
+
+    return cols;
+  }, [isTeacher, currentUserRole, t, navigate]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -294,36 +341,40 @@ export default function GroupManagement() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2.5">
             <Users className="w-7 h-7 text-brand-navy dark:text-blue-400" />
-            {t('groups.title', 'Group Management')}
+            {isTeacher ? 'Mening guruhlarim' : t('groups.title', 'Group Management')}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {t('groups.subtitle', 'Organize cohorts, classrooms, schedules, and student rosters')}
+            {isTeacher
+              ? 'Sizga biriktirilgan o‘quv guruhlari, auditoriyalar va talabalaringiz ro‘yxati'
+              : t('groups.subtitle', 'Organize cohorts, classrooms, schedules, and student rosters')}
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <Button
-            variant="outline"
-            size="md"
-            icon={GraduationCap}
-            onClick={() => navigate(`/${currentUserRole}/users/create?role=student`)}
-          >
-            {t('users.createStudent', '+ Yangi o‘quvchi qo‘shish')}
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={Plus}
-            onClick={() => navigate(`/${currentUserRole}/groups/create`)}
-          >
-            {t('groups.createGroup', 'New Study Group')}
-          </Button>
-        </div>
+        {!isTeacher && (
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Button
+              variant="outline"
+              size="md"
+              icon={GraduationCap}
+              onClick={() => navigate(`/${currentUserRole}/users/create?role=student`)}
+            >
+              {t('users.createStudent', '+ Yangi o‘quvchi qo‘shish')}
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              icon={Plus}
+              onClick={() => navigate(`/${currentUserRole}/groups/create`)}
+            >
+              {t('groups.createGroup', 'New Study Group')}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Filters Bar */}
       <Card noPadding>
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
+        <div className={`p-4 grid grid-cols-1 sm:grid-cols-2 ${isTeacher ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-3 items-center`}>
           <Input
             icon={Search}
             size="md"
@@ -344,12 +395,12 @@ export default function GroupManagement() {
               setCourseFilter(e.target.value);
               setPage(1);
             }}
-            placeholder={t('courses.allCourses', 'Barcha kurslar')}
+            placeholder={isTeacher ? "Mening fanlarim" : t('courses.allCourses', 'Barcha kurslar')}
             headerTitle={t('courses.title', 'Kurs bo‘yicha saralash')}
             icon={BookOpen}
             options={[
-              { value: 'all', label: t('courses.allCourses', 'Barcha kurslar'), subtitle: `${courses.length} ta umumiy kurs` },
-              ...courses.map((c) => ({
+              { value: 'all', label: isTeacher ? "Barcha fanlarim" : t('courses.allCourses', 'Barcha kurslar'), subtitle: `${displayedCourses.length} ta fan` },
+              ...displayedCourses.map((c) => ({
                 value: c.id,
                 label: c.name,
                 subtitle: c.code || 'Kurs fani',
@@ -359,27 +410,29 @@ export default function GroupManagement() {
             ]}
           />
 
-          {/* Teacher Filter */}
-          <Select
-            value={teacherFilter}
-            size="md"
-            onChange={(e) => {
-              setTeacherFilter(e.target.value);
-              setPage(1);
-            }}
-            placeholder={t('groups.allTeachers', 'Barcha ustozlar')}
-            headerTitle={t('users.filterByTeacher', 'Ustoz bo‘yicha saralash')}
-            icon={Users}
-            options={[
-              { value: 'all', label: t('groups.allTeachers', 'Barcha ustozlar'), subtitle: `${teachers.length} ta o‘qituvchi` },
-              ...teachers.map((teach) => ({
-                value: teach.id,
-                label: teach.fullName,
-                subtitle: teach.phone || 'O‘qituvchi',
-                color: '#123D78',
-              })),
-            ]}
-          />
+          {/* Teacher Filter - only shown for Owner / Admin */}
+          {!isTeacher && (
+            <Select
+              value={teacherFilter}
+              size="md"
+              onChange={(e) => {
+                setTeacherFilter(e.target.value);
+                setPage(1);
+              }}
+              placeholder={t('groups.allTeachers', 'Barcha ustozlar')}
+              headerTitle={t('users.filterByTeacher', 'Ustoz bo‘yicha saralash')}
+              icon={Users}
+              options={[
+                { value: 'all', label: t('groups.allTeachers', 'Barcha ustozlar'), subtitle: `${teachers.length} ta o‘qituvchi` },
+                ...teachers.map((teach) => ({
+                  value: teach.id,
+                  label: teach.fullName,
+                  subtitle: teach.phone || 'O‘qituvchi',
+                  color: '#123D78',
+                })),
+              ]}
+            />
+          )}
 
           {/* Status Filter */}
           <Select
@@ -529,32 +582,36 @@ export default function GroupManagement() {
                       >
                         {t('common.view', 'Batafsil')}
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        icon={Edit2}
-                        className="flex-1 justify-center text-xs py-1.5"
-                        onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
-                      >
-                        {t('common.edit', 'Tahrirlash')}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`!p-2 shrink-0 ${
-                          group.status === 'archived'
-                            ? 'text-gray-500 hover:text-emerald-600'
-                            : 'text-gray-500 hover:text-brand-red'
-                        }`}
-                        title={group.status === 'archived' ? t('common.restore', 'Tiklash') : t('common.archive', 'Arxivlash')}
-                        onClick={() => handleToggleArchive(group)}
-                      >
-                        {group.status === 'archived' ? (
-                          <RotateCcw className="w-4 h-4" />
-                        ) : (
-                          <Archive className="w-4 h-4" />
-                        )}
-                      </Button>
+                      {!isTeacher && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon={Edit2}
+                            className="flex-1 justify-center text-xs py-1.5"
+                            onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
+                          >
+                            {t('common.edit', 'Tahrirlash')}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`!p-2 shrink-0 ${
+                              group.status === 'archived'
+                                ? 'text-gray-500 hover:text-emerald-600'
+                                : 'text-gray-500 hover:text-brand-red'
+                            }`}
+                            title={group.status === 'archived' ? t('common.restore', 'Tiklash') : t('common.archive', 'Arxivlash')}
+                            onClick={() => handleToggleArchive(group)}
+                          >
+                            {group.status === 'archived' ? (
+                              <RotateCcw className="w-4 h-4" />
+                            ) : (
+                              <Archive className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );

@@ -11,6 +11,7 @@ export async function getGroups({
   search = '',
   courseId = 'all',
   teacherId = 'all',
+  teacherName = '',
   status = 'all',
   page = 1,
   limit = 20,
@@ -105,8 +106,15 @@ export async function getGroups({
           };
         });
 
-        if (teacherId && teacherId !== 'all') {
-          groups = groups.filter((g) => g.group_teachers?.some((t) => t.profiles?.id === teacherId));
+        if ((teacherId && teacherId !== 'all') || (teacherName && teacherName.trim())) {
+          const cleanTName = (teacherName || '').trim().toLowerCase();
+          groups = groups.filter((g) => {
+            const matchSupabaseGt = (teacherId && teacherId !== 'all') && g.group_teachers?.some((t) => t.profiles?.id === teacherId);
+            const matchTeacherId = (teacherId && teacherId !== 'all') && (g.teacher_id === teacherId || g.teacherId === teacherId || g.primaryTeacher?.id === teacherId);
+            const gTeacherFullName = (g.primaryTeacher?.fullName || g.teacher_name || g.teacherName || '').trim().toLowerCase();
+            const matchName = cleanTName && gTeacherFullName && (gTeacherFullName.includes(cleanTName) || cleanTName.includes(gTeacherFullName));
+            return matchSupabaseGt || matchTeacherId || matchName;
+          });
         }
 
         return {
@@ -133,8 +141,15 @@ export async function getGroups({
     list = list.filter((g) => g.course_id === courseId);
   }
 
-  if (teacherId && teacherId !== 'all') {
-    list = list.filter((g) => g.teacher_id === teacherId);
+  if ((teacherId && teacherId !== 'all') || (teacherName && teacherName.trim())) {
+    const cleanTName = (teacherName || '').trim().toLowerCase();
+    list = list.filter((g) => {
+      const matchId = (teacherId && teacherId !== 'all') && (g.teacher_id === teacherId || g.teacherId === teacherId || g.primaryTeacher?.id === teacherId);
+      const matchGt = Array.isArray(g.group_teachers) && (teacherId && teacherId !== 'all') && g.group_teachers.some(t => (t.teacher_id || t.id || t.profiles?.id) === teacherId);
+      const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
+      const matchName = cleanTName && gName && (gName.includes(cleanTName) || cleanTName.includes(gName));
+      return matchId || matchGt || matchName;
+    });
   }
 
   if (search && search.trim()) {

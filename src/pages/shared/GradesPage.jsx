@@ -172,8 +172,25 @@ export default function GradesPage() {
         }
       } else {
         try {
-          const gRes = await getGroups({ status: 'active', limit: 100 });
-          const groupList = gRes.groups || [];
+          const isTeacher = profile?.role === 'teacher';
+          const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
+          const gRes = await getGroups({
+            status: 'active',
+            limit: 100,
+            teacherId: isTeacher ? profile?.id : 'all',
+            teacherName: isTeacher ? teacherFullName : '',
+          });
+          let groupList = gRes.groups || [];
+          if (isTeacher) {
+            const myName = teacherFullName.trim().toLowerCase();
+            const myId = profile?.id;
+            groupList = groupList.filter((g) => {
+              const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId));
+              const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
+              const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
+              return matchId || matchName;
+            });
+          }
           setGroups(groupList);
           if (groupList.length > 0 && !selectedGroupId) {
             setSelectedGroupId(groupList[0].id);

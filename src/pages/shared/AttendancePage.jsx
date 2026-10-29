@@ -215,12 +215,24 @@ export default function AttendancePage() {
   useEffect(() => {
     const loadGroupsList = async () => {
       try {
+        const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
         const res = await getGroups({
           status: 'active',
           teacherId: isTeacher ? profile?.id : 'all',
+          teacherName: isTeacher ? teacherFullName : '',
           limit: 100,
         });
-        const groupList = res.groups || [];
+        let groupList = res.groups || [];
+        if (isTeacher) {
+          const myName = teacherFullName.trim().toLowerCase();
+          const myId = profile?.id;
+          groupList = groupList.filter((g) => {
+            const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId));
+            const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
+            const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
+            return matchId || matchName;
+          });
+        }
         setGroups(groupList);
         if (groupList.length > 0 && !selectedRosterGroupId) {
           setSelectedRosterGroupId(groupList[0].id);

@@ -132,6 +132,23 @@ export default function GroupDetail({ groupId: propGroupId }) {
     setLoading(true);
     try {
       const data = await getGroupById(groupId);
+
+      if (isTeacher && data) {
+        const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
+        const myName = teacherFullName.trim().toLowerCase();
+        const myId = profile?.id;
+
+        const matchId = (myId && (data.teacher_id === myId || data.teacherId === myId || data.teachers?.some((t) => t.id === myId)));
+        const gName = (data.teacher_name || data.teacherName || data.teachers?.[0]?.fullName || '').trim().toLowerCase();
+        const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
+
+        if (!matchId && !matchName) {
+          toast.error("Siz faqat o‘zingizga biriktirilgan guruhlarni ko‘rishingiz mumkin!");
+          navigate('/teacher/groups', { replace: true });
+          return;
+        }
+      }
+
       setGroup(data);
 
       // Also fetch grades and attendance summary for tabs
@@ -150,7 +167,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
     } finally {
       setLoading(false);
     }
-  }, [groupId, t]);
+  }, [groupId, isTeacher, profile, navigate, t]);
 
   useEffect(() => {
     fetchGroup();

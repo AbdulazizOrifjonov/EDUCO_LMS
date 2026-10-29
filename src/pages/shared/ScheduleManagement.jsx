@@ -20,6 +20,7 @@ import Badge from '@/components/ui/Badge';
 import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
 import { localStore } from '@/lib/localStore';
+import useAuth from '@/hooks/useAuth';
 import LessonForm from './LessonForm';
 import { getGroups } from '@/services/groupService';
 import { getTeachers } from '@/services/userService';
@@ -36,6 +37,10 @@ const DAYS = [
 
 export default function ScheduleManagement() {
   const { t } = useTranslation();
+  const { profile } = useAuth();
+  const isTeacher = profile?.role === 'teacher';
+  const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
+
   const [schedules, setSchedules] = useState([]);
   const [groups, setGroups] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -81,18 +86,38 @@ export default function ScheduleManagement() {
     // Fetch groups and teachers for filtering
     const loadFilters = async () => {
       try {
-        const [gRes, tRes] = await Promise.all([
-          getGroups({ status: 'active', limit: 100 }),
-          getTeachers(),
-        ]);
-        setGroups(gRes.groups || []);
-        setTeachers(tRes || []);
+        if (isTeacher) {
+          const gRes = await getGroups({
+            status: 'active',
+            limit: 100,
+            teacherId: profile?.id,
+            teacherName: teacherFullName,
+          });
+          let groupList = gRes.groups || [];
+          const myName = teacherFullName.trim().toLowerCase();
+          const myId = profile?.id;
+          groupList = groupList.filter((g) => {
+            const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId));
+            const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
+            const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
+            return matchId || matchName;
+          });
+          setGroups(groupList);
+          setTeachers([]);
+        } else {
+          const [gRes, tRes] = await Promise.all([
+            getGroups({ status: 'active', limit: 100 }),
+            getTeachers(),
+          ]);
+          setGroups(gRes.groups || []);
+          setTeachers(tRes || []);
+        }
       } catch (err) {
         console.warn(err);
       }
     };
     loadFilters();
-  }, [fetchScheduleData]);
+  }, [fetchScheduleData, isTeacher, profile?.id, teacherFullName]);
 
   const handleDeleteLesson = async (id) => {
     if (!window.confirm(t('schedule.confirmDelete', 'Ushbu darsni jadvaldan o‘chirmoqchimisiz?'))) {
@@ -112,11 +137,24 @@ export default function ScheduleManagement() {
 
   // Filtered schedules
   const filteredSchedules = schedules.filter((s) => {
+    if (isTeacher) {
+      const myId = profile?.id;
+      const myName = teacherFullName.trim().toLowerCase();
+      const hasMyGroup = groups.some((g) => g.id === s.group_id);
+      const hasMyId = s.teachers?.some((t) => t?.id === myId) || s.teacher_id === myId;
+      const hasMyName = s.teachers?.some((t) => {
+        const tName = `${t?.first_name || ''} ${t?.last_name || ''}`.trim().toLowerCase();
+        return myName && tName && (tName.includes(myName) || myName.includes(tName));
+      }) || (s.teacher_name && myName && s.teacher_name.toLowerCase().includes(myName));
+
+      if (!hasMyGroup && !hasMyId && !hasMyName) return false;
+    }
+
     if (patternFilter === 'odd' && ![1, 3, 5].includes(Number(s.day_of_week))) return false;
     if (patternFilter === 'even' && ![2, 4, 6].includes(Number(s.day_of_week))) return false;
     if (groupFilter !== 'all' && s.group_id !== groupFilter) return false;
     if (roomFilter !== 'all' && s.room !== roomFilter) return false;
-    if (teacherFilter !== 'all') {
+    if (!isTeacher && teacherFilter !== 'all') {
       const hasTeacher = s.teachers?.some((teach) => teach?.id === teacherFilter);
       if (!hasTeacher) return false;
     }
@@ -130,25 +168,27 @@ export default function ScheduleManagement() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2.5">
             <Calendar className="w-7 h-7 text-brand-navy dark:text-blue-400" />
-            {t('nav.schedule', 'Dars jadvali')}
+            {isTeacher ? 'Mening dars jadvalim' : t('nav.schedule', 'Dars jadvali')}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {t('schedule.subtitle', 'Toq kunlar (Dush-Chor-Jum) va Juft kunlar (Sesh-Pay-Shan) bo‘yicha haftalik dars jadvali')}
           </p>
         </div>
 
-        <Button
-          variant="primary"
-          size="md"
-          icon={Plus}
-          onClick={() => {
-            setSelectedLesson(null);
-            setInitialSlot({ day: patternFilter === 'even' ? 2 : 1, time: '09:00' });
-            setIsFormOpen(true);
-          }}
-        >
-          {t('schedule.addLesson', 'Dars qo‘shish')}
-        </Button>
+        {!isTeacher && (
+          <Button
+            variant="primary"
+            size="md"
+            icon={Plus}
+            onClick={() => {
+              setSelectedLesson(null);
+              setInitialSlot({ day: patternFilter === 'even' ? 2 : 1, time: '09:00' });
+              setIsFormOpen(true);
+            }}
+          >
+            {t('schedule.addLesson', 'Dars qo‘shish')}
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -193,7 +233,7 @@ export default function ScheduleManagement() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className={`grid grid-cols-1 ${isTeacher ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-3`}>
             {/* Group Filter */}
             <Select
               value={groupFilter}
@@ -213,24 +253,26 @@ export default function ScheduleManagement() {
               ]}
             />
 
-            {/* Teacher Filter */}
-            <Select
-              value={teacherFilter}
-              onChange={(e) => setTeacherFilter(e.target.value)}
-              placeholder={t('groups.allTeachers', 'Barcha o‘qituvchilar')}
-              headerTitle={t('users.filterByTeacher', 'Ustoz bo‘yicha jadval')}
-              icon={GraduationCap}
-              size="sm"
-              options={[
-                { value: 'all', label: t('groups.allTeachers', 'Barcha o‘qituvchilar'), subtitle: `${teachers.length} ta o‘qituvchi` },
-                ...teachers.map((teach) => ({
-                  value: teach.id,
-                  label: teach.fullName,
-                  subtitle: teach.phone || 'O‘qituvchi',
-                  color: '#123D78',
-                })),
-              ]}
-            />
+            {/* Teacher Filter - only for Owner/Admin */}
+            {!isTeacher && (
+              <Select
+                value={teacherFilter}
+                onChange={(e) => setTeacherFilter(e.target.value)}
+                placeholder={t('groups.allTeachers', 'Barcha o‘qituvchilar')}
+                headerTitle={t('users.filterByTeacher', 'Ustoz bo‘yicha jadval')}
+                icon={GraduationCap}
+                size="sm"
+                options={[
+                  { value: 'all', label: t('groups.allTeachers', 'Barcha o‘qituvchilar'), subtitle: `${teachers.length} ta o‘qituvchi` },
+                  ...teachers.map((teach) => ({
+                    value: teach.id,
+                    label: teach.fullName,
+                    subtitle: teach.phone || 'O‘qituvchi',
+                    color: '#123D78',
+                  })),
+                ]}
+              />
+            )}
 
             {/* Room Filter */}
             <Select
