@@ -96,6 +96,35 @@ export default function DashboardLayout({
 
   const userDropdownRef = useRef(null);
   const notifDropdownRef = useRef(null);
+  const mainRef = useRef(null);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+
+  // Automatically scroll main container and window to top on every route navigation
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (typeof document !== 'undefined') {
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    }
+  }, [location.pathname, location.search]);
+
+  // Track if mobile chat window is actively open
+  useEffect(() => {
+    const updateChatState = () => {
+      setIsMobileChatOpen(document.body.classList.contains('mobile-chat-open'));
+    };
+    updateChatState();
+    const observer = new MutationObserver(updateChatState);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Poll for due reminders (admin & owner)
   useEffect(() => {
@@ -319,8 +348,10 @@ export default function DashboardLayout({
 
       {/* Main Content Wrapper */}
       <div
-        className={`flex min-w-0 flex-1 flex-col pt-16 transition-all duration-300 ease-in-out ${
-          isChatPage ? 'h-full max-h-full overflow-hidden' : 'min-h-screen overflow-x-hidden'
+        className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out ${
+          isChatPage
+            ? 'h-[100dvh] max-h-[100dvh] overflow-hidden pt-0'
+            : 'min-h-screen overflow-x-hidden pt-16'
         }
           ${
             collapsed
@@ -334,19 +365,23 @@ export default function DashboardLayout({
           w-full
         `}
       >
-        {/* Top Navigation Bar (Fixed at top on scroll) */}
+        {/* Top Navigation Bar */}
         <header
-          className={`fixed top-0 z-40 flex h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-3 sm:px-6 shadow-sm backdrop-blur-md transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-[#101827]/95
-            ${
-              collapsed
-                ? isRtl
-                  ? 'left-0 right-0 lg:right-20'
-                  : 'left-0 right-0 lg:left-20'
-                : isRtl
-                ? 'left-0 right-0 lg:right-64'
-                : 'left-0 right-0 lg:left-64'
-            }
-          `}
+          className={`${
+            isChatPage
+              ? `shrink-0 z-40 h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-3 sm:px-6 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-[#101827]/95 ${
+                  isMobileChatOpen ? 'hidden md:flex' : 'flex'
+                }`
+              : `fixed top-0 z-40 flex h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-3 sm:px-6 shadow-sm backdrop-blur-md transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-[#101827]/95 ${
+                  collapsed
+                    ? isRtl
+                      ? 'left-0 right-0 lg:right-20'
+                      : 'left-0 right-0 lg:left-20'
+                    : isRtl
+                    ? 'left-0 right-0 lg:right-64'
+                    : 'left-0 right-0 lg:left-64'
+                }`
+          }`}
         >
           {/* Left section: Hamburger (mobile) + Page Title */}
           <div className="flex shrink min-w-0 items-center gap-1.5 sm:gap-3 mr-2 sm:mr-3 lg:mr-6">
@@ -717,9 +752,10 @@ export default function DashboardLayout({
 
         {/* Main Content Area */}
         <main
+          ref={mainRef}
           className={`flex-1 min-h-0 min-w-0 w-full ${
             isChatPage
-              ? 'p-0 md:p-3 overflow-hidden flex flex-col h-full max-h-full'
+              ? 'p-0 md:p-3 overflow-hidden flex flex-col'
               : 'p-3 sm:p-5 lg:p-6 overflow-y-auto overflow-x-hidden'
           }`}
         >

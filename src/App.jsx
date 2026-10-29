@@ -4,6 +4,7 @@ import useAuth from '@/hooks/useAuth';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ToastContainer from '@/components/ui/Toast';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import ScrollToTop from '@/components/ScrollToTop';
 import { ROLES } from '@/lib/constants';
 
 // Layouts
@@ -62,6 +63,7 @@ export default function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Suspense fallback={<LoadingSpinner fullPage text="Loading EDUCO LMS..." />}>
         <Routes>
           {/* Public Routes */}

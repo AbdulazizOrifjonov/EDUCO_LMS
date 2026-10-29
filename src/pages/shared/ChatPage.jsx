@@ -103,6 +103,18 @@ export default function ChatPage() {
     setShowMobileChat(false);
   };
 
+  // Sync mobile chat open state to document body so layout can adapt
+  useEffect(() => {
+    if (showMobileChat) {
+      document.body.classList.add('mobile-chat-open');
+    } else {
+      document.body.classList.remove('mobile-chat-open');
+    }
+    return () => {
+      document.body.classList.remove('mobile-chat-open');
+    };
+  }, [showMobileChat]);
+
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}

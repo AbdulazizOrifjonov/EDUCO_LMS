@@ -441,13 +441,14 @@ export default function ChatWindow({
   return (
     <div className="flex-1 min-h-0 min-w-0 max-w-full flex flex-col h-full bg-[#F5F7FA] dark:bg-[#101827] relative overflow-hidden">
       {/* Chat Header */}
-      <div className="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-xs z-10 shrink-0 sticky top-0">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse min-w-0">
+      <div className="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-xs z-10 shrink-0">
+        <div className="flex items-center space-x-2.5 sm:space-x-3 rtl:space-x-reverse min-w-0">
           {/* Mobile Back Button */}
           <button
             type="button"
             onClick={onBackToList}
-            className="md:hidden p-2 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="md:hidden -ml-1 p-2 rounded-xl text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
+            title="Guruhlar ro'yxatiga qaytish"
           >
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
           </button>
