@@ -34,6 +34,7 @@ import { toast } from '@/components/ui/Toast';
 import { createUser, updateUser, getUserById } from '@/services/userService';
 import { getGroups, enrollStudent } from '@/services/groupService';
 import { createStudentReminder } from '@/services/reminderService';
+import { getCourses, createCourse } from '@/services/courseService';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone, cleanUzPhone } from '@/utils/phoneFormat';
 
@@ -68,6 +69,15 @@ export default function UserCreatePage() {
   const [groupsList, setGroupsList] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(searchParams.get('groupId') || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Teacher direction / Course selection & inline creation
+  const [coursesList, setCoursesList] = useState([]);
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [isCreatingInlineCourse, setIsCreatingInlineCourse] = useState(false);
+  const [newCourseName, setNewCourseName] = useState('');
+  const [newCourseFee, setNewCourseFee] = useState('');
+  const [newCourseDesc, setNewCourseDesc] = useState('');
+  const [isSavingCourse, setIsSavingCourse] = useState(false);
 
   // Set default reminder date to 3 days from now
   const getDefaultReminderDate = (daysAhead = 3) => {
@@ -143,12 +153,58 @@ export default function UserCreatePage() {
     loadGroups();
   }, [profile?.id, isTeacher]);
 
+  const loadCourses = async () => {
+    try {
+      const res = await getCourses({ status: 'active', limit: 100 });
+      setCoursesList(res.courses || []);
+    } catch (e) {
+      console.error('loadCourses error:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  const handleCreateInlineCourse = async (e) => {
+    e?.preventDefault?.();
+    const name = newCourseName.trim();
+    if (!name) {
+      toast.error('Yo‘nalish (kurs) nomini kiriting!');
+      return;
+    }
+    try {
+      setIsSavingCourse(true);
+      const fee = Number(String(newCourseFee).replace(/\D/g, '')) || 0;
+      const created = await createCourse({
+        name,
+        monthlyFee: fee,
+        description: newCourseDesc.trim() || undefined,
+      });
+      toast.success(`"${name}" yangi ta‘lim yo‘nalishi yaratildi va biriktirildi!`);
+      const res = await getCourses({ status: 'active', limit: 100 });
+      setCoursesList(res.courses || []);
+      setSelectedCourseId(created.id);
+      setIsCreatingInlineCourse(false);
+      setNewCourseName('');
+      setNewCourseFee('');
+      setNewCourseDesc('');
+    } catch (err) {
+      toast.error(`Xatolik: ${err.message}`);
+    } finally {
+      setIsSavingCourse(false);
+    }
+  };
+
   // If editing, load user details
   useEffect(() => {
     if (isEditing && id) {
       getUserById(id)
         .then((u) => {
           if (u) {
+            if (u.course_id || u.courseId) {
+              setSelectedCourseId(u.course_id || u.courseId);
+            }
             reset({
               firstName: u.first_name || '',
               lastName: u.last_name || '',
@@ -221,6 +277,7 @@ export default function UserCreatePage() {
     setIsSubmitting(true);
     try {
       if (isEditing) {
+        const selectedCourseObj = coursesList.find((c) => c.id === selectedCourseId);
         await updateUser(id, {
           firstName: data.firstName,
           lastName: data.lastName,
@@ -230,9 +287,32 @@ export default function UserCreatePage() {
           role: data.role,
           isActive: data.isActive,
           password: trimmedPwd || undefined,
+          courseId: selectedCourseId || undefined,
+          subject: selectedCourseObj?.name || undefined,
         });
         toast.success('Foydalanuvchi ma‘lumotlari muvaffaqiyatli yangilandi!');
       } else {
+        // If teacher role and an inline course was drafted, auto-create it
+        let finalCourseId = selectedCourseId;
+        let finalSubject = '';
+        if (data.role === ROLES.TEACHER) {
+          if (!finalCourseId && newCourseName.trim()) {
+            try {
+              const fee = Number(String(newCourseFee).replace(/\D/g, '')) || 0;
+              const newC = await createCourse({
+                name: newCourseName.trim(),
+                monthlyFee: fee,
+                description: newCourseDesc.trim() || undefined,
+              });
+              finalCourseId = newC.id;
+              finalSubject = newC.name;
+            } catch (_) {}
+          } else if (finalCourseId) {
+            const matched = coursesList.find((c) => c.id === finalCourseId);
+            finalSubject = matched?.name || '';
+          }
+        }
+
         const createdUser = await createUser({
           firstName: data.firstName,
           lastName: data.lastName,
@@ -242,6 +322,8 @@ export default function UserCreatePage() {
           role: data.role,
           isActive: data.isActive,
           password: trimmedPwd,
+          courseId: finalCourseId || null,
+          subject: finalSubject || '',
         });
 
         // 1. Group enrollment if selected
@@ -384,6 +466,39 @@ export default function UserCreatePage() {
           >
             {isEditing ? "O'zgarishlarni saqlash" : "Ro'yxatdan o'tkazish"}
           </Button>
+        </div>
+      </div>
+
+      {/* Visual Workflow Steps Guide (Logical Dependency Order) */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-purple-50/70 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-purple-950/30 border border-blue-200/80 dark:border-blue-900/50 shadow-xs">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-200">
+              O‘quv markazni sozlash mantiqiy ketma-ketligi
+            </span>
+          </div>
+          <span className="text-[11px] text-blue-700 dark:text-blue-300 font-semibold bg-white/70 dark:bg-gray-800/70 px-2.5 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800">
+            Har bir bosqichda yetishmayotgan qismini o‘sha joyning o‘zida ham yaratib ketaverasiz
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+          <div className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${selectedRole === ROLES.TEACHER && !selectedCourseId ? 'bg-amber-100/90 border-amber-300 dark:bg-amber-950/60 font-bold text-amber-900 dark:text-amber-200 ring-2 ring-amber-400/50' : 'bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'}`}>
+            <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">1</span>
+            <span className="truncate">1. Yo‘nalish (Kurs)</span>
+          </div>
+          <div className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${selectedRole === ROLES.TEACHER ? 'bg-amber-100/90 border-amber-300 dark:bg-amber-950/60 font-bold text-amber-900 dark:text-amber-200 ring-2 ring-amber-400/50' : 'bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'}`}>
+            <span className="w-5 h-5 rounded-full bg-amber-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">2</span>
+            <span className="truncate">2. O‘qituvchi</span>
+          </div>
+          <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-purple-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">3</span>
+            <span className="truncate">3. O‘quv guruhi</span>
+          </div>
+          <div className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${selectedRole === ROLES.STUDENT ? 'bg-emerald-100/90 border-emerald-300 dark:bg-emerald-950/60 font-bold text-emerald-900 dark:text-emerald-200 ring-2 ring-emerald-400/50' : 'bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'}`}>
+            <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">4</span>
+            <span className="truncate">4. O‘quvchi</span>
+          </div>
         </div>
       </div>
 
@@ -646,6 +761,142 @@ export default function UserCreatePage() {
           />
         </Card>
 
+        {/* Section 4: Mutaxassislik va Ta'lim yo'nalishi (Teacher only) */}
+        {selectedRole === ROLES.TEACHER && (
+          <Card className="p-5 border-2 border-amber-300/80 dark:border-amber-900/50">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <div>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">
+                    4. Mutaxassislik va Ta‘lim yo‘nalishi (Fan)
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    O‘qituvchi markazda qaysi fan yoki yo‘nalish bo‘yicha dars beradi?
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreatingInlineCourse(!isCreatingInlineCourse)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{isCreatingInlineCourse ? "Bekor qilish" : "+ Yangi yo‘nalish qo‘shish"}</span>
+              </button>
+            </div>
+
+            {/* Inline Course Creator Sub-card */}
+            {isCreatingInlineCourse && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border-2 border-dashed border-amber-300 dark:border-amber-800 space-y-3.5 mb-4 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+                      Yangi ta‘lim yo‘nalishi (kurs) yaratish
+                    </h3>
+                  </div>
+                  <span className="text-[11px] text-amber-700 dark:text-amber-300 font-semibold">
+                    Bir zumda yaratilib, o‘qituvchiga biriktiriladi
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">
+                      Yo‘nalish / Fan nomi <span className="text-rose-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="Masalan: Matematika, IELTS, Dasturlash"
+                      value={newCourseName}
+                      onChange={(e) => setNewCourseName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">
+                      Oylik kurs to‘lovi (so‘mda)
+                    </label>
+                    <Input
+                      placeholder="Masalan: 450 000"
+                      value={newCourseFee}
+                      onChange={(e) => setNewCourseFee(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1">
+                    Qisqacha tavsif (ixtiyoriy)
+                  </label>
+                  <Input
+                    placeholder="Kurs darajasi yoki yo‘nalish haqida qisqacha ma‘lumot"
+                    value={newCourseDesc}
+                    onChange={(e) => setNewCourseDesc(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-200/60 dark:border-amber-900/40">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsCreatingInlineCourse(false)}
+                  >
+                    Bekor qilish
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    isLoading={isSavingCourse}
+                    onClick={handleCreateInlineCourse}
+                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                  >
+                    Yo‘nalishni saqlash va biriktirish
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Course Select */}
+            <div className="space-y-3">
+              <Select
+                label="O‘qituvchining asosiy yo‘nalishi / fani"
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                placeholder="Yo‘nalishni tanlang (yoki yuqoridan yangi qo‘shing)"
+                headerTitle="Mavjud ta‘lim yo‘nalishlari"
+                icon={BookOpen}
+                size="md"
+                options={[
+                  { value: '', label: 'Yo‘nalishsiz (Keyinroq biriktirish)', subtitle: 'Guruh ochilganda ham biriktirish mumkin' },
+                  ...coursesList.map((c) => ({
+                    value: c.id,
+                    label: c.name,
+                    subtitle: c.monthly_fee ? `${Number(c.monthly_fee).toLocaleString()} so‘m/oy` : 'To‘lov belgilanmagan',
+                    color: c.color || '#d97706',
+                  })),
+                ]}
+              />
+
+              {coursesList.length === 0 && !isCreatingInlineCourse && (
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <span>Tizimda hali ta‘lim yo‘nalishlari (kurslar) mavjud emas. Yuqoridagi tugma orqali o‘qituvchi uchun hoziroq yo‘nalish qo‘shishingiz mumkin!</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsCreatingInlineCourse(true)}
+                    className="shrink-0 font-bold border-amber-300 text-amber-900 dark:text-amber-200"
+                  >
+                    + Yangi yo‘nalish
+                  </Button>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
         {/* Section 4: O'quv guruhiga biriktirish (Student only) */}
         {selectedRole === ROLES.STUDENT && (
           <Card className="p-5">
@@ -670,6 +921,30 @@ export default function UserCreatePage() {
             </div>
 
             <div className="space-y-3">
+              {groupsList.length === 0 && (
+                <div className="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-200 space-y-2">
+                  <div className="flex items-center gap-2 font-bold">
+                    <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <span>Hali o‘quv guruhlari ochilmaganmi? Xavotir olmang!</span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    O‘quvchini hozir <strong>«Guruhsiz (Kutish zali)»</strong>da ro‘yxatga olaverasiz. Yangi guruh ochilganda uni bitta tugma bilan guruhga biriktirib qo‘yasiz.
+                  </p>
+                  {!isTeacher && (
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/${currentUserRole}/groups/create`)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Hozir yangi guruh ochish</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <Select
                 label={isTeacher ? "Sizning o‘quv guruhingiz" : "O‘quv guruhini tanlang"}
                 value={selectedGroupId}

@@ -19,19 +19,24 @@ import {
   Layers,
   Camera,
   Trash2,
+  Plus,
+  AlertCircle,
+  X,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import Modal from '@/components/ui/Modal';
 import { toast } from '@/components/ui/Toast';
 import { createGroup, updateGroup, getGroupById } from '@/services/groupService';
-import { getCourses } from '@/services/courseService';
-import { getTeachers } from '@/services/userService';
+import { getCourses, createCourse } from '@/services/courseService';
+import { getTeachers, createUser } from '@/services/userService';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { fileToCompressedDataUrl } from '@/services/settingsService';
 import { ROLES } from '@/lib/constants';
+import { formatUzPhone, cleanUzPhone } from '@/utils/phoneFormat';
 
 const groupSchema = z.object({
   name: z.string().min(2, 'Guruh nomi kamida 2 ta belgidan iborat bo‘lishi kerak'),
@@ -61,6 +66,20 @@ export default function GroupCreatePage() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [cropModalFile, setCropModalFile] = useState(null);
+
+  // Quick Inline Course Creation state
+  const [isCreatingInlineCourse, setIsCreatingInlineCourse] = useState(false);
+  const [newCourseName, setNewCourseName] = useState('');
+  const [newCourseFee, setNewCourseFee] = useState('');
+  const [newCourseDesc, setNewCourseDesc] = useState('');
+  const [isSavingCourse, setIsSavingCourse] = useState(false);
+
+  // Quick Inline Teacher Creation state
+  const [isCreatingInlineTeacher, setIsCreatingInlineTeacher] = useState(false);
+  const [newTeacherFirstName, setNewTeacherFirstName] = useState('');
+  const [newTeacherLastName, setNewTeacherLastName] = useState('');
+  const [newTeacherPhone, setNewTeacherPhone] = useState('+998 ');
+  const [isSavingTeacher, setIsSavingTeacher] = useState(false);
 
   const {
     register,
@@ -177,6 +196,77 @@ export default function GroupCreatePage() {
     setAvatarUrl('');
   };
 
+  const handleCreateInlineCourse = async (e) => {
+    e?.preventDefault?.();
+    const name = newCourseName.trim();
+    if (!name) {
+      toast.error('Yo‘nalish (kurs) nomini kiriting!');
+      return;
+    }
+    try {
+      setIsSavingCourse(true);
+      const fee = Number(String(newCourseFee).replace(/\D/g, '')) || 0;
+      const created = await createCourse({
+        name,
+        monthlyFee: fee,
+        description: newCourseDesc.trim() || undefined,
+      });
+      toast.success(`"${name}" yangi ta‘lim yo‘nalishi yaratildi va guruhga tanlandi!`);
+      const res = await getCourses({ status: 'active', limit: 100 });
+      setCourses(res.courses || []);
+      setValue('courseId', created.id, { shouldValidate: true });
+      if (fee > 0) {
+        setValue('monthlyPrice', fee, { shouldValidate: true });
+      }
+      setIsCreatingInlineCourse(false);
+      setNewCourseName('');
+      setNewCourseFee('');
+      setNewCourseDesc('');
+    } catch (err) {
+      toast.error(`Xatolik: ${err.message}`);
+    } finally {
+      setIsSavingCourse(false);
+    }
+  };
+
+  const handleCreateInlineTeacher = async (e) => {
+    e?.preventDefault?.();
+    const firstName = newTeacherFirstName.trim();
+    const lastName = newTeacherLastName.trim();
+    const phone = cleanUzPhone(newTeacherPhone);
+    if (!firstName || !lastName) {
+      toast.error('O‘qituvchining ismi va familiyasini kiriting!');
+      return;
+    }
+    if (!phone) {
+      toast.error('O‘qituvchining telefon raqamini to‘liq kiriting!');
+      return;
+    }
+    try {
+      setIsSavingTeacher(true);
+      const created = await createUser({
+        firstName,
+        lastName,
+        phone,
+        role: ROLES.TEACHER,
+        courseId: selectedCourseId || null,
+        subject: selectedCourse?.name || '',
+      });
+      toast.success(`Ustoz "${firstName} ${lastName}" muvaffaqiyatli qo‘shildi va biriktirildi!`);
+      const teacherRes = await getTeachers();
+      setTeachers(teacherRes || []);
+      setValue('teacherId', created.id);
+      setIsCreatingInlineTeacher(false);
+      setNewTeacherFirstName('');
+      setNewTeacherLastName('');
+      setNewTeacherPhone('+998 ');
+    } catch (err) {
+      toast.error(`Xatolik: ${err.message}`);
+    } finally {
+      setIsSavingTeacher(false);
+    }
+  };
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -247,6 +337,39 @@ export default function GroupCreatePage() {
             ? 'Guruh parametrlari, mas‘ul o‘qituvchi, talabalar sig‘imi va dars xonasini yangilang'
             : 'Yangi sinf yoki o‘quv guruhini shakllantirish, o‘qituvchi, kurs fani va auditoriyani belgilang'}
         </p>
+      </div>
+
+      {/* Visual Workflow Steps Guide (Logical Dependency Order) */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-purple-50/70 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-purple-950/30 border border-blue-200/80 dark:border-blue-900/50 shadow-xs">
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-900 dark:text-blue-200">
+              O‘quv markazni sozlash mantiqiy ketma-ketligi
+            </span>
+          </div>
+          <span className="text-[11px] text-blue-700 dark:text-blue-300 font-semibold bg-white/70 dark:bg-gray-800/70 px-2.5 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-800">
+            Kurs yoki o‘qituvchi hali ochilmagan bo‘lsa, shu sahifaning o‘zida tezkor yaratib olasiz
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+          <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">1</span>
+            <span className="truncate">1. Yo‘nalish (Kurs)</span>
+          </div>
+          <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-amber-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">2</span>
+            <span className="truncate">2. O‘qituvchi</span>
+          </div>
+          <div className="p-2.5 rounded-xl border bg-emerald-100/90 border-emerald-300 dark:bg-emerald-950/60 font-bold text-emerald-900 dark:text-emerald-200 ring-2 ring-emerald-400/50 flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">3</span>
+            <span className="truncate">3. O‘quv guruhi</span>
+          </div>
+          <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-purple-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">4</span>
+            <span className="truncate">4. O‘quvchi</span>
+          </div>
+        </div>
       </div>
 
       {/* Form */}
@@ -343,11 +466,100 @@ export default function GroupCreatePage() {
               />
             </div>
 
-            {/* Course Selector */}
-            <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Kurs fani / Ta‘lim yo‘nalishi <span className="text-brand-red">*</span>
-              </label>
+            {/* Course Selector & Inline Creator */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                  Kurs fani / Ta‘lim yo‘nalishi <span className="text-brand-red">*</span>
+                </label>
+                {!isTeacher && (
+                  <button
+                    type="button"
+                    onClick={() => setIsCreatingInlineCourse(!isCreatingInlineCourse)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{isCreatingInlineCourse ? 'Yopish' : '+ Yangi yo‘nalish'}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Inline Course Creation Card */}
+              {isCreatingInlineCourse && (
+                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 space-y-3 animate-fade-in mb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <h4 className="text-xs font-bold text-blue-950 dark:text-blue-200 uppercase tracking-wide">
+                        Yangi ta‘lim yo‘nalishi (Kurs) ochish
+                      </h4>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsCreatingInlineCourse(false)}
+                      className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Kurs nomi <span className="text-brand-red">*</span>
+                      </label>
+                      <Input
+                        placeholder="Masalan: Frontend Boot-2026 yoki Ingliz tili"
+                        value={newCourseName}
+                        onChange={(e) => setNewCourseName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Oylik to‘lov (so‘m)
+                      </label>
+                      <Input
+                        placeholder="Masalan: 600000"
+                        value={newCourseFee}
+                        onChange={(e) => setNewCourseFee(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      Kurs tavsifi (ixtiyoriy)
+                    </label>
+                    <Input
+                      placeholder="Masalan: Noldan professional darajagacha darslar"
+                      value={newCourseDesc}
+                      onChange={(e) => setNewCourseDesc(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsCreatingInlineCourse(false)}
+                    >
+                      Bekor qilish
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      isLoading={isSavingCourse}
+                      onClick={handleCreateInlineCourse}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                    >
+                      Yo‘nalishni saqlash va tanlash
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <Select
                 value={selectedCourseId}
                 onChange={(e) => setValue('courseId', e.target.value)}
@@ -362,6 +574,21 @@ export default function GroupCreatePage() {
                 }))}
                 error={errors.courseId?.message}
               />
+
+              {courses.length === 0 && !isCreatingInlineCourse && (
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span>Tizimda hali kurslar mavjud emas. Yuqoridagi tugma orqali yo‘nalish yarating!</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsCreatingInlineCourse(true)}
+                    className="shrink-0 font-bold border-amber-300 text-amber-900 dark:text-amber-200"
+                  >
+                    + Yangi yo‘nalish
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </Card>
@@ -376,11 +603,100 @@ export default function GroupCreatePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Teacher Selector */}
-            <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Asosiy o‘qituvchi (Ustoz)
-              </label>
+            {/* Teacher Selector & Inline Creator */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                  Asosiy o‘qituvchi (Ustoz)
+                </label>
+                {!isTeacher && (
+                  <button
+                    type="button"
+                    onClick={() => setIsCreatingInlineTeacher(!isCreatingInlineTeacher)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>{isCreatingInlineTeacher ? 'Yopish' : '+ Yangi o‘qituvchi'}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Inline Teacher Creation Card */}
+              {isCreatingInlineTeacher && (
+                <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 space-y-3 animate-fade-in mb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <h4 className="text-xs font-bold text-emerald-950 dark:text-emerald-200 uppercase tracking-wide">
+                        Yangi o‘qituvchi (Ustoz) qo‘shish
+                      </h4>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsCreatingInlineTeacher(false)}
+                      className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Ism <span className="text-brand-red">*</span>
+                      </label>
+                      <Input
+                        placeholder="Masalan: Sardor"
+                        value={newTeacherFirstName}
+                        onChange={(e) => setNewTeacherFirstName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Familiya <span className="text-brand-red">*</span>
+                      </label>
+                      <Input
+                        placeholder="Masalan: Alimov"
+                        value={newTeacherLastName}
+                        onChange={(e) => setNewTeacherLastName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      Telefon raqami (Login uchun) <span className="text-brand-red">*</span>
+                    </label>
+                    <Input
+                      placeholder="+998 90 123 45 67"
+                      value={newTeacherPhone}
+                      onChange={(e) => setNewTeacherPhone(formatUzPhone(e.target.value))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsCreatingInlineTeacher(false)}
+                    >
+                      Bekor qilish
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      isLoading={isSavingTeacher}
+                      onClick={handleCreateInlineTeacher}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                    >
+                      O‘qituvchini saqlash va biriktirish
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <Select
                 value={selectedTeacherId}
                 onChange={(e) => setValue('teacherId', e.target.value)}
@@ -401,6 +717,20 @@ export default function GroupCreatePage() {
                 <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                   ✓ Siz ushbu guruhga asosiy o‘qituvchi sifatida biriktirilasiz
                 </p>
+              )}
+              {teachers.length === 0 && !isCreatingInlineTeacher && !isTeacher && (
+                <div className="p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span>Hozircha tizimda o‘qituvchilar yo‘q. Yuqoridagi tugma orqali o‘qituvchini tezkor qo‘shishingiz yoki guruhni hozircha o‘qituvchisiz saqlashingiz mumkin.</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsCreatingInlineTeacher(true)}
+                    className="shrink-0 font-bold border-blue-300 text-blue-900 dark:text-blue-200"
+                  >
+                    + Yangi o‘qituvchi
+                  </Button>
+                </div>
               )}
             </div>
 

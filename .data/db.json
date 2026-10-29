@@ -1,23 +1,61 @@
 {
   "educo_db_users": [
     {
-      "id": "usr-1793249718156",
-      "username": "safiya_ibrohimova",
-      "first_name": "Safiya",
-      "last_name": "Ibrohimova",
-      "fullName": "Safiya Ibrohimova",
-      "full_name": "Safiya Ibrohimova",
+      "id": "usr-1793287688192",
+      "username": "abdulziz_orifjonov",
+      "first_name": "Abdulziz",
+      "last_name": "Orifjonov",
+      "fullName": "Abdulziz Orifjonov",
+      "full_name": "Abdulziz Orifjonov",
       "avatar_url": "",
-      "role": "admin",
-      "email": "safiya_ibrohimova@educo.app",
-      "phone": "+998 93 610 17 74",
+      "role": "student",
+      "email": "abdulziz_orifjonov@educo.app",
+      "phone": "+998 93 582 17 74",
+      "father_phone": "+998 93 582 17 74",
+      "mother_phone": "+998 93 582 17 74",
+      "password": "Pgxq&82P6",
+      "password_updated_at": "2026-10-29T15:28:08.192Z",
+      "is_active": true,
+      "created_at": "2026-10-29T15:28:08.192Z",
+      "updated_at": "2026-10-29T15:28:08.192Z"
+    },
+    {
+      "id": "usr-1793287463431",
+      "username": "abdulaziz_orifjonov",
+      "first_name": "Abdulaziz",
+      "last_name": "Orifjonov",
+      "fullName": "Abdulaziz Orifjonov",
+      "full_name": "Abdulaziz Orifjonov",
+      "avatar_url": "",
+      "role": "teacher",
+      "email": "abdulaziz_orifjonov@educo.app",
+      "phone": "+998 93 582 17 74",
       "father_phone": "",
       "mother_phone": "",
-      "password": "Fhxv$94J3",
-      "password_updated_at": "2026-10-29T04:55:18.157Z",
+      "password": "Mmua*65G7",
+      "password_updated_at": "2026-10-29T15:24:23.431Z",
       "is_active": true,
-      "created_at": "2026-10-29T04:55:18.157Z",
-      "updated_at": "2026-10-29T04:55:18.157Z"
+      "created_at": "2026-10-29T15:24:23.431Z",
+      "updated_at": "2026-10-29T15:24:23.431Z"
+    },
+    {
+      "id": "usr-1793287264461",
+      "username": "abdulzizbek_orifjonov",
+      "first_name": "Abdulzizbek",
+      "last_name": "Orifjonov",
+      "fullName": "Abdulzizbek Orifjonov",
+      "full_name": "Abdulzizbek Orifjonov",
+      "avatar_url": "",
+      "role": "admin",
+      "email": "abdulzizbek_orifjonov@educo.app",
+      "phone": "+998 93 582 17 74",
+      "father_phone": "",
+      "mother_phone": "",
+      "password": "Aywa&26W4",
+      "password_updated_at": "2026-10-29T15:21:04.461Z",
+      "is_active": true,
+      "created_at": "2026-10-29T15:21:04.461Z",
+      "updated_at": "2026-10-29T15:21:04.461Z"
     },
     {
       "id": "usr-owner-1",
@@ -30,9 +68,9 @@
       "email": "abbosbek@educo.app",
       "phone": "+998 98 800 14 15",
       "password": "AbbosBek1415",
-      "password_updated_at": "2026-10-28T17:21:20.120Z",
+      "password_updated_at": "2026-10-29T11:20:36.253Z",
       "is_active": true,
-      "created_at": "2026-10-28T17:21:20.202Z",
+      "created_at": "2026-10-29T11:20:36.253Z",
       "avatar_url": ""
     }
   ],
@@ -47,7 +85,15 @@
       "created_at": "2026-10-13T03:07:05.687Z",
       "updated_at": "2026-10-13T03:07:05.687Z",
       "chat_attachments": [],
-      "seen_by": []
+      "seen_by": [
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:02.243Z"
+        }
+      ]
     },
     {
       "id": "msg-staff-2",
@@ -64,6 +110,13 @@
           "user_role": "owner",
           "avatar_url": "",
           "seen_at": "2026-10-16T17:40:37.900Z"
+        },
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:02.545Z"
         }
       ]
     },
@@ -82,6 +135,13 @@
           "user_role": "owner",
           "avatar_url": "",
           "seen_at": "2026-10-16T17:40:38.059Z"
+        },
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:02.779Z"
         }
       ]
     },
@@ -259,7 +319,15 @@
       "created_at": "2026-10-13T06:31:46.701Z",
       "updated_at": "2026-10-13T06:31:46.701Z",
       "chat_attachments": [],
-      "seen_by": []
+      "seen_by": [
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:02.965Z"
+        }
+      ]
     },
     {
       "id": "msg-1791873142957-csvc",
@@ -276,6 +344,13 @@
           "user_role": "owner",
           "avatar_url": "",
           "seen_at": "2026-10-16T17:40:38.264Z"
+        },
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:03.197Z"
         }
       ]
     },
@@ -287,7 +362,15 @@
       "created_at": "2026-10-17T17:44:49.237Z",
       "updated_at": "2026-10-17T17:44:49.237Z",
       "chat_attachments": [],
-      "seen_by": []
+      "seen_by": [
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:03.422Z"
+        }
+      ]
     },
     {
       "id": "msg-1792306617174-v3of",
@@ -336,7 +419,15 @@
       "created_at": "2026-10-18T06:56:57.426Z",
       "updated_at": "2026-10-18T06:56:57.426Z",
       "chat_attachments": [],
-      "seen_by": []
+      "seen_by": [
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:03.626Z"
+        }
+      ]
     },
     {
       "id": "msg-1792306617648-awa2",
@@ -468,6 +559,13 @@
           "user_role": "owner",
           "avatar_url": "",
           "seen_at": "2026-10-26T04:59:33.670Z"
+        },
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:03.876Z"
         }
       ]
     },
@@ -494,6 +592,13 @@
           "user_role": "owner",
           "avatar_url": "",
           "seen_at": "2026-10-26T04:59:33.934Z"
+        },
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:04.079Z"
         }
       ]
     },
@@ -520,6 +625,13 @@
           "user_role": "owner",
           "avatar_url": "",
           "seen_at": "2026-10-26T04:59:34.220Z"
+        },
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:04.241Z"
         }
       ]
     },
@@ -751,7 +863,15 @@
       "created_at": "2026-10-20T10:09:01.052Z",
       "updated_at": "2026-10-20T10:09:01.052Z",
       "chat_attachments": [],
-      "seen_by": []
+      "seen_by": [
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:04.537Z"
+        }
+      ]
     },
     {
       "id": "msg-1792490941245-un4v",
@@ -852,7 +972,15 @@
       "created_at": "2026-10-20T10:09:23.057Z",
       "updated_at": "2026-10-20T10:09:23.057Z",
       "chat_attachments": [],
-      "seen_by": []
+      "seen_by": [
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:04.786Z"
+        }
+      ]
     },
     {
       "id": "msg-1792490963301-4szz",
@@ -945,7 +1073,15 @@
           "is_video_note": true
         }
       ],
-      "seen_by": []
+      "seen_by": [
+        {
+          "user_id": "usr-1793287463431",
+          "user_name": "Abdulaziz Orifjonov",
+          "user_role": "teacher",
+          "avatar_url": "",
+          "seen_at": "2026-10-29T15:27:05.018Z"
+        }
+      ]
     },
     {
       "id": "msg-1793190938439-9dak",
@@ -1393,12 +1529,10 @@
       "api_token": "SXP6_F:_8_-fv9uvdsyrp",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-10-29T04:52:13.228Z",
+      "last_seen_at": "2026-10-29T11:20:36.248Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-28T17:19:23.717Z",
-      "battery_level": null,
-      "updated_at": "2026-10-29T04:52:13.229Z"
+      "created_at": "2026-10-29T11:20:36.253Z"
     },
     {
       "id": "dev-backup-2",
@@ -1411,7 +1545,7 @@
       "last_seen_at": null,
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-28T17:19:23.717Z"
+      "created_at": "2026-10-29T11:20:36.253Z"
     }
   ],
   "educo_db_memberships": [],

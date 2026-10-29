@@ -165,6 +165,8 @@ export async function createUser({
   role = 'student',
   password = 'password123',
   isActive = true,
+  courseId = null,
+  subject = '',
 }) {
   if (role === 'owner') {
     throw new Error('Tizimda faqat 1 ta Boshliq (Owner) bo‘lishi mumkin!');
@@ -229,6 +231,8 @@ export async function createUser({
           mother_phone: normalizedMother,
           password: password || 'Educo#2026!',
           is_active: isActive,
+          course_id: courseId || null,
+          subject: subject || '',
         };
         localStore.saveUser(created);
         return created;
@@ -250,6 +254,8 @@ export async function createUser({
     password: password || 'Educo#2026!',
     role,
     is_active: isActive,
+    course_id: courseId || null,
+    subject: subject || '',
   });
   return created;
 }
@@ -308,7 +314,7 @@ export async function createStudent({
 /**
  * Update user details
  */
-export async function updateUser(id, { firstName, lastName, username, phone, fatherPhone, motherPhone, role, isActive, password }) {
+export async function updateUser(id, { firstName, lastName, username, phone, fatherPhone, motherPhone, role, isActive, password, courseId, subject }) {
   const normalizedPhone = phone !== undefined ? cleanUzPhone(phone) : undefined;
   const normalizedFather = fatherPhone !== undefined ? cleanUzPhone(fatherPhone) : undefined;
   const normalizedMother = motherPhone !== undefined ? cleanUzPhone(motherPhone) : undefined;
@@ -326,6 +332,8 @@ export async function updateUser(id, { firstName, lastName, username, phone, fat
       if (normalizedMother !== undefined) profileUpdate.mother_phone = normalizedMother;
       if (username) profileUpdate.username = username;
       if (typeof isActive === 'boolean') profileUpdate.is_active = isActive;
+      if (courseId !== undefined) profileUpdate.course_id = courseId;
+      if (subject !== undefined) profileUpdate.subject = subject;
 
       await supabase.from('profiles').update(profileUpdate).eq('id', id);
       if (role) {
@@ -336,17 +344,21 @@ export async function updateUser(id, { firstName, lastName, username, phone, fat
     }
   }
 
+  const localUser = localStore.getUsers().find((u) => u.id === id) || {};
   const updated = localStore.saveUser({
+    ...localUser,
     id,
-    first_name: firstName,
-    last_name: lastName,
-    username,
-    phone: normalizedPhone,
-    father_phone: normalizedFather,
-    mother_phone: normalizedMother,
-    password: password?.trim() || undefined,
-    role,
-    is_active: isActive,
+    first_name: firstName !== undefined ? firstName : localUser.first_name,
+    last_name: lastName !== undefined ? lastName : localUser.last_name,
+    username: username !== undefined ? username : localUser.username,
+    phone: normalizedPhone !== undefined ? normalizedPhone : localUser.phone,
+    father_phone: normalizedFather !== undefined ? normalizedFather : localUser.father_phone,
+    mother_phone: normalizedMother !== undefined ? normalizedMother : localUser.mother_phone,
+    password: password?.trim() || localUser.password,
+    role: role || localUser.role,
+    is_active: isActive !== undefined ? isActive : localUser.is_active,
+    course_id: courseId !== undefined ? courseId : localUser.course_id,
+    subject: subject !== undefined ? subject : localUser.subject,
   });
   return updated;
 }
