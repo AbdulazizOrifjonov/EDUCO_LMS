@@ -1,6 +1,25 @@
 {
   "educo_db_users": [
     {
+      "id": "usr-1793249718156",
+      "username": "safiya_ibrohimova",
+      "first_name": "Safiya",
+      "last_name": "Ibrohimova",
+      "fullName": "Safiya Ibrohimova",
+      "full_name": "Safiya Ibrohimova",
+      "avatar_url": "",
+      "role": "admin",
+      "email": "safiya_ibrohimova@educo.app",
+      "phone": "+998 93 610 17 74",
+      "father_phone": "",
+      "mother_phone": "",
+      "password": "Fhxv$94J3",
+      "password_updated_at": "2026-10-29T04:55:18.157Z",
+      "is_active": true,
+      "created_at": "2026-10-29T04:55:18.157Z",
+      "updated_at": "2026-10-29T04:55:18.157Z"
+    },
+    {
       "id": "usr-owner-1",
       "username": "abbosbek",
       "first_name": "Abbosbek",
@@ -13,7 +32,8 @@
       "password": "AbbosBek1415",
       "password_updated_at": "2026-10-28T17:21:20.120Z",
       "is_active": true,
-      "created_at": "2026-10-28T17:21:20.202Z"
+      "created_at": "2026-10-28T17:21:20.202Z",
+      "avatar_url": ""
     }
   ],
   "educo_db_groups": [],
@@ -1373,12 +1393,12 @@
       "api_token": "SXP6_F:_8_-fv9uvdsyrp",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-10-29T03:52:11.351Z",
+      "last_seen_at": "2026-10-29T04:52:13.228Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
       "created_at": "2026-10-28T17:19:23.717Z",
       "battery_level": null,
-      "updated_at": "2026-10-29T03:52:11.352Z"
+      "updated_at": "2026-10-29T04:52:13.229Z"
     },
     {
       "id": "dev-backup-2",
@@ -1998,6 +2018,72 @@
     }
   ],
   "educo_db_sms_logs": [
+    {
+      "id": "sms-log-1793249533239-uxfr",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "Ih9zXUD5S-bVf-ih_b8yE",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T07:52:13.79+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998935821774",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T04:52:13.790716216Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T04:52:13.239Z"
+    },
+    {
+      "id": "sms-log-1793249246756-61an",
+      "queue_id": null,
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "sent",
+      "response_payload": {
+        "delivered_via": "Asosiy Android Gateway (SMS Gate Cloud)",
+        "role": "primary",
+        "simulated": false,
+        "id": "Xma8Wum3TSbkzHjFng_Ix",
+        "deviceId": "12ORNBItawPJyk0-_g3AE",
+        "createdAt": "2026-10-29T07:47:27.349+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998935821774",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-10-29T04:47:27.350472731Z"
+        },
+        "textMessage": {
+          "text": "Bu EDUCO LMS tizimidan sinov SMS xabari!"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-10-29T04:47:26.756Z"
+    },
     {
       "id": "sms-log-1793245931356-tctb",
       "queue_id": null,

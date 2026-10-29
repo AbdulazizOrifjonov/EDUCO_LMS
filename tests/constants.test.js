@@ -38,15 +38,12 @@ describe('EDUCO LMS Core Constants', () => {
     expect(GRADE_RANGE.MAX).toBe(5);
   });
 
-  it('supports all 4 required languages with Arabic RTL', () => {
+  it('supports all 3 required languages (uz, ru, en)', () => {
     const codes = SUPPORTED_LANGUAGES.map((l) => l.code);
     expect(codes).toContain('uz');
     expect(codes).toContain('ru');
     expect(codes).toContain('en');
-    expect(codes).toContain('ar');
-
-    const arabic = SUPPORTED_LANGUAGES.find((l) => l.code === 'ar');
-    expect(arabic.dir).toBe('rtl');
+    expect(codes).not.toContain('ar');
 
     const english = SUPPORTED_LANGUAGES.find((l) => l.code === 'en');
     expect(english.dir).toBe('ltr');

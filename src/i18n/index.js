@@ -5,13 +5,11 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import en from './locales/en.json';
 import ru from './locales/ru.json';
 import uz from './locales/uz.json';
-import ar from './locales/ar.json';
 
 const resources = {
   uz,
   ru,
   en,
-  ar,
 };
 
 i18n
@@ -20,7 +18,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'uz',
-    supportedLngs: ['uz', 'ru', 'en', 'ar'],
+    supportedLngs: ['uz', 'ru', 'en'],
     interpolation: {
       escapeValue: false,
     },

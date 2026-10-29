@@ -94,24 +94,6 @@ export function LanguageFlag({ code, className = 'w-5 h-3.5' }) {
         </svg>
       );
 
-    case 'ar':
-      // Flag of Saudi Arabia
-      return (
-        <svg
-          viewBox="0 0 36 24"
-          className={`${className} rounded-[3px] shadow-sm shrink-0 overflow-hidden border border-black/10 dark:border-white/10`}
-          aria-hidden="true"
-        >
-          <rect width="36" height="24" fill="#006C35" />
-          {/* Stylized white calligraphy & sword */}
-          <rect x="9" y="7" width="18" height="1.6" rx="0.8" fill="#FFFFFF" opacity="0.9" />
-          <rect x="11" y="10" width="14" height="1.4" rx="0.7" fill="#FFFFFF" opacity="0.85" />
-          <rect x="10" y="15.5" width="14" height="1.5" rx="0.75" fill="#FFFFFF" />
-          <polygon points="10,16.25 7.5,15.3 7.5,17.2" fill="#FFFFFF" />
-          <rect x="23.5" y="14.6" width="1.2" height="3.3" rx="0.5" fill="#FFFFFF" />
-        </svg>
-      );
-
     default:
       return null;
   }
