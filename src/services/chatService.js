@@ -1,5 +1,6 @@
 import { localStore } from '@/lib/localStore';
 import { useAuthStore } from '@/hooks/useAuth';
+import { notifyAnnouncement, notifyChatMessage } from '@/services/pushNotificationService';
 
 export const STAFF_CHAT_ID = 'staff-general-chat';
 export const ANNOUNCEMENTS_CHAT_ID = 'announcements-broadcast-channel';
@@ -446,6 +447,21 @@ export async function sendMessage(groupId, content, replyTo = null) {
           is_pinned: true,
         });
       } catch (e) {}
+      // Trigger mobile & system push notification
+      notifyAnnouncement({
+        title: "Markaz E'loni",
+        content: textMessage,
+      }).catch(() => {});
+    } else {
+      try {
+        const users = localStore.getUsers();
+        const author = users.find((u) => u.id === senderId);
+        notifyChatMessage({
+          senderName: author?.name || author?.fullName || "Foydalanuvchi",
+          messageText: textMessage,
+          groupId,
+        }).catch(() => {});
+      } catch (_) {}
     }
 
     // Notify listeners in current tab and across windows

@@ -1,0 +1,22 @@
+{
+  "name": "EDUCO LMS",
+  "short_name": "EDUCO",
+  "description": "O'quv markazni boshqarish va ta'lim tizimi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#123D78",
+  "theme_color": "#123D78",
+  "icons": [
+    {
+      "src": "/educo-logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

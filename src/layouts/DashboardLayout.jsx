@@ -29,6 +29,13 @@ import StudentRemindersModal from '@/components/reminders/StudentRemindersModal'
 import { getDueReminders } from '@/services/reminderService';
 import GlobalSearchBar from '@/components/GlobalSearchBar';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
+import { toast } from '@/components/ui/Toast';
+import {
+  isPushSupported,
+  getNotificationPermission,
+  requestNotificationPermission,
+  showPushNotification,
+} from '@/services/pushNotificationService';
 
 export default function DashboardLayout({
   sidebarItems = [],
@@ -57,6 +64,35 @@ export default function DashboardLayout({
   const [remindersModalOpen, setRemindersModalOpen] = useState(false);
   const [dueRemindersCount, setDueRemindersCount] = useState(0);
   const [cropAvatarFile, setCropAvatarFile] = useState(null);
+  const [pushPermission, setPushPermission] = useState(() => getNotificationPermission());
+
+  const handleEnablePush = async () => {
+    try {
+      const perm = await requestNotificationPermission();
+      setPushPermission(perm);
+      if (perm === 'granted') {
+        toast.success("Bildirishnomalar muvaffaqiyatli yoqildi!");
+      } else {
+        toast.warning("Bildirishnomalarga ruxsat berilmadi");
+      }
+    } catch (err) {
+      toast.error(err.message || "Xatolik yuz berdi");
+    }
+  };
+
+  const handleTestPushNotification = async () => {
+    const ok = await showPushNotification({
+      title: "📢 EDUCO LMS — Sinov Eslatmasi!",
+      body: "Salom! Bu sizning telefoningizga yuborilgan eslatma bildirishnomasi. Barcha yangi xabarlar va e'lonlar xuddi shu tarzda keladi!",
+      url: '/chat?channel=announcements',
+      tag: 'test-notification-' + Date.now(),
+    });
+    if (ok) {
+      toast.success("Eslatma telefoningizga yuborildi!");
+    } else {
+      handleEnablePush();
+    }
+  };
 
   const userDropdownRef = useRef(null);
   const notifDropdownRef = useRef(null);
@@ -442,6 +478,37 @@ export default function DashboardLayout({
                       </button>
                     )}
                   </div>
+
+                  {/* Web Push Notification Quick Enable & Test Banner */}
+                  {pushPermission !== 'granted' ? (
+                    <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-b border-blue-100 dark:border-blue-900/40 flex items-center justify-between gap-2">
+                      <div className="text-xs">
+                        <strong className="block text-blue-900 dark:text-blue-100 font-bold">Telefonga eslatmalar</strong>
+                        <span className="text-[11px] text-blue-700 dark:text-blue-300">Tepada xabarlar chiqishi uchun yoqing</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleEnablePush}
+                        className="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shrink-0 shadow-xs cursor-pointer"
+                      >
+                        Yoqish 🔔
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between text-xs">
+                      <span className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Eslatmalar faol</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleTestPushNotification}
+                        className="text-xs text-emerald-700 dark:text-emerald-400 font-bold hover:underline cursor-pointer"
+                      >
+                        Sinab ko‘rish 🚀
+                      </button>
+                    </div>
+                  )}
 
                   <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
                     {notifications.length === 0 ? (
