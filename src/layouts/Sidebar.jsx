@@ -177,11 +177,11 @@ export default function Sidebar({
           }`}
         >
           {collapsed && !mobileOpen ? (
-            /* When collapsed: NO logo image in sidebar! The toggle button sits right here in its place */
+            /* When collapsed: NO logo image in sidebar! The toggle button sits right here in its place (4-burchak) */
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="hidden lg:flex h-10 w-10 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white shadow-md border border-white/25 hover:scale-105 active:scale-95 transition-all"
+              className="hidden lg:flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 text-white shadow-md border border-white/25 hover:scale-105 active:scale-95 transition-all"
               title={t('common.expand', 'Yon panelni kengaytirish')}
               aria-label="Expand sidebar"
             >

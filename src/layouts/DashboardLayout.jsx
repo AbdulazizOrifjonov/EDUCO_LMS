@@ -464,7 +464,7 @@ export default function DashboardLayout({
               >
                 <Clock className={`w-3.5 h-3.5 shrink-0 ${dueRemindersCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`} />
                 {dueRemindersCount > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-black leading-none shrink-0 shadow-xs">
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-md bg-rose-600 text-white text-[10px] font-black leading-none shrink-0 shadow-xs">
                     {dueRemindersCount}
                   </span>
                 )}
