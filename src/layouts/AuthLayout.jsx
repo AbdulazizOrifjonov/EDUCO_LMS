@@ -121,21 +121,17 @@ export default function AuthLayout() {
         <div className="rounded-3xl border border-white/20 bg-white/95 p-6 sm:p-8 shadow-2xl backdrop-blur-xl transition-all dark:border-gray-800 dark:bg-[#1a2332]/95 sm:rounded-[2rem]">
           {/* Logo Header */}
           <div className="mb-6 flex flex-col items-center text-center">
-            <div className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#123D78] to-[#1a4f9a] text-white shadow-xl shadow-blue-950/30 ring-4 ring-white/50 dark:ring-gray-800">
-              <GraduationCap className="h-9 w-9 text-white" />
-              <div className="absolute -top-1 -right-1 flex h-4 w-4">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 dark:bg-emerald-500 opacity-75" />
-                <span className="relative inline-flex h-4 w-4 rounded-full bg-blue-500 dark:bg-emerald-500 border-2 border-white dark:border-gray-900" />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black tracking-wider text-[#123D78] dark:text-white sm:text-3xl">
-                EDUCO
-              </h1>
-              <span className="rounded-lg bg-blue-600 dark:bg-emerald-500 px-2 py-0.5 text-xs font-extrabold uppercase tracking-widest text-white shadow-sm">
-                LMS
-              </span>
+            <div className="mb-3 flex items-center justify-center">
+              <img
+                src="/educo-logo.png"
+                alt="EDUCO LMS"
+                className="h-12 sm:h-14 w-auto object-contain dark:hidden"
+              />
+              <img
+                src="/educo-logo-white.png"
+                alt="EDUCO LMS"
+                className="h-12 sm:h-14 w-auto object-contain hidden dark:block"
+              />
             </div>
 
             <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
