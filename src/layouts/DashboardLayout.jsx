@@ -384,7 +384,7 @@ export default function DashboardLayout({
           }`}
         >
           {/* Left section: Hamburger (mobile) + EDUCO Logo + Page Title */}
-          <div className="flex shrink min-w-0 items-center gap-1.5 sm:gap-2.5 mr-2 sm:mr-3 lg:mr-6">
+          <div className="flex shrink-0 min-w-0 items-center gap-1.5 sm:gap-2 mr-2 sm:mr-3 lg:mr-4">
             <button
               type="button"
               onClick={() => {
@@ -410,12 +410,12 @@ export default function DashboardLayout({
               <img
                 src="/educo-logo.png"
                 alt="EDUCO"
-                className="h-7 sm:h-8 w-auto object-contain dark:hidden"
+                className="h-6 sm:h-7 lg:h-8 w-auto object-contain dark:hidden"
               />
               <img
                 src="/educo-logo-white.png"
                 alt="EDUCO"
-                className="h-7 sm:h-8 w-auto object-contain hidden dark:block"
+                className="h-6 sm:h-7 lg:h-8 w-auto object-contain hidden dark:block"
               />
             </Link>
 
@@ -430,22 +430,22 @@ export default function DashboardLayout({
 
             {Boolean(getPageTitle()) && (
               <div className="min-w-0">
-                <h1 className="truncate text-sm sm:text-base md:text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+                <h1 className="truncate text-xs sm:text-sm lg:text-base xl:text-lg font-bold tracking-tight text-gray-900 dark:text-white max-w-[120px] sm:max-w-[180px] lg:max-w-none">
                   {getPageTitle()}
                 </h1>
               </div>
             )}
           </div>
 
-          {/* Center / Search bar with reactive live search (Stretched to fill available space) */}
-          <div className="hidden md:flex flex-1 min-w-0 max-w-xl lg:max-w-2xl xl:max-w-3xl mr-3 lg:mr-6">
+          {/* Center / Search bar with reactive live search */}
+          <div className="hidden md:flex flex-1 min-w-[120px] max-w-sm lg:max-w-lg xl:max-w-2xl mx-1.5 sm:mx-3">
             <GlobalSearchBar role={userRole} isRtl={isRtl} />
           </div>
 
-          {/* Right section: System status pill, Language selector, Theme toggle, Notifications, User Profile */}
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            {/* Live System Status Pill */}
-            <div className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/15 text-blue-800 border border-blue-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-semibold shadow-xs">
+          {/* Right section: System status pill, Reminders, Language, Theme, Notifications, User Profile */}
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 lg:gap-2">
+            {/* Live System Status Pill - only on large screens >= 1200px */}
+            <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-800 border border-blue-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-semibold shadow-xs">
               <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-emerald-500 animate-pulse shrink-0" />
               <span>{t('common.systemActive', 'Tizim faol')}</span>
             </div>
@@ -455,23 +455,23 @@ export default function DashboardLayout({
               <button
                 type="button"
                 onClick={() => setRemindersModalOpen(true)}
-                className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
                   dueRemindersCount > 0
                     ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 ring-2 ring-rose-400/30 animate-pulse'
-                    : 'hidden sm:inline-flex bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/20'
+                    : 'hidden xl:inline-flex bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/20'
                 }`}
-                title="O'quvchilar bilan bog'lanish eslatmalari"
+                title={dueRemindersCount > 0 ? `${dueRemindersCount} ta o‘quvchi bilan bog‘lanish eslatmasi` : "O‘quvchilar bilan bog‘lanish eslatmalari"}
               >
-                <Clock className={`w-3.5 h-3.5 ${dueRemindersCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`} />
-                <span className="hidden sm:inline">
-                  {dueRemindersCount > 0 ? `${dueRemindersCount} ta qo'ng'iroq!` : 'Eslatmalar'}
-                </span>
-                <span className="sm:hidden font-black text-[11px]">
-                  {dueRemindersCount > 0 ? dueRemindersCount : ''}
-                </span>
+                <Clock className={`w-3.5 h-3.5 shrink-0 ${dueRemindersCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`} />
                 {dueRemindersCount > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 animate-ping" />
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-black leading-none shrink-0 shadow-xs">
+                    {dueRemindersCount}
+                  </span>
                 )}
+                {/* Full text only on large screens >= 1200px (xl), hidden on media 600px - 1200px */}
+                <span className="hidden xl:inline whitespace-nowrap">
+                  {dueRemindersCount > 0 ? 'ta qo‘ng‘iroq!' : 'Eslatmalar'}
+                </span>
               </button>
             )}
 
@@ -482,7 +482,7 @@ export default function DashboardLayout({
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-xl p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+              className="rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
               title={
                 theme === 'dark'
                   ? t('common.lightMode', 'Light Mode')
@@ -491,14 +491,14 @@ export default function DashboardLayout({
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-amber-400" />
+                <Sun className="h-4 sm:h-5 w-4 sm:w-5 text-amber-400" />
               ) : (
-                <Moon className="h-5 w-5 text-gray-600" />
+                <Moon className="h-4 sm:h-5 w-4 sm:w-5 text-gray-600" />
               )}
             </button>
 
             {/* Notifications Dropdown */}
-            <div className="relative" ref={notifDropdownRef}>
+            <div className="relative shrink-0" ref={notifDropdownRef}>
               <button
                 type="button"
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
@@ -660,7 +660,8 @@ export default function DashboardLayout({
                     initials
                   )}
                 </div>
-                <div className="hidden text-left sm:block">
+                {/* User Name & Role - text hidden on screens < 1200px to prevent crowding */}
+                <div className="hidden text-left xl:block">
                   <p className="max-w-[120px] truncate text-xs font-semibold text-gray-900 dark:text-white">
                     {displayName}
                   </p>
@@ -668,7 +669,7 @@ export default function DashboardLayout({
                     {t(`roles.${userRole}`, userRole)}
                   </p>
                 </div>
-                <ChevronDown className="hidden h-4 w-4 text-gray-400 sm:block" />
+                <ChevronDown className="hidden h-4 w-4 text-gray-400 xl:block" />
               </button>
 
               {/* User Dropdown Popover */}

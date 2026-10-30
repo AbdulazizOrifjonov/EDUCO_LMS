@@ -256,7 +256,7 @@ export default function GlobalSearchBar({ role = 'admin', isRtl = false }) {
               <X className="w-3.5 h-3.5" />
             </button>
           ) : (
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-[10px] font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
+            <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-[10px] font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
               Ctrl+K
             </kbd>
           )}
