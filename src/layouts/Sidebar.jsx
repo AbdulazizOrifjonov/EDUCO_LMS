@@ -176,21 +176,30 @@ export default function Sidebar({
             collapsed && !mobileOpen ? 'justify-center px-2' : 'justify-between px-4'
           }`}
         >
-          <NavLink
-            to={`/${userRole}/dashboard`}
-            className="flex items-center gap-3 transition-opacity hover:opacity-95"
-            onClick={onCloseMobile}
-            title="EDUCO LMS"
-          >
-            {/* Official EDUCO Logo - 100% transparent without any container background */}
-            {collapsed && !mobileOpen ? (
-              <img
-                src="/educo-mark-white.png"
-                alt="EDUCO"
-                className="h-9 w-9 object-contain drop-shadow-sm"
-              />
-            ) : (
-              <div className="flex items-center gap-2.5">
+          {collapsed && !mobileOpen ? (
+            /* When collapsed: NO logo image in sidebar! The toggle button sits right here in its place */
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="hidden lg:flex h-10 w-10 items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white shadow-md border border-white/25 hover:scale-105 active:scale-95 transition-all"
+              title={t('common.expand', 'Yon panelni kengaytirish')}
+              aria-label="Expand sidebar"
+            >
+              {isRtl ? (
+                <ChevronLeft className="h-5 w-5" />
+              ) : (
+                <ChevronRight className="h-5 w-5" />
+              )}
+            </button>
+          ) : (
+            <>
+              {/* When expanded: Full EDUCO Logo on left */}
+              <NavLink
+                to={`/${userRole}/dashboard`}
+                className="flex items-center gap-2.5 transition-opacity hover:opacity-95"
+                onClick={onCloseMobile}
+                title="EDUCO LMS"
+              >
                 <img
                   src="/educo-logo-white.png"
                   alt="EDUCO"
@@ -199,44 +208,34 @@ export default function Sidebar({
                 <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white border border-white/20 shadow-xs">
                   LMS
                 </span>
-              </div>
-            )}
-          </NavLink>
+              </NavLink>
 
-          {/* Mobile Close Button */}
-          <button
-            type="button"
-            onClick={onCloseMobile}
-            className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white lg:hidden"
-            aria-label={t('common.close', 'Close menu')}
-          >
-            <X className="h-5 w-5" />
-          </button>
+              {/* Mobile Close Button */}
+              <button
+                type="button"
+                onClick={onCloseMobile}
+                className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white lg:hidden"
+                aria-label={t('common.close', 'Close menu')}
+              >
+                <X className="h-5 w-5" />
+              </button>
 
-          {/* Desktop Collapse/Expand Toggle Button */}
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            className={`hidden lg:flex items-center justify-center transition-all ${
-              collapsed && !mobileOpen
-                ? 'absolute -right-3 top-1/2 -translate-y-1/2 z-50 h-6 w-6 rounded-full bg-blue-600 dark:bg-emerald-600 text-white shadow-lg ring-2 ring-white dark:ring-gray-900 hover:scale-110'
-                : 'rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white'
-            }`}
-            title={collapsed ? t('common.expand', 'Yon panelni kengaytirish') : t('common.collapse', 'Yon panelni yig‘ish')}
-            aria-label="Toggle sidebar collapse"
-          >
-            {collapsed ? (
-              isRtl ? (
-                <ChevronLeft className="h-3.5 w-3.5" />
-              ) : (
-                <ChevronRight className="h-3.5 w-3.5" />
-              )
-            ) : isRtl ? (
-              <ChevronRight className="h-5 w-5" />
-            ) : (
-              <ChevronLeft className="h-5 w-5" />
-            )}
-          </button>
+              {/* Desktop Collapse Button */}
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="hidden lg:flex items-center justify-center rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                title={t('common.collapse', 'Yon panelni yig‘ish')}
+                aria-label="Collapse sidebar"
+              >
+                {isRtl ? (
+                  <ChevronRight className="h-5 w-5" />
+                ) : (
+                  <ChevronLeft className="h-5 w-5" />
+                )}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Navigation Items (Scrollable without ugly scrollbars) */}
