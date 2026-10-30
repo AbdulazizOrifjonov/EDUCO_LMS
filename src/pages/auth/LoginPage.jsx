@@ -181,12 +181,14 @@ export default function LoginPage() {
     >
       {/* Top Header: Brand Corner & Controls */}
       <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-navy flex items-center justify-center text-white shadow-md">
-            <GraduationCap className="w-6 h-6" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-brand-navy dark:text-white">
-            EDUCO<span className="text-brand-red">.</span>LMS
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/educo-logo.png"
+            alt="EDUCO"
+            className="h-8 w-auto object-contain dark:bg-white/95 dark:px-2 dark:py-1 dark:rounded-lg shadow-xs"
+          />
+          <span className="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-brand-navy dark:bg-blue-900/50 dark:text-blue-300">
+            LMS
           </span>
         </div>
 
@@ -248,8 +250,8 @@ export default function LoginPage() {
           <div className="bg-white dark:bg-surface-dark-secondary rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl p-8 sm:p-10 transition-colors">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex w-14 h-14 rounded-2xl bg-brand-navy/10 dark:bg-blue-500/10 text-brand-navy dark:text-blue-400 items-center justify-center mb-4 ring-8 ring-blue-50 dark:ring-surface-dark-tertiary">
-                <GraduationCap className="w-8 h-8" />
+              <div className="inline-flex p-3 rounded-2xl bg-white shadow-md border border-gray-100 dark:border-gray-700 items-center justify-center mb-4 ring-8 ring-blue-50 dark:ring-surface-dark-tertiary">
+                <img src="/educo-logo.png" alt="EDUCO" className="h-9 w-auto object-contain" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {t('auth.loginTitle', 'Sign in to EDUCO')}

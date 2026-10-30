@@ -383,8 +383,8 @@ export default function DashboardLayout({
                 }`
           }`}
         >
-          {/* Left section: Hamburger (mobile) + Page Title */}
-          <div className="flex shrink min-w-0 items-center gap-1.5 sm:gap-3 mr-2 sm:mr-3 lg:mr-6">
+          {/* Left section: Hamburger (mobile) + EDUCO Logo + Page Title */}
+          <div className="flex shrink min-w-0 items-center gap-1.5 sm:gap-2.5 mr-2 sm:mr-3 lg:mr-6">
             <button
               type="button"
               onClick={() => {
@@ -399,9 +399,26 @@ export default function DashboardLayout({
               <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
+            {/* Official EDUCO Logo */}
+            <Link
+              to={`/${userRole}/dashboard`}
+              className="flex items-center shrink-0 hover:opacity-90 transition-opacity"
+              title="EDUCO LMS"
+            >
+              <img
+                src="/educo-logo.png"
+                alt="EDUCO"
+                className="h-6 sm:h-7 w-auto object-contain dark:bg-white/95 dark:px-1.5 dark:py-0.5 dark:rounded-md transition-all"
+              />
+            </Link>
+
+            {Boolean(getPageTitle()) && (
+              <span className="h-4 sm:h-5 w-[1.5px] bg-gray-300 dark:bg-gray-700 shrink-0 mx-0.5 sm:mx-1" aria-hidden="true" />
+            )}
+
             {Boolean(getPageTitle()) && (
               <div className="min-w-0">
-                <h1 className="truncate text-sm sm:text-lg md:text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                <h1 className="truncate text-sm sm:text-base md:text-lg font-bold tracking-tight text-gray-900 dark:text-white">
                   {getPageTitle()}
                 </h1>
               </div>

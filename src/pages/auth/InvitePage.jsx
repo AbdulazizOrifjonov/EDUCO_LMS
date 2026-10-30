@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslation } from 'react-i18next';
 import {
-  GraduationCap,
   Lock,
   CheckCircle2,
   AlertCircle,
@@ -91,8 +90,8 @@ export default function InvitePage() {
         <div className="bg-white dark:bg-surface-dark-secondary rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl p-8 sm:p-10 transition-colors">
           {/* Logo & Heading */}
           <div className="text-center mb-8">
-            <div className="inline-flex w-14 h-14 rounded-2xl bg-brand-navy/10 dark:bg-blue-500/10 text-brand-navy dark:text-blue-400 items-center justify-center mb-4 ring-8 ring-blue-50 dark:ring-surface-dark-tertiary">
-              <Sparkles className="w-7 h-7" />
+            <div className="inline-flex p-3 rounded-2xl bg-white shadow-md border border-gray-100 dark:border-gray-700 items-center justify-center mb-4 ring-8 ring-blue-50 dark:ring-surface-dark-tertiary">
+              <img src="/educo-logo.png" alt="EDUCO" className="h-9 w-auto object-contain" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
               {t('auth.welcomeToEduco', 'Welcome to EDUCO')}

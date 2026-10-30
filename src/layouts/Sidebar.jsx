@@ -9,7 +9,6 @@ import {
   Moon,
   Globe,
   X,
-  GraduationCap,
   Sparkles,
   Camera,
 } from 'lucide-react';
@@ -183,31 +182,18 @@ export default function Sidebar({
             onClick={onCloseMobile}
             title="EDUCO LMS"
           >
-            {/* Logo Icon (Always 100% visible) */}
-            <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-white/25 to-white/10 shadow-md backdrop-blur-sm border border-white/25">
-              <GraduationCap className="h-6 w-6 text-white" />
-              <span className="absolute -bottom-1 px-1 py-[1px] rounded bg-blue-600 dark:bg-emerald-600 text-[8px] font-black uppercase tracking-wider text-white shadow-sm leading-none">
-                EDUCO
-              </span>
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 dark:bg-emerald-500 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sky-300 dark:bg-emerald-400" />
-              </span>
-            </div>
-
-            {/* Logo Text (visible when expanded) */}
-            {(!collapsed || mobileOpen) && (
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xl font-black tracking-wider text-white">
-                    EDUCO
-                  </span>
-                  <span className="rounded-md bg-blue-500 dark:bg-emerald-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
-                    LMS
-                  </span>
+            {/* Official EDUCO Logo */}
+            {collapsed && !mobileOpen ? (
+              <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white p-1 shadow-md border border-white/20">
+                <img src="/favicon-32x32.png" alt="EDUCO" className="h-7 w-7 object-contain" />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-white/95 rounded-xl px-2.5 py-1 shadow-md border border-white/20">
+                  <img src="/educo-logo.png" alt="EDUCO" className="h-7 w-auto object-contain" />
                 </div>
-                <span className="text-[10px] font-medium text-white/60 tracking-tight dark:text-gray-400">
-                  Learning Management
+                <span className="rounded-md bg-blue-500/80 dark:bg-emerald-600/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-xs">
+                  LMS
                 </span>
               </div>
             )}
