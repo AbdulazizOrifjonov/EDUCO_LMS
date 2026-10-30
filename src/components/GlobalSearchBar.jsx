@@ -21,7 +21,12 @@ import { useSearch } from '@/context/SearchContext';
 import { localStore } from '@/lib/localStore';
 import Avatar from '@/components/ui/Avatar';
 
-export default function GlobalSearchBar({ role = 'admin', isRtl = false }) {
+export default function GlobalSearchBar({
+  role = 'admin',
+  isRtl = false,
+  autoFocus = false,
+  onClose = null,
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,6 +36,14 @@ export default function GlobalSearchBar({ role = 'admin', isRtl = false }) {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
+
+  // Auto focus if requested
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+      setIsOpen(true);
+    }
+  }, [autoFocus]);
 
   // Global Ctrl+K / Cmd+K shortcut
   useEffect(() => {
@@ -43,12 +56,13 @@ export default function GlobalSearchBar({ role = 'admin', isRtl = false }) {
       if (e.key === 'Escape') {
         setIsOpen(false);
         inputRef.current?.blur();
+        if (onClose) onClose();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [onClose]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -60,12 +74,13 @@ export default function GlobalSearchBar({ role = 'admin', isRtl = false }) {
         !inputRef.current.contains(e.target)
       ) {
         setIsOpen(false);
+        if (onClose) onClose();
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [onClose]);
 
   // Compute Current Page Information
   const currentPageInfo = useMemo(() => {
@@ -184,27 +199,30 @@ export default function GlobalSearchBar({ role = 'admin', isRtl = false }) {
 
   const handleSelectUser = (u) => {
     setIsOpen(false);
-    // If on passwords page or navigate to passwords page with user selected
     navigate(`/${role}/passwords`);
     setSearchQuery(u.fullName || u.first_name);
+    if (onClose) onClose();
   };
 
   const handleSelectGroup = (g) => {
     setIsOpen(false);
     navigate(`/${role}/attendance?tab=roster&group=${g.id}`);
     setSearchQuery('');
+    if (onClose) onClose();
   };
 
   const handleSelectCourse = (c) => {
     setIsOpen(false);
     navigate(`/${role}/courses`);
     setSearchQuery(c.name);
+    if (onClose) onClose();
   };
 
   const handleSelectPage = (p) => {
     setIsOpen(false);
     navigate(p.path);
     setSearchQuery('');
+    if (onClose) onClose();
   };
 
   return (

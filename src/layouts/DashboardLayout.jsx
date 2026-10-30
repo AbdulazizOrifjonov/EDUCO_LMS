@@ -17,6 +17,8 @@ import {
   AlertCircle,
   HelpCircle,
   Camera,
+  ArrowLeft,
+  X,
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -64,7 +66,24 @@ export default function DashboardLayout({
   const [remindersModalOpen, setRemindersModalOpen] = useState(false);
   const [dueRemindersCount, setDueRemindersCount] = useState(0);
   const [cropAvatarFile, setCropAvatarFile] = useState(null);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [pushPermission, setPushPermission] = useState(() => getNotificationPermission());
+
+  useEffect(() => {
+    setMobileSearchOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        if (window.innerWidth < 768) {
+          setMobileSearchOpen(true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleEnablePush = async () => {
     try {
@@ -383,67 +402,109 @@ export default function DashboardLayout({
                 }`
           }`}
         >
-          {/* Left section: Hamburger (mobile) + EDUCO Logo + Page Title */}
-          <div className="flex shrink-0 min-w-0 items-center gap-1.5 sm:gap-2 mr-2 sm:mr-3 lg:mr-4">
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
-                  document.activeElement.blur();
-                }
-                setMobileOpen(true);
-              }}
-              className="shrink-0 rounded-lg p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white lg:hidden"
-              aria-label="Open mobile menu"
-            >
-              <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
-            </button>
-
-            {/* Official EDUCO Logo - shown on mobile, and on desktop ONLY when sidebar is collapsed */}
-            <Link
-              to={`/${userRole}/dashboard`}
-              className={`items-center shrink-0 hover:opacity-90 transition-opacity ${
-                collapsed ? 'flex' : 'flex lg:hidden'
-              }`}
-              title="EDUCO LMS"
-            >
-              <img
-                src="/educo-logo.png"
-                alt="EDUCO"
-                className="h-6 sm:h-7 lg:h-8 w-auto object-contain dark:hidden"
-              />
-              <img
-                src="/educo-logo-white.png"
-                alt="EDUCO"
-                className="h-6 sm:h-7 lg:h-8 w-auto object-contain hidden dark:block"
-              />
-            </Link>
-
-            {Boolean(getPageTitle()) && (
-              <span
-                className={`h-4 sm:h-5 w-[1.5px] bg-gray-300 dark:bg-gray-700 shrink-0 mx-0.5 sm:mx-1 ${
-                  collapsed ? 'inline-block' : 'inline-block lg:hidden'
-                }`}
-                aria-hidden="true"
-              />
-            )}
-
-            {Boolean(getPageTitle()) && (
-              <div className="min-w-0">
-                <h1 className="truncate text-xs sm:text-sm lg:text-base xl:text-lg font-bold tracking-tight text-gray-900 dark:text-white max-w-[120px] sm:max-w-[180px] lg:max-w-none">
-                  {getPageTitle()}
-                </h1>
+          {mobileSearchOpen ? (
+            /* Full-width Search Bar for Mobile / Compact Screens */
+            <div className="flex w-full items-center gap-2 animate-fade-in py-1">
+              <button
+                type="button"
+                onClick={() => setMobileSearchOpen(false)}
+                className="shrink-0 rounded-xl p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Orqaga"
+                title="Orqaga"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <GlobalSearchBar
+                  role={userRole}
+                  isRtl={isRtl}
+                  autoFocus={true}
+                  onClose={() => setMobileSearchOpen(false)}
+                />
               </div>
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => setMobileSearchOpen(false)}
+                className="shrink-0 rounded-xl p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Yopish"
+                title="Yopish"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Left section: Hamburger (mobile) + EDUCO Logo + Page Title */}
+              <div className="flex shrink-0 min-w-0 items-center gap-1.5 sm:gap-2 mr-2 sm:mr-3 lg:mr-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
+                      document.activeElement.blur();
+                    }
+                    setMobileOpen(true);
+                  }}
+                  className="shrink-0 rounded-lg p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white lg:hidden"
+                  aria-label="Open mobile menu"
+                >
+                  <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
+                </button>
 
-          {/* Center / Search bar with reactive live search */}
-          <div className="hidden md:flex flex-1 min-w-[120px] max-w-sm lg:max-w-lg xl:max-w-2xl mx-1.5 sm:mx-3">
-            <GlobalSearchBar role={userRole} isRtl={isRtl} />
-          </div>
+                {/* Official EDUCO Logo - shown on mobile, and on desktop ONLY when sidebar is collapsed */}
+                <Link
+                  to={`/${userRole}/dashboard`}
+                  className={`items-center shrink-0 hover:opacity-90 transition-opacity ${
+                    collapsed ? 'flex' : 'flex lg:hidden'
+                  }`}
+                  title="EDUCO LMS"
+                >
+                  <img
+                    src="/educo-logo.png"
+                    alt="EDUCO"
+                    className="h-6 sm:h-7 lg:h-8 w-auto object-contain dark:hidden"
+                  />
+                  <img
+                    src="/educo-logo-white.png"
+                    alt="EDUCO"
+                    className="h-6 sm:h-7 lg:h-8 w-auto object-contain hidden dark:block"
+                  />
+                </Link>
 
-          {/* Right section: System status pill, Reminders, Language, Theme, Notifications, User Profile */}
-          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 lg:gap-2">
+                {Boolean(getPageTitle()) && (
+                  <span
+                    className={`h-4 sm:h-5 w-[1.5px] bg-gray-300 dark:bg-gray-700 shrink-0 mx-0.5 sm:mx-1 ${
+                      collapsed ? 'inline-block' : 'inline-block lg:hidden'
+                    }`}
+                    aria-hidden="true"
+                  />
+                )}
+
+                {Boolean(getPageTitle()) && (
+                  <div className="min-w-0">
+                    <h1 className="truncate text-xs sm:text-sm lg:text-base xl:text-lg font-bold tracking-tight text-gray-900 dark:text-white max-w-[120px] sm:max-w-[180px] lg:max-w-none">
+                      {getPageTitle()}
+                    </h1>
+                  </div>
+                )}
+              </div>
+
+              {/* Center / Search bar with reactive live search on desktop (md:) */}
+              <div className="hidden md:flex flex-1 min-w-[120px] max-w-sm lg:max-w-lg xl:max-w-2xl mx-1.5 sm:mx-3">
+                <GlobalSearchBar role={userRole} isRtl={isRtl} />
+              </div>
+
+              {/* Right section: Search Button (< md), System status, Reminders, Language, Theme, Notifications, User Profile */}
+              <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 lg:gap-2">
+                {/* Search Icon Button for screens < md (mobile & compact) */}
+                <button
+                  type="button"
+                  onClick={() => setMobileSearchOpen(true)}
+                  className="md:hidden rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
+                  title="Qidiruv (Ctrl+K)"
+                  aria-label="Qidiruv"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
             {/* Live System Status Pill - only on large screens >= 1200px */}
             <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-800 border border-blue-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-semibold shadow-xs">
               <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-emerald-500 animate-pulse shrink-0" />
@@ -778,7 +839,9 @@ export default function DashboardLayout({
               )}
             </div>
           </div>
-        </header>
+        </>
+      )}
+    </header>
 
         {/* Main Content Area */}
         <main
