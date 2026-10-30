@@ -321,11 +321,11 @@ export default function TuitionPage() {
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-        <nav className="flex space-x-6 rtl:space-x-reverse" aria-label="Tuition Tabs">
+        <nav className="flex items-center gap-6 overflow-x-auto no-scrollbar py-1 rtl:space-x-reverse" aria-label="Tuition Tabs">
           <button
             onClick={() => setActiveTab('summary')}
             className={`
-              flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors
+              shrink-0 flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap cursor-pointer
               ${
                 activeTab === 'summary'
                   ? 'border-blue-600 text-blue-600 dark:border-emerald-400 dark:text-emerald-400 font-semibold'
@@ -343,7 +343,7 @@ export default function TuitionPage() {
           <button
             onClick={() => setActiveTab('history')}
             className={`
-              flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors
+              shrink-0 flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap cursor-pointer
               ${
                 activeTab === 'history'
                   ? 'border-blue-600 text-blue-600 dark:border-emerald-400 dark:text-emerald-400 font-semibold'

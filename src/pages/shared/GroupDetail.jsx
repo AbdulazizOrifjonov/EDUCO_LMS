@@ -511,7 +511,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
 
       {/* Tabs Header */}
       <div className="border-b border-gray-200 dark:border-gray-800">
-        <nav className="flex space-x-6 rtl:space-x-reverse">
+        <nav className="flex items-center gap-6 overflow-x-auto no-scrollbar py-1 rtl:space-x-reverse">
           {[
             { id: 'students', label: t('groups.students', 'Enrolled Students'), icon: Users, count: enrolledCount },
             { id: 'schedule', label: t('nav.schedule', 'Weekly Timetable'), icon: Calendar, count: group.schedules?.length },
@@ -525,7 +525,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap
+                  shrink-0 flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap cursor-pointer
                   ${
                     isSelected
                       ? 'border-emerald-600 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400 font-semibold'

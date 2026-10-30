@@ -751,85 +751,77 @@ export default function AttendancePage() {
       </div>
 
       {/* Navigation Tabs Bar */}
-      <div
-        className={`w-full grid ${
-          isOwnerOrAdmin ? 'grid-cols-2 sm:flex' : 'grid-cols-2'
-        } items-center gap-1.5 sm:gap-2 p-1 sm:p-0 bg-gray-100/90 dark:bg-surface-dark-secondary/70 sm:bg-transparent sm:dark:bg-transparent rounded-2xl sm:rounded-none sm:border-b sm:border-gray-200 sm:dark:border-gray-800`}
-      >
-        <button
-          type="button"
-          onClick={() => setActiveTab('analytics')}
-          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all min-w-0 cursor-pointer ${
-            activeTab === 'analytics'
-              ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-surface-dark-secondary'
-          }`}
-        >
-          <BarChart3 className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline whitespace-nowrap">
-            {isTeacher ? "Guruhlarim tahlili" : "Xodimlar & Guruhlar tahlili"}
-          </span>
-          <span className="sm:hidden truncate">
-            {isTeacher ? "Guruhlar tahlili" : "Tahlil"}
-          </span>
-          {analyticsData && (
-            <span
-              className={`text-[10px] sm:text-xs px-1.5 py-0.2 rounded-full shrink-0 ${
-                activeTab === 'analytics'
-                  ? 'bg-white/20 text-white'
-                  : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
-              }`}
-            >
-              {filteredStaffForLevel1.length}
+      <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-2">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar sm:flex-wrap py-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab('analytics')}
+            className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'analytics'
+                ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 shrink-0" />
+            <span>
+              {isTeacher ? "Guruhlarim tahlili" : "Xodimlar & Guruhlar tahlili"}
             </span>
+            {analyticsData && (
+              <span
+                className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full shrink-0 font-bold ${
+                  activeTab === 'analytics'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
+                }`}
+              >
+                {filteredStaffForLevel1.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('roster')}
+            className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+              activeTab === 'roster'
+                ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
+            }`}
+          >
+            <ClipboardCheck className="w-4 h-4 shrink-0" />
+            <span>Kunlik guruh davomati</span>
+          </button>
+
+          {isOwnerOrAdmin && (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveTab('staff')}
+                className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'staff'
+                    ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
+                }`}
+              >
+                <UserCheck className="w-4 h-4 shrink-0" />
+                <span>Xodimlar / Ustozlar davomati</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('reports')}
+                className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  activeTab === 'reports'
+                    ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
+                }`}
+              >
+                <FileSpreadsheet className="w-4 h-4 shrink-0" />
+                <span>Davomat hisoboti & CSV</span>
+              </button>
+            </>
           )}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('roster')}
-          className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all min-w-0 cursor-pointer ${
-            activeTab === 'roster'
-              ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-surface-dark-secondary'
-          }`}
-        >
-          <ClipboardCheck className="w-4 h-4 shrink-0" />
-          <span className="hidden sm:inline whitespace-nowrap">Kunlik guruh davomati</span>
-          <span className="sm:hidden truncate">Kunlik davomat</span>
-        </button>
-
-        {isOwnerOrAdmin && (
-          <>
-            <button
-              type="button"
-              onClick={() => setActiveTab('staff')}
-              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all min-w-0 cursor-pointer ${
-                activeTab === 'staff'
-                  ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-surface-dark-secondary'
-              }`}
-            >
-              <UserCheck className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline whitespace-nowrap">Xodimlar / Ustozlar davomati</span>
-              <span className="sm:hidden truncate">Xodimlar</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('reports')}
-              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all min-w-0 cursor-pointer ${
-                activeTab === 'reports'
-                  ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-surface-dark-secondary'
-              }`}
-            >
-              <FileSpreadsheet className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline whitespace-nowrap">Davomat hisoboti & CSV</span>
-              <span className="sm:hidden truncate">Hisobot & CSV</span>
-            </button>
-          </>
-        )}
+        </div>
       </div>
 
       {/* ========================================================================= */}
