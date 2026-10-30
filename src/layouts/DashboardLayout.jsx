@@ -404,7 +404,7 @@ export default function DashboardLayout({
         >
           {mobileSearchOpen ? (
             /* Full-width Search Bar for Mobile / Compact Screens */
-            <div className="flex w-full items-center gap-2 animate-fade-in py-1">
+            <div className="flex w-full items-center justify-between gap-2 animate-fade-in py-1 max-w-2xl mx-auto">
               <button
                 type="button"
                 onClick={() => setMobileSearchOpen(false)}
@@ -489,7 +489,7 @@ export default function DashboardLayout({
               </div>
 
               {/* Center / Search bar with reactive live search on desktop (md:) */}
-              <div className="hidden md:flex flex-1 min-w-[120px] max-w-sm lg:max-w-lg xl:max-w-2xl mx-1.5 sm:mx-3">
+              <div className="hidden md:flex flex-1 justify-center min-w-[120px] max-w-sm lg:max-w-lg xl:max-w-2xl mx-auto">
                 <GlobalSearchBar role={userRole} isRtl={isRtl} />
               </div>
 

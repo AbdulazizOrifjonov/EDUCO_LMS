@@ -79,7 +79,11 @@ export default function GlobalSearchBar({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [onClose]);
 
   // Compute Current Page Information
@@ -281,13 +285,23 @@ export default function GlobalSearchBar({
         </div>
       </div>
 
+      {/* Mobile Backdrop Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 dark:bg-black/50 z-40 md:hidden backdrop-blur-xs transition-opacity"
+          onClick={() => {
+            setIsOpen(false);
+            if (onClose) onClose();
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Interactive Live Search Dropdown */}
       {isOpen && (
         <div
           ref={dropdownRef}
-          className={`absolute top-full mt-2 z-50 w-full min-w-[320px] sm:min-w-[420px] rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary shadow-2xl overflow-hidden animate-fade-in ${
-            isRtl ? 'right-0' : 'left-0'
-          }`}
+          className="fixed left-3 right-3 top-[58px] sm:top-[64px] mx-auto max-w-lg z-50 md:absolute md:top-full md:mt-2 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:min-w-[420px] md:max-w-xl rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary shadow-2xl overflow-hidden animate-fade-in"
         >
           {/* Header Indicator */}
           <div className="p-3 bg-gray-50 dark:bg-surface-dark-tertiary border-b border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
@@ -306,7 +320,7 @@ export default function GlobalSearchBar({
             )}
           </div>
 
-          <div className="max-h-96 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
+          <div className="max-h-[50vh] sm:max-h-96 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-800">
             {/* If query entered */}
             {searchQuery.trim() ? (
               searchResults?.totalCount === 0 ? (
