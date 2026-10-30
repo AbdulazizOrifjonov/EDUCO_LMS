@@ -399,10 +399,12 @@ export default function DashboardLayout({
               <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
-            {/* Official EDUCO Logo - 100% transparent without any container background */}
+            {/* Official EDUCO Logo - shown on mobile, and on desktop ONLY when sidebar is collapsed */}
             <Link
               to={`/${userRole}/dashboard`}
-              className="flex items-center shrink-0 hover:opacity-90 transition-opacity"
+              className={`items-center shrink-0 hover:opacity-90 transition-opacity ${
+                collapsed ? 'flex' : 'flex lg:hidden'
+              }`}
               title="EDUCO LMS"
             >
               <img
@@ -418,7 +420,12 @@ export default function DashboardLayout({
             </Link>
 
             {Boolean(getPageTitle()) && (
-              <span className="h-4 sm:h-5 w-[1.5px] bg-gray-300 dark:bg-gray-700 shrink-0 mx-0.5 sm:mx-1" aria-hidden="true" />
+              <span
+                className={`h-4 sm:h-5 w-[1.5px] bg-gray-300 dark:bg-gray-700 shrink-0 mx-0.5 sm:mx-1 ${
+                  collapsed ? 'inline-block' : 'inline-block lg:hidden'
+                }`}
+                aria-hidden="true"
+              />
             )}
 
             {Boolean(getPageTitle()) && (
