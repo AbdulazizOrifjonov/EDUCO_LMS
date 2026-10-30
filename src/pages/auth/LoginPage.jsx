@@ -185,7 +185,12 @@ export default function LoginPage() {
           <img
             src="/educo-logo.png"
             alt="EDUCO"
-            className="h-8 w-auto object-contain dark:bg-white/95 dark:px-2 dark:py-1 dark:rounded-lg shadow-xs"
+            className="h-8 w-auto object-contain dark:hidden"
+          />
+          <img
+            src="/educo-logo-white.png"
+            alt="EDUCO"
+            className="h-8 w-auto object-contain hidden dark:block"
           />
           <span className="text-xs font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-brand-navy dark:bg-blue-900/50 dark:text-blue-300">
             LMS
@@ -250,8 +255,9 @@ export default function LoginPage() {
           <div className="bg-white dark:bg-surface-dark-secondary rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl p-8 sm:p-10 transition-colors">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex p-3 rounded-2xl bg-white shadow-md border border-gray-100 dark:border-gray-700 items-center justify-center mb-4 ring-8 ring-blue-50 dark:ring-surface-dark-tertiary">
-                <img src="/educo-logo.png" alt="EDUCO" className="h-9 w-auto object-contain" />
+              <div className="flex justify-center mb-4">
+                <img src="/educo-logo.png" alt="EDUCO" className="h-10 w-auto object-contain dark:hidden" />
+                <img src="/educo-logo-white.png" alt="EDUCO" className="h-10 w-auto object-contain hidden dark:block" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {t('auth.loginTitle', 'Sign in to EDUCO')}

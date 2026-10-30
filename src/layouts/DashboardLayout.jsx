@@ -399,7 +399,7 @@ export default function DashboardLayout({
               <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
-            {/* Official EDUCO Logo */}
+            {/* Official EDUCO Logo - 100% transparent without any container background */}
             <Link
               to={`/${userRole}/dashboard`}
               className="flex items-center shrink-0 hover:opacity-90 transition-opacity"
@@ -408,7 +408,12 @@ export default function DashboardLayout({
               <img
                 src="/educo-logo.png"
                 alt="EDUCO"
-                className="h-7 sm:h-8 w-auto object-contain dark:bg-white/95 dark:px-2 dark:py-1 dark:rounded-lg shadow-2xs transition-all"
+                className="h-7 sm:h-8 w-auto object-contain dark:hidden"
+              />
+              <img
+                src="/educo-logo-white.png"
+                alt="EDUCO"
+                className="h-7 sm:h-8 w-auto object-contain hidden dark:block"
               />
             </Link>
 

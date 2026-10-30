@@ -1,63 +1,6 @@
 {
   "educo_db_users": [
     {
-      "id": "usr-1793287688192",
-      "username": "abdulziz_orifjonov",
-      "first_name": "Abdulziz",
-      "last_name": "Orifjonov",
-      "fullName": "Abdulziz Orifjonov",
-      "full_name": "Abdulziz Orifjonov",
-      "avatar_url": "",
-      "role": "student",
-      "email": "abdulziz_orifjonov@educo.app",
-      "phone": "+998 93 582 17 74",
-      "father_phone": "+998 93 582 17 74",
-      "mother_phone": "+998 93 582 17 74",
-      "password": "Pgxq&82P6",
-      "password_updated_at": "2026-10-29T15:28:08.192Z",
-      "is_active": true,
-      "created_at": "2026-10-29T15:28:08.192Z",
-      "updated_at": "2026-10-29T15:28:08.192Z"
-    },
-    {
-      "id": "usr-1793287463431",
-      "username": "abdulaziz_orifjonov",
-      "first_name": "Abdulaziz",
-      "last_name": "Orifjonov",
-      "fullName": "Abdulaziz Orifjonov",
-      "full_name": "Abdulaziz Orifjonov",
-      "avatar_url": "",
-      "role": "teacher",
-      "email": "abdulaziz_orifjonov@educo.app",
-      "phone": "+998 93 582 17 74",
-      "father_phone": "",
-      "mother_phone": "",
-      "password": "Mmua*65G7",
-      "password_updated_at": "2026-10-29T15:24:23.431Z",
-      "is_active": true,
-      "created_at": "2026-10-29T15:24:23.431Z",
-      "updated_at": "2026-10-29T15:24:23.431Z"
-    },
-    {
-      "id": "usr-1793287264461",
-      "username": "abdulzizbek_orifjonov",
-      "first_name": "Abdulzizbek",
-      "last_name": "Orifjonov",
-      "fullName": "Abdulzizbek Orifjonov",
-      "full_name": "Abdulzizbek Orifjonov",
-      "avatar_url": "",
-      "role": "admin",
-      "email": "abdulzizbek_orifjonov@educo.app",
-      "phone": "+998 93 582 17 74",
-      "father_phone": "",
-      "mother_phone": "",
-      "password": "Aywa&26W4",
-      "password_updated_at": "2026-10-29T15:21:04.461Z",
-      "is_active": true,
-      "created_at": "2026-10-29T15:21:04.461Z",
-      "updated_at": "2026-10-29T15:21:04.461Z"
-    },
-    {
       "id": "usr-owner-1",
       "username": "abbosbek",
       "first_name": "Abbosbek",
@@ -68,10 +11,9 @@
       "email": "abbosbek@educo.app",
       "phone": "+998 98 800 14 15",
       "password": "AbbosBek1415",
-      "password_updated_at": "2026-10-29T11:20:36.253Z",
+      "password_updated_at": "2026-10-30T04:51:09.242Z",
       "is_active": true,
-      "created_at": "2026-10-29T11:20:36.253Z",
-      "avatar_url": ""
+      "created_at": "2026-10-30T04:51:09.242Z"
     }
   ],
   "educo_db_groups": [],
@@ -1529,12 +1471,10 @@
       "api_token": "SXP6_F:_8_-fv9uvdsyrp",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-10-30T03:26:15.383Z",
+      "last_seen_at": "2026-10-30T04:51:09.241Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-29T11:20:36.253Z",
-      "battery_level": null,
-      "updated_at": "2026-10-30T03:26:15.387Z"
+      "created_at": "2026-10-30T04:51:09.242Z"
     },
     {
       "id": "dev-backup-2",
@@ -1547,7 +1487,7 @@
       "last_seen_at": null,
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-29T11:20:36.253Z"
+      "created_at": "2026-10-30T04:51:09.242Z"
     }
   ],
   "educo_db_memberships": [],

@@ -182,17 +182,21 @@ export default function Sidebar({
             onClick={onCloseMobile}
             title="EDUCO LMS"
           >
-            {/* Official EDUCO Logo */}
+            {/* Official EDUCO Logo - 100% transparent without any container background */}
             {collapsed && !mobileOpen ? (
-              <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/20">
-                <img src="/educo-mark.png" alt="EDUCO" className="h-7 w-7 object-contain" />
-              </div>
+              <img
+                src="/educo-mark-white.png"
+                alt="EDUCO"
+                className="h-9 w-9 object-contain drop-shadow-sm"
+              />
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center bg-white/95 rounded-xl px-2.5 py-1.5 shadow-md border border-white/20">
-                  <img src="/educo-logo.png" alt="EDUCO" className="h-8 w-auto object-contain" />
-                </div>
-                <span className="rounded-md bg-blue-500/80 dark:bg-emerald-600/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <img
+                  src="/educo-logo-white.png"
+                  alt="EDUCO"
+                  className="h-8 sm:h-9 w-auto object-contain drop-shadow-sm"
+                />
+                <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white border border-white/20 shadow-xs">
                   LMS
                 </span>
               </div>
