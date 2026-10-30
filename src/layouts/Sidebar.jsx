@@ -184,13 +184,13 @@ export default function Sidebar({
           >
             {/* Official EDUCO Logo */}
             {collapsed && !mobileOpen ? (
-              <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white p-1 shadow-md border border-white/20">
-                <img src="/favicon-32x32.png" alt="EDUCO" className="h-7 w-7 object-contain" />
+              <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/20">
+                <img src="/educo-mark.png" alt="EDUCO" className="h-7 w-7 object-contain" />
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <div className="flex items-center bg-white/95 rounded-xl px-2.5 py-1 shadow-md border border-white/20">
-                  <img src="/educo-logo.png" alt="EDUCO" className="h-7 w-auto object-contain" />
+                <div className="flex items-center bg-white/95 rounded-xl px-2.5 py-1.5 shadow-md border border-white/20">
+                  <img src="/educo-logo.png" alt="EDUCO" className="h-8 w-auto object-contain" />
                 </div>
                 <span className="rounded-md bg-blue-500/80 dark:bg-emerald-600/80 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-xs">
                   LMS

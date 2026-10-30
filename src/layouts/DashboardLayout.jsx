@@ -408,7 +408,7 @@ export default function DashboardLayout({
               <img
                 src="/educo-logo.png"
                 alt="EDUCO"
-                className="h-6 sm:h-7 w-auto object-contain dark:bg-white/95 dark:px-1.5 dark:py-0.5 dark:rounded-md transition-all"
+                className="h-7 sm:h-8 w-auto object-contain dark:bg-white/95 dark:px-2 dark:py-1 dark:rounded-lg shadow-2xs transition-all"
               />
             </Link>
 
