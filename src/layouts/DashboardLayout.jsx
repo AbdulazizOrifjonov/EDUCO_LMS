@@ -474,18 +474,18 @@ export default function DashboardLayout({
                 </Link>
               </div>
 
-              {/* Center / Search bar with reactive live search on desktop */}
-              <div className="hidden md:flex flex-1 justify-center max-w-[220px] lg:max-w-sm xl:max-w-md 2xl:max-w-xl mx-2 lg:mx-4 min-w-0">
+              {/* Center / Search bar with reactive live search (Visible on tablet/sm >= 640px and desktop) */}
+              <div className="hidden sm:flex flex-1 justify-center max-w-xs md:max-w-md lg:max-w-lg xl:max-w-2xl mx-2 sm:mx-3 lg:mx-4 min-w-0">
                 <GlobalSearchBar role={userRole} isRtl={false} />
               </div>
 
-              {/* Right section: Search Button (< md), Reminders, Install App, Language, Theme, Notifications, User Profile */}
+              {/* Right section: Search Button (< sm), Reminders, Install App, Language, Theme, Notifications, User Profile */}
               <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 lg:gap-2">
-                {/* Search Icon Button for screens < md (mobile & compact) */}
+                {/* Search Icon Button for tiny screens < sm (< 640px) */}
                 <button
                   type="button"
                   onClick={() => setMobileSearchOpen(true)}
-                  className="md:hidden rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
+                  className="sm:hidden rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
                   title="Qidiruv (Ctrl+K)"
                   aria-label="Qidiruv"
                 >
