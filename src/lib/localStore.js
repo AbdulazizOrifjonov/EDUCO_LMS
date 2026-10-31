@@ -103,88 +103,15 @@ class LocalStore {
   }
 
   ensureCleanStart() {
-    const WIPE_VERSION_KEY = 'educo_clean_start_v10_reset';
+    // SAFE STARTUP: Never wipe production data!
+    // Simply ensure that if localStorage has never had any users key at all,
+    // we provide initial Abbosbek Owner fallback so root login is always guaranteed.
     try {
       if (typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function') {
-        if (window.localStorage.getItem(WIPE_VERSION_KEY) !== 'v10_done') {
-          // Reset all data to clean starting state: only Abbosbek as Owner!
+        const existingUsers = window.localStorage.getItem(STORAGE_KEYS.USERS);
+        if (!existingUsers) {
           window.localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
-          window.localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.GROUPS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.MEMBERSHIPS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.LESSON_SCHEDULES, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.LESSONS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.GRADES, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.HOMEWORK, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.MATERIALS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.STUDENT_REMINDERS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.TEACHER_ATTENDANCE, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.SMS_DEVICES, JSON.stringify(INITIAL_SMS_DEVICES));
-          window.localStorage.setItem(STORAGE_KEYS.SMS_QUEUE, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.SMS_LOGS, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify([]));
-          window.localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify([]));
-
-          // In-memory clean state
           this.memoryStore[STORAGE_KEYS.USERS] = INITIAL_USERS;
-          this.memoryStore[STORAGE_KEYS.COURSES] = [];
-          this.memoryStore[STORAGE_KEYS.GROUPS] = [];
-          this.memoryStore[STORAGE_KEYS.MEMBERSHIPS] = [];
-          this.memoryStore[STORAGE_KEYS.LESSON_SCHEDULES] = [];
-          this.memoryStore[STORAGE_KEYS.LESSONS] = [];
-          this.memoryStore[STORAGE_KEYS.ATTENDANCE] = [];
-          this.memoryStore[STORAGE_KEYS.GRADES] = [];
-          this.memoryStore[STORAGE_KEYS.HOMEWORK] = [];
-          this.memoryStore[STORAGE_KEYS.SUBMISSIONS] = [];
-          this.memoryStore[STORAGE_KEYS.MATERIALS] = [];
-          this.memoryStore[STORAGE_KEYS.PAYMENTS] = [];
-          this.memoryStore[STORAGE_KEYS.STUDENT_REMINDERS] = [];
-          this.memoryStore[STORAGE_KEYS.TEACHER_ATTENDANCE] = [];
-          this.memoryStore[STORAGE_KEYS.SMS_DEVICES] = INITIAL_SMS_DEVICES;
-          this.memoryStore[STORAGE_KEYS.SMS_QUEUE] = [];
-          this.memoryStore[STORAGE_KEYS.SMS_LOGS] = [];
-          this.memoryStore[STORAGE_KEYS.CHAT_MESSAGES] = [];
-          this.memoryStore[STORAGE_KEYS.NOTIFICATIONS] = [];
-
-          // Keep Owner session, clear non-owner sessions
-          try {
-            const activeSessionRaw = window.localStorage.getItem('educo_demo_session');
-            if (activeSessionRaw) {
-              const activeSession = JSON.parse(activeSessionRaw);
-              if (activeSession?.role !== 'owner' && activeSession?.id !== 'usr-owner-1') {
-                window.localStorage.removeItem('educo_demo_session');
-              }
-            }
-          } catch (_) {}
-
-          window.localStorage.setItem(WIPE_VERSION_KEY, 'v10_done');
-
-          // Sync clean slate to server with wipe flag
-          this.pushToServer({
-            _wipe_to_clean: true,
-            [STORAGE_KEYS.USERS]: INITIAL_USERS,
-            [STORAGE_KEYS.COURSES]: [],
-            [STORAGE_KEYS.GROUPS]: [],
-            [STORAGE_KEYS.MEMBERSHIPS]: [],
-            [STORAGE_KEYS.LESSON_SCHEDULES]: [],
-            [STORAGE_KEYS.LESSONS]: [],
-            [STORAGE_KEYS.ATTENDANCE]: [],
-            [STORAGE_KEYS.GRADES]: [],
-            [STORAGE_KEYS.HOMEWORK]: [],
-            [STORAGE_KEYS.SUBMISSIONS]: [],
-            [STORAGE_KEYS.MATERIALS]: [],
-            [STORAGE_KEYS.PAYMENTS]: [],
-            [STORAGE_KEYS.STUDENT_REMINDERS]: [],
-            [STORAGE_KEYS.TEACHER_ATTENDANCE]: [],
-            [STORAGE_KEYS.SMS_DEVICES]: INITIAL_SMS_DEVICES,
-            [STORAGE_KEYS.SMS_QUEUE]: [],
-            [STORAGE_KEYS.SMS_LOGS]: [],
-            [STORAGE_KEYS.CHAT_MESSAGES]: [],
-            [STORAGE_KEYS.NOTIFICATIONS]: [],
-          }).catch(() => {});
         }
       }
     } catch (_) {}

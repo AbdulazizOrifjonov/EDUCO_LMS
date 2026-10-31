@@ -249,15 +249,9 @@ export default {
             lastStoreUpdatedAt = Date.now();
             const now = new Date().toISOString();
 
+            // Data protection: Wipe flag ignored to prevent data loss on redeploys or client resets
             if (payload._wipe_to_clean === true) {
-              memoryKV.clear();
-              if (db) {
-                try {
-                  await db.exec('DELETE FROM kv_store;');
-                } catch (e) {
-                  console.warn('D1 wipe error:', e);
-                }
-              }
+              console.warn('[DataProtection] Client wipe request safely ignored to protect production database.');
             }
 
             for (const [key, value] of Object.entries(payload)) {

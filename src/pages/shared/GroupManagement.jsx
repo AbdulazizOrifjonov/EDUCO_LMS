@@ -357,26 +357,24 @@ export default function GroupManagement() {
           </p>
         </div>
 
-        {!isTeacher && (
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <Button
-              variant="outline"
-              size="md"
-              icon={GraduationCap}
-              onClick={() => navigate(`/${currentUserRole}/users/create?role=student`)}
-            >
-              {t('users.createStudent', '+ Yangi o‘quvchi qo‘shish')}
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              icon={Plus}
-              onClick={() => navigate(`/${currentUserRole}/groups/create`)}
-            >
-              {t('groups.createGroup', 'New Study Group')}
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <Button
+            variant="outline"
+            size="md"
+            icon={GraduationCap}
+            onClick={() => navigate(`/${currentUserRole}/users/create?role=student`)}
+          >
+            {t('users.createStudent', '+ Yangi o‘quvchi qo‘shish')}
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
+            icon={Plus}
+            onClick={() => navigate(`/${currentUserRole}/groups/create`)}
+          >
+            {t('groups.createGroup', 'New Study Group')}
+          </Button>
+        </div>
       </div>
 
       {/* Filters Bar */}

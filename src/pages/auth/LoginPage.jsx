@@ -33,8 +33,36 @@ export default function LoginPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, loading: authLoading } = useAuth();
+  const { user, profile, signIn, loading: authLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
+
+  // Automatic redirect if user already has an active remembered session
+  useEffect(() => {
+    if (!authLoading && user && profile) {
+      const rawRole = profile?.role || user?.user_metadata?.role || 'student';
+      const userRole = String(rawRole).toLowerCase().trim();
+      const from = location.state?.from?.pathname;
+      if (from && from !== '/login' && from !== '/unauthorized' && from.startsWith(`/${userRole}`)) {
+        navigate(from, { replace: true });
+        return;
+      }
+      switch (userRole) {
+        case 'owner':
+          navigate('/owner/dashboard', { replace: true });
+          break;
+        case 'admin':
+          navigate('/admin/dashboard', { replace: true });
+          break;
+        case 'teacher':
+          navigate('/teacher/dashboard', { replace: true });
+          break;
+        case 'student':
+        default:
+          navigate('/student/dashboard', { replace: true });
+          break;
+      }
+    }
+  }, [user, profile, authLoading, navigate, location.state]);
 
   const [showPassword, setShowPassword] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -63,7 +91,7 @@ export default function LoginPage() {
     defaultValues: {
       username: initialUsername,
       password: '',
-      rememberMe: Boolean(remembered),
+      rememberMe: remembered ? true : true, // Always default to true so user session is remembered!
     },
   });
 

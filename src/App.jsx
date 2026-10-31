@@ -51,6 +51,28 @@ const ChatPage = React.lazy(() => import('@/pages/shared/ChatPage'));
 const RemindersPage = React.lazy(() => import('@/pages/shared/RemindersPage'));
 const SmsManagementPage = React.lazy(() => import('@/pages/owner/SmsManagementPage'));
 
+function RootRedirect() {
+  const { user, profile, loading } = useAuth();
+  if (loading) {
+    return <LoadingSpinner fullPage text="EDUCO LMS yuklanmoqda..." />;
+  }
+  if (user && profile) {
+    const role = String(profile.role || user.user_metadata?.role || 'student').toLowerCase();
+    switch (role) {
+      case 'owner':
+        return <Navigate to="/owner/dashboard" replace />;
+      case 'admin':
+        return <Navigate to="/admin/dashboard" replace />;
+      case 'teacher':
+        return <Navigate to="/teacher/dashboard" replace />;
+      case 'student':
+      default:
+        return <Navigate to="/student/dashboard" replace />;
+    }
+  }
+  return <Navigate to="/login" replace />;
+}
+
 export default function App() {
   const { initializeAuth } = useAuth();
 
@@ -67,7 +89,7 @@ export default function App() {
       <Suspense fallback={<LoadingSpinner fullPage text="Loading EDUCO LMS..." />}>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/invite/:token" element={<InvitePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -169,8 +191,12 @@ export default function App() {
           >
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<TeacherDashboard />} />
+            <Route path="courses" element={<CourseManagement />} />
+            <Route path="courses/create" element={<CourseCreatePage />} />
+            <Route path="courses/edit/:id" element={<CourseCreatePage />} />
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
+            <Route path="passwords" element={<PasswordsPage />} />
             <Route path="groups" element={<GroupManagement />} />
             <Route path="groups/create" element={<GroupCreatePage />} />
             <Route path="groups/edit/:id" element={<GroupCreatePage />} />
@@ -179,6 +205,7 @@ export default function App() {
             <Route path="schedule" element={<ScheduleManagement />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="grades" element={<GradesPage />} />
+            <Route path="reminders" element={<RemindersPage />} />
             <Route path="homework" element={<Navigate to="/teacher/dashboard" replace />} />
             <Route path="homework/*" element={<Navigate to="/teacher/dashboard" replace />} />
             <Route path="materials" element={<Navigate to="/teacher/dashboard" replace />} />

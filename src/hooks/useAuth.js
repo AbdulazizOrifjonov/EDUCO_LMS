@@ -449,11 +449,6 @@ export const useAuthStore = create((set, get) => ({
             }
             const dbUsers = localStore.getUsers();
             const dbUser = dbUsers.find((u) => u.id === normId);
-            if (!dbUser && (normId.startsWith('usr-admin-') || normId.startsWith('usr-teacher-') || normId.startsWith('usr-student-'))) {
-              safeStorage.removeItem('educo_demo_session');
-              set({ user: null, profile: null, session: null, loading: false });
-              return;
-            }
             if (dbUser) {
               parsed.profile = {
                 ...dbUser,
@@ -463,6 +458,7 @@ export const useAuthStore = create((set, get) => ({
                 avatar_url: parsed.profile.avatar_url || dbUser.avatar_url || '',
               };
             }
+            // Keep existing session valid permanently across reloads and tab closures
             safeStorage.setItem('educo_demo_session', JSON.stringify(parsed));
             set({ user: parsed.user, profile: parsed.profile, session: parsed.user, loading: false });
             return;

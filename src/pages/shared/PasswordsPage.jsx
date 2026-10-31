@@ -80,7 +80,9 @@ export default function PasswordsPage() {
       });
 
       let list = res.users || [];
-      if (!isOwner) {
+      if (currentUserRole === ROLES.TEACHER || currentUserRole === 'teacher') {
+        list = list.filter((u) => u.role === ROLES.STUDENT);
+      } else if (!isOwner) {
         list = list.filter((u) => u.role === ROLES.TEACHER || u.role === ROLES.STUDENT);
       }
       setUsers(list);
@@ -504,36 +506,47 @@ export default function PasswordsPage() {
     },
   ];
 
-  const filterTabs = [
-    {
-      id: 'all',
-      label: t('passwords.allTab', 'Barchasi'),
-      count: users.length,
-      icon: Users,
-    },
-    {
-      id: ROLES.STUDENT,
-      label: t('users.studentsTab', "O'quvchilar"),
-      count: totalStudents,
-      icon: GraduationCap,
-    },
-    {
-      id: ROLES.TEACHER,
-      label: t('users.teachersTab', "O'qituvchilar"),
-      count: totalTeachers,
-      icon: Users,
-    },
-    ...(isOwner
-      ? [
-          {
-            id: ROLES.ADMIN,
-            label: t('users.adminsTab', 'Administratorlar'),
-            count: totalAdmins,
-            icon: Shield,
-          },
-        ]
-      : []),
-  ];
+  const isTeacher = currentUserRole === ROLES.TEACHER || currentUserRole === 'teacher';
+
+  const filterTabs = isTeacher
+    ? [
+        {
+          id: 'all',
+          label: t('passwords.allStudentsTab', 'Barcha o‘quvchilar'),
+          count: users.length,
+          icon: GraduationCap,
+        },
+      ]
+    : [
+        {
+          id: 'all',
+          label: t('passwords.allTab', 'Barchasi'),
+          count: users.length,
+          icon: Users,
+        },
+        {
+          id: ROLES.STUDENT,
+          label: t('users.studentsTab', "O'quvchilar"),
+          count: totalStudents,
+          icon: GraduationCap,
+        },
+        {
+          id: ROLES.TEACHER,
+          label: t('users.teachersTab', "O'qituvchilar"),
+          count: totalTeachers,
+          icon: Users,
+        },
+        ...(isOwner
+          ? [
+              {
+                id: ROLES.ADMIN,
+                label: t('users.adminsTab', 'Administratorlar'),
+                count: totalAdmins,
+                icon: Shield,
+              },
+            ]
+          : []),
+      ];
 
   const tabColorConfig = {
     all: {

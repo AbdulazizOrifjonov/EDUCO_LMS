@@ -353,22 +353,32 @@ export default function GroupCreatePage() {
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-          <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(`/${currentUserRole}/courses/create`)}
+            className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2 cursor-pointer transition-all text-left"
+            title="Kurs yaratish sahifasiga o‘tish"
+          >
             <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">1</span>
-            <span className="truncate">1. Yo‘nalish (Kurs)</span>
-          </div>
+            <span className="truncate">1. Kurs (Yo‘nalish) ↗</span>
+          </button>
           <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
             <span className="w-5 h-5 rounded-full bg-amber-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">2</span>
             <span className="truncate">2. O‘qituvchi</span>
           </div>
           <div className="p-2.5 rounded-xl border bg-emerald-100/90 border-emerald-300 dark:bg-emerald-950/60 font-bold text-emerald-900 dark:text-emerald-200 ring-2 ring-emerald-400/50 flex items-center gap-2">
             <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">3</span>
-            <span className="truncate">3. O‘quv guruhi</span>
+            <span className="truncate">3. O‘quv guruhi (Hozir)</span>
           </div>
-          <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(`/${currentUserRole}/users/create?role=student`)}
+            className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 hover:bg-purple-50 dark:hover:bg-purple-950/40 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2 cursor-pointer transition-all text-left"
+            title="O‘quvchi qo‘shish sahifasiga o‘tish"
+          >
             <span className="w-5 h-5 rounded-full bg-purple-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">4</span>
-            <span className="truncate">4. O‘quvchi</span>
-          </div>
+            <span className="truncate">4. O‘quvchi ↗</span>
+          </button>
         </div>
       </div>
 
@@ -472,16 +482,14 @@ export default function GroupCreatePage() {
                 <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                   Kurs fani / Ta‘lim yo‘nalishi <span className="text-brand-red">*</span>
                 </label>
-                {!isTeacher && (
-                  <button
-                    type="button"
-                    onClick={() => setIsCreatingInlineCourse(!isCreatingInlineCourse)}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>{isCreatingInlineCourse ? 'Yopish' : '+ Yangi yo‘nalish'}</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingInlineCourse(!isCreatingInlineCourse)}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isCreatingInlineCourse ? 'Yopish' : '+ Yangi yo‘nalish'}</span>
+                </button>
               </div>
 
               {/* Inline Course Creation Card */}
