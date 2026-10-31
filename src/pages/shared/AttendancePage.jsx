@@ -41,6 +41,7 @@ import Table from '@/components/ui/Table';
 import Modal from '@/components/ui/Modal';
 import Avatar from '@/components/ui/Avatar';
 import Select from '@/components/ui/Select';
+import DatePicker from '@/components/ui/DatePicker';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from '@/components/ui/Toast';
 import { getGroups, getGroupById } from '@/services/groupService';
@@ -1685,16 +1686,14 @@ export default function AttendancePage() {
           {/* Date & Group Control Bar */}
           <Card noPadding>
             <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center">
-              {/* Date Picker */}
+              {/* Custom Date Picker */}
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-1">
-                  {t('common.date', 'Dars sanasi')}
-                </label>
-                <input
-                  type="date"
+                <DatePicker
+                  label={t('common.date', 'Dars sanasi')}
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
+                  onChange={(val) => setSelectedDate(val)}
+                  placeholder="Sanani tanlang..."
+                  className="w-full"
                 />
               </div>
 

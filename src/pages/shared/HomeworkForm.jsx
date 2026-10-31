@@ -8,6 +8,7 @@ import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import DatePicker from '@/components/ui/DatePicker';
 import { toast } from '@/components/ui/Toast';
 import { createHomework, updateHomework } from '@/services/homeworkService';
 import { getGroups } from '@/services/groupService';
@@ -184,13 +185,11 @@ export default function HomeworkForm({
             searchable
           />
 
-          <Input
+          <DatePicker
             label={t('homework.deadline', 'Submission Deadline')}
-            type="datetime-local"
-            icon={Calendar}
-            required
-            error={errors.dueDate?.message}
-            {...register('dueDate')}
+            value={watch('dueDate') ? String(watch('dueDate')).slice(0, 10) : ''}
+            onChange={(val) => setValue('dueDate', val, { shouldValidate: true })}
+            className="w-full"
           />
         </div>
 

@@ -19,6 +19,7 @@ import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Select from '@/components/ui/Select';
+import DatePicker from '@/components/ui/DatePicker';
 import { toast } from '@/components/ui/Toast';
 import { getAttendanceReport } from '@/services/attendanceService';
 import { getGroups } from '@/services/groupService';
@@ -226,26 +227,20 @@ export default function AttendanceReport() {
       <Card noPadding>
         <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
-            <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300 block mb-1">
-              {t('common.startDate', 'Start Date')}
-            </label>
-            <input
-              type="date"
+            <DatePicker
+              label={t('common.startDate', 'Start Date')}
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
+              onChange={(val) => setStartDate(val)}
+              className="w-full"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase text-gray-700 dark:text-gray-300 block mb-1">
-              {t('common.endDate', 'End Date')}
-            </label>
-            <input
-              type="date"
+            <DatePicker
+              label={t('common.endDate', 'End Date')}
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-navy"
+              onChange={(val) => setEndDate(val)}
+              className="w-full"
             />
           </div>
 

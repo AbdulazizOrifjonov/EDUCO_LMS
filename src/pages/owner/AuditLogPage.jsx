@@ -171,26 +171,26 @@ export default function AuditLogPage() {
           />
 
           <div>
-            <Input
-              type="date"
+            <DatePicker
               label={t('reports.from')}
               value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
+              onChange={(val) => {
+                setStartDate(val);
                 setPage(1);
               }}
+              className="w-full"
             />
           </div>
 
           <div>
-            <Input
-              type="date"
+            <DatePicker
               label={t('reports.to')}
               value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
+              onChange={(val) => {
+                setEndDate(val);
                 setPage(1);
               }}
+              className="w-full"
             />
           </div>
         </form>

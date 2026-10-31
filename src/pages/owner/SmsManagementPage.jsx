@@ -1191,17 +1191,16 @@ export default function SmsManagementPage() {
                     </span>
                   )}
                 </div>
-                <select
+                <Select
                   value={selectedPreviewStudentId || activePreviewRecipient?.studentId || ''}
                   onChange={(e) => setSelectedPreviewStudentId(e.target.value)}
-                  className="w-full text-xs font-semibold py-2 px-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {prospectiveRecipients.map((r) => (
-                    <option key={r.studentId} value={r.studentId}>
-                      {r.studentName} — {r.isDebtor ? `Qarz: ${formatCurrency(r.balance)}` : 'To‘langan'} • {r.recipientLabel}: {r.targetPhone || 'Raqam yo‘q'}
-                    </option>
-                  ))}
-                </select>
+                  headerTitle="O‘quvchini tanlang"
+                  options={prospectiveRecipients.map((r) => ({
+                    value: r.studentId,
+                    label: r.studentName,
+                    subtitle: (r.isDebtor ? `Qarz: ${formatCurrency(r.balance)}` : 'To‘langan') + ' • ' + (r.targetPhone || 'Raqam yo‘q'),
+                  }))}
+                />
               </div>
 
               {/* Mock Smartphone Screen */}

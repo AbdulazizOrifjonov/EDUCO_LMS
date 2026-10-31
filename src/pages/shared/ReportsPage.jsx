@@ -252,20 +252,20 @@ export default function ReportsPage() {
       <Card>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
           <div>
-            <Input
-              type="date"
+            <DatePicker
               label={t('reports.from')}
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(val) => setStartDate(val)}
+              className="w-full"
             />
           </div>
 
           <div>
-            <Input
-              type="date"
+            <DatePicker
               label={t('reports.to')}
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(val) => setEndDate(val)}
+              className="w-full"
             />
           </div>
 

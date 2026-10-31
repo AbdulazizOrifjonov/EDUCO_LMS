@@ -28,6 +28,7 @@ export default function DatePicker({
 }) {
   const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef(null);
 
   // Parse incoming value (expected YYYY-MM-DD or ISO string)
@@ -67,6 +68,19 @@ export default function DatePicker({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Determine if calendar should open upwards when close to bottom of screen
+  useEffect(() => {
+    if (isOpen && containerRef.current && typeof window !== 'undefined') {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 320 && rect.top > 320) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    }
   }, [isOpen]);
 
   const viewYear = viewDate.getFullYear();
@@ -264,24 +278,26 @@ export default function DatePicker({
         value={value || ''}
       />
 
-      {/* Popover Calendar */}
+      {/* Popover Calendar - EXACT width matching input container (100% w-full) */}
       {isOpen && (
         <div
-          className="absolute z-50 mt-2 left-0 w-80 sm:w-84 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-150"
-          style={{ minWidth: '300px' }}
+          className={`absolute z-50 left-0 right-0 w-full rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-3 animate-in fade-in zoom-in-95 duration-150 ${
+            openUpward ? 'bottom-full mb-2' : 'top-full mt-1.5'
+          }`}
+          style={{ minWidth: '260px' }}
         >
           {/* Calendar Header */}
-          <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-gray-100 dark:border-gray-800">
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
+              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
               title="Oldingi oy"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-1.5 font-bold text-sm text-gray-900 dark:text-white">
+            <div className="flex items-center gap-1.5 font-bold text-xs sm:text-sm text-gray-900 dark:text-white">
               <span>{monthNames[viewMonth]}</span>
               <span className="text-blue-600 dark:text-emerald-400 font-black">
                 {viewYear}
@@ -291,7 +307,7 @@ export default function DatePicker({
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
+              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
               title="Keyingi oy"
             >
               <ChevronRight className="w-4 h-4" />
@@ -299,11 +315,11 @@ export default function DatePicker({
           </div>
 
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 gap-1 text-center mb-1.5">
+          <div className="grid grid-cols-7 gap-1 text-center mb-1">
             {weekDayNames.map((w, idx) => (
               <span
                 key={w.short}
-                className={`text-[11px] font-bold uppercase py-1 select-none ${
+                className={`text-[10px] font-bold uppercase py-0.5 select-none ${
                   idx === 6
                     ? 'text-rose-500 dark:text-rose-400'
                     : 'text-gray-400 dark:text-gray-500'
@@ -340,11 +356,11 @@ export default function DatePicker({
                   key={idx}
                   type="button"
                   onClick={() => handleSelectDay(item.date)}
-                  className={`h-9 w-full rounded-xl text-xs font-medium flex items-center justify-center transition-all cursor-pointer relative select-none ${btnClass}`}
+                  className={`h-8 w-full rounded-lg text-xs font-medium flex items-center justify-center transition-all cursor-pointer relative select-none ${btnClass}`}
                 >
                   <span>{item.dayNumber}</span>
                   {isToday && !isSelected && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-blue-600 dark:bg-emerald-400" />
+                    <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-blue-600 dark:bg-emerald-400" />
                   )}
                 </button>
               );
@@ -352,7 +368,7 @@ export default function DatePicker({
           </div>
 
           {/* Footer Quick Presets */}
-          <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100 dark:border-gray-800 text-xs">
+          <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-gray-100 dark:border-gray-800 text-xs">
             <button
               type="button"
               onClick={handleToday}

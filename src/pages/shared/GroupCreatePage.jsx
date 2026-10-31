@@ -28,6 +28,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import DatePicker from '@/components/ui/DatePicker';
 import Modal from '@/components/ui/Modal';
 import { toast } from '@/components/ui/Toast';
 import { createGroup, updateGroup, getGroupById } from '@/services/groupService';
@@ -847,10 +848,11 @@ export default function GroupCreatePage() {
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Boshlanish sanasi
               </label>
-              <input
-                type="date"
-                {...register('startDate')}
-                className="w-full h-11 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-sm text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-emerald-500 outline-none"
+              <DatePicker
+                value={watch('startDate')}
+                onChange={(val) => setValue('startDate', val)}
+                placeholder="Sanani tanlang..."
+                className="w-full"
               />
             </div>
           </div>

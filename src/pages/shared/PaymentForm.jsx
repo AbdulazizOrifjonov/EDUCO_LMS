@@ -133,12 +133,11 @@ export default function PaymentForm({ defaultStudentId, onSubmit, onCancel, isLo
         </div>
 
         <div>
-          <Input
-            type="date"
+          <DatePicker
             label={t('tuition.paymentDate', 'Payment Date')}
-            required
-            error={errors.payment_date?.message}
-            {...register('payment_date')}
+            value={watch('payment_date')}
+            onChange={(val) => setValue('payment_date', val)}
+            className="w-full"
           />
         </div>
       </div>

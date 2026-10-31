@@ -71,33 +71,30 @@ export default function SalaryPeriodForm({ onSubmit, onCancel, isLoading }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Input
-            type="date"
+          <DatePicker
             label={t('payroll.startDate')}
-            required
-            error={errors.start_date?.message}
-            {...register('start_date')}
+            value={watch('start_date')}
+            onChange={(val) => setValue('start_date', val)}
+            className="w-full"
           />
         </div>
 
         <div>
-          <Input
-            type="date"
+          <DatePicker
             label={t('payroll.endDate')}
-            required
-            error={errors.end_date?.message}
-            {...register('end_date')}
+            value={watch('end_date')}
+            onChange={(val) => setValue('end_date', val)}
+            className="w-full"
           />
         </div>
       </div>
 
       <div>
-        <Input
-          type="date"
+        <DatePicker
           label={t('payroll.scheduledPaymentDate')}
-          required
-          error={errors.payment_date?.message}
-          {...register('payment_date')}
+          value={watch('payment_date')}
+          onChange={(val) => setValue('payment_date', val)}
+          className="w-full"
         />
       </div>
 

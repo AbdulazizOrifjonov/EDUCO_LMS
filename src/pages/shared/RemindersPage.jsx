@@ -880,7 +880,7 @@ export default function RemindersPage() {
           </div>
 
           {/* Modal Footer */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-end gap-3 pt-4 mt-8 border-t border-gray-100 dark:border-gray-800">
             <Button variant="ghost" type="button" onClick={() => setIsCreateModalOpen(false)}>
               Bekor qilish
             </Button>

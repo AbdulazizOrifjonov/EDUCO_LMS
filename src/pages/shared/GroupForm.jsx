@@ -7,6 +7,7 @@ import { Users, GraduationCap, Building2, Calendar, DollarSign, Hash, Camera, Tr
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import DatePicker from '@/components/ui/DatePicker';
 import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
 import { createGroup, updateGroup } from '@/services/groupService';
@@ -376,12 +377,11 @@ export default function GroupForm({
             />
           </div>
 
-          <Input
+          <DatePicker
             label={t('groups.startDate', 'Start Date')}
-            type="date"
-            icon={Calendar}
-            error={errors.startDate?.message}
-            {...register('startDate')}
+            value={watch('startDate')}
+            onChange={(val) => setValue('startDate', val)}
+            className="w-full"
           />
         </div>
 

@@ -31,6 +31,7 @@ import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import Avatar from '@/components/ui/Avatar';
+import DatePicker from '@/components/ui/DatePicker';
 import { toast } from '@/components/ui/Toast';
 import {
   getTeacherAttendance,
@@ -401,11 +402,11 @@ export default function TeacherAttendance() {
               </div>
 
               <div className="flex items-center gap-2">
-                <input
-                  type="date"
+                <DatePicker
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 text-xs py-1.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold"
+                  onChange={(val) => setDate(val)}
+                  placeholder="Sanani tanlang..."
+                  className="w-44 sm:w-48"
                 />
                 <span className="text-xs text-gray-400 hidden sm:inline">
                   {new Date(date).toLocaleDateString('uz-UZ', { weekday: 'long', month: 'long', day: 'numeric' })}

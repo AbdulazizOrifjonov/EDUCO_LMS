@@ -128,12 +128,11 @@ export default function SalaryRuleForm({ initialData, onSubmit, onCancel, isLoad
       </div>
 
       <div>
-        <Input
-          type="date"
+        <DatePicker
           label={t('payroll.effectiveDate')}
-          required
-          error={errors.effective_date?.message}
-          {...register('effective_date')}
+          value={watch('effective_date')}
+          onChange={(val) => setValue('effective_date', val)}
+          className="w-full"
         />
       </div>
 
