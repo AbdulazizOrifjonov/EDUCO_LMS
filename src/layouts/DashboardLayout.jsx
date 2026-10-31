@@ -103,13 +103,13 @@ export default function DashboardLayout({
 
   const handleTestPushNotification = async () => {
     const ok = await showPushNotification({
-      title: "📢 EDUCO LMS — Sinov Eslatmasi!",
-      body: "Salom! Bu sizning telefoningizga yuborilgan eslatma bildirishnomasi. Barcha yangi xabarlar va e'lonlar xuddi shu tarzda keladi!",
+      title: "📢 EDUCO LMS — Sinov Bildirishnomasi!",
+      body: "Salom! Bu sizning telefoningizga yuborilgan bildirishnoma. Barcha yangi xabarlar va e'lonlar xuddi shu tarzda keladi!",
       url: '/chat?channel=announcements',
       tag: 'test-notification-' + Date.now(),
     });
     if (ok) {
-      toast.success("Eslatma telefoningizga yuborildi!");
+      toast.success("Bildirishnoma telefoningizga yuborildi!");
     } else {
       handleEnablePush();
     }
@@ -592,7 +592,7 @@ export default function DashboardLayout({
                   {pushPermission !== 'granted' ? (
                     <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-b border-blue-100 dark:border-blue-900/40 flex items-center justify-between gap-2.5">
                       <div className="text-xs min-w-0">
-                        <strong className="block text-blue-900 dark:text-blue-100 font-bold truncate">Telefonga eslatmalar</strong>
+                        <strong className="block text-blue-900 dark:text-blue-100 font-bold truncate">Telefonga bildirishnomalar</strong>
                         <span className="text-[11px] text-blue-700 dark:text-blue-300 block truncate">Tepada xabarlar chiqishi uchun yoqing</span>
                       </div>
                       <button
@@ -607,7 +607,7 @@ export default function DashboardLayout({
                     <div className="px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between text-xs">
                       <span className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-1.5 truncate">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span className="truncate">Eslatmalar faol</span>
+                        <span className="truncate">Bildirishnomalar faol</span>
                       </span>
                       <button
                         type="button"
@@ -853,8 +853,8 @@ export default function DashboardLayout({
         </main>
       </div>
 
-      {/* Student Follow-up & Lesson Reminders Modal */}
-      {remindersModalOpen && (
+      {/* Student Follow-up & Lesson Reminders Modal (Owner & Admin only) */}
+      {(role === 'admin' || role === 'owner') && remindersModalOpen && (
         <StudentRemindersModal
           isOpen={remindersModalOpen}
           onClose={() => setRemindersModalOpen(false)}

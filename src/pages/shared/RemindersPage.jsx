@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import useAuth from '@/hooks/useAuth';
 import {
   Bell,
   Clock,
@@ -47,6 +49,15 @@ import { localStore } from '@/lib/localStore';
 import { formatUzPhone } from '@/utils/phoneFormat';
 
 export default function RemindersPage() {
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (profile && !['owner', 'admin'].includes(profile.role)) {
+      navigate(profile.role === 'teacher' ? '/teacher/dashboard' : '/student', { replace: true });
+    }
+  }, [profile, navigate]);
+
   const { t } = useTranslation();
   const { confirmDelete } = useTwoStepConfirm();
   const [reminders, setReminders] = useState([]);

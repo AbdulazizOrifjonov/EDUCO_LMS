@@ -501,3 +501,4 @@ export const useAuthStore = create((set, get) => ({
 export default function useAuth() {
   return useAuthStore();
 }
+export { useAuth };

@@ -208,7 +208,7 @@ export default function App() {
             <Route path="schedule" element={<ScheduleManagement />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="grades" element={<GradesPage />} />
-            <Route path="reminders" element={<RemindersPage />} />
+            <Route path="reminders" element={<Navigate to="/teacher/dashboard" replace />} />
             <Route path="homework" element={<Navigate to="/teacher/dashboard" replace />} />
             <Route path="homework/*" element={<Navigate to="/teacher/dashboard" replace />} />
             <Route path="materials" element={<Navigate to="/teacher/dashboard" replace />} />

@@ -62,6 +62,7 @@ export default function UserCreatePage() {
   const { profile } = useAuth();
   const currentUserRole = profile?.role || ROLES.OWNER;
   const isTeacher = currentUserRole === ROLES.TEACHER;
+  const isOwnerOrAdmin = currentUserRole === ROLES.OWNER || currentUserRole === ROLES.ADMIN;
 
   const isEditing = Boolean(id);
   const defaultRoleFromQuery = isTeacher ? ROLES.STUDENT : (searchParams.get('role') || ROLES.STUDENT);
@@ -104,7 +105,7 @@ export default function UserCreatePage() {
       role: defaultRoleFromQuery,
       isActive: true,
       password: '',
-      hasReminder: !isTeacher && defaultRoleFromQuery === ROLES.STUDENT,
+      hasReminder: isOwnerOrAdmin && defaultRoleFromQuery === ROLES.STUDENT,
       reminderDate: getDefaultReminderDate(3),
       reminderTime: '15:00',
       reminderNote: 'Dars 3 kundan keyin boshlanishi haqida xabar berish va jadvalni tasdiqlash',
@@ -335,8 +336,8 @@ export default function UserCreatePage() {
           }
         }
 
-        // 2. Schedule Reminder if requested
-        if (data.role === ROLES.STUDENT && data.hasReminder && data.reminderDate) {
+        // 2. Schedule Reminder if requested (Owner & Admin only)
+        if (isOwnerOrAdmin && data.role === ROLES.STUDENT && data.hasReminder && data.reminderDate) {
           const selectedGroupObj = groupsList.find((g) => g.id === selectedGroupId);
           await createStudentReminder({
             student_id: createdUser?.id,
@@ -980,8 +981,8 @@ export default function UserCreatePage() {
           </Card>
         )}
 
-        {/* Section 5: ⏰ Dars kuni / Qayta bog'lanish eslatmasi (Admin Reminder) */}
-        {selectedRole === ROLES.STUDENT && !isEditing && !isTeacher && (
+        {/* Section 5: ⏰ Dars kuni / Qayta bog'lanish eslatmasi (Owner & Admin only) */}
+        {selectedRole === ROLES.STUDENT && !isEditing && isOwnerOrAdmin && (
           <Card className="p-5 border-2 border-amber-300 dark:border-amber-900/50 bg-amber-50/20 dark:bg-amber-950/10">
             <div className="flex items-center justify-between mb-3 pb-3 border-b border-amber-200/80 dark:border-amber-900/50 flex-wrap gap-2">
               <div className="flex items-center gap-2">

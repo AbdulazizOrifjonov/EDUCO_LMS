@@ -59,12 +59,6 @@ const TEACHER_NAV_ITEMS = [
     icon: Award,
   },
   {
-    labelKey: 'nav.reminders',
-    label: 'Sinov darslari & Eslatmalar',
-    path: '/teacher/reminders',
-    icon: Clock,
-  },
-  {
     labelKey: 'nav.chat',
     label: 'Chat & Kanallar',
     path: '/teacher/chat',
