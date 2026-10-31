@@ -185,7 +185,7 @@ export default function TeacherDashboard() {
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-500/15 text-blue-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-blue-500/30 dark:border-emerald-500/30 hover:bg-blue-500/25 dark:hover:bg-emerald-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
           <UserPlus className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
-          <span>{t('dashboard.addNewStudentQuick', "+ Yangi o'quvchi qo'shish")}</span>
+          <span>{t('dashboard.addNewStudentQuick', "Yangi o'quvchi qo'shish")}</span>
         </button>
         <button
           type="button"

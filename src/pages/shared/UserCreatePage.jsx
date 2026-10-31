@@ -792,7 +792,7 @@ export default function UserCreatePage() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>{isCreatingInlineCourse ? "Bekor qilish" : "+ Yangi yo‘nalish qo‘shish"}</span>
+                <span>{isCreatingInlineCourse ? "Bekor qilish" : "Yangi yo‘nalish qo‘shish"}</span>
               </button>
             </div>
 
@@ -924,7 +924,7 @@ export default function UserCreatePage() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>+ Yangi guruh ochish</span>
+                <span>Yangi guruh ochish</span>
               </button>
             </div>
 

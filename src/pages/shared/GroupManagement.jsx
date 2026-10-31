@@ -375,7 +375,7 @@ export default function GroupManagement() {
             icon={GraduationCap}
             onClick={() => navigate(`/${currentUserRole}/users/create?role=student`)}
           >
-            {t('users.createStudent', '+ Yangi o‘quvchi qo‘shish')}
+            {t('users.createStudent', 'Yangi o‘quvchi qo‘shish')}
           </Button>
           <Button
             variant="primary"

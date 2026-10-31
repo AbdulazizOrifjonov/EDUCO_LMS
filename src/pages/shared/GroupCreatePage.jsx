@@ -488,7 +488,7 @@ export default function GroupCreatePage() {
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>{isCreatingInlineCourse ? 'Yopish' : '+ Yangi yo‘nalish'}</span>
+                  <span>{isCreatingInlineCourse ? 'Yopish' : 'Yangi yo‘nalish'}</span>
                 </button>
               </div>
 
@@ -624,7 +624,7 @@ export default function GroupCreatePage() {
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>{isCreatingInlineTeacher ? 'Yopish' : '+ Yangi o‘qituvchi'}</span>
+                    <span>{isCreatingInlineTeacher ? 'Yopish' : 'Yangi o‘qituvchi'}</span>
                   </button>
                 )}
               </div>

@@ -406,7 +406,7 @@ export default function UserManagement() {
             className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold"
             onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.TEACHER}`)}
           >
-            + {t('users.createTeacher', "O'qituvchi qo'shish")}
+            {t('users.createTeacher', "O'qituvchi qo'shish")}
           </Button>
 
           <Button
@@ -416,7 +416,7 @@ export default function UserManagement() {
             className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold"
             onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.STUDENT}`)}
           >
-            + {t('users.createStudent', "Yangi o'quvchi qo'shish")}
+            {t('users.createStudent', "Yangi o'quvchi qo'shish")}
           </Button>
 
           {currentUserRole === ROLES.OWNER && (
@@ -427,7 +427,7 @@ export default function UserManagement() {
               className="text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-300/60 dark:border-purple-800/50 font-semibold"
               onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.ADMIN}`)}
             >
-              + {t('users.createAdmin', "Admin")}
+              {t('users.createAdmin', "Admin qo'shish")}
             </Button>
           )}
         </div>
