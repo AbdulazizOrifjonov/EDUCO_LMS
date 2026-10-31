@@ -19,7 +19,9 @@ import {
   Camera,
   ArrowLeft,
   X,
+  Download,
 } from 'lucide-react';
+import InstallAppModal from '@/components/InstallAppModal';
 import Sidebar from './Sidebar';
 import LanguageSelector from '@/components/LanguageSelector';
 import useAuth from '@/hooks/useAuth';
@@ -117,6 +119,7 @@ export default function DashboardLayout({
   const notifDropdownRef = useRef(null);
   const mainRef = useRef(null);
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+  const [installModalOpen, setInstallModalOpen] = useState(false);
 
   // Automatically scroll main container and window to top on every route navigation
   useEffect(() => {
@@ -519,6 +522,18 @@ export default function DashboardLayout({
               </button>
             )}
 
+            {/* Install App Button */}
+            <button
+              type="button"
+              onClick={() => setInstallModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+              title="Ilovani kompyuter yoki telefonga o‘rnatish"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span className="hidden md:inline">Ilovani o‘rnatish</span>
+              <span className="md:hidden">Ilova</span>
+            </button>
+
             {/* Language Switcher */}
             <LanguageSelector />
 
@@ -806,6 +821,17 @@ export default function DashboardLayout({
                       <Settings className="h-4 w-4 text-gray-500" />
                       {t('common.settings', 'Settings')}
                     </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        setInstallModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-medium text-blue-700 dark:text-blue-300 transition-colors hover:bg-blue-50 dark:hover:bg-blue-950/40 text-left cursor-pointer"
+                    >
+                      <Download className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span>Ilovani o‘rnatish (PC / iPhone)</span>
+                    </button>
                   </div>
 
                   <div className="border-t border-gray-100 pt-1 dark:border-gray-800">
@@ -864,6 +890,12 @@ export default function DashboardLayout({
           }
         }}
         title={t('users.editAvatar', 'Profil rasmini moslashtirish')}
+      />
+
+      {/* PWA Install Modal for PC, iPhone & Android */}
+      <InstallAppModal
+        isOpen={installModalOpen}
+        onClose={() => setInstallModalOpen(false)}
       />
     </div>
   );

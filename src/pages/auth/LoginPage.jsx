@@ -15,7 +15,9 @@ import {
   Sun,
   Moon,
   CheckCircle2,
+  Download,
 } from 'lucide-react';
+import InstallAppModal from '@/components/InstallAppModal';
 import useAuth from '@/hooks/useAuth';
 import useTheme from '@/hooks/useTheme';
 import Button from '@/components/ui/Button';
@@ -68,6 +70,7 @@ export default function LoginPage() {
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [serverError, setServerError] = useState('');
   const [quickLoggingInRole, setQuickLoggingInRole] = useState(null);
+  const [installModalOpen, setInstallModalOpen] = useState(false);
 
   const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
   const isRTL = currentLang.dir === 'rtl';
@@ -510,9 +513,27 @@ export default function LoginPage() {
                 </button>
               </p>
             </div>
+
+            {/* Install App Link */}
+            <div className="mt-4 pt-3 border-t border-gray-100/80 dark:border-gray-800 text-center">
+              <button
+                type="button"
+                onClick={() => setInstallModalOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/80 hover:bg-blue-100/90 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Ilovani kompyuter yoki iPhone‘ga o‘rnatish 📲</span>
+              </button>
+            </div>
           </div>
         </div>
       </main>
+
+      {/* PWA Install Modal */}
+      <InstallAppModal
+        isOpen={installModalOpen}
+        onClose={() => setInstallModalOpen(false)}
+      />
 
       {/* Footer */}
       <footer className="w-full max-w-7xl mx-auto px-6 py-6 text-center text-xs text-gray-500 dark:text-gray-400">

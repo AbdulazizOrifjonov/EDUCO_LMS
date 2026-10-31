@@ -1,11 +1,15 @@
 {
-  "name": "EDUCO LMS",
-  "short_name": "EDUCO",
-  "description": "O'quv markazni boshqarish va ta'lim tizimi",
+  "name": "EDUCO LMS - Ta'lim Tizimi",
+  "short_name": "EDUCO LMS",
+  "description": "O'quv markazni boshqarish va zamonaviy LMS ta'lim platformasi",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#123D78",
+  "categories": ["education", "productivity", "utilities"],
   "icons": [
     {
       "src": "/educo-logo-192.png",
