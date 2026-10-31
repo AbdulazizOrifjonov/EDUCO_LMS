@@ -485,7 +485,7 @@ export default function DashboardLayout({
                 <button
                   type="button"
                   onClick={() => setMobileSearchOpen(true)}
-                  className="sm:hidden rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
+                  className="sm:hidden h-10 w-10 inline-flex items-center justify-center rounded-xl text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
                   title="Qidiruv (Ctrl+K)"
                   aria-label="Qidiruv"
                 >
@@ -497,7 +497,7 @@ export default function DashboardLayout({
                   <button
                     type="button"
                     onClick={() => setRemindersModalOpen(true)}
-                    className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 ring-2 ring-rose-400/30 animate-pulse"
+                    className="h-10 inline-flex items-center gap-1 sm:gap-1.5 px-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 ring-2 ring-rose-400/30 animate-pulse"
                     title={`${dueRemindersCount} ta o‘quvchi bilan bog‘lanish eslatmasi`}
                   >
                     <Clock className="w-3.5 h-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
@@ -514,7 +514,7 @@ export default function DashboardLayout({
                 <button
                   type="button"
                   onClick={() => setInstallModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                  className="h-10 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
                   title="Ilovani kompyuter yoki telefonga o‘rnatish"
                 >
                   <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -529,7 +529,7 @@ export default function DashboardLayout({
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
+              className="h-10 w-10 inline-flex items-center justify-center rounded-xl text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
               title={
                 theme === 'dark'
                   ? t('common.lightMode', 'Light Mode')
@@ -549,7 +549,7 @@ export default function DashboardLayout({
               <button
                 type="button"
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
-                className="relative rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                className="relative h-10 w-10 inline-flex items-center justify-center rounded-xl text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
                 aria-label="Notifications"
                 title={t('nav.notifications', 'Notifications')}
               >
@@ -684,7 +684,7 @@ export default function DashboardLayout({
               <button
                 type="button"
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-1.5 sm:gap-2 rounded-xl p-1 sm:p-1.5 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 shrink-0"
+                className="h-10 flex items-center gap-1.5 sm:gap-2 rounded-xl p-1 sm:px-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 shrink-0"
                 aria-label="User menu"
               >
                 {/* Avatar */}

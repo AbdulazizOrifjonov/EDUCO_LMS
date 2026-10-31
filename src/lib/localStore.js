@@ -290,7 +290,25 @@ class LocalStore {
 
   // --- COURSES ---
   getCourses() {
-    return this.getItem(STORAGE_KEYS.COURSES, INITIAL_COURSES);
+    const list = this.getItem(STORAGE_KEYS.COURSES, INITIAL_COURSES);
+    const groups = this.getItem(STORAGE_KEYS.GROUPS, INITIAL_GROUPS);
+    return list.map((c) => {
+      const activeGroups = groups.filter((g) => {
+        const matchesCourse =
+          g.course_id === c.id ||
+          g.courseId === c.id ||
+          (g.course_name && c.name && g.course_name.toLowerCase() === c.name.toLowerCase()) ||
+          (g.name && c.name && g.name.toLowerCase().startsWith(c.name.toLowerCase())) ||
+          (g.direction && c.name && g.direction.toLowerCase() === c.name.toLowerCase());
+        const isActive = g.status === 'active' || g.is_active === true || (!g.status && g.status !== 'archived');
+        return matchesCourse && isActive;
+      });
+      return {
+        ...c,
+        groupsCount: activeGroups.length,
+        activeGroupsCount: activeGroups.length,
+      };
+    });
   }
 
   saveCourse(courseData) {
@@ -303,6 +321,8 @@ class LocalStore {
       monthly_fee: Number(courseData.monthly_fee || courseData.monthlyFee || 0),
       color: courseData.color || '#123D78',
       is_active: courseData.is_active ?? courseData.isActive ?? true,
+      teacher_ids: courseData.teacher_ids || courseData.teacherIds || (index >= 0 ? list[index].teacher_ids : []) || [],
+      teachers: courseData.teachers || (index >= 0 ? list[index].teachers : []) || [],
       created_at: courseData.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
       groupsCount: 0,

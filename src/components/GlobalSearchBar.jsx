@@ -255,7 +255,7 @@ export default function GlobalSearchBar({
             if (!isOpen) setIsOpen(true);
           }}
           placeholder={pagePlaceholder || 'Qidirish (Ctrl+K)...'}
-          className="w-full rounded-xl border border-gray-200 dark:border-gray-700/80 bg-gray-50/80 hover:bg-gray-100/60 dark:bg-surface-dark-tertiary/70 dark:hover:bg-surface-dark-tertiary py-2 pl-9 pr-14 text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 outline-none transition-all shadow-xs focus:border-blue-500 dark:focus:border-emerald-500 focus:bg-white dark:focus:bg-surface-dark-secondary focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-emerald-500/20 truncate"
+          className="w-full h-10 rounded-xl border border-gray-200 dark:border-gray-700/80 bg-gray-50/80 hover:bg-gray-100/60 dark:bg-surface-dark-tertiary/70 dark:hover:bg-surface-dark-tertiary py-2 pl-9 pr-14 text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 outline-none transition-all shadow-xs focus:border-blue-500 dark:focus:border-emerald-500 focus:bg-white dark:focus:bg-surface-dark-secondary focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-emerald-500/20 truncate"
         />
 
         {/* Clear (X) or Ctrl+K Indicator */}
@@ -291,11 +291,11 @@ export default function GlobalSearchBar({
         />
       )}
 
-      {/* Interactive Live Search Dropdown */}
+      {/* Interactive Live Search Dropdown - EXACT width matching input (100% w-full) */}
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="fixed left-3 right-3 top-[58px] sm:top-[64px] mx-auto max-w-lg z-50 md:absolute md:top-full md:mt-2 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:min-w-[420px] md:max-w-xl rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary shadow-2xl overflow-hidden animate-fade-in"
+          className="fixed left-3 right-3 top-[58px] sm:top-[64px] z-50 sm:absolute sm:top-full sm:mt-2 sm:inset-x-0 sm:left-0 sm:right-0 sm:w-full sm:max-w-none sm:min-w-0 sm:translate-x-0 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary shadow-2xl overflow-hidden animate-fade-in"
         >
           {/* Header Indicator */}
           <div className="p-3 bg-gray-50 dark:bg-surface-dark-tertiary border-b border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">

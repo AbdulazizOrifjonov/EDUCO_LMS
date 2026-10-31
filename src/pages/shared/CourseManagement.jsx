@@ -36,6 +36,7 @@ export default function CourseManagement() {
   const { profile } = useAuth();
   const { confirmDelete } = useTwoStepConfirm();
   const currentUserRole = profile?.role || 'owner';
+  const isOwnerOrAdmin = currentUserRole === 'owner' || currentUserRole === 'admin';
   const { searchQuery, setSearchQuery } = useSearch();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -143,6 +144,19 @@ export default function CourseManagement() {
                 {row.description}
               </p>
             )}
+            {row.teachers && row.teachers.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                <span className="text-[10px] font-semibold text-gray-400">Ustozlar:</span>
+                {row.teachers.map((t, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+                  >
+                    👨‍🏫 {t.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ),
@@ -176,38 +190,42 @@ export default function CourseManagement() {
         </Badge>
       ),
     },
-    {
-      header: t('common.actions', 'Actions'),
-      key: 'actions',
-      className: 'text-right rtl:text-left',
-      cellClassName: 'text-right rtl:text-left',
-      render: (row) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
-            title={t('common.edit', 'Edit Course')}
-            onClick={() => navigate(`/${currentUserRole}/courses/edit/${row.id}`)}
-          >
-            <Edit2 className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`!p-1.5 h-8 w-8 ${
-              row.is_active
-                ? 'text-gray-500 hover:text-brand-red'
-                : 'text-gray-500 hover:text-emerald-600'
-            }`}
-            title={row.is_active ? t('common.archive', 'Archive') : t('common.restore', 'Restore')}
-            onClick={() => handleToggleArchive(row)}
-          >
-            {row.is_active ? <Archive className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
-          </Button>
-        </div>
-      ),
-    },
+    ...(isOwnerOrAdmin
+      ? [
+          {
+            header: t('common.actions', 'Actions'),
+            key: 'actions',
+            className: 'text-right rtl:text-left',
+            cellClassName: 'text-right rtl:text-left',
+            render: (row) => (
+              <div className="flex items-center justify-end gap-1.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
+                  title={t('common.edit', 'Edit Course')}
+                  onClick={() => navigate(`/${currentUserRole}/courses/edit/${row.id}`)}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`!p-1.5 h-8 w-8 ${
+                    row.is_active
+                      ? 'text-gray-500 hover:text-brand-red'
+                      : 'text-gray-500 hover:text-emerald-600'
+                  }`}
+                  title={row.is_active ? t('common.archive', 'Archive') : t('common.restore', 'Restore')}
+                  onClick={() => handleToggleArchive(row)}
+                >
+                  {row.is_active ? <Archive className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
+                </Button>
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -233,14 +251,16 @@ export default function CourseManagement() {
           >
             {t('courses.directions', 'Learning Directions')}
           </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={Plus}
-            onClick={() => navigate(`/${currentUserRole}/courses/create`)}
-          >
-            {t('courses.createCourse', 'New Course')}
-          </Button>
+          {isOwnerOrAdmin && (
+            <Button
+              variant="primary"
+              size="md"
+              icon={Plus}
+              onClick={() => navigate(`/${currentUserRole}/courses/create`)}
+            >
+              {t('courses.createCourse', 'New Course')}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -349,34 +369,36 @@ export default function CourseManagement() {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      icon={Edit2}
-                      className="flex-1 justify-center text-xs py-1.5"
-                      onClick={() => {
-                        setSelectedCourse(course);
-                        setIsFormOpen(true);
-                      }}
-                    >
-                      {t('common.edit', 'Tahrirlash')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      icon={course.is_active ? Archive : RotateCcw}
-                      className={`flex-1 justify-center text-xs py-1.5 ${
-                        course.is_active
-                          ? 'text-gray-600 hover:text-brand-red'
-                          : 'text-gray-600 hover:text-emerald-600'
-                      }`}
-                      onClick={() => handleToggleArchive(course)}
-                    >
-                      {course.is_active ? t('common.archive', 'Arxivlash') : t('common.restore', 'Tiklash')}
-                    </Button>
-                  </div>
+                  {/* Action Buttons (Owner & Admin only) */}
+                  {isOwnerOrAdmin && (
+                    <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={Edit2}
+                        className="flex-1 justify-center text-xs py-1.5"
+                        onClick={() => {
+                          setSelectedCourse(course);
+                          setIsFormOpen(true);
+                        }}
+                      >
+                        {t('common.edit', 'Tahrirlash')}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon={course.is_active ? Archive : RotateCcw}
+                        className={`flex-1 justify-center text-xs py-1.5 ${
+                          course.is_active
+                            ? 'text-gray-600 hover:text-brand-red'
+                            : 'text-gray-600 hover:text-emerald-600'
+                        }`}
+                        onClick={() => handleToggleArchive(course)}
+                      >
+                        {course.is_active ? t('common.archive', 'Arxivlash') : t('common.restore', 'Tiklash')}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

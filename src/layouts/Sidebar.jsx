@@ -205,7 +205,7 @@ export default function Sidebar({
                   alt="EDUCO"
                   className="h-8 sm:h-9 w-auto object-contain drop-shadow-sm"
                 />
-                <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white border border-white/20 shadow-xs">
+                <span className="rounded-md bg-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white border border-white/20 shadow-xs translate-y-2">
                   LMS
                 </span>
               </NavLink>

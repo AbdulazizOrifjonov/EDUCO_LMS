@@ -13,6 +13,7 @@ import {
   Sparkles,
   ArrowLeft,
   Save,
+  Users,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -22,6 +23,7 @@ import { toast } from '@/components/ui/Toast';
 import { createCourse, updateCourse, getCourseById, getCourses } from '@/services/courseService';
 import { getCourseCodeSuggestions } from './CourseForm';
 import { ROLES } from '@/lib/constants';
+import { localStore } from '@/lib/localStore';
 
 const courseSchema = z.object({
   name: z.string().min(2, 'Kurs nomi kamida 2 ta harfdan iborat bo‘lishi kerak'),
@@ -51,9 +53,20 @@ export default function CourseCreatePage() {
   const currentUserRole = profile?.role || ROLES.OWNER;
   const isEditing = Boolean(id);
 
+  // Security guard: Only owner and admin can access course create/edit
+  useEffect(() => {
+    if (profile && !['owner', 'admin'].includes(profile.role)) {
+      navigate(`/${currentUserRole}/courses`, { replace: true });
+    }
+  }, [profile, currentUserRole, navigate]);
+
   const [existingCourses, setExistingCourses] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAutoCode, setIsAutoCode] = useState(!isEditing);
+
+  // Teachers assignment (Owner & Admin only)
+  const [teachers, setTeachers] = useState([]);
+  const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
 
   const {
     register,
@@ -91,6 +104,12 @@ export default function CourseCreatePage() {
       })
       .catch(() => {});
 
+    // Fetch available teachers
+    try {
+      const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+      setTeachers(allUsers.filter((u) => u.role === ROLES.TEACHER));
+    } catch (_) {}
+
     if (isEditing && id) {
       getCourseById(id)
         .then((c) => {
@@ -103,6 +122,7 @@ export default function CourseCreatePage() {
               color: c.color || '#123D78',
               isActive: c.is_active !== undefined ? c.is_active : true,
             });
+            setSelectedTeacherIds(c.teacher_ids || c.teacherIds || []);
             setIsAutoCode(false);
           }
         })
@@ -145,11 +165,23 @@ export default function CourseCreatePage() {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
+      const assignedTeachers = teachers.filter((t) => selectedTeacherIds.includes(t.id));
+      const payload = {
+        ...data,
+        teacher_ids: selectedTeacherIds,
+        teacherIds: selectedTeacherIds,
+        teachers: assignedTeachers.map((t) => ({
+          id: t.id,
+          name: t.fullName || `${t.first_name || ''} ${t.last_name || ''}`.trim() || t.username,
+          phone: t.phone || '',
+        })),
+      };
+
       if (isEditing) {
-        await updateCourse(id, data);
+        await updateCourse(id, payload);
         toast.success(t('courses.updateSuccess', 'Kurs ma‘lumotlari muvaffaqiyatli yangilandi!'));
       } else {
-        await createCourse(data);
+        await createCourse(payload);
         toast.success(t('courses.createSuccess', 'Yangi kurs muvaffaqiyatli yaratildi!'));
       }
       handleBack();
@@ -385,7 +417,79 @@ export default function CourseCreatePage() {
           </div>
         </Card>
 
-        {/* Section 3: Status */}
+        {/* Section 2.5: Assigned Teachers (O‘qituvchilarni biriktirish) */}
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-brand-navy dark:text-blue-400" />
+              <div>
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                  3. Kursga o‘qituvchilarni biriktirish
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Ushbu ta‘lim yo‘nalishida dars beruvchi ustozlarni belgilang (Faqat Owner va Admin huquqi)
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/50">
+              {selectedTeacherIds.length} ta ustoz biriktirildi
+            </span>
+          </div>
+
+          {teachers.length === 0 ? (
+            <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 text-center text-xs text-gray-500">
+              Tizimda hozircha o‘qituvchilar mavjud emas. Yangi o‘qituvchi qo‘shilgach, bu yerda ko‘rinadi.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {teachers.map((teacher) => {
+                const isSelected = selectedTeacherIds.includes(teacher.id);
+                const teacherName = teacher.fullName || `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() || teacher.username;
+                return (
+                  <button
+                    key={teacher.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTeacherIds((prev) =>
+                        isSelected ? prev.filter((tid) => tid !== teacher.id) : [...prev, teacher.id]
+                      );
+                    }}
+                    className={`p-3 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-blue-500 dark:border-emerald-500 bg-blue-50/70 dark:bg-emerald-950/30 ring-2 ring-blue-400/30'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-surface-dark-secondary'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                        isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                      }`}>
+                        {teacherName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                          {teacherName}
+                        </p>
+                        <p className="text-[11px] text-gray-400 truncate">
+                          {teacher.phone || `@${teacher.username}`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center border shrink-0 ${
+                      isSelected
+                        ? 'bg-blue-600 dark:bg-emerald-600 border-blue-600 text-white'
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}>
+                      {isSelected && <Check className="w-3.5 h-3.5" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
+        {/* Section 4: Status */}
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
