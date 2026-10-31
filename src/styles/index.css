@@ -17,6 +17,8 @@
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
     max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -25,6 +27,44 @@
     transition: background-color 0.2s ease, color 0.2s ease;
     overflow-x: hidden;
     max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Prevent manual pinch-to-zoom and unwanted gesture scale on screens <= 768px */
+  @media (max-width: 768px) {
+    html,
+    body {
+      touch-action: pan-x pan-y;
+      overscroll-behavior-y: contain;
+    }
+
+    /* Prevent iOS Safari from zooming in on input focus by ensuring >= 16px font-size */
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+
+    /* Prevent accidental text selection on headings and banners when tapping/swiping on mobile */
+    h1, h2, h3, h4, h5, h6,
+    .dashboard-banner {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+
+  /* Prevent accidental text highlight and touch callout on app chrome, navigation, headers and buttons */
+  button,
+  nav,
+  header,
+  aside,
+  [role="button"],
+  .no-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .dark body,

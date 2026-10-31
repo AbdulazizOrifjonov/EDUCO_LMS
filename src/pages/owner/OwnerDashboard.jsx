@@ -182,7 +182,7 @@ export default function OwnerDashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Top Welcome Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/35">
+      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/35">
         {/* Subtle decorative circles */}
         <div className="absolute right-0 top-0 -mt-10 -mr-10 w-56 h-56 bg-white/10 dark:bg-emerald-400/15 rounded-full pointer-events-none blur-3xl" />
         <div className="absolute right-40 bottom-0 -mb-10 w-36 h-36 bg-sky-400/10 dark:teal-400/10 rounded-full pointer-events-none blur-2xl" />
