@@ -837,7 +837,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate('/owner/attendance')}
+                onClick={() => navigate(`/${currentUserRole}/attendance?groupId=${groupId}`)}
               >
                 {t('attendance.takeAttendance', 'Take Attendance')}
               </Button>

@@ -119,6 +119,7 @@ export default function App() {
             <Route path="groups/create" element={<GroupCreatePage />} />
             <Route path="groups/edit/:id" element={<GroupCreatePage />} />
             <Route path="groups/:id" element={<GroupDetail />} />
+            <Route path="groups/:id/add-student" element={<UserCreatePage />} />
             <Route path="schedule" element={<ScheduleManagement />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="attendance/teachers" element={<TeacherAttendance />} />
@@ -163,6 +164,7 @@ export default function App() {
             <Route path="groups/create" element={<GroupCreatePage />} />
             <Route path="groups/edit/:id" element={<GroupCreatePage />} />
             <Route path="groups/:id" element={<GroupDetail />} />
+            <Route path="groups/:id/add-student" element={<UserCreatePage />} />
             <Route path="schedule" element={<ScheduleManagement />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="attendance/teachers" element={<TeacherAttendance />} />
