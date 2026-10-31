@@ -564,18 +564,16 @@ export default function DashboardLayout({
               {/* Notification Menu Card */}
               {notifDropdownOpen && (
                 <div
-                  className={`fixed sm:absolute top-16 sm:top-full mt-2 inset-x-3 sm:inset-x-auto sm:w-96 rounded-2xl border border-gray-100 bg-white p-0 shadow-2xl transition-all dark:border-gray-800 dark:bg-[#1a2332] z-50
-                    ${isRtl ? 'sm:left-0' : 'sm:right-0'}
-                  `}
+                  className="fixed sm:absolute top-16 sm:top-full mt-2 inset-x-3 sm:inset-x-auto sm:right-0 sm:w-[410px] rounded-2xl border border-gray-100 bg-white p-0 shadow-2xl transition-all dark:border-gray-800 dark:bg-[#1a2332] z-50 overflow-hidden"
                 >
-                  <div className="flex items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {t('nav.notifications', 'Notifications')}
+                  <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <h3 className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                        {t('nav.notifications', 'Bildirishnomalar')}
                       </h3>
                       {unreadCount > 0 && (
-                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-[#F12D3A] dark:bg-emerald-950/40 dark:text-emerald-300">
-                          {unreadCount} {t('common.new', 'new')}
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 whitespace-nowrap shrink-0">
+                          {unreadCount} {t('common.new', 'yangi')}
                         </span>
                       )}
                     </div>
@@ -583,38 +581,38 @@ export default function DashboardLayout({
                       <button
                         type="button"
                         onClick={markAllAsRead}
-                        className="text-xs font-medium text-blue-600 hover:underline dark:text-emerald-400"
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                       >
-                        {t('common.markAllAsRead', 'Mark all as read')}
+                        {t('common.markAllAsRead', "O‘qilgan qilish")}
                       </button>
                     )}
                   </div>
 
                   {/* Web Push Notification Quick Enable & Test Banner */}
                   {pushPermission !== 'granted' ? (
-                    <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-b border-blue-100 dark:border-blue-900/40 flex items-center justify-between gap-2">
-                      <div className="text-xs">
-                        <strong className="block text-blue-900 dark:text-blue-100 font-bold">Telefonga eslatmalar</strong>
-                        <span className="text-[11px] text-blue-700 dark:text-blue-300">Tepada xabarlar chiqishi uchun yoqing</span>
+                    <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border-b border-blue-100 dark:border-blue-900/40 flex items-center justify-between gap-2.5">
+                      <div className="text-xs min-w-0">
+                        <strong className="block text-blue-900 dark:text-blue-100 font-bold truncate">Telefonga eslatmalar</strong>
+                        <span className="text-[11px] text-blue-700 dark:text-blue-300 block truncate">Tepada xabarlar chiqishi uchun yoqing</span>
                       </div>
                       <button
                         type="button"
                         onClick={handleEnablePush}
-                        className="px-2.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shrink-0 shadow-xs cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shrink-0 shadow-xs cursor-pointer whitespace-nowrap active:scale-95 transition-all"
                       >
                         Yoqish 🔔
                       </button>
                     </div>
                   ) : (
                     <div className="px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-100 dark:border-emerald-900/40 flex items-center justify-between text-xs">
-                      <span className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Eslatmalar faol</span>
+                      <span className="text-emerald-800 dark:text-emerald-300 font-semibold flex items-center gap-1.5 truncate">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="truncate">Eslatmalar faol</span>
                       </span>
                       <button
                         type="button"
                         onClick={handleTestPushNotification}
-                        className="text-xs text-emerald-700 dark:text-emerald-400 font-bold hover:underline cursor-pointer"
+                        className="text-xs text-emerald-700 dark:text-emerald-400 font-bold hover:underline cursor-pointer shrink-0 whitespace-nowrap"
                       >
                         Sinab ko‘rish 🚀
                       </button>
@@ -635,21 +633,26 @@ export default function DashboardLayout({
                             if (!notif.is_read) markAsRead(notif.id);
                           }}
                           className={`flex items-start gap-3 p-3.5 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60
-                            ${!notif.is_read ? 'bg-blue-50/50 dark:bg-emerald-950/20' : ''}
+                            ${!notif.is_read ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''}
                           `}
                         >
-                          <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                          <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                             <Bell className="h-3.5 w-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
-                              {notif.title || t('nav.notifications', 'Notification')}
-                            </p>
+                            <div className="flex items-center justify-between gap-1.5">
+                              <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                                {notif.title || t('nav.notifications', 'Notification')}
+                              </p>
+                              {!notif.is_read && (
+                                <span className="h-2 w-2 rounded-full bg-rose-500 flex-shrink-0 ring-2 ring-rose-200 dark:ring-rose-900/60" />
+                              )}
+                            </div>
                             <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mt-0.5">
                               {notif.message || notif.content}
                             </p>
                             <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
+                              <Clock className="h-3 w-3 shrink-0" />
                               {notif.created_at
                                 ? new Date(notif.created_at).toLocaleTimeString([], {
                                     hour: '2-digit',
@@ -658,9 +661,6 @@ export default function DashboardLayout({
                                 : ''}
                             </span>
                           </div>
-                          {!notif.is_read && (
-                            <span className="h-2 w-2 rounded-full bg-[#F12D3A] dark:bg-emerald-500 flex-shrink-0 mt-1.5" />
-                          )}
                         </div>
                       ))
                     )}
@@ -670,9 +670,9 @@ export default function DashboardLayout({
                     <Link
                       to={`/${userRole}/notifications`}
                       onClick={() => setNotifDropdownOpen(false)}
-                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors dark:text-emerald-400 dark:hover:text-emerald-300"
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors dark:text-blue-400 dark:hover:text-blue-300"
                     >
-                      {t('common.viewAll', 'View all notifications')} →
+                      {t('common.viewAll', 'Barcha bildirishnomalarni ko‘rish')} →
                     </Link>
                   </div>
                 </div>
