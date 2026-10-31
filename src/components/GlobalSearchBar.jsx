@@ -234,9 +234,9 @@ export default function GlobalSearchBar({
       {/* Search Input Bar */}
       <div className="relative">
         <div
-          className={`pointer-events-none absolute inset-y-0 flex items-center text-gray-500 transition-colors ${
-            isRtl ? 'right-3.5' : 'left-3.5'
-          } ${isFocused ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+          className={`pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400 transition-colors ${
+            isFocused ? 'text-blue-600 dark:text-emerald-400' : ''
+          }`}
         >
           <Search className="h-4 w-4" />
         </div>
@@ -254,18 +254,12 @@ export default function GlobalSearchBar({
             setSearchQuery(e.target.value);
             if (!isOpen) setIsOpen(true);
           }}
-          placeholder={pagePlaceholder}
-          className={`w-full rounded-xl border border-[#D4CCB9] bg-[#EFECE2] py-2 text-xs sm:text-sm text-gray-900 placeholder-gray-500 outline-none transition-all shadow-xs focus:border-emerald-600 focus:bg-[#FAF7F0] focus:ring-2 focus:ring-emerald-600/20 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-emerald-500 dark:focus:bg-gray-800
-            ${isRtl ? 'pr-9 pl-9' : 'pl-9 pr-9'}
-          `}
+          placeholder={pagePlaceholder || 'Qidirish (Ctrl+K)...'}
+          className="w-full rounded-xl border border-gray-200 dark:border-gray-700/80 bg-gray-50/80 hover:bg-gray-100/60 dark:bg-surface-dark-tertiary/70 dark:hover:bg-surface-dark-tertiary py-2 pl-9 pr-14 text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 outline-none transition-all shadow-xs focus:border-blue-500 dark:focus:border-emerald-500 focus:bg-white dark:focus:bg-surface-dark-secondary focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-emerald-500/20 truncate"
         />
 
         {/* Clear (X) or Ctrl+K Indicator */}
-        <div
-          className={`absolute inset-y-0 flex items-center ${
-            isRtl ? 'left-2.5' : 'right-2.5'
-          }`}
-        >
+        <div className="absolute inset-y-0 right-2 flex items-center">
           {searchQuery ? (
             <button
               type="button"
@@ -278,7 +272,7 @@ export default function GlobalSearchBar({
               <X className="w-3.5 h-3.5" />
             </button>
           ) : (
-            <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-[10px] font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700">
+            <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-gray-300/80 dark:border-gray-600/80 text-[10px] font-mono text-gray-400 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/60">
               Ctrl+K
             </kbd>
           )}

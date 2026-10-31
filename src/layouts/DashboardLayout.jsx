@@ -474,12 +474,12 @@ export default function DashboardLayout({
                 </Link>
               </div>
 
-              {/* Center / Search bar with reactive live search on desktop (md:) */}
-              <div className="hidden md:flex flex-1 justify-center min-w-[120px] max-w-sm lg:max-w-lg xl:max-w-2xl mx-auto">
-                <GlobalSearchBar role={userRole} isRtl={isRtl} />
+              {/* Center / Search bar with reactive live search on desktop */}
+              <div className="hidden md:flex flex-1 justify-center max-w-[220px] lg:max-w-sm xl:max-w-md 2xl:max-w-xl mx-2 lg:mx-4 min-w-0">
+                <GlobalSearchBar role={userRole} isRtl={false} />
               </div>
 
-              {/* Right section: Search Button (< md), System status, Reminders, Language, Theme, Notifications, User Profile */}
+              {/* Right section: Search Button (< md), Reminders, Install App, Language, Theme, Notifications, User Profile */}
               <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 lg:gap-2">
                 {/* Search Icon Button for screens < md (mobile & compact) */}
                 <button
@@ -491,48 +491,36 @@ export default function DashboardLayout({
                 >
                   <Search className="h-5 w-5" />
                 </button>
-            {/* Live System Status Pill - only on large screens >= 1200px */}
-            <div className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-800 border border-blue-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-semibold shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-emerald-500 animate-pulse shrink-0" />
-              <span>{t('common.systemActive', 'Tizim faol')}</span>
-            </div>
 
-            {/* Student Reminders Alert Pill for Admin and Owner */}
-            {(role === 'admin' || role === 'owner') && (
-              <button
-                type="button"
-                onClick={() => setRemindersModalOpen(true)}
-                className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 ${
-                  dueRemindersCount > 0
-                    ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 ring-2 ring-rose-400/30 animate-pulse'
-                    : 'hidden xl:inline-flex bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/20'
-                }`}
-                title={dueRemindersCount > 0 ? `${dueRemindersCount} ta o‘quvchi bilan bog‘lanish eslatmasi` : "O‘quvchilar bilan bog‘lanish eslatmalari"}
-              >
-                <Clock className={`w-3.5 h-3.5 shrink-0 ${dueRemindersCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`} />
-                {dueRemindersCount > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-md bg-rose-600 text-white text-[10px] font-black leading-none shrink-0 shadow-xs">
-                    {dueRemindersCount}
-                  </span>
+                {/* Student Reminders Alert Pill for Admin and Owner */}
+                {(role === 'admin' || role === 'owner') && dueRemindersCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setRemindersModalOpen(true)}
+                    className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 ring-2 ring-rose-400/30 animate-pulse"
+                    title={`${dueRemindersCount} ta o‘quvchi bilan bog‘lanish eslatmasi`}
+                  >
+                    <Clock className="w-3.5 h-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
+                    <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-md bg-rose-600 text-white text-[10px] font-black leading-none shrink-0 shadow-xs">
+                      {dueRemindersCount}
+                    </span>
+                    <span className="hidden xl:inline whitespace-nowrap">
+                      ta eslatma
+                    </span>
+                  </button>
                 )}
-                {/* Full text only on large screens >= 1200px (xl), hidden on media 600px - 1200px */}
-                <span className="hidden xl:inline whitespace-nowrap">
-                  {dueRemindersCount > 0 ? 'ta qo‘ng‘iroq!' : 'Eslatmalar'}
-                </span>
-              </button>
-            )}
 
-            {/* Install App Button */}
-            <button
-              type="button"
-              onClick={() => setInstallModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
-              title="Ilovani kompyuter yoki telefonga o‘rnatish"
-            >
-              <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span className="hidden md:inline">Ilovani o‘rnatish</span>
-              <span className="md:hidden">Ilova</span>
-            </button>
+                {/* Install App Button */}
+                <button
+                  type="button"
+                  onClick={() => setInstallModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                  title="Ilovani kompyuter yoki telefonga o‘rnatish"
+                >
+                  <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span className="hidden xl:inline">Ilovani o‘rnatish</span>
+                  <span className="hidden md:inline xl:hidden">Ilova</span>
+                </button>
 
             {/* Language Switcher */}
             <LanguageSelector />
