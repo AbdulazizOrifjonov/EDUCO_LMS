@@ -11,6 +11,15 @@ import { initPushNotifications } from './services/pushNotificationService';
 // Initialize Service Worker for mobile push & status bar notifications
 initPushNotifications();
 
+// Auto-reload on Vite dynamic import failure (when new deployment replaces old asset chunks)
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (event) => {
+    event.preventDefault();
+    console.warn('[Vite] Chunk preload error detected; auto-reloading to fetch newest version...');
+    window.location.reload();
+  });
+}
+
 // Prevent manual pinch-to-zoom, gesture scaling, and unwanted double-tap zoom on touch/mobile screens (< 768px)
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   // Prevent multi-touch gesture zoom (pinch zoom)

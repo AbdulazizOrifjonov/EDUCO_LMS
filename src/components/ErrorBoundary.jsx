@@ -13,6 +13,19 @@ export default class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary caught error:', error, errorInfo);
+    // Auto-reload once when a new version has been deployed and old Vite chunks are missing
+    const isChunkError =
+      error?.message?.includes('dynamically imported module') ||
+      error?.message?.includes('Failed to fetch dynamically imported module') ||
+      error?.name === 'ChunkLoadError';
+    if (isChunkError && typeof window !== 'undefined') {
+      const lastReload = sessionStorage.getItem('last_chunk_reload');
+      const now = Date.now();
+      if (!lastReload || now - parseInt(lastReload, 10) > 8000) {
+        sessionStorage.setItem('last_chunk_reload', String(now));
+        window.location.reload();
+      }
+    }
   }
 
   handleReload = () => {
@@ -21,8 +34,10 @@ export default class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     try {
-      localStorage.clear();
       sessionStorage.clear();
+      localStorage.removeItem('educo_auth_token');
+      localStorage.removeItem('educo_current_user');
+      localStorage.removeItem('educo_demo_session');
     } catch (e) {}
     window.location.href = '/login';
   };
