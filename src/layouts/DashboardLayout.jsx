@@ -388,10 +388,10 @@ export default function DashboardLayout({
         <header
           className={`${
             isChatPage
-              ? `shrink-0 z-40 h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-3 sm:px-6 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-[#101827]/95 ${
+              ? `shrink-0 z-40 h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-2.5 sm:px-4 lg:px-6 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-[#101827]/95 ${
                   isMobileChatOpen ? 'hidden md:flex' : 'flex'
                 }`
-              : `fixed top-0 z-40 flex h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-3 sm:px-6 shadow-sm backdrop-blur-md transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-[#101827]/95 ${
+              : `fixed top-0 z-40 flex h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-2.5 sm:px-4 lg:px-6 shadow-sm backdrop-blur-md transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-[#101827]/95 ${
                   collapsed
                     ? isRtl
                       ? 'left-0 right-0 lg:right-20'
@@ -434,8 +434,8 @@ export default function DashboardLayout({
             </div>
           ) : (
             <>
-              {/* Left section: Hamburger (mobile) + EDUCO Logo + Page Title */}
-              <div className="flex shrink-0 min-w-0 items-center gap-1.5 sm:gap-2 mr-2 sm:mr-3 lg:mr-4">
+              {/* Left section: Hamburger (mobile) + EDUCO Logo */}
+              <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 mr-2 sm:mr-3 lg:mr-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -469,23 +469,6 @@ export default function DashboardLayout({
                     className="h-6 sm:h-7 lg:h-8 w-auto object-contain hidden dark:block"
                   />
                 </Link>
-
-                {Boolean(getPageTitle()) && (
-                  <span
-                    className={`h-4 sm:h-5 w-[1.5px] bg-gray-300 dark:bg-gray-700 shrink-0 mx-0.5 sm:mx-1 ${
-                      collapsed ? 'inline-block' : 'inline-block lg:hidden'
-                    }`}
-                    aria-hidden="true"
-                  />
-                )}
-
-                {Boolean(getPageTitle()) && (
-                  <div className="min-w-0">
-                    <h1 className="truncate text-xs sm:text-sm lg:text-base xl:text-lg font-bold tracking-tight text-gray-900 dark:text-white max-w-[120px] sm:max-w-[180px] lg:max-w-none">
-                      {getPageTitle()}
-                    </h1>
-                  </div>
-                )}
               </div>
 
               {/* Center / Search bar with reactive live search on desktop (md:) */}
@@ -516,7 +499,7 @@ export default function DashboardLayout({
               <button
                 type="button"
                 onClick={() => setRemindersModalOpen(true)}
-                className={`inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 ${
                   dueRemindersCount > 0
                     ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/40 hover:bg-rose-500/25 ring-2 ring-rose-400/30 animate-pulse'
                     : 'hidden xl:inline-flex bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/20'
@@ -563,7 +546,7 @@ export default function DashboardLayout({
               <button
                 type="button"
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
-                className="relative rounded-xl p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                className="relative rounded-xl p-1.5 sm:p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
                 aria-label="Notifications"
                 title={t('nav.notifications', 'Notifications')}
               >
@@ -694,11 +677,11 @@ export default function DashboardLayout({
             </div>
 
             {/* User Menu Dropdown */}
-            <div className="relative" ref={userDropdownRef}>
+            <div className="relative shrink-0" ref={userDropdownRef}>
               <button
                 type="button"
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2 rounded-xl p-1.5 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                className="flex items-center gap-1.5 sm:gap-2 rounded-xl p-1 sm:p-1.5 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 shrink-0"
                 aria-label="User menu"
               >
                 {/* Avatar */}

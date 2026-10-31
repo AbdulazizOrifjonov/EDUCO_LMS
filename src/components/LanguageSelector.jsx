@@ -141,7 +141,7 @@ export default function LanguageSelector({ className = '' }) {
         <button
           type="button"
           aria-label="Select language"
-          className="flex items-center gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-xs"
+          className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 xl:px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/80 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-xs shrink-0"
         >
           <LanguageFlag code={activeLangConfig.code} className="w-5 h-3.5 shrink-0" />
           <span className="hidden xl:inline font-semibold uppercase text-xs">{activeLangConfig.code}</span>
