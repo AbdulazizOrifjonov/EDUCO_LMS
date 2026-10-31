@@ -204,6 +204,28 @@ export default {
           if (!store[k]) store[k] = v;
         }
 
+        // Default: If users key is empty, ensure only Abbosbek Owner is present!
+        if (!store['educo_db_users'] || !store['educo_db_users'].length) {
+          store['educo_db_users'] = [
+            {
+              id: 'usr-owner-1',
+              username: 'abbosbek',
+              first_name: 'Abbosbek',
+              last_name: 'Boshqaruvchi',
+              fullName: 'Abbosbek',
+              full_name: 'Abbosbek',
+              role: 'owner',
+              email: 'abbosbek@educo.app',
+              phone: '+998 98 800 14 15',
+              password: 'AbbosBek1415',
+              password_updated_at: '2026-10-31T05:02:37.920Z',
+              is_active: true,
+              created_at: '2026-10-31T05:02:37.920Z',
+              avatar_url: '',
+            },
+          ];
+        }
+
         return new Response(JSON.stringify(store), {
           status: 200,
           headers: {
@@ -227,7 +249,19 @@ export default {
             lastStoreUpdatedAt = Date.now();
             const now = new Date().toISOString();
 
+            if (payload._wipe_to_clean === true) {
+              memoryKV.clear();
+              if (db) {
+                try {
+                  await db.exec('DELETE FROM kv_store;');
+                } catch (e) {
+                  console.warn('D1 wipe error:', e);
+                }
+              }
+            }
+
             for (const [key, value] of Object.entries(payload)) {
+              if (key.startsWith('_')) continue;
               memoryKV.set(key, value);
 
               if (db) {

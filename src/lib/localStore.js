@@ -103,10 +103,10 @@ class LocalStore {
   }
 
   ensureCleanStart() {
-    const WIPE_VERSION_KEY = 'educo_clean_start_v6';
+    const WIPE_VERSION_KEY = 'educo_clean_start_v10_reset';
     try {
       if (typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function') {
-        if (window.localStorage.getItem(WIPE_VERSION_KEY) !== 'v6_done') {
+        if (window.localStorage.getItem(WIPE_VERSION_KEY) !== 'v10_done') {
           // Reset all data to clean starting state: only Abbosbek as Owner!
           window.localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
           window.localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify([]));
@@ -125,20 +125,65 @@ class LocalStore {
           window.localStorage.setItem(STORAGE_KEYS.SMS_DEVICES, JSON.stringify(INITIAL_SMS_DEVICES));
           window.localStorage.setItem(STORAGE_KEYS.SMS_QUEUE, JSON.stringify([]));
           window.localStorage.setItem(STORAGE_KEYS.SMS_LOGS, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify([]));
+          window.localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify([]));
 
-          // Clear any old active session so user logs in cleanly with the owner credentials
-          window.localStorage.removeItem('educo_demo_session');
-          window.localStorage.setItem(WIPE_VERSION_KEY, 'v6_done');
+          // In-memory clean state
+          this.memoryStore[STORAGE_KEYS.USERS] = INITIAL_USERS;
+          this.memoryStore[STORAGE_KEYS.COURSES] = [];
+          this.memoryStore[STORAGE_KEYS.GROUPS] = [];
+          this.memoryStore[STORAGE_KEYS.MEMBERSHIPS] = [];
+          this.memoryStore[STORAGE_KEYS.LESSON_SCHEDULES] = [];
+          this.memoryStore[STORAGE_KEYS.LESSONS] = [];
+          this.memoryStore[STORAGE_KEYS.ATTENDANCE] = [];
+          this.memoryStore[STORAGE_KEYS.GRADES] = [];
+          this.memoryStore[STORAGE_KEYS.HOMEWORK] = [];
+          this.memoryStore[STORAGE_KEYS.SUBMISSIONS] = [];
+          this.memoryStore[STORAGE_KEYS.MATERIALS] = [];
+          this.memoryStore[STORAGE_KEYS.PAYMENTS] = [];
+          this.memoryStore[STORAGE_KEYS.STUDENT_REMINDERS] = [];
+          this.memoryStore[STORAGE_KEYS.TEACHER_ATTENDANCE] = [];
+          this.memoryStore[STORAGE_KEYS.SMS_DEVICES] = INITIAL_SMS_DEVICES;
+          this.memoryStore[STORAGE_KEYS.SMS_QUEUE] = [];
+          this.memoryStore[STORAGE_KEYS.SMS_LOGS] = [];
+          this.memoryStore[STORAGE_KEYS.CHAT_MESSAGES] = [];
+          this.memoryStore[STORAGE_KEYS.NOTIFICATIONS] = [];
 
-          // Sync clean slate to server
+          // Keep Owner session, clear non-owner sessions
+          try {
+            const activeSessionRaw = window.localStorage.getItem('educo_demo_session');
+            if (activeSessionRaw) {
+              const activeSession = JSON.parse(activeSessionRaw);
+              if (activeSession?.role !== 'owner' && activeSession?.id !== 'usr-owner-1') {
+                window.localStorage.removeItem('educo_demo_session');
+              }
+            }
+          } catch (_) {}
+
+          window.localStorage.setItem(WIPE_VERSION_KEY, 'v10_done');
+
+          // Sync clean slate to server with wipe flag
           this.pushToServer({
+            _wipe_to_clean: true,
             [STORAGE_KEYS.USERS]: INITIAL_USERS,
             [STORAGE_KEYS.COURSES]: [],
             [STORAGE_KEYS.GROUPS]: [],
             [STORAGE_KEYS.MEMBERSHIPS]: [],
             [STORAGE_KEYS.LESSON_SCHEDULES]: [],
+            [STORAGE_KEYS.LESSONS]: [],
+            [STORAGE_KEYS.ATTENDANCE]: [],
+            [STORAGE_KEYS.GRADES]: [],
+            [STORAGE_KEYS.HOMEWORK]: [],
+            [STORAGE_KEYS.SUBMISSIONS]: [],
+            [STORAGE_KEYS.MATERIALS]: [],
             [STORAGE_KEYS.PAYMENTS]: [],
+            [STORAGE_KEYS.STUDENT_REMINDERS]: [],
+            [STORAGE_KEYS.TEACHER_ATTENDANCE]: [],
             [STORAGE_KEYS.SMS_DEVICES]: INITIAL_SMS_DEVICES,
+            [STORAGE_KEYS.SMS_QUEUE]: [],
+            [STORAGE_KEYS.SMS_LOGS]: [],
+            [STORAGE_KEYS.CHAT_MESSAGES]: [],
+            [STORAGE_KEYS.NOTIFICATIONS]: [],
           }).catch(() => {});
         }
       }
@@ -181,74 +226,38 @@ class LocalStore {
 
     Object.values(STORAGE_KEYS).forEach((key) => {
       const serverVal = serverData[key];
-      if (!serverVal || !Array.isArray(serverVal)) return;
+      if (serverVal === undefined || !Array.isArray(serverVal)) return;
 
       const localVal = this.getItem(key, []);
-      const localMap = new Map();
-      localVal.forEach((item) => {
-        if (item && item.id) localMap.set(item.id, item);
-      });
+      const localStr = JSON.stringify(localVal);
+      const serverStr = JSON.stringify(serverVal);
 
-      const newItems = [];
-      const updatedItems = [];
-      let collectionChanged = false;
-
-      serverVal.forEach((serverItem) => {
-        if (!serverItem || !serverItem.id) return;
-        const localItem = localMap.get(serverItem.id);
-        if (!localItem) {
-          localMap.set(serverItem.id, serverItem);
-          newItems.push(serverItem);
-          collectionChanged = true;
-        } else {
-          const localStr = JSON.stringify(localItem);
-          const serverStr = JSON.stringify(serverItem);
-          if (localStr !== serverStr) {
-            localMap.set(serverItem.id, serverItem);
-            updatedItems.push(serverItem);
-            collectionChanged = true;
-          }
-        }
-      });
-
-      if (collectionChanged) {
-        const mergedArr = Array.from(localMap.values());
-        this.memoryStore[key] = mergedArr;
+      if (localStr !== serverStr) {
+        this.memoryStore[key] = serverVal;
         try {
           if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
-            window.localStorage.setItem(key, JSON.stringify(mergedArr));
+            window.localStorage.setItem(key, serverStr);
           }
         } catch (e) {}
 
         if (key === STORAGE_KEYS.CHAT_MESSAGES) {
           hasChatChanges = true;
           const enrichedAll = this.getChatMessages();
-          newItems.forEach((rawMsg) => {
-            const msg = enrichedAll.find((m) => m.id === rawMsg.id) || rawMsg;
-            if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
-              window.dispatchEvent(
-                new CustomEvent('educo-chat-update', {
-                  detail: {
-                    event: 'INSERT',
-                    groupId: msg.group_id || msg.groupId,
-                    message: msg,
-                  },
-                })
-              );
-            }
-          });
-          updatedItems.forEach((rawMsg) => {
-            const msg = enrichedAll.find((m) => m.id === rawMsg.id) || rawMsg;
-            if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
-              window.dispatchEvent(
-                new CustomEvent('educo-chat-update', {
-                  detail: {
-                    event: 'UPDATE',
-                    groupId: msg.group_id || msg.groupId,
-                    message: msg,
-                  },
-                })
-              );
+          const localMap = new Map((localVal || []).map((m) => [m.id, m]));
+          serverVal.forEach((rawMsg) => {
+            if (!localMap.has(rawMsg.id)) {
+              const msg = enrichedAll.find((m) => m.id === rawMsg.id) || rawMsg;
+              if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+                window.dispatchEvent(
+                  new CustomEvent('educo-chat-update', {
+                    detail: {
+                      event: 'INSERT',
+                      groupId: msg.group_id || msg.groupId,
+                      message: msg,
+                    },
+                  })
+                );
+              }
             }
           });
         } else if (key === STORAGE_KEYS.NOTIFICATIONS) {
@@ -256,7 +265,7 @@ class LocalStore {
           if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
             window.dispatchEvent(
               new CustomEvent('educo-notification-update', {
-                detail: { newItems },
+                detail: { newItems: serverVal },
               })
             );
           }
@@ -325,7 +334,7 @@ class LocalStore {
       Object.values(STORAGE_KEYS).forEach((key) => {
         const localVal = this.getItem(key, null);
         const serverVal = serverData[key];
-        if (localVal && Array.isArray(localVal) && localVal.length > 0 && (!serverVal || !serverVal.length)) {
+        if (serverVal === undefined && localVal && Array.isArray(localVal) && localVal.length > 0) {
           localPushPayload[key] = localVal;
           hasLocalChangesToPush = true;
         }
@@ -1161,63 +1170,7 @@ class LocalStore {
 
   // --- CHAT MESSAGES (STAFF CHAT & GROUP CHATS) ---
   getInitialChatMessages() {
-    return [
-      {
-        id: 'msg-ann-init',
-        group_id: 'announcements-broadcast-channel',
-        sender_id: 'usr-owner-1',
-        message: 'Hurmatli oʻquvchilar, ustozlar va markaz xodimlari! Yangi oʻquv mavsumi munosabati bilan barchangizga muvaffaqiyatlar tilaymiz. Ushbu kanalda markazimizning eng muhim umumiy eʻlonlari berib boriladi.',
-        created_at: new Date(Date.now() - 6 * 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 6 * 3600000).toISOString(),
-        chat_attachments: [],
-        is_announcement: true,
-      },
-      {
-        id: 'msg-staff-1',
-        group_id: 'staff-general-chat',
-        sender_id: 'usr-owner-1',
-        message: 'Assalomu alaykum hurmatli adminlar va ustozlar! Bu yerda oʻquv markazimizning ichki masalalari, dars jadvallari va yangiliklarni muhokama qilamiz.',
-        created_at: new Date(Date.now() - 3 * 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 3 * 3600000).toISOString(),
-        chat_attachments: [],
-      },
-      {
-        id: 'msg-staff-2',
-        group_id: 'staff-general-chat',
-        sender_id: 'usr-admin-1',
-        message: 'Va alaykum assalom! Yangi qabul qilingan oʻquvchilarning davomat va guruh jadvallari yangilandi.',
-        created_at: new Date(Date.now() - 2 * 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 2 * 3600000).toISOString(),
-        chat_attachments: [],
-      },
-      {
-        id: 'msg-staff-3',
-        group_id: 'staff-general-chat',
-        sender_id: 'usr-teacher-1',
-        message: 'Tushunarli, rahmat! Bugungi Frontend va Python guruhlarimning dars materiallarini ham tizimga yuklab qoʻydim.',
-        created_at: new Date(Date.now() - 45 * 60000).toISOString(),
-        updated_at: new Date(Date.now() - 45 * 60000).toISOString(),
-        chat_attachments: [],
-      },
-      {
-        id: 'msg-grp1-1',
-        group_id: 'grp-1',
-        sender_id: 'usr-teacher-1',
-        message: 'Assalomu alaykum FS-12 guruhi! Bugungi React Hooks mavzusi boʻyicha uy vazifasini vaqtida topshirishni unutmang.',
-        created_at: new Date(Date.now() - 4 * 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 4 * 3600000).toISOString(),
-        chat_attachments: [],
-      },
-      {
-        id: 'msg-grp1-2',
-        group_id: 'grp-1',
-        sender_id: 'usr-student-1',
-        message: 'Xoʻp boʻladi ustoz, hozir bajarib yuklayapman!',
-        created_at: new Date(Date.now() - 3.5 * 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 3.5 * 60000).toISOString(),
-        chat_attachments: [],
-      },
-    ];
+    return [];
   }
 
   getStaffMembers() {
@@ -1464,114 +1417,7 @@ class LocalStore {
 
   // --- STUDENT REMINDERS ---
   getStudentReminders() {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-    const in3Days = new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0];
-
-    const defaultReminders = [
-      {
-        id: 'rem-trial-1',
-        type: 'trial_lesson',
-        student_id: '',
-        student_name: 'Diyorbek Karimov',
-        student_phone: '+998912345678',
-        father_phone: '+998909876543',
-        mother_phone: '',
-        group_id: 'grp-1',
-        group_name: 'FE-24 React Guruh',
-        course_name: 'Frontend React & JavaScript',
-        teacher_name: 'Bobur Mirzayev',
-        room: '101-xona',
-        due_date: todayStr,
-        due_time: '18:00',
-        note: 'Yangi o‘quvchi 1-bepul sinov darsiga taklif qilingan. Darsdan 15 daqiqa oldin kutib olish lozim.',
-        status: 'pending',
-        created_at: new Date(Date.now() - 86400000).toISOString(),
-        completed_at: null,
-      },
-      {
-        id: 'rem-trial-2',
-        type: 'trial_lesson',
-        student_id: '',
-        student_name: 'Madina Saidova',
-        student_phone: '+998934445566',
-        father_phone: '+998971112233',
-        mother_phone: '',
-        group_id: 'grp-2',
-        group_name: 'PY-18 Python Dasturlash',
-        course_name: 'Python Backend & Data Science',
-        teacher_name: 'Bobur Mirzayev',
-        room: '102-xona',
-        due_date: tomorrow,
-        due_time: '15:00',
-        note: 'Python kursi bo‘yicha sinov darsida qatnashadi. Noutbuk olib kelishi aytilgan.',
-        status: 'pending',
-        created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-        completed_at: null,
-      },
-      {
-        id: 'rem-demo-1',
-        type: 'call',
-        student_id: 'usr-student-1',
-        student_name: 'Jasur Rustamov',
-        student_phone: '+998905556677',
-        father_phone: '+998905551122',
-        mother_phone: '',
-        group_id: 'grp-1',
-        group_name: 'FE-24 React Guruh',
-        course_name: 'Frontend React & JavaScript',
-        teacher_name: 'Bobur Mirzayev',
-        room: '101-xona',
-        due_date: todayStr,
-        due_time: '14:30',
-        note: 'Dars boshlanishi va jadvalni tasdiqlash uchun ota-onasi bilan bog‘lanish',
-        status: 'pending',
-        created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-        completed_at: null,
-      },
-      {
-        id: 'rem-call-3',
-        type: 'call',
-        student_id: '',
-        student_name: 'Azizbek Rahimov',
-        student_phone: '+998998889900',
-        father_phone: '+998901239988',
-        mother_phone: '',
-        group_id: 'grp-3',
-        group_name: 'ENG-05 IELTS Foundation',
-        course_name: 'Ingliz tili (IELTS Intensive)',
-        teacher_name: 'Nilufar Usmonova',
-        room: '103-xona',
-        due_date: in3Days,
-        due_time: '11:00',
-        note: 'Placement test natijasi chiqadi, darajasiga qarab guruh tanlash uchun qo‘ng‘iroq qilish',
-        status: 'pending',
-        created_at: new Date(Date.now() - 86400000).toISOString(),
-        completed_at: null,
-      },
-      {
-        id: 'rem-comp-1',
-        type: 'trial_lesson',
-        student_id: '',
-        student_name: 'Shaxnoza Aliyeva',
-        student_phone: '+998947778899',
-        father_phone: '',
-        mother_phone: '',
-        group_id: 'grp-1',
-        group_name: 'FE-24 React Guruh',
-        course_name: 'Frontend React & JavaScript',
-        teacher_name: 'Bobur Mirzayev',
-        room: '101-xona',
-        due_date: new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0],
-        due_time: '18:00',
-        note: 'Sinov darsiga qatnashdi. Kurs yoqdi va shartnoma tuzishga kelishildi.',
-        status: 'completed',
-        created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
-        completed_at: new Date(Date.now() - 2 * 86400000).toISOString(),
-        completed_note: 'Sinov darsida qatnashdi, kursga yozildi',
-      },
-    ];
-    return this.getItem(STORAGE_KEYS.STUDENT_REMINDERS, defaultReminders);
+    return this.getItem(STORAGE_KEYS.STUDENT_REMINDERS, []);
   }
 
   saveStudentReminder(reminderData) {
