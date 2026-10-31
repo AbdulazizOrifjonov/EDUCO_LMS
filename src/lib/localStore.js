@@ -190,6 +190,7 @@ class LocalStore {
       });
 
       const newItems = [];
+      const updatedItems = [];
       let collectionChanged = false;
 
       serverVal.forEach((serverItem) => {
@@ -204,6 +205,7 @@ class LocalStore {
           const serverStr = JSON.stringify(serverItem);
           if (localStr !== serverStr) {
             localMap.set(serverItem.id, serverItem);
+            updatedItems.push(serverItem);
             collectionChanged = true;
           }
         }
@@ -220,12 +222,28 @@ class LocalStore {
 
         if (key === STORAGE_KEYS.CHAT_MESSAGES) {
           hasChatChanges = true;
-          newItems.forEach((msg) => {
+          const enrichedAll = this.getChatMessages();
+          newItems.forEach((rawMsg) => {
+            const msg = enrichedAll.find((m) => m.id === rawMsg.id) || rawMsg;
             if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
               window.dispatchEvent(
                 new CustomEvent('educo-chat-update', {
                   detail: {
                     event: 'INSERT',
+                    groupId: msg.group_id || msg.groupId,
+                    message: msg,
+                  },
+                })
+              );
+            }
+          });
+          updatedItems.forEach((rawMsg) => {
+            const msg = enrichedAll.find((m) => m.id === rawMsg.id) || rawMsg;
+            if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+              window.dispatchEvent(
+                new CustomEvent('educo-chat-update', {
+                  detail: {
+                    event: 'UPDATE',
                     groupId: msg.group_id || msg.groupId,
                     message: msg,
                   },
@@ -266,17 +284,27 @@ class LocalStore {
     if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     if (typeof document !== 'undefined' && document.hidden) return;
 
+    if (this._isSyncing) return;
+    this._isSyncing = true;
+
     try {
-      const headers = { 'Cache-Control': 'no-cache' };
+      const headers = {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      };
       if (this._lastServerETag) {
         headers['If-None-Match'] = this._lastServerETag;
       }
-      const res = await fetch('/api/sync-store', { headers });
+      const res = await fetch(`/api/sync-store?t=${Date.now()}`, { headers });
       if (res.status === 304) {
         // Data on server is unchanged - 0 bytes downloaded!
+        this._isSyncing = false;
         return;
       }
-      if (!res.ok) return;
+      if (!res.ok) {
+        this._isSyncing = false;
+        return;
+      }
 
       const etag = res.headers.get('ETag') || res.headers.get('etag');
       if (etag) {
@@ -284,7 +312,10 @@ class LocalStore {
       }
 
       const serverData = await res.json();
-      if (!serverData || typeof serverData !== 'object') return;
+      if (!serverData || typeof serverData !== 'object') {
+        this._isSyncing = false;
+        return;
+      }
 
       this.applyIncomingData(serverData);
 
@@ -303,7 +334,10 @@ class LocalStore {
       if (hasLocalChangesToPush && Object.keys(localPushPayload).length > 0) {
         await this.pushToServer(localPushPayload);
       }
-    } catch (e) {}
+    } catch (e) {
+    } finally {
+      this._isSyncing = false;
+    }
   }
 
   async pushToServer(payload) {
@@ -1928,12 +1962,12 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
     }
   });
 
-  // 4. Gentle periodic sync (every 15s) ONLY when tab is active and visible
+  // 4. Realtime periodic sync (every 2s) when tab is active and visible
   setInterval(() => {
     if (typeof document !== 'undefined' && !document.hidden && navigator.onLine) {
       localStore.syncWithServer().catch(() => {});
     }
-  }, 15000);
+  }, 2000);
 }
 
 export default localStore;

@@ -267,10 +267,13 @@ export default function AttendancePage() {
   useEffect(() => {
     const handleSync = () => {
       refreshGroupStatuses();
+      if (activeTab === 'analytics') {
+        loadAnalytics();
+      }
     };
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);
-  }, [refreshGroupStatuses]);
+  }, [refreshGroupStatuses, activeTab, loadAnalytics]);
 
   // Load lesson and students for Roster
   const loadGroupAttendance = useCallback(async () => {

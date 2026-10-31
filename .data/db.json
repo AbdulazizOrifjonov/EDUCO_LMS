@@ -1,6 +1,25 @@
 {
   "educo_db_users": [
     {
+      "id": "usr-1793433222134",
+      "username": "zafar_karimov",
+      "first_name": "zafar",
+      "last_name": "karimov",
+      "fullName": "zafar karimov",
+      "full_name": "zafar karimov",
+      "avatar_url": "",
+      "role": "teacher",
+      "email": "zafar_karimov@educo.app",
+      "phone": "+998 88 888 88 88",
+      "father_phone": "",
+      "mother_phone": "",
+      "password": "password123",
+      "password_updated_at": "2026-10-31T07:53:42.134Z",
+      "is_active": true,
+      "created_at": "2026-10-31T07:53:42.134Z",
+      "updated_at": "2026-10-31T07:53:42.134Z"
+    },
+    {
       "id": "usr-owner-1",
       "username": "abbosbek",
       "first_name": "Abbosbek",
@@ -13,11 +32,60 @@
       "password": "AbbosBek1415",
       "password_updated_at": "2026-10-31T05:02:37.920Z",
       "is_active": true,
-      "created_at": "2026-10-31T05:02:37.920Z"
+      "created_at": "2026-10-31T05:02:37.920Z",
+      "avatar_url": ""
     }
   ],
-  "educo_db_groups": [],
-  "educo_db_lesson_schedules": [],
+  "educo_db_groups": [
+    {
+      "id": "grp-1793433247170",
+      "name": "frontend",
+      "code": "GRP-2276",
+      "course_id": "crs-1793433058959",
+      "course_name": "fullstack",
+      "teacher_id": "usr-1793433222134",
+      "teacher_name": "zafar karimov",
+      "room": "2-xona",
+      "capacity": 20,
+      "enrolled_count": 0,
+      "status": "active",
+      "monthly_price": 500000,
+      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "avatar_url": null,
+      "image_url": null,
+      "created_at": "2026-10-31T07:54:07.171Z",
+      "updated_at": "2026-10-31T07:56:59.801Z"
+    }
+  ],
+  "educo_db_lesson_schedules": [
+    {
+      "id": "sch-1793433419791-1-sta4",
+      "group_id": "grp-1793433247170",
+      "day_of_week": 1,
+      "start_time": "18:00:00",
+      "end_time": "20:00:00",
+      "room": "2-xona",
+      "created_at": "2026-10-31T07:56:59.791Z"
+    },
+    {
+      "id": "sch-1793433419791-3-4s89",
+      "group_id": "grp-1793433247170",
+      "day_of_week": 3,
+      "start_time": "18:00:00",
+      "end_time": "20:00:00",
+      "room": "2-xona",
+      "created_at": "2026-10-31T07:56:59.791Z"
+    },
+    {
+      "id": "sch-1793433419791-5-tvxd",
+      "group_id": "grp-1793433247170",
+      "day_of_week": 5,
+      "start_time": "18:00:00",
+      "end_time": "20:00:00",
+      "room": "2-xona",
+      "created_at": "2026-10-31T07:56:59.791Z"
+    }
+  ],
   "educo_db_chat_messages": [
     {
       "id": "msg-staff-1",
@@ -1251,7 +1319,21 @@
       "created_at": "2026-10-19T09:15:00.000Z"
     }
   ],
-  "educo_db_courses": [],
+  "educo_db_courses": [
+    {
+      "id": "crs-1793433058959",
+      "name": "fullstack",
+      "code": "FS-1.1",
+      "description": "html css react node.js  express",
+      "monthly_fee": 500000,
+      "color": "#123D78",
+      "is_active": true,
+      "created_at": "2026-10-31T07:51:18.331Z",
+      "updated_at": "2026-10-31T07:51:18.331Z",
+      "groupsCount": 0,
+      "activeGroupsCount": 0
+    }
+  ],
   "educo_db_announcements": [
     {
       "id": "ann-1793190942617",
@@ -1295,6 +1377,27 @@
     }
   ],
   "educo_db_student_reminders": [
+    {
+      "id": "rem-1793433551363",
+      "type": "call",
+      "student_id": "",
+      "student_name": "diyor",
+      "student_phone": "+998 99 999 99 99",
+      "father_phone": "+998 99 999 99 99",
+      "mother_phone": "",
+      "group_id": "grp-1793433247170",
+      "group_name": "frontend",
+      "course_name": "fullstack",
+      "teacher_name": "zafar karimov",
+      "room": "2-xona",
+      "due_date": "2026-10-31",
+      "due_time": "18:00",
+      "note": "Dars boshlanish sanasi va guruh haqida xabar berish",
+      "status": "pending",
+      "created_at": "2026-10-31T07:59:11.363Z",
+      "completed_at": null,
+      "completed_note": null
+    },
     {
       "id": "rem-demo-1",
       "type": "call",

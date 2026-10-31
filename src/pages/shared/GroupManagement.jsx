@@ -133,6 +133,13 @@ export default function GroupManagement() {
     fetchGroups();
   }, [fetchGroups]);
 
+  // Realtime cross-role sync: auto-refresh when another user/role creates or modifies groups
+  useEffect(() => {
+    const handleSync = () => fetchGroups();
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [fetchGroups]);
+
   const handleToggleArchive = async (group) => {
     const nextStatus = group.status === 'archived' ? 'active' : 'archived';
     try {

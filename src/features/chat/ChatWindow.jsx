@@ -204,7 +204,20 @@ export default function ChatWindow({
       }
     });
 
+    // Active Chat High-Frequency Poller (every 1s while user is viewing chat room)
+    let isPolling = false;
+    const chatPollTimer = setInterval(async () => {
+      if (isPolling) return;
+      if (typeof document !== 'undefined' && document.hidden) return;
+      isPolling = true;
+      try {
+        await localStore.syncWithServer();
+      } catch (_) {}
+      isPolling = false;
+    }, 1000);
+
     return () => {
+      clearInterval(chatPollTimer);
       if (channel) {
         channel.unsubscribe();
       }

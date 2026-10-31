@@ -80,9 +80,11 @@ export default function ChatPage() {
   useEffect(() => {
     const handleRefresh = () => loadChats(false);
     window.addEventListener('educo-chat-update', handleRefresh);
+    window.addEventListener('educo-data-sync', handleRefresh);
     window.addEventListener('storage', handleRefresh);
     return () => {
       window.removeEventListener('educo-chat-update', handleRefresh);
+      window.removeEventListener('educo-data-sync', handleRefresh);
       window.removeEventListener('storage', handleRefresh);
     };
   }, [loadChats]);

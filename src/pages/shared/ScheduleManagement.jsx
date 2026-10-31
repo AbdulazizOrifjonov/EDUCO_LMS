@@ -117,6 +117,13 @@ export default function ScheduleManagement() {
       }
     };
     loadFilters();
+
+    const handleSync = () => {
+      fetchScheduleData();
+      loadFilters();
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
   }, [fetchScheduleData, isTeacher, profile?.id, teacherFullName]);
 
   const handleDeleteLesson = async (id) => {

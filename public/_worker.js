@@ -163,9 +163,10 @@ export default {
       // GET /api/sync-store - Fetch all shared data (supports 304 Not Modified ETag caching)
       if (request.method === 'GET') {
         const clientETag = request.headers.get('if-none-match');
+        const hasBypassParam = url.searchParams.has('t') || url.searchParams.has('nocache');
         const currentETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
 
-        if (clientETag && clientETag === currentETag) {
+        if (!hasBypassParam && clientETag && clientETag === currentETag) {
           return new Response(null, {
             status: 304,
             headers: {
@@ -173,7 +174,8 @@ export default {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
               'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-None-Match',
-              'Cache-Control': 'no-cache, must-revalidate',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
             },
           });
         }
@@ -210,7 +212,8 @@ export default {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-None-Match',
-            'Cache-Control': 'no-cache, must-revalidate',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
           },
         });
       }

@@ -71,6 +71,12 @@ export default function TuitionPage() {
 
   useEffect(() => {
     loadData();
+
+    const handleSync = () => {
+      loadData();
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
   }, [statusFilter]);
 
   const loadData = async () => {

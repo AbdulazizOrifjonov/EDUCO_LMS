@@ -79,6 +79,13 @@ export default function CourseManagement() {
     fetchCourses();
   }, [fetchCourses]);
 
+  // Realtime cross-role sync: auto-refresh when another user/role adds or modifies courses
+  useEffect(() => {
+    const handleSync = () => fetchCourses();
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [fetchCourses]);
+
   const loadDirections = async () => {
     const data = await getLearningDirections();
     setDirections(data);

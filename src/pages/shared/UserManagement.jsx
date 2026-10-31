@@ -105,6 +105,13 @@ export default function UserManagement() {
     fetchUsers();
   }, [fetchUsers]);
 
+  // Realtime cross-role sync: auto-refresh when another user/role adds or modifies users
+  useEffect(() => {
+    const handleSync = () => fetchUsers();
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [fetchUsers]);
+
   const handleToggleStatus = async (user) => {
     const nextStatus = !user.is_active;
     try {
