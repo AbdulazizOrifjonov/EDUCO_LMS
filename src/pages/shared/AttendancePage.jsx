@@ -1517,11 +1517,11 @@ export default function AttendancePage() {
                 </div>
 
                 {/* Role Category Filter Pills (Fixed: no horizontal scroll, fits mobile & desktop) */}
-                <div className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2 w-full sm:w-auto">
+                <div className="grid grid-cols-3 gap-1 sm:flex sm:flex-wrap sm:items-center sm:gap-2 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('all')}
-                    className={`flex items-center justify-center text-center px-1.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center justify-center text-center px-1 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer truncate ${
                       staffRoleFilter === 'all'
                         ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-sm shadow-blue-600/30 dark:shadow-emerald-600/30 ring-2 ring-blue-500/40 dark:ring-emerald-500/40'
                         : 'bg-gray-100 hover:bg-gray-200 dark:bg-surface-dark-tertiary dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -1532,7 +1532,7 @@ export default function AttendancePage() {
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('teacher')}
-                    className={`flex items-center justify-center text-center px-1 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center justify-center text-center px-1 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer truncate ${
                       staffRoleFilter === 'teacher'
                         ? 'bg-amber-500 text-white shadow-sm shadow-amber-500/30 ring-2 ring-amber-500/40'
                         : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30'
@@ -1544,7 +1544,7 @@ export default function AttendancePage() {
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('admin')}
-                    className={`flex items-center justify-center text-center px-1 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center justify-center text-center px-1 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer truncate ${
                       staffRoleFilter === 'admin'
                         ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30 ring-2 ring-purple-500/40'
                         : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30'

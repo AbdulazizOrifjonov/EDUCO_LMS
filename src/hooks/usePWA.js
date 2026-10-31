@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 
-let deferredPrompt = null;
+let deferredPrompt = typeof window !== 'undefined' ? (window.__pwaPrompt || null) : null;
 
 export function usePWA() {
-  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstallable, setIsInstallable] = useState(Boolean(deferredPrompt));
   const [isStandalone, setIsStandalone] = useState(false);
   const [platform, setPlatform] = useState('desktop'); // 'ios' | 'android' | 'desktop'
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Check if early prompt already captured in window.__pwaPrompt
+    if (window.__pwaPrompt) {
+      deferredPrompt = window.__pwaPrompt;
+      setIsInstallable(true);
+    }
 
     // 1. Check if already installed & running standalone
     const standaloneMode =
@@ -36,14 +42,22 @@ export function usePWA() {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       deferredPrompt = e;
+      window.__pwaPrompt = e;
+      setIsInstallable(true);
+    };
+
+    const handlePwaPromptAvailable = (e) => {
+      deferredPrompt = e?.detail || window.__pwaPrompt;
       setIsInstallable(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-available', handlePwaPromptAvailable);
 
     // Check if app was just installed
     const handleAppInstalled = () => {
       deferredPrompt = null;
+      if (typeof window !== 'undefined') window.__pwaPrompt = null;
       setIsInstallable(false);
       setIsStandalone(true);
     };
@@ -51,19 +65,22 @@ export function usePWA() {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-available', handlePwaPromptAvailable);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const triggerInstall = async () => {
-    if (deferredPrompt) {
+    const promptToUse = deferredPrompt || (typeof window !== 'undefined' ? window.__pwaPrompt : null);
+    if (promptToUse) {
       try {
-        deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
+        promptToUse.prompt();
+        const choice = await promptToUse.userChoice;
         if (choice.outcome === 'accepted') {
           setIsStandalone(true);
         }
         deferredPrompt = null;
+        if (typeof window !== 'undefined') window.__pwaPrompt = null;
         setIsInstallable(false);
         return true;
       } catch (err) {
@@ -78,6 +95,6 @@ export function usePWA() {
     isStandalone,
     platform,
     triggerInstall,
-    hasNativePrompt: Boolean(deferredPrompt),
+    hasNativePrompt: Boolean(deferredPrompt || (typeof window !== 'undefined' && window.__pwaPrompt)),
   };
 }
