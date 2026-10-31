@@ -755,11 +755,11 @@ export default function AttendancePage() {
 
       {/* Navigation Tabs Bar */}
       <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-2">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar sm:flex-wrap py-1">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 py-1">
           <button
             type="button"
             onClick={() => setActiveTab('analytics')}
-            className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'analytics'
                 ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
@@ -785,7 +785,7 @@ export default function AttendancePage() {
           <button
             type="button"
             onClick={() => setActiveTab('roster')}
-            className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
               activeTab === 'roster'
                 ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
@@ -800,7 +800,7 @@ export default function AttendancePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('staff')}
-                className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === 'staff'
                     ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
@@ -813,7 +813,7 @@ export default function AttendancePage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('reports')}
-                className={`shrink-0 flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === 'reports'
                     ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 font-bold'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-surface-dark-secondary bg-gray-50/80 dark:bg-surface-dark-secondary/50 border border-gray-200/60 dark:border-gray-800'
@@ -1516,12 +1516,12 @@ export default function AttendancePage() {
                   </p>
                 </div>
 
-                {/* Role Category Filter Pills */}
-                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar sm:flex-wrap">
+                {/* Role Category Filter Pills (Fixed: no horizontal scroll, fits mobile & desktop) */}
+                <div className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('all')}
-                    className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    className={`flex items-center justify-center text-center px-1.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       staffRoleFilter === 'all'
                         ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-sm shadow-blue-600/30 dark:shadow-emerald-600/30 ring-2 ring-blue-500/40 dark:ring-emerald-500/40'
                         : 'bg-gray-100 hover:bg-gray-200 dark:bg-surface-dark-tertiary dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -1532,24 +1532,26 @@ export default function AttendancePage() {
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('teacher')}
-                    className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    className={`flex items-center justify-center text-center px-1 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       staffRoleFilter === 'teacher'
                         ? 'bg-amber-500 text-white shadow-sm shadow-amber-500/30 ring-2 ring-amber-500/40'
                         : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30'
                     }`}
                   >
-                    O'qituvchilar ({analyticsData?.teachers?.length || 0})
+                    <span className="hidden sm:inline">O'qituvchilar</span>
+                    <span className="sm:hidden">Ustozlar</span> ({analyticsData?.teachers?.length || 0})
                   </button>
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('admin')}
-                    className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    className={`flex items-center justify-center text-center px-1 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       staffRoleFilter === 'admin'
                         ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30 ring-2 ring-purple-500/40'
                         : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30'
                     }`}
                   >
-                    Administratorlar ({analyticsData?.admins?.length || 0})
+                    <span className="hidden sm:inline">Administratorlar</span>
+                    <span className="sm:hidden">Adminlar</span> ({analyticsData?.admins?.length || 0})
                   </button>
                 </div>
               </div>
