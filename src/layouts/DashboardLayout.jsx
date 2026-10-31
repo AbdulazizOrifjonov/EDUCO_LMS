@@ -352,7 +352,7 @@ export default function DashboardLayout({
       className={`${
         isChatPage
           ? 'fixed inset-0 h-[100dvh] max-h-[100dvh] overflow-hidden'
-          : 'min-h-screen overflow-x-hidden'
+          : 'min-h-screen overflow-x-clip'
       } bg-[#EFECE4] text-slate-900 transition-colors duration-200 dark:bg-[#101827] dark:text-gray-100 flex w-full max-w-full`}
     >
       {/* Sidebar Component */}
@@ -370,7 +370,7 @@ export default function DashboardLayout({
         className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out ${
           isChatPage
             ? 'h-[100dvh] max-h-[100dvh] overflow-hidden pt-0'
-            : 'min-h-screen overflow-x-hidden pt-16'
+            : 'min-h-screen pt-16'
         }
           ${
             collapsed
@@ -829,10 +829,10 @@ export default function DashboardLayout({
         {/* Main Content Area */}
         <main
           ref={mainRef}
-          className={`flex-1 min-h-0 min-w-0 w-full ${
+          className={`flex-1 min-w-0 w-full ${
             isChatPage
               ? 'p-0 md:p-3 overflow-hidden flex flex-col'
-              : 'p-3 sm:p-5 lg:p-6 overflow-y-auto overflow-x-hidden'
+              : 'p-3 sm:p-5 lg:p-6'
           }`}
         >
           {children || <Outlet />}

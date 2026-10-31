@@ -16,7 +16,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    max-width: 100vw;
+    overflow-x: clip;
+    overflow-y: auto;
+    width: 100%;
+    min-height: 100%;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
@@ -26,17 +29,20 @@
     color: #1E293B;
     transition: background-color 0.2s ease, color 0.2s ease;
     overflow-x: hidden;
-    max-width: 100vw;
+    overflow-x: clip;
+    overflow-y: auto;
+    width: 100%;
+    min-height: 100%;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Prevent manual pinch-to-zoom and unwanted gesture scale on screens <= 768px */
+  /* Prevent manual pinch-to-zoom while keeping full vertical and horizontal touch scrolling fluid */
   @media (max-width: 768px) {
     html,
     body {
-      touch-action: pan-x pan-y;
-      overscroll-behavior-y: contain;
+      touch-action: manipulation;
     }
 
     /* Prevent iOS Safari from zooming in on input focus by ensuring >= 16px font-size */
