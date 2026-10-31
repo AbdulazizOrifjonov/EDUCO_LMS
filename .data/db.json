@@ -11,9 +11,9 @@
       "email": "abbosbek@educo.app",
       "phone": "+998 98 800 14 15",
       "password": "AbbosBek1415",
-      "password_updated_at": "2026-10-30T09:05:45.527Z",
+      "password_updated_at": "2026-10-31T05:02:37.920Z",
       "is_active": true,
-      "created_at": "2026-10-30T09:05:45.527Z"
+      "created_at": "2026-10-31T05:02:37.920Z"
     }
   ],
   "educo_db_groups": [],
@@ -1471,10 +1471,10 @@
       "api_token": "SXP6_F:_8_-fv9uvdsyrp",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-10-30T09:05:45.523Z",
+      "last_seen_at": "2026-10-31T05:02:37.913Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-30T09:05:45.527Z"
+      "created_at": "2026-10-31T05:02:37.920Z"
     },
     {
       "id": "dev-backup-2",
@@ -1487,7 +1487,7 @@
       "last_seen_at": null,
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-30T09:05:45.527Z"
+      "created_at": "2026-10-31T05:02:37.920Z"
     }
   ],
   "educo_db_memberships": [],
