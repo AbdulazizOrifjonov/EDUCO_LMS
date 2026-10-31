@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useAuth from '@/hooks/useAuth';
 import {
+  ArrowLeft,
   Bell,
   Clock,
   Phone,
@@ -66,7 +67,7 @@ export default function RemindersPage() {
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'trial' | 'today' | 'upcoming' | 'completed'
 
   // Modal states
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [activeView, setActiveView] = useState('list'); // 'list' | 'create'
   const [completeModalItem, setCompleteModalItem] = useState(null);
   const [completeNote, setCompleteNote] = useState('');
 
@@ -248,7 +249,7 @@ export default function RemindersPage() {
           : 'Yangi eslatma muvaffaqiyatli saqlandi!'
       );
 
-      setIsCreateModalOpen(false);
+      setActiveView('list');
       setFormData({
         student_name: '',
         student_phone: '+998',
@@ -286,30 +287,46 @@ export default function RemindersPage() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={loadData}
-            disabled={loading}
-            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-xs flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer disabled:opacity-50"
-            title="Yangilash"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-600 dark:text-emerald-400' : ''}`} />
-            <span className="hidden sm:inline">Yangilash</span>
-          </button>
+          {activeView === 'create' ? (
+            <button
+              type="button"
+              onClick={() => setActiveView('list')}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Barcha eslatmalarga qaytish</span>
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={loadData}
+                disabled={loading}
+                className="p-2 sm:px-3 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-xs flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer disabled:opacity-50"
+                title="Yangilash"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-600 dark:text-emerald-400' : ''}`} />
+                <span className="hidden sm:inline">Yangilash</span>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer"
-          >
-            <Plus className="w-4 h-4 shrink-0 stroke-[2.5]" />
-            <span className="hidden sm:inline">Yangi eslatma / Sinov darsi</span>
-            <span className="sm:hidden">Yangi eslatma</span>
-          </button>
+              <button
+                type="button"
+                onClick={() => setActiveView('create')}
+                className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 shrink-0 stroke-[2.5]" />
+                <span className="hidden sm:inline">Yangi eslatma / Sinov darsi</span>
+                <span className="sm:hidden">Yangi eslatma</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* 4 Stats Cards */}
+      {/* VIEW: LIST (Stats, filters, reminders table/cards) */}
+      {activeView === 'list' && (
+        <div className="space-y-6">
+          {/* 4 Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         <div
           onClick={() => setActiveTab('today')}
@@ -511,7 +528,7 @@ export default function RemindersPage() {
             </p>
             <Button
               variant="primary"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => setActiveView('create')}
               icon={Plus}
               className="mt-2"
             >
@@ -732,164 +749,194 @@ export default function RemindersPage() {
         )}
       </div>
 
-      {/* Modal: Create New Reminder / Trial Lesson */}
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        title="Yangi eslatma / Sinov darsi qo‘shish"
-        size="lg"
-      >
-        <form onSubmit={handleCreateSubmit} className="space-y-4">
-          {/* Reminder Type Selector */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-              Eslatma turi
-            </label>
-            <div className="grid grid-cols-2 gap-2.5">
+              </div>
+      )}
+
+      {/* VIEW: CREATE (Dedicated Full-Page Section) */}
+      {activeView === 'create' && (
+        <Card className="p-6 sm:p-8 space-y-6 max-w-4xl mx-auto shadow-sm">
+          {/* Section Header */}
+          <div className="flex items-center justify-between pb-5 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => setFormData((p) => ({ ...p, type: 'trial_lesson' }))}
-                className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
-                  formData.type === 'trial_lesson'
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/40 ring-2 ring-purple-500/20 text-purple-900 dark:text-purple-200 font-bold'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                }`}
+                onClick={() => setActiveView('list')}
+                className="p-2 sm:p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+                title="Orqaga qaytish"
               >
-                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 flex items-center justify-center shrink-0">
-                  <GraduationCap className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-extrabold">🎓 Sinov darsi</div>
-                  <div className="text-[11px] opacity-75">Yangi o‘quvchini 1-darsga chaqirish</div>
-                </div>
+                <ArrowLeft className="w-5 h-5" />
               </button>
-
-              <button
-                type="button"
-                onClick={() => setFormData((p) => ({ ...p, type: 'call' }))}
-                className={`p-3 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
-                  formData.type === 'call'
-                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 ring-2 ring-amber-500/20 text-amber-900 dark:text-amber-200 font-bold'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 flex items-center justify-center shrink-0">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-extrabold">📞 Qo‘ng‘iroq / Qayta bog‘lanish</div>
-                  <div className="text-[11px] opacity-75">Dars kuni yoki to‘lovni eslatish</div>
-                </div>
-              </button>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
+                  <span>📝 Yangi eslatma / Sinov darsi rejalashtirish</span>
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Yangi o‘quvchini sinov darsiga chaqirish, qayta bog‘lanish va dars sanasini belgilash
+                </p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setActiveView('list')}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Ro‘yxatga qaytish
+            </button>
           </div>
 
-          {/* Student Name */}
-          <Input
-            label="O‘quvchining F.I.SH."
-            placeholder="Masalan: Diyorbek Karimov"
-            value={formData.student_name}
-            onChange={(e) => setFormData((p) => ({ ...p, student_name: e.target.value }))}
-            required
-          />
-
-          {/* Phone Numbers */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <Input
-              label="O‘quvchi telefoni"
-              placeholder="+998901234567"
-              value={formData.student_phone}
-              onChange={(e) => setFormData((p) => ({ ...p, student_phone: e.target.value }))}
-            />
-            <Input
-              label="Ota-onasining telefoni"
-              placeholder="+998909876543"
-              value={formData.father_phone}
-              onChange={(e) => setFormData((p) => ({ ...p, father_phone: e.target.value }))}
-            />
-          </div>
-
-          {/* Group / Direction Selection */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <form onSubmit={handleCreateSubmit} className="space-y-5 pt-2">
+            {/* Reminder Type Selector */}
             <div>
-              <Select
-                label="O‘quv guruhi"
-                value={formData.group_id}
-                onChange={(e) => setFormData((p) => ({ ...p, group_id: e.target.value }))}
-                headerTitle="Guruhni tanlang"
-                options={[
-                  { value: '', label: 'Guruh tanlanmagan (Umumiy)' },
-                  ...groups.map((g) => ({
-                    value: g.id,
-                    label: g.name,
-                    subtitle: g.course_name || 'Kurs',
-                  })),
-                ]}
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-2">
+                Eslatma turi <span className="text-brand-red">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData((p) => ({ ...p, type: 'trial_lesson' }))}
+                  className={`p-3.5 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
+                    formData.type === 'trial_lesson'
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/40 ring-2 ring-purple-500/20 text-purple-900 dark:text-purple-200 font-bold'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-purple-200'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-extrabold">🎓 Sinov darsi</div>
+                    <div className="text-xs opacity-75">Yangi o‘quvchini 1-darsga chaqirish</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData((p) => ({ ...p, type: 'call' }))}
+                  className={`p-3.5 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
+                    formData.type === 'call'
+                      ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 ring-2 ring-amber-500/20 text-amber-900 dark:text-amber-200 font-bold'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-200'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 flex items-center justify-center shrink-0">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-extrabold">📞 Qo‘ng‘iroq / Qayta bog‘lanish</div>
+                    <div className="text-xs opacity-75">Dars kuni yoki to‘lovni eslatish</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Student Name */}
+            <Input
+              label="O‘quvchining F.I.SH."
+              placeholder="Masalan: Diyorbek Karimov"
+              value={formData.student_name}
+              onChange={(e) => setFormData((p) => ({ ...p, student_name: e.target.value }))}
+              required
+            />
+
+            {/* Phone Numbers */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="O‘quvchi telefoni"
+                placeholder="+998901234567"
+                value={formData.student_phone}
+                onChange={(e) => setFormData((p) => ({ ...p, student_phone: e.target.value }))}
+              />
+              <Input
+                label="Ota-onasining telefoni"
+                placeholder="+998909876543"
+                value={formData.father_phone}
+                onChange={(e) => setFormData((p) => ({ ...p, father_phone: e.target.value }))}
               />
             </div>
 
+            {/* Group / Direction Selection */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Select
+                  label="O‘quv guruhi"
+                  value={formData.group_id}
+                  onChange={(e) => setFormData((p) => ({ ...p, group_id: e.target.value }))}
+                  headerTitle="Guruhni tanlang"
+                  options={[
+                    { value: '', label: 'Guruh tanlanmagan (Umumiy)' },
+                    ...groups.map((g) => ({
+                      value: g.id,
+                      label: g.name,
+                      subtitle: g.course_name || 'Kurs',
+                    })),
+                  ]}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                  Auditoriya (Xona)
+                </label>
+                <input
+                  type="text"
+                  placeholder="101-xona"
+                  value={formData.room}
+                  onChange={(e) => setFormData((p) => ({ ...p, room: e.target.value }))}
+                  className="w-full h-11 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Date & Time Picker */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                  Eslatma / Dars sanasi <span className="text-brand-red">*</span>
+                </label>
+                <DatePicker
+                  value={formData.due_date}
+                  onChange={(val) => setFormData((p) => ({ ...p, due_date: val }))}
+                  placeholder="Sanani tanlang..."
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <TimePicker
+                  label="Vaqti (Toshkent vaqti)"
+                  value={formData.due_time || '10:00'}
+                  onChange={(val) => setFormData((p) => ({ ...p, due_time: val }))}
+                />
+              </div>
+            </div>
+
+            {/* Purpose / Note */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                Auditoriya (Xona)
+                Eslatma maqsadi va izoh
               </label>
-              <input
-                type="text"
-                placeholder="101-xona"
-                value={formData.room}
-                onChange={(e) => setFormData((p) => ({ ...p, room: e.target.value }))}
-                className="w-full h-11 px-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Date & Time Picker */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                Eslatma / Dars sanasi
-              </label>
-              <DatePicker
-                value={formData.due_date}
-                onChange={(val) => setFormData((p) => ({ ...p, due_date: val }))}
-                placeholder="Sanani tanlang..."
-                className="w-full"
+              <textarea
+                rows={3}
+                placeholder="Masalan: 1-sinov darsiga taklif qilingan, noutbuk olib kelishi lozim..."
+                value={formData.note}
+                onChange={(e) => setFormData((p) => ({ ...p, note: e.target.value }))}
+                className="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               />
             </div>
 
-            <div>
-              <TimePicker
-                label="Vaqti (Toshkent vaqti)"
-                value={formData.due_time || '10:00'}
-                onChange={(val) => setFormData((p) => ({ ...p, due_time: val }))}
-              />
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-5 border-t border-gray-100 dark:border-gray-800">
+              <Button variant="ghost" type="button" onClick={() => setActiveView('list')}>
+                Bekor qilish
+              </Button>
+              <Button variant="primary" type="submit" icon={Check} className="px-6 py-2.5 font-bold">
+                💾 Saqlash va Rejalashtirish
+              </Button>
             </div>
-          </div>
-
-          {/* Purpose / Note */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-              Eslatma maqsadi va izoh
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Masalan: 1-sinov darsiga taklif qilingan, noutbuk olib kelishi lozim..."
-              value={formData.note}
-              onChange={(e) => setFormData((p) => ({ ...p, note: e.target.value }))}
-              className="w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          {/* Modal Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 mt-8 border-t border-gray-100 dark:border-gray-800">
-            <Button variant="ghost" type="button" onClick={() => setIsCreateModalOpen(false)}>
-              Bekor qilish
-            </Button>
-            <Button variant="primary" type="submit" icon={Check}>
-              Saqlash
-            </Button>
-          </div>
-        </form>
-      </Modal>
+          </form>
+        </Card>
+      )}
 
       {/* Modal: Mark Complete with Note */}
       <Modal

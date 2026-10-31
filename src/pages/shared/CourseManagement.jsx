@@ -35,7 +35,7 @@ export default function CourseManagement() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { confirmDelete } = useTwoStepConfirm();
-  const currentUserRole = profile?.role || 'owner';
+  const currentUserRole = profile?.role || '';
   const isOwnerOrAdmin = currentUserRole === 'owner' || currentUserRole === 'admin';
   const { searchQuery, setSearchQuery } = useSearch();
   const [courses, setCourses] = useState([]);
