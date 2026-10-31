@@ -24,6 +24,7 @@ import {
   SlidersHorizontal,
   ChevronRight,
   MessageSquare,
+  BookOpen,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -266,25 +267,27 @@ export default function RemindersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <Button
-            variant="ghost"
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
             onClick={loadData}
             disabled={loading}
-            icon={RefreshCw}
-            className={loading ? 'animate-spin' : ''}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-xs flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer disabled:opacity-50"
+            title="Yangilash"
           >
-            Yangilash
-          </Button>
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-600 dark:text-emerald-400' : ''}`} />
+            <span className="hidden sm:inline">Yangilash</span>
+          </button>
 
-          <Button
-            variant="primary"
+          <button
+            type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            icon={Plus}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 shadow-md"
+            className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer"
           >
-            + Yangi eslatma / Sinov darsi
-          </Button>
+            <Plus className="w-4 h-4 shrink-0 stroke-[2.5]" />
+            <span className="hidden sm:inline">Yangi eslatma / Sinov darsi</span>
+            <span className="sm:hidden">Yangi eslatma</span>
+          </button>
         </div>
       </div>
 
@@ -494,7 +497,7 @@ export default function RemindersPage() {
               icon={Plus}
               className="mt-2"
             >
-              + Yangi eslatma qo‘shish
+              Yangi eslatma qo‘shish
             </Button>
           </div>
         ) : (
@@ -508,189 +511,202 @@ export default function RemindersPage() {
             return (
               <div
                 key={item.id}
-                className={`rounded-2xl border p-4 sm:p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                className={`rounded-2xl border p-3.5 sm:p-4.5 transition-all duration-200 space-y-3 ${
                   isCompleted
-                    ? 'bg-gray-50/70 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 opacity-80'
+                    ? 'bg-gray-50/70 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 opacity-75'
                     : isDueToday
-                    ? 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800/80 shadow-sm'
+                    ? 'bg-white dark:bg-gray-900 border-rose-300 dark:border-rose-900/70 shadow-sm ring-1 ring-rose-400/20'
                     : isTrial
-                    ? 'bg-purple-50/30 dark:bg-purple-950/15 border-purple-200 dark:border-purple-900/50'
+                    ? 'bg-white dark:bg-gray-900 border-purple-200 dark:border-purple-900/50 shadow-2xs'
                     : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-2xs'
                 }`}
               >
-                {/* Left Side: Student Info & Meta */}
-                <div className="flex items-start gap-3.5 min-w-0 flex-1">
-                  <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg shrink-0 shadow-sm ${
-                      isCompleted
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
-                        : isTrial
-                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300'
-                        : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <Check className="w-6 h-6" />
-                    ) : isTrial ? (
-                      <GraduationCap className="w-6 h-6" />
-                    ) : (
-                      <Phone className="w-5 h-5" />
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5 min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-extrabold text-base text-gray-900 dark:text-white truncate">
-                        {item.student_name}
-                      </h3>
-
-                      {/* Type Badge */}
-                      {isTrial ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-300 dark:border-purple-800 flex items-center gap-1">
-                          <GraduationCap className="w-3 h-3" />
-                          <span>Sinov darsi</span>
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1">
-                          <Phone className="w-3 h-3" />
-                          <span>Qo‘ng‘iroq / Eslatma</span>
-                        </span>
-                      )}
-
-                      {/* Status Indicator */}
+                {/* Top Row: Avatar + Name + Badges + Delete Button */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
+                        isCompleted
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                          : isTrial
+                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/90 dark:text-purple-300'
+                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950/90 dark:text-amber-300'
+                      }`}
+                    >
                       {isCompleted ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                          ✓ Bajarilgan
-                        </span>
-                      ) : isDueToday ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse">
-                          Bugun muddati!
-                        </span>
-                      ) : null}
+                        <Check className="w-5 h-5" />
+                      ) : isTrial ? (
+                        <GraduationCap className="w-5 h-5" />
+                      ) : (
+                        <Phone className="w-4 h-4" />
+                      )}
                     </div>
 
-                    {/* Course / Group / Teacher / Room */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600 dark:text-gray-300 font-medium">
-                      {item.course_name && (
-                        <span className="text-blue-600 dark:text-emerald-400 font-bold">
-                          {item.course_name}
-                        </span>
-                      )}
-                      {item.group_name && item.group_name !== 'Guruhsiz' && (
-                        <span>• Guruh: {item.group_name}</span>
-                      )}
-                      {item.teacher_name && <span>• Ustoz: {item.teacher_name}</span>}
-                      {item.room && <span>• Xona: {item.room}</span>}
-                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="font-extrabold text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                          {item.student_name}
+                        </h3>
 
-                    {/* Note / Purpose */}
-                    {item.note && (
-                      <p className="text-xs text-gray-700 dark:text-gray-300 bg-white/70 dark:bg-gray-800/60 p-2 rounded-xl border border-gray-100 dark:border-gray-800">
-                        {item.note}
-                      </p>
-                    )}
+                        {/* Type Badge */}
+                        {isTrial ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
+                            <GraduationCap className="w-3 h-3" />
+                            <span>Sinov darsi</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                            <Phone className="w-3 h-3" />
+                            <span>Qo‘ng‘iroq</span>
+                          </span>
+                        )}
 
-                    {/* Completed note if done */}
-                    {isCompleted && item.completed_note && (
-                      <p className="text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-900 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                        <span>Natija: {item.completed_note}</span>
-                      </p>
-                    )}
-
-                    {/* Phones list */}
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      {item.student_phone && (
-                        <a
-                          href={`tel:${item.student_phone}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-bold transition-colors"
-                        >
-                          <Phone className="w-3 h-3" />
-                          <span>O‘quvchi: {formatUzPhone(item.student_phone)}</span>
-                        </a>
-                      )}
-
-                      {item.father_phone && (
-                        <a
-                          href={`tel:${item.father_phone}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold transition-colors"
-                        >
-                          <Phone className="w-3 h-3" />
-                          <span>Otasi: {formatUzPhone(item.father_phone)}</span>
-                        </a>
-                      )}
-
-                      {item.mother_phone && (
-                        <a
-                          href={`tel:${item.mother_phone}`}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-bold transition-colors"
-                        >
-                          <Phone className="w-3 h-3" />
-                          <span>Onasi: {formatUzPhone(item.mother_phone)}</span>
-                        </a>
-                      )}
+                        {/* Status Indicator */}
+                        {isCompleted ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                            ✓ Bajarilgan
+                          </span>
+                        ) : isDueToday ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse shadow-xs">
+                            Bugun!
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(item.id, item.student_name)}
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer shrink-0"
+                    title="O‘chirish"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
 
-                {/* Right Side: Scheduled Date/Time & Actions */}
-                <div className="flex flex-row md:flex-col items-center md:items-end justify-between gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-gray-100 dark:border-gray-800">
-                  {/* Date & Time */}
-                  <div className="text-left md:text-right font-mono text-xs space-y-0.5">
-                    <div className="flex items-center md:justify-end gap-1.5 font-bold text-gray-900 dark:text-white">
-                      <Calendar className="w-3.5 h-3.5 text-blue-500 dark:text-emerald-400" />
-                      <span>{item.due_date}</span>
-                    </div>
+                {/* Course & Group Metadata Chips */}
+                {(item.course_name || (item.group_name && item.group_name !== 'Guruhsiz') || item.teacher_name || item.room) && (
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    {item.course_name && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-900/40">
+                        <BookOpen className="w-3 h-3 shrink-0" />
+                        <span>{item.course_name}</span>
+                      </span>
+                    )}
+                    {item.group_name && item.group_name !== 'Guruhsiz' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium">
+                        <Users className="w-3 h-3 text-gray-500" />
+                        <span>{item.group_name}</span>
+                      </span>
+                    )}
+                    {item.teacher_name && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium">
+                        <span>Ustoz: {item.teacher_name}</span>
+                      </span>
+                    )}
+                    {item.room && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium">
+                        <span>Xona: {item.room}</span>
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Note / Purpose */}
+                {item.note && (
+                  <div className="text-xs text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-xl border-l-3 border-purple-500 dark:border-purple-400 font-normal leading-relaxed">
+                    {item.note}
+                  </div>
+                )}
+
+                {/* Completed note if done */}
+                {isCompleted && item.completed_note && (
+                  <div className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-xl border-l-3 border-emerald-500 flex items-center gap-1.5 font-medium">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <span>Natija: {item.completed_note}</span>
+                  </div>
+                )}
+
+                {/* Phones list */}
+                {(item.student_phone || item.father_phone || item.mother_phone) && (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {item.student_phone && (
+                      <a
+                        href={`tel:${item.student_phone}`}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold transition-colors border border-blue-200/50 dark:border-blue-900/30"
+                      >
+                        <Phone className="w-3 h-3 text-blue-500" />
+                        <span>O‘quvchi: <span className="font-mono">{formatUzPhone(item.student_phone)}</span></span>
+                      </a>
+                    )}
+                    {item.father_phone && (
+                      <a
+                        href={`tel:${item.father_phone}`}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold transition-colors border border-indigo-200/50 dark:border-indigo-900/30"
+                      >
+                        <Phone className="w-3 h-3 text-indigo-500" />
+                        <span>Otasi: <span className="font-mono">{formatUzPhone(item.father_phone)}</span></span>
+                      </a>
+                    )}
+                    {item.mother_phone && (
+                      <a
+                        href={`tel:${item.mother_phone}`}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-semibold transition-colors border border-rose-200/50 dark:border-rose-900/30"
+                      >
+                        <Phone className="w-3 h-3 text-rose-500" />
+                        <span>Onasi: <span className="font-mono">{formatUzPhone(item.mother_phone)}</span></span>
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Footer: Date & Time + Action Buttons */}
+                <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 pt-2.5 border-t border-gray-100 dark:border-gray-800/80">
+                  {/* Date & Time chip (NEVER wraps into separate lines) */}
+                  <div className="inline-flex items-center gap-2 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap bg-gray-100 dark:bg-gray-800/80 px-2.5 py-1 rounded-lg shrink-0">
+                    <Calendar className="w-3.5 h-3.5 text-blue-500 dark:text-emerald-400 shrink-0" />
+                    <span>{item.due_date}</span>
                     {item.due_time && (
-                      <div className="flex items-center md:justify-end gap-1.5 text-gray-500">
-                        <Clock className="w-3.5 h-3.5" />
+                      <>
+                        <span className="text-gray-300 dark:text-gray-600">·</span>
+                        <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                         <span>{item.due_time}</span>
-                      </div>
+                      </>
                     )}
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    {!isCompleted && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenComplete(item)}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs flex items-center gap-1 cursor-pointer"
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                          <span>{isTrial ? 'Dars o‘tildi' : 'Bog‘lanildi'}</span>
-                        </button>
+                  {!isCompleted && (
+                    <div className="flex items-center gap-1.5 ml-auto shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenComplete(item)}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer hover:shadow-sm"
+                      >
+                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>{isTrial ? 'Dars o‘tildi' : 'Bog‘lanildi'}</span>
+                      </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handlePostpone(item.id, 1)}
-                          className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold transition-colors cursor-pointer"
-                          title="1 kunga keyinga surish"
-                        >
-                          +1 kun
-                        </button>
+                      <button
+                        type="button"
+                        onClick={() => handlePostpone(item.id, 1)}
+                        className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        title="1 kunga keyinga surish"
+                      >
+                        +1 kun
+                      </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handlePostpone(item.id, 3)}
-                          className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold transition-colors cursor-pointer"
-                          title="3 kunga keyinga surish"
-                        >
-                          +3 kun
-                        </button>
-                      </>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(item.id, item.student_name)}
-                      className="p-1.5 rounded-xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                      title="O‘chirish"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => handlePostpone(item.id, 3)}
+                        className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        title="3 kunga keyinga surish"
+                      >
+                        +3 kun
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
