@@ -47,9 +47,11 @@ import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { getGradesByGroup } from '@/services/gradeService';
 import { getAttendanceReport } from '@/services/attendanceService';
 import { formatUzPhone } from '@/utils/phoneFormat';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 
 export default function GroupDetail({ groupId: propGroupId }) {
   const { t } = useTranslation();
+  const { confirmDelete } = useTwoStepConfirm();
   const { id: paramGroupId } = useParams();
   const navigate = useNavigate();
   const { profile } = useAuth();
@@ -114,7 +116,12 @@ export default function GroupDetail({ groupId: propGroupId }) {
 
   const handleRemoveAvatar = async () => {
     if (!groupId) return;
-    if (!window.confirm("Guruh profil rasmini olib tashlashni tasdiqlaysizmi?")) return;
+    const ok = await confirmDelete({
+      title: 'Guruh rasmini olib tashlash',
+      itemName: group?.name,
+      description: 'Guruhning hozirgi logotipi yoki rasmi o‘chiriladi.',
+    });
+    if (!ok) return;
     try {
       setAvatarUploading(true);
       await uploadGroupAvatar(groupId, null);
@@ -200,9 +207,13 @@ export default function GroupDetail({ groupId: propGroupId }) {
   };
 
   const handleRemoveStudent = async (student) => {
-    if (!window.confirm(t('groups.confirmRemoveStudent', `Remove ${student.fullName} from group?`))) {
-      return;
-    }
+    const studentName = student.fullName || student.full_name || 'Talaba';
+    const ok = await confirmDelete({
+      title: 'O‘quvchini guruhdan chiqarish',
+      itemName: studentName,
+      description: `Ushbu o‘quvchi «${group?.name || 'Guruh'}» ro‘yxatidan va uning barcha dars davomatidan chiqariladi.`,
+    });
+    if (!ok) return;
     try {
       await removeStudent(groupId, student.id);
       toast.success(t('groups.studentRemoved', 'Student removed from group.'));

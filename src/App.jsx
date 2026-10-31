@@ -6,6 +6,7 @@ import ToastContainer from '@/components/ui/Toast';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ScrollToTop from '@/components/ScrollToTop';
 import { ROLES } from '@/lib/constants';
+import { TwoStepConfirmProvider } from '@/context/ConfirmContext';
 
 // Layouts
 import OwnerLayout from '@/layouts/OwnerLayout';
@@ -84,7 +85,7 @@ export default function App() {
   }, [initializeAuth]);
 
   return (
-    <>
+    <TwoStepConfirmProvider>
       <ScrollToTop />
       <Suspense fallback={<LoadingSpinner fullPage text="Loading EDUCO LMS..." />}>
         <Routes>
@@ -248,6 +249,6 @@ export default function App() {
 
       {/* Global Toast Notifications Container */}
       <ToastContainer />
-    </>
+    </TwoStepConfirmProvider>
   );
 }

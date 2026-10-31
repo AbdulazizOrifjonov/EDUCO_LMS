@@ -32,6 +32,7 @@ import Table from '@/components/ui/Table';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from '@/components/ui/Toast';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 import GradeForm from './GradeForm';
 import {
   getGradesByGroup,
@@ -117,6 +118,7 @@ const QUICK_FEEDBACK_PRESETS = [
 export default function GradesPage() {
   const { t } = useTranslation();
   const { profile } = useAuth();
+  const { confirmDelete } = useTwoStepConfirm();
   const isStudent = profile?.role === ROLES.STUDENT;
 
   const [groups, setGroups] = useState([]);
@@ -555,9 +557,15 @@ export default function GradesPage() {
     }
   };
 
-  // Delete grade
+  // Delete grade with 2-step confirmation
   const handleDeleteGrade = async (studentId, gradeId) => {
-    if (!window.confirm(t('grades.confirmDelete', 'Ushbu bahoni o‘chirishni xohlaysizmi?'))) return;
+    const student = students.find((s) => s.id === studentId);
+    const ok = await confirmDelete({
+      title: 'Bahoni o‘chirish',
+      itemName: student?.fullName || student?.full_name || 'Talaba bahosi',
+      description: 'Ushbu dars uchun qo‘yilgan baho va izoh tizimdan butunlay o‘chiriladi.',
+    });
+    if (!ok) return;
     try {
       await deleteGrade(gradeId);
       toast.success(t('grades.deleted', 'Baho o‘chirildi'));

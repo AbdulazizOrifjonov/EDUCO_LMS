@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 import { localStore } from '@/lib/localStore';
 import useAuth from '@/hooks/useAuth';
 import LessonForm from './LessonForm';
@@ -37,6 +38,7 @@ const DAYS = [
 
 export default function ScheduleManagement() {
   const { t } = useTranslation();
+  const { confirmDelete } = useTwoStepConfirm();
   const { profile } = useAuth();
   const isTeacher = profile?.role === 'teacher';
   const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
@@ -127,9 +129,13 @@ export default function ScheduleManagement() {
   }, [fetchScheduleData, isTeacher, profile?.id, teacherFullName]);
 
   const handleDeleteLesson = async (id) => {
-    if (!window.confirm(t('schedule.confirmDelete', 'Ushbu darsni jadvaldan o‘chirmoqchimisiz?'))) {
-      return;
-    }
+    const lesson = schedules.find((s) => s.id === id);
+    const ok = await confirmDelete({
+      title: 'Darsni jadvaldan o‘chirish',
+      itemName: lesson ? `${lesson.group_name || lesson.groupName || 'Guruh'} (${lesson.room || 'Xona'})` : 'Dars',
+      description: 'Ushbu dars vaqti va xonasi umumiy jadvaldan butunlay olib tashlanadi.',
+    });
+    if (!ok) return;
     try {
       localStore.deleteSchedule(id);
       toast.success(t('schedule.deleted', 'Dars jadvaldan o‘chirildi'));

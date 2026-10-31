@@ -33,11 +33,13 @@ import {
 import { getCourses } from '@/services/courseService';
 import { getTeachers } from '@/services/userService';
 import { useSearch } from '@/context/SearchContext';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 
 export default function GroupManagement() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { confirmDelete } = useTwoStepConfirm();
   const currentUserRole = profile?.role || 'owner';
   const isTeacher = currentUserRole === 'teacher';
   const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
@@ -142,6 +144,15 @@ export default function GroupManagement() {
 
   const handleToggleArchive = async (group) => {
     const nextStatus = group.status === 'archived' ? 'active' : 'archived';
+    if (nextStatus === 'archived') {
+      const ok = await confirmDelete({
+        title: 'Guruhni arxivlash',
+        itemName: group.name,
+        description: 'Ushbu guruh arxivlanadi va uning faol darslari to‘xtatiladi. Xohlagan vaqt qayta tiklashingiz mumkin.',
+        confirmButtonText: 'Ha, guruh arxivlansin',
+      });
+      if (!ok) return;
+    }
     try {
       await updateGroup(group.id, { status: nextStatus });
       toast.success(

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/ui/Toast';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 import { localStore } from '@/lib/localStore';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
@@ -43,6 +44,7 @@ export default function ChatWindow({
   onBackToList,
 }) {
   const { t } = useTranslation();
+  const { confirmDelete } = useTwoStepConfirm();
 
   const [messages, setMessages] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
@@ -114,7 +116,13 @@ export default function ChatWindow({
 
   const handleRemoveGroupAvatar = async () => {
     if (!activeGroup?.id) return;
-    if (!window.confirm("Guruh profil rasmini olib tashlamoqchimisiz?")) return;
+    const ok = await confirmDelete({
+      title: 'Guruh rasmini olib tashlash',
+      itemName: activeGroup.name,
+      description: 'Guruhning asosiy profil rasmi o‘chiriladi.',
+      confirmButtonText: 'Ha, rasm olib tashlansin',
+    });
+    if (!ok) return;
     try {
       setAvatarUploading(true);
       await uploadGroupAvatar(activeGroup.id, null);
@@ -395,15 +403,19 @@ export default function ChatWindow({
   };
 
   const handleDeleteMessage = async (messageId) => {
-    if (!window.confirm(t('common.confirm', 'Are you sure you want to delete this message?'))) {
-      return;
-    }
+    const ok = await confirmDelete({
+      title: 'Chat xabarini o‘chirish',
+      description: 'Ushbu xabar barcha foydalanuvchilar chatidan butunlay o‘chiriladi.',
+      confirmButtonText: 'Ha, xabar o‘chirilsin',
+    });
+    if (!ok) return;
     try {
       await deleteMessage(messageId);
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      toast.success('Xabar o‘chirildi');
     } catch (err) {
       console.error('Failed to delete message:', err);
-      alert('Failed to delete message.');
+      toast.error('Xabarni o‘chirishda xatolik');
     }
   };
 

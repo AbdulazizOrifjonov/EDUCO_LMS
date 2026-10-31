@@ -35,6 +35,7 @@ import Select from '@/components/ui/Select';
 import DatePicker from '@/components/ui/DatePicker';
 import TimePicker from '@/components/ui/TimePicker';
 import { toast } from '@/components/ui/Toast';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 import {
   getStudentReminders,
   createStudentReminder,
@@ -47,6 +48,7 @@ import { formatUzPhone } from '@/utils/phoneFormat';
 
 export default function RemindersPage() {
   const { t } = useTranslation();
+  const { confirmDelete } = useTwoStepConfirm();
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,9 +194,14 @@ export default function RemindersPage() {
     }
   };
 
-  // Handle Delete
+  // Handle Delete with 2-step confirmation
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`${name} eslatmasini o‘chirishni tasdiqlaysizmi?`)) return;
+    const isConfirmed = await confirmDelete({
+      title: 'Sinov darsi / Eslatmani o‘chirish',
+      itemName: name,
+      description: 'Ushbu o‘quvchining sinov darsi va qo‘ng‘iroq eslatmasi tizimdan butunlay o‘chiriladi.',
+    });
+    if (!isConfirmed) return;
     try {
       await deleteStudentReminder(id);
       toast.success('Eslatma muvaffaqiyatli o‘chirildi');

@@ -1,7 +1,7 @@
 // Central local persistent store for EDUCO LMS
 // Provides full offline/local storage for all entities
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   COURSES: 'educo_db_courses',
   USERS: 'educo_db_users',
   GROUPS: 'educo_db_groups',

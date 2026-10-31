@@ -39,10 +39,12 @@ import {
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone } from '@/utils/phoneFormat';
 import { useSearch } from '@/context/SearchContext';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 
 export default function UserManagement() {
   const { t } = useTranslation();
   const { profile } = useAuth();
+  const { confirmDelete } = useTwoStepConfirm();
   const currentUserRole = profile?.role || ROLES.OWNER;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -114,6 +116,16 @@ export default function UserManagement() {
 
   const handleToggleStatus = async (user) => {
     const nextStatus = !user.is_active;
+    if (!nextStatus) {
+      // Suspending / blocking user
+      const ok = await confirmDelete({
+        title: 'Foydalanuvchi hisobini bloklash',
+        itemName: user.fullName || user.username,
+        description: 'Ushbu foydalanuvchi hisobi to‘xtatiladi va u tizimga (LMS ga) kira olmaydi.',
+        confirmButtonText: 'Ha, hisob to‘xtatilsin',
+      });
+      if (!ok) return;
+    }
     try {
       await toggleUserStatus(user.id, nextStatus);
       toast.success(

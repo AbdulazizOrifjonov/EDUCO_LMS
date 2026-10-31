@@ -28,11 +28,13 @@ import {
   getLearningDirections,
 } from '@/services/courseService';
 import { useSearch } from '@/context/SearchContext';
+import { useTwoStepConfirm } from '@/context/ConfirmContext';
 
 export default function CourseManagement() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { confirmDelete } = useTwoStepConfirm();
   const currentUserRole = profile?.role || 'owner';
   const { searchQuery, setSearchQuery } = useSearch();
   const [courses, setCourses] = useState([]);
@@ -94,6 +96,16 @@ export default function CourseManagement() {
 
   const handleToggleArchive = async (course) => {
     const nextStatus = !course.is_active;
+    if (!nextStatus) {
+      // Archiving course
+      const ok = await confirmDelete({
+        title: 'Kurs / Yo‘nalishni arxivlash',
+        itemName: course.name,
+        description: 'Ushbu ta‘lim yo‘nalishi arxivlanadi. Yangi guruhlar ochishda ushbu kurs tanlanmaydi. Istalgan payt qayta faollashtirish mumkin.',
+        confirmButtonText: 'Ha, kurs arxivlansin',
+      });
+      if (!ok) return;
+    }
     try {
       await archiveCourse(course.id, nextStatus);
       toast.success(
