@@ -1499,23 +1499,26 @@ export default function AttendancePage() {
             /* LEVEL 1: XODIMLAR / USTOZLAR VA ADMINLAR RO'YXATI VA MONITORING           */
             /* ========================================================================= */
             <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="space-y-1">
-                  <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base flex items-center gap-2">
-                    <UserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    Ustozlar va xodimlar davomati ({filteredStaffForLevel1.length} nafar)
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 pb-1">
+                <div className="space-y-1 min-w-0">
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg flex items-center gap-2 flex-wrap">
+                    <UserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>Ustozlar va xodimlar davomati</span>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-gray-100 dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60 shrink-0">
+                      {filteredStaffForLevel1.length} nafar
+                    </span>
                   </h3>
                   <p className="text-xs text-gray-400">
                     O'qituvchilar va administratorlar davomati monitoringi
                   </p>
                 </div>
 
-                {/* Role Category Filter Pills (Image 3 role toifalari) */}
-                <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Role Category Filter Pills */}
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar sm:flex-wrap">
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('all')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                       staffRoleFilter === 'all'
                         ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-sm shadow-blue-600/30 dark:shadow-emerald-600/30 ring-2 ring-blue-500/40 dark:ring-emerald-500/40'
                         : 'bg-gray-100 hover:bg-gray-200 dark:bg-surface-dark-tertiary dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -1526,7 +1529,7 @@ export default function AttendancePage() {
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('teacher')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                       staffRoleFilter === 'teacher'
                         ? 'bg-amber-500 text-white shadow-sm shadow-amber-500/30 ring-2 ring-amber-500/40'
                         : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30'
@@ -1537,7 +1540,7 @@ export default function AttendancePage() {
                   <button
                     type="button"
                     onClick={() => setStaffRoleFilter('admin')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                       staffRoleFilter === 'admin'
                         ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30 ring-2 ring-purple-500/40'
                         : 'bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30'
