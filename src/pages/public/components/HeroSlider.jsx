@@ -107,8 +107,8 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
             <div className="absolute top-1/4 left-10 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
             <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
-            {/* Slide Content Box */}
-            <div className="relative z-20 max-w-[1540px] mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
+            {/* Slide Content Box with Generous Side Padding to Never Collide with Arrows */}
+            <div className="relative z-20 max-w-[1540px] mx-auto h-full px-5 sm:px-20 md:px-24 lg:px-28 xl:px-32 flex flex-col justify-center">
               <div className="max-w-2xl sm:max-w-3xl space-y-4 sm:space-y-6">
                 {/* Badge Pill */}
                 {slide.badge && (
@@ -128,49 +128,53 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                   {slide.subtitle}
                 </p>
 
-                {/* Action CTA Buttons */}
+                {/* Action CTA Buttons (Dynamic Animated & Floating) */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2 sm:pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                  {/* Sinov darsiga yozilish CTA (Direct scroll to registration form) */}
+                  {/* Sinov darsiga yozilish CTA (Animated float + sweeping light beam + Kun/Tun) */}
                   <a
                     href="#contact"
                     onClick={(e) => scrollToTarget(e, '#contact')}
-                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-950/30 ring-2 ring-blue-300/40 dark:from-[#064e3b] dark:via-emerald-600 dark:to-teal-700 dark:hover:from-[#053d2e] dark:hover:to-emerald-800 dark:shadow-emerald-950/40 dark:ring-emerald-300/40 text-white font-extrabold text-sm sm:text-base shadow-xl hover:scale-103 active:scale-97 transition-all cursor-pointer"
+                    className="relative overflow-hidden inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-950/35 ring-2 ring-blue-300/40 dark:from-[#064e3b] dark:via-emerald-600 dark:to-teal-700 dark:hover:from-[#053d2e] dark:hover:to-emerald-800 dark:shadow-emerald-950/40 dark:ring-emerald-300/40 text-white font-extrabold text-sm sm:text-base shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer animate-hero-cta-float group"
                   >
-                    <span className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-                      <Sparkles className="w-4 h-4 text-amber-300" />
+                    {/* Sweeping Shimmer Light Beam */}
+                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-[-20deg] pointer-events-none animate-shimmer-sweep" />
+
+                    <span className="w-7 h-7 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center shrink-0 shadow-inner group-hover:rotate-12 transition-transform">
+                      <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
                     </span>
-                    <span>Sinov darsiga yozilish</span>
+                    <span className="relative z-10">Sinov darsiga yozilish</span>
                   </a>
 
-                  {/* Primary CTA: Courses */}
+                  {/* Primary CTA: Courses (Subtle gentle floating breathing animation) */}
                   <a
                     href={slide.cta_link || '#courses'}
                     onClick={(e) => scrollToTarget(e, slide.cta_link || '#courses')}
-                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base backdrop-blur-md border border-white/25 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98"
+                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base backdrop-blur-md border border-white/25 hover:border-white/50 transition-all cursor-pointer hover:scale-105 active:scale-95 animate-subtle-float group shadow-lg shadow-black/20"
                   >
                     <span>{slide.cta_text || 'Kurslar katalogi'}</span>
-                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                    <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1.5 transition-transform duration-300 text-blue-300 dark:text-emerald-300" />
                   </a>
 
-                  {/* Secondary CTA */}
+                  {/* Secondary CTA: About Us (Subtle float with delay offset) */}
                   {slide.secondary_cta_text && (
                     <a
                       href={slide.secondary_cta_link || '#about'}
                       onClick={(e) => scrollToTarget(e, slide.secondary_cta_link || '#about')}
-                      className="inline-flex items-center gap-2 px-5 sm:px-7 py-3.5 sm:py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base backdrop-blur-md border border-white/25 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98"
+                      className="inline-flex items-center gap-2 px-5 sm:px-7 py-3.5 sm:py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base backdrop-blur-md border border-white/25 hover:border-white/50 transition-all cursor-pointer hover:scale-105 active:scale-95 animate-subtle-float-delay shadow-lg shadow-black/20"
                     >
                       <span>{slide.secondary_cta_text}</span>
                     </a>
                   )}
 
-                  {/* Play Video Highlight Pill */}
+                  {/* Play Video Highlight Pill (With pulsing radar ring) */}
                   <button
                     type="button"
                     onClick={onOpenVideo}
-                    className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-black/40 hover:bg-black/60 text-white/90 text-xs sm:text-sm font-semibold border border-white/15 backdrop-blur-md transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded-2xl bg-black/40 hover:bg-black/65 text-white/95 text-xs sm:text-sm font-semibold border border-white/20 hover:border-white/40 backdrop-blur-md transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg group"
                   >
-                    <div className="w-6 h-6 rounded-full bg-blue-600 dark:bg-emerald-500 text-white flex items-center justify-center shrink-0">
-                      <Play className="w-3 h-3 fill-current ml-0.5" />
+                    <div className="relative w-6 h-6 rounded-full bg-blue-600 dark:bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                      <span className="absolute inset-0 rounded-full bg-blue-400 dark:bg-emerald-400 animate-ping opacity-60" />
+                      <Play className="relative z-10 w-3 h-3 fill-current ml-0.5" />
                     </div>
                     <span className="hidden sm:inline">Markaz videosi</span>
                   </button>
@@ -181,24 +185,24 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
         );
       })}
 
-      {/* Manual Navigation Arrows (Desktop & Tablet) */}
+      {/* Manual Navigation Arrows (Positioned safely away from text) */}
       {total > 1 && (
-        <div className="hidden sm:flex absolute inset-x-4 top-1/2 -translate-y-1/2 z-30 justify-between pointer-events-none">
+        <div className="hidden sm:flex absolute inset-x-3 sm:inset-x-5 lg:inset-x-8 top-1/2 -translate-y-1/2 z-30 justify-between pointer-events-none">
           <button
             type="button"
             onClick={handlePrev}
-            className="w-12 h-12 rounded-2xl bg-black/40 hover:bg-black/70 text-white/90 hover:text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 pointer-events-auto cursor-pointer shadow-xl"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-black/45 hover:bg-black/75 text-white/90 hover:text-white border border-white/25 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 pointer-events-auto cursor-pointer shadow-2xl hover:border-white/50 group"
             aria-label="Oldingi slayd"
           >
-            <ChevronLeft className="w-6 h-6 rtl:rotate-180" />
+            <ChevronLeft className="w-6 h-6 rtl:rotate-180 group-hover:-translate-x-0.5 transition-transform" />
           </button>
           <button
             type="button"
             onClick={handleNext}
-            className="w-12 h-12 rounded-2xl bg-black/40 hover:bg-black/70 text-white/90 hover:text-white border border-white/20 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 pointer-events-auto cursor-pointer shadow-xl"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-black/45 hover:bg-black/75 text-white/90 hover:text-white border border-white/25 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 active:scale-95 pointer-events-auto cursor-pointer shadow-2xl hover:border-white/50 group"
             aria-label="Keyingi slayd"
           >
-            <ChevronRight className="w-6 h-6 rtl:rotate-180" />
+            <ChevronRight className="w-6 h-6 rtl:rotate-180 group-hover:translate-x-0.5 transition-transform" />
           </button>
         </div>
       )}

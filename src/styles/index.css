@@ -379,4 +379,53 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.6) !important;
 }
 
+/* Hero CTA Dynamic Movement & Floating Animations */
+@keyframes heroCtaFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  30%, 100% {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+
+@keyframes subtleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-hero-cta-float {
+  animation: heroCtaFloat 3.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-shimmer-sweep {
+  animation: shimmerSweep 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+.animate-subtle-float {
+  animation: subtleFloat 3.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-subtle-float-delay {
+  animation: subtleFloat 3.6s ease-in-out infinite;
+  animation-delay: 1.5s;
+  will-change: transform;
+}
+
 
