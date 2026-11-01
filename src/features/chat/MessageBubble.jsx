@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Reply,
   Trash2,
@@ -11,10 +11,13 @@ import {
   Eye,
   Megaphone,
   Pencil,
+  Smile,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import TelegramVoicePlayer from './TelegramVoicePlayer';
 import TelegramVideoPlayer from './TelegramVideoPlayer';
+
+const TELEGRAM_REACTIONS = ['👍', '❤️', '🔥', '👏', '😂', '⚡', '🎉', '🤩', '🙏', '👎'];
 
 export default function MessageBubble({
   message,
@@ -25,10 +28,13 @@ export default function MessageBubble({
   onImageClick,
   onViewSeen,
   onEdit,
+  onToggleReaction,
 }) {
   const { t, i18n } = useTranslation();
   const [showContextMenu, setShowContextMenu] = useState(false);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
   const menuRef = useRef(null);
+  const reactionPickerRef = useRef(null);
 
   const isRtl = i18n.language === 'ar' || document.documentElement.dir === 'rtl';
   const isOwn = message.sender_id === currentUserId;
@@ -73,12 +79,41 @@ export default function MessageBubble({
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setShowContextMenu(false);
       }
+      if (reactionPickerRef.current && !reactionPickerRef.current.contains(e.target)) {
+        setShowReactionPicker(false);
+      }
     }
-    if (showContextMenu) {
+    if (showContextMenu || showReactionPicker) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showContextMenu]);
+  }, [showContextMenu, showReactionPicker]);
+
+  // Extract message reactions safely (supports array or dictionary)
+  const rawReactions = message.reactions || [];
+  const reactions = useMemo(() => {
+    if (Array.isArray(rawReactions)) {
+      return rawReactions.filter(
+        (r) => r && r.emoji && (r.count > 0 || (r.user_ids && r.user_ids.length > 0))
+      );
+    }
+    if (typeof rawReactions === 'object') {
+      return Object.entries(rawReactions)
+        .map(([emoji, uids]) => ({
+          emoji,
+          count: Array.isArray(uids) ? uids.length : 1,
+          user_ids: Array.isArray(uids) ? uids : [uids],
+        }))
+        .filter((r) => r.count > 0);
+    }
+    return [];
+  }, [rawReactions]);
+
+  // Telegram-style quick double click reaction (adds 👍)
+  const handleDoubleClick = (e) => {
+    e.stopPropagation();
+    onToggleReaction?.(message.id, '👍');
+  };
 
 
 
@@ -220,6 +255,7 @@ export default function MessageBubble({
           </div>
         ) : (
           <div
+            onDoubleClick={handleDoubleClick}
             className={`rounded-2xl px-3.5 py-2.5 shadow-sm text-sm break-words relative transition-colors ${
             isOwn
               ? isAnnouncement
@@ -411,6 +447,38 @@ export default function MessageBubble({
             </p>
           )}
 
+          {/* Telegram-style Reactions list (Pills like Image 2: ⚡ 1, 👍 2) */}
+          {reactions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5 pt-0.5">
+              {reactions.map((r) => {
+                const hasReacted = (r.user_ids || []).includes(currentUserId);
+                return (
+                  <button
+                    key={r.emoji}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleReaction?.(message.id, r.emoji);
+                    }}
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs transition-all cursor-pointer select-none active:scale-95 shadow-xs ${
+                      hasReacted
+                        ? isOwn
+                          ? 'bg-white/30 text-white border border-white/50 ring-1 ring-white/60 font-bold'
+                          : 'bg-blue-100 dark:bg-emerald-950/80 text-blue-700 dark:text-emerald-300 border border-blue-400 dark:border-emerald-500 font-bold'
+                        : isOwn
+                          ? 'bg-black/20 text-white/95 hover:bg-black/30 border border-white/15'
+                          : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700'
+                    }`}
+                    title={`${r.emoji} (${r.count || r.user_ids?.length || 1} kishi)`}
+                  >
+                    <span className="text-sm leading-none">{r.emoji}</span>
+                    <span className="text-[11px] font-bold">{r.count || r.user_ids?.length || 1}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {/* Time, edit status & delivery status */}
           {(() => {
             const otherViewers = (message.seen_by || []).filter(
@@ -466,6 +534,40 @@ export default function MessageBubble({
         </div>
       )}
 
+        {/* Floating Telegram Reaction Bar */}
+        {showReactionPicker && (
+          <div
+            ref={reactionPickerRef}
+            className={`absolute -top-11 z-50 flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-150 ${
+              isOwn ? 'right-0' : 'left-0'
+            }`}
+          >
+            {TELEGRAM_REACTIONS.map((emoji) => {
+              const existing = reactions.find((r) => r.emoji === emoji);
+              const hasReacted = existing?.user_ids?.includes(currentUserId);
+              return (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleReaction?.(message.id, emoji);
+                    setShowReactionPicker(false);
+                  }}
+                  className={`w-7 h-7 flex items-center justify-center rounded-full text-base hover:scale-130 transition-transform active:scale-90 cursor-pointer select-none ${
+                    hasReacted
+                      ? 'bg-blue-100 dark:bg-emerald-900/60 ring-2 ring-blue-500 dark:ring-emerald-400'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                  title={emoji}
+                >
+                  {emoji}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Hover / Context Actions */}
         <div
           ref={menuRef}
@@ -473,6 +575,18 @@ export default function MessageBubble({
             isOwn ? 'left-2' : 'right-2'
           }`}
         >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowReactionPicker(!showReactionPicker);
+            }}
+            className="p-1 rounded-full bg-white dark:bg-gray-700 text-amber-500 hover:text-amber-600 dark:text-amber-400 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer"
+            title="Emoji reaksiya"
+          >
+            <Smile className="w-3.5 h-3.5" />
+          </button>
+
           <button
             type="button"
             onClick={() => onViewSeen?.(message)}
@@ -517,10 +631,34 @@ export default function MessageBubble({
         {/* Right-click Context Menu dropdown if activated */}
         {showContextMenu && (
           <div
-            className={`absolute top-2 z-40 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[210px] max-w-[270px] text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
+            className={`absolute top-2 z-40 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[220px] max-w-[280px] text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
               isOwn ? 'right-0' : 'left-0'
             }`}
           >
+            {/* Quick emoji reactions row inside context menu */}
+            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40">
+              {['👍', '❤️', '🔥', '👏', '😂', '⚡', '🎉'].map((emoji) => {
+                const existing = reactions.find((r) => r.emoji === emoji);
+                const hasReacted = existing?.user_ids?.includes(currentUserId);
+                return (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => {
+                      setShowContextMenu(false);
+                      onToggleReaction?.(message.id, emoji);
+                    }}
+                    className={`w-6 h-6 flex items-center justify-center rounded-full hover:scale-130 transition-transform active:scale-90 text-sm cursor-pointer select-none ${
+                      hasReacted ? 'bg-blue-100 dark:bg-emerald-900/60 ring-1 ring-blue-500' : ''
+                    }`}
+                    title={emoji}
+                  >
+                    {emoji}
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Viewers Direct Information Section */}
             {(() => {
               const otherViewers = (message.seen_by || []).filter(

@@ -302,6 +302,38 @@ class LocalStore {
     } catch (e) {}
   }
 
+  // --- GLOBAL REALTIME CROSS-DEVICE ENGINE ---
+  startRealtimeEngine(intervalMs = 1000) {
+    if (typeof window === 'undefined') return;
+    if (this._realtimeTimer) return;
+
+    // Run initial sync right away
+    this.syncWithServer().catch(() => {});
+
+    // High frequency 1000ms heartbeat (checks every 1s)
+    this._realtimeTimer = setInterval(() => {
+      // In background or locked screen, slow to 2.5s to preserve battery
+      if (typeof document !== 'undefined' && document.hidden) {
+        if (!this._lastHiddenSync || Date.now() - this._lastHiddenSync > 2500) {
+          this._lastHiddenSync = Date.now();
+          this.syncWithServer().catch(() => {});
+        }
+        return;
+      }
+      this.syncWithServer().catch(() => {});
+    }, intervalMs);
+
+    // Instant wake sync on user switching back to tab, unlocking phone, or network coming online
+    const handleWake = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        this.syncWithServer().catch(() => {});
+      }
+    };
+    window.addEventListener('visibilitychange', handleWake);
+    window.addEventListener('focus', handleWake);
+    window.addEventListener('online', handleWake);
+  }
+
   // --- COURSES ---
   getCourses() {
     const list = this.getItem(STORAGE_KEYS.COURSES, INITIAL_COURSES);
@@ -1253,6 +1285,7 @@ class LocalStore {
             },
         chat_attachments: m.chat_attachments || [],
         seen_by: cleanedSeenBy,
+        reactions: Array.isArray(m.reactions) ? m.reactions : [],
       };
     });
 
@@ -1276,6 +1309,7 @@ class LocalStore {
       updated_at: nowIso,
       chat_attachments: msgData.chat_attachments || [],
       seen_by: msgData.seen_by || [],
+      reactions: msgData.reactions || [],
     };
 
     list.push(newMsg);
@@ -1398,6 +1432,87 @@ class LocalStore {
     this.setItem(STORAGE_KEYS.CHAT_MESSAGES, list);
     this.pushToServer({ [STORAGE_KEYS.CHAT_MESSAGES]: list }).catch(() => {});
     return true;
+  }
+
+  // --- TELEGRAM-STYLE MESSAGE REACTIONS ---
+  toggleMessageReaction(messageId, emoji, userId) {
+    if (!messageId || !emoji || !userId) return null;
+    const list = this.getItem(STORAGE_KEYS.CHAT_MESSAGES, this.getInitialChatMessages());
+    const idx = list.findIndex((m) => m.id === messageId);
+    if (idx < 0) return null;
+
+    const msg = { ...list[idx] };
+    const normalizedUid = this.normalizeUserId(userId);
+
+    // Reactions stored as array of objects: [{ emoji: '👍', count: 1, user_ids: ['usr-...'] }]
+    let reactions = Array.isArray(msg.reactions) ? [...msg.reactions] : [];
+
+    // Support legacy object format { '👍': ['usr-1'] }
+    if (!Array.isArray(msg.reactions) && msg.reactions && typeof msg.reactions === 'object') {
+      reactions = Object.entries(msg.reactions).map(([em, uids]) => ({
+        emoji: em,
+        count: Array.isArray(uids) ? uids.length : 1,
+        user_ids: Array.isArray(uids) ? uids : [uids],
+      }));
+    }
+
+    const rIdx = reactions.findIndex((r) => r.emoji === emoji);
+    if (rIdx >= 0) {
+      const existing = reactions[rIdx];
+      const userList = Array.isArray(existing.user_ids) ? [...existing.user_ids] : [];
+      const userIndex = userList.indexOf(normalizedUid);
+
+      if (userIndex >= 0) {
+        // User already reacted -> remove reaction (toggle off)
+        userList.splice(userIndex, 1);
+        if (userList.length === 0) {
+          reactions.splice(rIdx, 1);
+        } else {
+          reactions[rIdx] = {
+            ...existing,
+            count: userList.length,
+            user_ids: userList,
+          };
+        }
+      } else {
+        // Add user's reaction
+        userList.push(normalizedUid);
+        reactions[rIdx] = {
+          ...existing,
+          count: userList.length,
+          user_ids: userList,
+        };
+      }
+    } else {
+      // New emoji reaction
+      reactions.push({
+        emoji,
+        count: 1,
+        user_ids: [normalizedUid],
+      });
+    }
+
+    msg.reactions = reactions;
+    msg.updated_at = new Date().toISOString();
+    list[idx] = msg;
+
+    this.setItem(STORAGE_KEYS.CHAT_MESSAGES, list);
+    this.pushToServer({ [STORAGE_KEYS.CHAT_MESSAGES]: list }).catch(() => {});
+
+    // Notify listeners locally
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo-chat-update', {
+          detail: {
+            event: 'UPDATE',
+            groupId: String(msg.group_id || msg.groupId),
+            message: msg,
+          },
+        })
+      );
+    }
+
+    return msg;
   }
 
   // --- STUDENT REMINDERS ---

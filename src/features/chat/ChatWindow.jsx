@@ -223,28 +223,35 @@ export default function ChatWindow({
         if (activeGroup?.id) {
           const fresh = localStore.getChatMessages(activeGroup.id);
           setMessages((prev) => {
-            const lastPrev = prev[prev.length - 1];
-            const lastFresh = fresh[fresh.length - 1];
             const hasChanged =
               fresh.length !== prev.length ||
-              (fresh.length > 0 && (
-                lastFresh?.id !== lastPrev?.id ||
-                lastFresh?.updated_at !== lastPrev?.updated_at ||
-                lastFresh?.seen_by?.length !== lastPrev?.seen_by?.length
-              ));
+              fresh.some((m, i) => {
+                const p = prev[i];
+                if (!p || p.id !== m.id) return true;
+                if (p.updated_at !== m.updated_at) return true;
+                if (JSON.stringify(p.reactions || []) !== JSON.stringify(m.reactions || [])) return true;
+                if ((p.seen_by?.length || 0) !== (m.seen_by?.length || 0)) return true;
+                return false;
+              });
 
             if (hasChanged) {
-              setTimeout(() => {
-                if (messagesContainerRef.current) {
-                  const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-                  const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
-                  if (distanceToBottom < 200) {
-                    scrollToBottomSmooth();
-                  } else {
-                    setNewMessagesBadge(true);
+              const isNewMessageAtBottom =
+                fresh.length > prev.length ||
+                (fresh.length > 0 && fresh[fresh.length - 1]?.id !== prev[prev.length - 1]?.id);
+
+              if (isNewMessageAtBottom) {
+                setTimeout(() => {
+                  if (messagesContainerRef.current) {
+                    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+                    const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
+                    if (distanceToBottom < 200) {
+                      scrollToBottomSmooth();
+                    } else {
+                      setNewMessagesBadge(true);
+                    }
                   }
-                }
-              }, 50);
+                }, 50);
+              }
               return fresh;
             }
             return prev;
@@ -260,28 +267,35 @@ export default function ChatWindow({
       if (activeGroup?.id) {
         const fresh = localStore.getChatMessages(activeGroup.id);
         setMessages((prev) => {
-          const lastPrev = prev[prev.length - 1];
-          const lastFresh = fresh[fresh.length - 1];
           const hasChanged =
             fresh.length !== prev.length ||
-            (fresh.length > 0 && (
-              lastFresh?.id !== lastPrev?.id ||
-              lastFresh?.updated_at !== lastPrev?.updated_at ||
-              lastFresh?.seen_by?.length !== lastPrev?.seen_by?.length
-            ));
+            fresh.some((m, i) => {
+              const p = prev[i];
+              if (!p || p.id !== m.id) return true;
+              if (p.updated_at !== m.updated_at) return true;
+              if (JSON.stringify(p.reactions || []) !== JSON.stringify(m.reactions || [])) return true;
+              if ((p.seen_by?.length || 0) !== (m.seen_by?.length || 0)) return true;
+              return false;
+            });
 
           if (hasChanged) {
-            setTimeout(() => {
-              if (messagesContainerRef.current) {
-                const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-                const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
-                if (distanceToBottom < 200) {
-                  scrollToBottomSmooth();
-                } else {
-                  setNewMessagesBadge(true);
+            const isNewMessageAtBottom =
+              fresh.length > prev.length ||
+              (fresh.length > 0 && fresh[fresh.length - 1]?.id !== prev[prev.length - 1]?.id);
+
+            if (isNewMessageAtBottom) {
+              setTimeout(() => {
+                if (messagesContainerRef.current) {
+                  const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+                  const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
+                  if (distanceToBottom < 200) {
+                    scrollToBottomSmooth();
+                  } else {
+                    setNewMessagesBadge(true);
+                  }
                 }
-              }
-            }, 50);
+              }, 50);
+            }
             return fresh;
           }
           return prev;
@@ -484,6 +498,20 @@ export default function ChatWindow({
     } catch (err) {
       console.error('Failed to delete message:', err);
       toast.error('Xabarni o‘chirishda xatolik');
+    }
+  };
+
+  const handleToggleReaction = async (messageId, emoji) => {
+    if (!currentUser?.id || !messageId) return;
+    try {
+      const updated = localStore.toggleMessageReaction(messageId, emoji, currentUser.id);
+      if (updated) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === messageId ? { ...m, reactions: updated.reactions } : m))
+        );
+      }
+    } catch (err) {
+      console.error('Failed to toggle reaction:', err);
     }
   };
 
@@ -805,6 +833,7 @@ export default function ChatWindow({
               onDelete={handleDeleteMessage}
               onImageClick={(src) => setPreviewImageSrc(src)}
               onViewSeen={(m) => setSeenModalMessage(m)}
+              onToggleReaction={handleToggleReaction}
               onEdit={(m) => {
                 setReplyingTo(null);
                 setEditingMessage(m);

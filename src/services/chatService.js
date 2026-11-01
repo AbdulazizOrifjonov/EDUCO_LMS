@@ -688,6 +688,14 @@ export async function markAllMessagesAsSeen(groupId, currentUser) {
 }
 
 /**
+ * Toggle a reaction on a message (Telegram-style)
+ */
+export async function toggleReaction(messageId, emoji, userId) {
+  if (!messageId || !emoji || !userId) return null;
+  return localStore.toggleMessageReaction(messageId, emoji, userId);
+}
+
+/**
  * Subscribe to live message events (both same-tab custom events and cross-tab localStorage events)
  */
 export function subscribeToMessages(groupId, callback) {

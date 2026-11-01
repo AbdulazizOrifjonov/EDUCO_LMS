@@ -81,7 +81,13 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = initializeAuth();
     // Launch global high-frequency cross-device sync engine (1s heartbeat)
-    localStore.startRealtimeEngine();
+    try {
+      if (typeof localStore?.startRealtimeEngine === 'function') {
+        localStore.startRealtimeEngine();
+      }
+    } catch (e) {
+      console.warn('Realtime engine start error:', e);
+    }
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };
