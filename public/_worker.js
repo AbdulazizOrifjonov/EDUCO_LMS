@@ -165,11 +165,30 @@ export default {
 
       // GET /api/sync-store - Fetch all shared data (supports 304 Not Modified ETag caching)
       if (request.method === 'GET') {
-        const clientETag = request.headers.get('if-none-match');
-        const hasBypassParam = url.searchParams.has('t') || url.searchParams.has('nocache');
-        const currentETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
+        const rawClientETag = request.headers.get('if-none-match') || '';
+        const clientETag = rawClientETag.replace(/^W\//, '').replace(/"/g, '').trim();
 
-        if (!hasBypassParam && clientETag && clientETag === currentETag) {
+        let dbMaxUpdated = null;
+        let dbKeyCount = 0;
+
+        if (db) {
+          try {
+            const meta = await db.prepare('SELECT MAX(updated_at) as max_up, COUNT(*) as cnt FROM kv_store').first();
+            if (meta) {
+              dbMaxUpdated = meta.max_up;
+              dbKeyCount = meta.cnt;
+            }
+          } catch (e) {
+            console.warn('D1 meta error:', e);
+          }
+        }
+
+        const currentETagValue = dbMaxUpdated
+          ? `d1-${dbKeyCount}-${dbMaxUpdated}`
+          : `mem-${currentStoreVersion}-${lastStoreUpdatedAt}`;
+        const currentETag = `"${currentETagValue}"`;
+
+        if (clientETag && clientETag === currentETagValue) {
           return new Response(null, {
             status: 304,
             headers: {
@@ -283,6 +302,16 @@ export default {
                   await kv.put(key, JSON.stringify(value));
                 } catch (_) {}
               }
+            }
+
+            let postETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
+            if (db) {
+              try {
+                const meta = await db.prepare('SELECT MAX(updated_at) as max_up, COUNT(*) as cnt FROM kv_store').first();
+                if (meta && meta.max_up) {
+                  postETag = `"d1-${meta.cnt}-${meta.max_up}"`;
+                }
+              } catch (_) {}
             }
             return jsonResponse({ success: true, timestamp: now }, 200, { 'ETag': postETag });
           }

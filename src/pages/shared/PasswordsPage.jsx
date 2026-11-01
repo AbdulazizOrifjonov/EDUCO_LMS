@@ -98,6 +98,13 @@ export default function PasswordsPage() {
     fetchCredentials();
   }, [fetchCredentials]);
 
+  // Real-time synchronization across devices (when roles, users, or passwords change)
+  useEffect(() => {
+    const handleSync = () => fetchCredentials();
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [fetchCredentials]);
+
   const toggleRowVisibility = (id) => {
     setVisibleRowIds((prev) => ({
       ...prev,

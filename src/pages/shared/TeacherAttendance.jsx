@@ -83,6 +83,13 @@ export default function TeacherAttendance() {
     fetchRecords();
   }, [fetchRecords]);
 
+  // Real-time synchronization across devices (when another device marks attendance)
+  useEffect(() => {
+    const handleSync = () => fetchRecords();
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [fetchRecords]);
+
   // Quick 1-click status change
   const handleQuickMark = async (teacherId, newStatus) => {
     try {

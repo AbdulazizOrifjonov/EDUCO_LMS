@@ -237,7 +237,8 @@ class LocalStore {
       if (this._lastServerETag) {
         headers['If-None-Match'] = this._lastServerETag;
       }
-      const syncUrl = this._lastServerETag ? '/api/sync-store' : `/api/sync-store?t=${Date.now()}`;
+      // Always bust local browser HTTP cache while allowing server-side ETag 304 check
+      const syncUrl = `/api/sync-store?t=${Date.now()}`;
       const res = await fetch(syncUrl, { headers });
       if (res.status === 304) {
         // Data on server is unchanged - ultra fast 0-byte 1-second heartbeat!

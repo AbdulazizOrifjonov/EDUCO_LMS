@@ -1,6 +1,7 @@
 import React, { useEffect, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
+import { localStore } from '@/lib/localStore';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ToastContainer from '@/components/ui/Toast';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -79,6 +80,8 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = initializeAuth();
+    // Launch global high-frequency cross-device sync engine (1s heartbeat)
+    localStore.startRealtimeEngine();
     return () => {
       if (typeof unsubscribe === 'function') unsubscribe();
     };

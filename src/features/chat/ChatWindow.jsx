@@ -214,18 +214,86 @@ export default function ChatWindow({
 
     // Active Chat High-Frequency Poller (every 1s while user is viewing chat room)
     let isPolling = false;
-    const chatPollTimer = setInterval(async () => {
+    const syncAndRefresh = async () => {
       if (isPolling) return;
       if (typeof document !== 'undefined' && document.hidden) return;
       isPolling = true;
       try {
         await localStore.syncWithServer();
+        if (activeGroup?.id) {
+          const fresh = localStore.getChatMessages(activeGroup.id);
+          setMessages((prev) => {
+            const lastPrev = prev[prev.length - 1];
+            const lastFresh = fresh[fresh.length - 1];
+            const hasChanged =
+              fresh.length !== prev.length ||
+              (fresh.length > 0 && (
+                lastFresh?.id !== lastPrev?.id ||
+                lastFresh?.updated_at !== lastPrev?.updated_at ||
+                lastFresh?.seen_by?.length !== lastPrev?.seen_by?.length
+              ));
+
+            if (hasChanged) {
+              setTimeout(() => {
+                if (messagesContainerRef.current) {
+                  const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+                  const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
+                  if (distanceToBottom < 200) {
+                    scrollToBottomSmooth();
+                  } else {
+                    setNewMessagesBadge(true);
+                  }
+                }
+              }, 50);
+              return fresh;
+            }
+            return prev;
+          });
+        }
       } catch (_) {}
       isPolling = false;
-    }, 1000);
+    };
+
+    const chatPollTimer = setInterval(syncAndRefresh, 1000);
+
+    const handleSyncEvent = () => {
+      if (activeGroup?.id) {
+        const fresh = localStore.getChatMessages(activeGroup.id);
+        setMessages((prev) => {
+          const lastPrev = prev[prev.length - 1];
+          const lastFresh = fresh[fresh.length - 1];
+          const hasChanged =
+            fresh.length !== prev.length ||
+            (fresh.length > 0 && (
+              lastFresh?.id !== lastPrev?.id ||
+              lastFresh?.updated_at !== lastPrev?.updated_at ||
+              lastFresh?.seen_by?.length !== lastPrev?.seen_by?.length
+            ));
+
+          if (hasChanged) {
+            setTimeout(() => {
+              if (messagesContainerRef.current) {
+                const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+                const distanceToBottom = scrollHeight - (scrollTop + clientHeight);
+                if (distanceToBottom < 200) {
+                  scrollToBottomSmooth();
+                } else {
+                  setNewMessagesBadge(true);
+                }
+              }
+            }, 50);
+            return fresh;
+          }
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener('educo-data-sync', handleSyncEvent);
 
     return () => {
       clearInterval(chatPollTimer);
+      window.removeEventListener('educo-data-sync', handleSyncEvent);
       if (channel) {
         channel.unsubscribe();
       }

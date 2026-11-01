@@ -696,7 +696,7 @@ export function subscribeToMessages(groupId, callback) {
   const handleLocalEvent = (e) => {
     const detail = e.detail;
     if (!detail) return;
-    if (detail.event === 'INSERT' && detail.groupId === groupId && detail.message) {
+    if (detail.event === 'INSERT' && String(detail.groupId) === String(groupId) && detail.message) {
       callback({ event: 'INSERT', message: detail.message });
     } else if (detail.event === 'UPDATE' && detail.message) {
       callback({ event: 'UPDATE', message: detail.message });
