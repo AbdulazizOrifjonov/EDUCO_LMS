@@ -12,7 +12,11 @@ import {
 } from 'lucide-react';
 import ScrollReveal from '@/hooks/useScrollReveal';
 
-export default function CoursesSection({ courses = [], onSelectCourse = () => {} }) {
+export default function CoursesSection({
+  courses = [],
+  onSelectCourse = () => {},
+  onEnrollCourse,
+}) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = useMemo(() => {
@@ -165,7 +169,13 @@ export default function CoursesSection({ courses = [], onSelectCourse = () => {}
 
                   <button
                     type="button"
-                    onClick={() => scrollToContact(course.title)}
+                    onClick={() => {
+                      if (onEnrollCourse) {
+                        onEnrollCourse(course);
+                      } else {
+                        scrollToContact(course.title);
+                      }
+                    }}
                     className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 dark:from-emerald-600 dark:to-teal-700 dark:hover:from-emerald-700 dark:hover:to-teal-800 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-600/20 dark:shadow-emerald-600/20 transition-all cursor-pointer text-center flex items-center justify-center gap-1"
                   >
                     <span>Yozilish</span>

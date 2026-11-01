@@ -13,8 +13,17 @@ import {
   Play,
 } from 'lucide-react';
 
-export function CourseDetailModal({ course, onClose, onRegister }) {
+export function CourseDetailModal({ course, onClose, onRegister, onEnroll }) {
   if (!course) return null;
+
+  const handleEnrollClick = () => {
+    onClose();
+    if (onEnroll) {
+      onEnroll(course);
+    } else if (onRegister) {
+      onRegister(course.title || course);
+    }
+  };
 
   return (
     <div
@@ -125,11 +134,8 @@ export function CourseDetailModal({ course, onClose, onRegister }) {
           </button>
           <button
             type="button"
-            onClick={() => {
-              onClose();
-              onRegister(course.title);
-            }}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 dark:from-emerald-600 dark:to-teal-700 dark:hover:from-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
+            onClick={handleEnrollClick}
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 dark:from-emerald-600 dark:to-teal-700 dark:hover:from-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <span>Ushbu kursga yozilish</span>
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />

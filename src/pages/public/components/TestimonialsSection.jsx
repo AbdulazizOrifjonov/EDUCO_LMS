@@ -49,8 +49,12 @@ export default function TestimonialsSection({ testimonials = [] }) {
               {/* Author Info */}
               <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center gap-3">
                 <img
-                  src={item.avatar_url}
+                  src={item.avatar_url || '/educo-logo.png'}
                   alt={item.author_name}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/educo-logo.png';
+                  }}
                   className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 shrink-0"
                 />
                 <div className="min-w-0">

@@ -29,17 +29,24 @@ const DEFAULT_COURSES = [
   { id: 'c-chess', title: 'Professional Shaxmat akademiyasi', category: 'Sport & Mantiq', badge: 'Chempionlar' },
 ];
 
-export default function CtaSection({ settings, courses = [] }) {
+export default function CtaSection({ settings, courses = [], prefilledCourse = '' }) {
   const [formData, setFormData] = useState({
     name: '',
     phone: '+998 ',
-    course: '',
+    course: prefilledCourse || '',
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Sync pre-filled course when selected from Course card or modal
+  useEffect(() => {
+    if (prefilledCourse) {
+      setFormData((prev) => ({ ...prev, course: prefilledCourse }));
+    }
+  }, [prefilledCourse]);
 
   // Merge available courses
   const courseOptions = React.useMemo(() => {

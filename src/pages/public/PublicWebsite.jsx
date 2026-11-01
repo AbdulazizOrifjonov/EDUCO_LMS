@@ -73,10 +73,13 @@ export default function PublicWebsite() {
   // Handle course enrollment click (pre-fill CTA form and scroll smoothly)
   const handleEnrollCourse = (course) => {
     setSelectedCourse(null);
-    setPrefilledCourseTitle(course.title);
-    const ctaEl = document.getElementById('aloqa');
+    const title = course?.title || (typeof course === 'string' ? course : '');
+    setPrefilledCourseTitle(title);
+    const ctaEl = document.getElementById('contact') || document.getElementById('aloqa');
     if (ctaEl) {
-      ctaEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const yOffset = -80;
+      const y = ctaEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
