@@ -147,6 +147,7 @@ export default function ChatPage() {
           activeGroup={activeGroup}
           currentUser={currentUser}
           userRole={role}
+          allGroups={groups}
           onBackToList={handleBackToList}
         />
       </div>

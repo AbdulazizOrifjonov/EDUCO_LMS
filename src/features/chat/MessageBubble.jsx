@@ -12,8 +12,12 @@ import {
   Megaphone,
   Pencil,
   Smile,
+  Pin,
+  Copy,
+  Forward,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/components/ui/Toast';
 import TelegramVoicePlayer from './TelegramVoicePlayer';
 import TelegramVideoPlayer from './TelegramVideoPlayer';
 
@@ -29,14 +33,19 @@ export default function MessageBubble({
   onViewSeen,
   onEdit,
   onToggleReaction,
+  onPin,
+  onForward,
 }) {
   const { t, i18n } = useTranslation();
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [reactionPlacement, setReactionPlacement] = useState('top');
+  const [menuPlacement, setMenuPlacement] = useState('bottom');
   const menuRef = useRef(null);
+  const contextMenuRef = useRef(null);
   const reactionPickerRef = useRef(null);
   const bubbleRef = useRef(null);
+  const clickTimerRef = useRef(null);
 
   const toggleReactionPicker = (e) => {
     e?.stopPropagation?.();
@@ -50,6 +59,82 @@ export default function MessageBubble({
       }
     }
     setShowReactionPicker((prev) => !prev);
+  };
+
+  const handleBubbleClick = (e) => {
+    // If clicked on an interactive control (audio player, link, button), don't open context menu
+    if (e.target.closest('button, a, input, audio, video')) {
+      return;
+    }
+
+    if (clickTimerRef.current) {
+      // Double click/tap detected: quick Telegram like 👍
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+      setShowContextMenu(false);
+      onToggleReaction?.(message.id, '👍');
+      return;
+    }
+
+    clickTimerRef.current = setTimeout(() => {
+      clickTimerRef.current = null;
+      // Single tap/click detected: Open Telegram Menu!
+      if (bubbleRef.current) {
+        const rect = bubbleRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        if (spaceBelow < 340 && rect.top > 250) {
+          setMenuPlacement('top');
+        } else {
+          setMenuPlacement('bottom');
+        }
+      }
+      setShowContextMenu((prev) => !prev);
+    }, 220);
+  };
+
+  const handleCopy = (e) => {
+    e?.stopPropagation?.();
+    setShowContextMenu(false);
+    const contentToCopy = displayMessageText || message.chat_attachments?.[0]?.file_name || '';
+    if (contentToCopy) {
+      navigator.clipboard?.writeText(contentToCopy);
+      toast.success(t('chat.copied', 'Xabar nusxalandi! 📋'));
+    }
+  };
+
+  const handlePin = (e) => {
+    e?.stopPropagation?.();
+    setShowContextMenu(false);
+    onPin?.(message);
+  };
+
+  const handleForward = (e) => {
+    e?.stopPropagation?.();
+    setShowContextMenu(false);
+    onForward?.(message);
+  };
+
+  const handleEdit = (e) => {
+    e?.stopPropagation?.();
+    setShowContextMenu(false);
+    onEdit?.(message);
+  };
+
+  const handleReply = (e) => {
+    e?.stopPropagation?.();
+    setShowContextMenu(false);
+    onReply?.(message);
+  };
+
+  const handleDelete = (e) => {
+    e?.stopPropagation?.();
+    setShowContextMenu(false);
+    onDelete?.(message.id);
+  };
+
+  const handleReact = (emoji) => {
+    setShowContextMenu(false);
+    onToggleReaction?.(message.id, emoji);
   };
 
   const isRtl = i18n.language === 'ar' || document.documentElement.dir === 'rtl';
@@ -89,10 +174,14 @@ export default function MessageBubble({
     .replace(/<!--REPLY:[\s\S]*?-->/g, '')
     .trim();
 
-  // Close context menu on outside click
+  // Close context menu on outside click or touch
   useEffect(() => {
     function handleClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(e.target) &&
+        !bubbleRef.current?.contains(e.target)
+      ) {
         setShowContextMenu(false);
       }
       if (reactionPickerRef.current && !reactionPickerRef.current.contains(e.target)) {
@@ -101,8 +190,12 @@ export default function MessageBubble({
     }
     if (showContextMenu || showReactionPicker) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [showContextMenu, showReactionPicker]);
 
   // Extract message reactions safely (supports array or dictionary)
@@ -216,11 +309,21 @@ export default function MessageBubble({
 
   return (
     <div
+      id={`msg-${message.id}`}
       className={`group flex items-end mb-4 relative min-w-0 max-w-full ${
         isOwn ? 'justify-end' : 'justify-start'
       }`}
       onContextMenu={(e) => {
         e.preventDefault();
+        if (bubbleRef.current) {
+          const rect = bubbleRef.current.getBoundingClientRect();
+          const spaceBelow = window.innerHeight - rect.bottom;
+          if (spaceBelow < 340 && rect.top > 250) {
+            setMenuPlacement('top');
+          } else {
+            setMenuPlacement('bottom');
+          }
+        }
         setShowContextMenu(true);
       }}
     >
@@ -257,7 +360,10 @@ export default function MessageBubble({
 
         {isPureVideoNote ? (
           /* Pure Circular Video Note - Freestanding Telegram Style (NO background box!) */
-          <div className={`relative select-none my-1 flex flex-col ${isOwn ? 'items-end' : 'items-start'}`}>
+          <div
+            onClick={handleBubbleClick}
+            className={`relative select-none my-1 flex flex-col cursor-pointer ${isOwn ? 'items-end' : 'items-start'}`}
+          >
             <TelegramVideoPlayer
               src={circularVideoAttachment.signedUrl || circularVideoAttachment.file_url}
               fileName={circularVideoAttachment.file_name}
@@ -271,8 +377,8 @@ export default function MessageBubble({
           </div>
         ) : (
           <div
-            onDoubleClick={handleDoubleClick}
-            className={`rounded-2xl px-3.5 py-2.5 shadow-sm text-sm break-words relative transition-colors ${
+            onClick={handleBubbleClick}
+            className={`rounded-2xl px-3.5 py-2.5 shadow-sm text-sm break-words relative transition-colors cursor-pointer select-none ${
             isOwn
               ? isAnnouncement
                 ? 'bg-gradient-to-r from-rose-900 to-[#123D78] text-white rounded-br-xs ring-2 ring-rose-500/50'
@@ -533,6 +639,11 @@ export default function MessageBubble({
                   </span>
                 )}
                 <span>{formatTime(message.created_at)}</span>
+                {message.is_pinned && (
+                  <span className="inline-flex items-center text-amber-400 dark:text-amber-300 ml-0.5" title="Qadalgan xabar">
+                    <Pin className="w-2.5 h-2.5 rotate-45 stroke-[2.5]" />
+                  </span>
+                )}
                 {isOwn && (
                   isSeenByOthers ? (
                     <span className="inline-flex items-center text-cyan-300 font-bold" title={`Ko'rildi (${otherViewers.length} kishi)`}>
@@ -643,134 +754,135 @@ export default function MessageBubble({
           )}
         </div>
 
-        {/* Right-click Context Menu dropdown if activated */}
+        {/* Telegram-style Action & Reaction Menu on Single Tap / Long Press / Right Click */}
         {showContextMenu && (
-          <div
-            className={`absolute top-2 z-40 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[220px] max-w-[280px] text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
-              isOwn ? 'right-0' : 'left-0'
-            }`}
-          >
-            {/* Quick emoji reactions row inside context menu */}
-            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40">
-              {['👍', '❤️', '🔥', '👏', '😂', '⚡', '🎉'].map((emoji) => {
-                const existing = reactions.find((r) => r.emoji === emoji);
-                const hasReacted = existing?.user_ids?.includes(currentUserId);
-                return (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => {
-                      setShowContextMenu(false);
-                      onToggleReaction?.(message.id, emoji);
-                    }}
-                    className={`w-6 h-6 flex items-center justify-center rounded-full hover:scale-130 transition-transform active:scale-90 text-sm cursor-pointer select-none ${
-                      hasReacted ? 'bg-blue-100 dark:bg-emerald-900/60 ring-1 ring-blue-500' : ''
-                    }`}
-                    title={emoji}
-                  >
-                    {emoji}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Viewers Direct Information Section */}
-            {(() => {
-              const otherViewers = (message.seen_by || []).filter(
-                (s) => String(s.user_id) !== String(message.sender_id)
-              );
-              return (
-                <div className="border-b border-gray-100 dark:border-gray-700/60 pb-1.5 mb-1 px-3">
-                  <div
-                    onClick={() => {
-                      setShowContextMenu(false);
-                      onViewSeen?.(message);
-                    }}
-                    className="flex items-center justify-between text-[#123D78] dark:text-blue-400 font-bold py-1 cursor-pointer hover:opacity-85"
-                  >
-                    <span className="flex items-center gap-1.5 text-xs">
-                      <Eye className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                      <span>Kimlar ko‘rdi</span>
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
-                      {otherViewers.length}
-                    </span>
-                  </div>
-
-                  {/* Immediate viewer names list directly in context menu */}
-                  {otherViewers.length > 0 ? (
-                    <div className="space-y-1 mt-1 max-h-36 overflow-y-auto">
-                      {otherViewers.map((viewer, idx) => (
-                        <div
-                          key={viewer.user_id || idx}
-                          className="flex items-center justify-between text-[11px] text-gray-700 dark:text-gray-200 py-0.5"
-                        >
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <div className="w-4 h-4 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
-                              {(viewer.user_name || 'U').charAt(0).toUpperCase()}
-                            </div>
-                            <span className="truncate font-medium text-gray-800 dark:text-gray-200">
-                              {viewer.user_name || 'Foydalanuvchi'}
-                            </span>
-                          </div>
-                          {viewer.seen_at && (
-                            <span className="text-[9px] text-gray-400 dark:text-gray-500 font-normal ml-1.5 shrink-0">
-                              {formatTime(viewer.seen_at)}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 italic mt-0.5">
-                      Hali hech kim ko‘rmadi
-                    </p>
-                  )}
-                </div>
-              );
-            })()}
-
-            {/* Telegram-style Edit Message option */}
-            {isOwn && (
-              <button
-                type="button"
-                onClick={() => {
-                  setShowContextMenu(false);
-                  onEdit?.(message);
-                }}
-                className="w-full flex items-center space-x-2 rtl:space-x-reverse px-3 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-left font-semibold cursor-pointer"
-              >
-                <Pencil className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Tahrirlash</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
+          <>
+            {/* Touch Backdrop for mobile / desktop outside dismiss */}
+            <div
+              className="fixed inset-0 z-40 bg-black/20 sm:bg-transparent"
+              onClick={(e) => {
+                e.stopPropagation();
                 setShowContextMenu(false);
-                onReply?.(message);
               }}
-              className="w-full flex items-center space-x-2 rtl:space-x-reverse px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-left cursor-pointer"
-            >
-              <Reply className="w-3.5 h-3.5" />
-              <span>{t('chat.reply', 'Reply')}</span>
-            </button>
+            />
 
-            {canDelete && (
-              <button
-                type="button"
-                onClick={() => {
-                  setShowContextMenu(false);
-                  onDelete?.(message.id);
-                }}
-                className="w-full flex items-center space-x-2 rtl:space-x-reverse px-3 py-2 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-left cursor-pointer"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>{t('chat.delete', 'Delete')}</span>
-              </button>
-            )}
-          </div>
+            {/* Telegram Popup Menu with Emojis & Actions */}
+            <div
+              ref={contextMenuRef}
+              className={`absolute z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 w-64 sm:w-72 text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
+                menuPlacement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+              } ${isOwn ? 'right-0' : 'left-0'}`}
+            >
+              {/* 1. Quick Emoji Reactions Bar (All 10 Telegram Reactions) */}
+              <div className="flex items-center gap-1 px-2.5 py-2 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/80 dark:bg-gray-900/40 overflow-x-auto no-scrollbar">
+                {TELEGRAM_REACTIONS.map((emoji) => {
+                  const existing = reactions.find((r) => r.emoji === emoji);
+                  const hasReacted = existing?.user_ids?.includes(currentUserId);
+                  return (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => handleReact(emoji)}
+                      className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:scale-125 transition-transform active:scale-90 text-base sm:text-lg cursor-pointer shrink-0 select-none ${
+                        hasReacted
+                          ? 'bg-blue-100 dark:bg-emerald-900/60 ring-2 ring-blue-500 dark:ring-emerald-400'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                      title={emoji}
+                    >
+                      {emoji}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 2. Action Menu Items (Exactly as in Telegram) */}
+              <div className="py-1">
+                {/* Reply */}
+                <button
+                  type="button"
+                  onClick={handleReply}
+                  className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
+                >
+                  <Reply className="w-4 h-4 text-blue-500 shrink-0" />
+                  <span>{t('chat.reply', 'Reply')}</span>
+                </button>
+
+                {/* Edit (if own message) */}
+                {isOwn && (
+                  <button
+                    type="button"
+                    onClick={handleEdit}
+                    className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
+                  >
+                    <Pencil className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>Tahrirlash</span>
+                  </button>
+                )}
+
+                {/* Pin */}
+                <button
+                  type="button"
+                  onClick={handlePin}
+                  className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
+                >
+                  <Pin className="w-4 h-4 text-amber-500 rotate-45 shrink-0" />
+                  <span>{message.is_pinned ? 'Qadashdan olish' : 'Xabarni qadash'}</span>
+                </button>
+
+                {/* Copy */}
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
+                >
+                  <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
+                  <span>Nusxa olish</span>
+                </button>
+
+                {/* Forward */}
+                <button
+                  type="button"
+                  onClick={handleForward}
+                  className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
+                >
+                  <Forward className="w-4 h-4 text-cyan-500 shrink-0" />
+                  <span>Uzatish (Forward)</span>
+                </button>
+
+                {/* Kimlar ko'rdi (Viewers) */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowContextMenu(false);
+                    onViewSeen?.(message);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
+                    <Eye className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <span>Kimlar ko‘rdi</span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                    {(message.seen_by || []).filter((s) => String(s.user_id) !== String(message.sender_id)).length}
+                  </span>
+                </button>
+
+                {/* Delete (if allowed) */}
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-left font-semibold cursor-pointer transition-colors border-t border-gray-100 dark:border-gray-700/60 mt-1"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500 shrink-0" />
+                    <span>{t('chat.delete', 'Delete')}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>

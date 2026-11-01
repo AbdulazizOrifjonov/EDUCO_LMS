@@ -16,6 +16,8 @@ import {
   Lock,
   Camera,
   Trash2,
+  Pin,
+  Forward,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/ui/Toast';
@@ -41,6 +43,7 @@ export default function ChatWindow({
   activeGroup,
   currentUser,
   userRole,
+  allGroups = [],
   onBackToList,
 }) {
   const { t } = useTranslation();
@@ -55,6 +58,7 @@ export default function ChatWindow({
   const [previewImageSrc, setPreviewImageSrc] = useState(null);
   const [showStaffList, setShowStaffList] = useState(false);
   const [seenModalMessage, setSeenModalMessage] = useState(null);
+  const [forwardModalMessage, setForwardModalMessage] = useState(null);
 
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [newMessagesBadge, setNewMessagesBadge] = useState(false);
@@ -515,6 +519,52 @@ export default function ChatWindow({
     }
   };
 
+  const handlePinMessage = async (msg) => {
+    if (!msg?.id) return;
+    try {
+      const newPinned = !msg.is_pinned;
+      await updateMessage(msg.id, { is_pinned: newPinned });
+      setMessages((prev) =>
+        prev.map((m) => (m.id === msg.id ? { ...m, is_pinned: newPinned } : m))
+      );
+      toast.success(newPinned ? 'Xabar chatga qadab qo‘yildi 📌' : 'Xabar qadashdan olindi');
+    } catch (err) {
+      console.error('Failed to pin message:', err);
+      toast.error('Xabarni qadashda xatolik yuz berdi');
+    }
+  };
+
+  const handleForwardMessage = (msg) => {
+    setForwardModalMessage(msg);
+  };
+
+  const handleConfirmForward = async (targetGroupId) => {
+    if (!forwardModalMessage || !targetGroupId) return;
+    try {
+      const forwardPrefix = forwardModalMessage.sender?.first_name
+        ? `↪ Uzatilgan xabar (${forwardModalMessage.sender.first_name}):\n`
+        : '↪ Uzatilgan xabar:\n';
+      const cleanText = forwardModalMessage.message
+        ? `${forwardPrefix}${forwardModalMessage.message}`
+        : '';
+      await sendMessage({
+        groupId: targetGroupId,
+        senderId: currentUser.id,
+        text: cleanText,
+        attachments: forwardModalMessage.chat_attachments || [],
+      });
+      setForwardModalMessage(null);
+      toast.success('Xabar muvaffaqiyatli uzatildi! 🚀');
+    } catch (err) {
+      console.error('Failed to forward message:', err);
+      toast.error('Xabarni uzatishda xatolik yuz berdi');
+    }
+  };
+
+  const pinnedMessage = useMemo(() => {
+    return messages.filter((m) => m.is_pinned).slice(-1)[0] || null;
+  }, [messages]);
+
   if (!activeGroup) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-900/50">
@@ -759,6 +809,34 @@ export default function ChatWindow({
         </div>
       )}
 
+      {/* Pinned Message Banner (Telegram Style) */}
+      {pinnedMessage && (
+        <div
+          onClick={() => {
+            const el = document.getElementById(`msg-${pinnedMessage.id}`);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.classList.add('ring-2', 'ring-blue-500', 'transition-all');
+              setTimeout(() => el.classList.remove('ring-2', 'ring-blue-500'), 1500);
+            }
+          }}
+          className="px-4 py-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700/80 flex items-center justify-between shadow-xs z-10 cursor-pointer select-none transition-colors hover:bg-gray-50 dark:hover:bg-gray-750"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-1 h-7 rounded-full bg-blue-600 dark:bg-emerald-500 shrink-0" />
+            <div className="min-w-0">
+              <span className="text-[11px] font-bold text-blue-600 dark:text-emerald-400 block truncate">
+                Qadalgan xabar
+              </span>
+              <p className="text-xs text-gray-700 dark:text-gray-300 truncate font-medium">
+                {pinnedMessage.message || 'Media / Fayl xabari'}
+              </p>
+            </div>
+          </div>
+          <Pin className="w-4 h-4 text-amber-500 shrink-0 rotate-45" />
+        </div>
+      )}
+
       {/* Message List Area - Telegram-Style bottom alignment */}
       <div
         ref={messagesContainerRef}
@@ -836,6 +914,8 @@ export default function ChatWindow({
                   onImageClick={(src) => setPreviewImageSrc(src)}
                   onViewSeen={(m) => setSeenModalMessage(m)}
                   onToggleReaction={handleToggleReaction}
+                  onPin={handlePinMessage}
+                  onForward={handleForwardMessage}
                   onEdit={(m) => {
                     setReplyingTo(null);
                     setEditingMessage(m);
@@ -1045,6 +1125,81 @@ export default function ChatWindow({
               >
                 Yopish
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Forward Message Modal (Telegram Style) */}
+      {forwardModalMessage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+          onClick={() => setForwardModalMessage(null)}
+        >
+          <div
+            className="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 p-5 space-y-4 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shadow-xs">
+                  <Forward className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                    Xabarni uzatish
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    Qaysi guruh yoki chatga yubormoqchisiz?
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setForwardModalMessage(null)}
+                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Snippet */}
+            <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60 text-xs">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                Uzatilayotgan xabar:
+              </span>
+              <p className="text-gray-800 dark:text-gray-200 font-medium truncate">
+                {forwardModalMessage.message || 'Media / Fayl'}
+              </p>
+            </div>
+
+            {/* Group targets */}
+            <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+              {allGroups
+                .filter((g) => g.id !== activeGroup?.id)
+                .map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => handleConfirmForward(g.id)}
+                    className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800/80 border border-gray-100 dark:border-gray-800 text-left transition-colors cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                        {g.name?.charAt(0).toUpperCase() || 'G'}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-gray-900 dark:text-white block truncate">
+                          {g.name}
+                        </span>
+                        <span className="text-[10px] text-gray-400 truncate block">
+                          {g.isStaffChat ? 'Xodimlar chati' : g.course?.name || 'Guruh'}
+                        </span>
+                      </div>
+                    </div>
+                    <Forward className="w-4 h-4 text-gray-300 group-hover:text-cyan-500 transition-colors shrink-0" />
+                  </button>
+                ))}
             </div>
           </div>
         </div>
