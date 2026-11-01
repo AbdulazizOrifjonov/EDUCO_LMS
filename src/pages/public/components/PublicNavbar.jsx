@@ -114,9 +114,7 @@ const navTranslations = {
 export default function PublicNavbar({ settings }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
-  const roleDropdownRef = useRef(null);
   const moreDropdownRef = useRef(null);
 
   const { user, profile } = useAuth();
@@ -139,18 +137,15 @@ export default function PublicNavbar({ settings }) {
   // Close dropdowns when clicked outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target)) {
-        setRoleDropdownOpen(false);
-      }
       if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target)) {
         setMoreDropdownOpen(false);
       }
     };
-    if (roleDropdownOpen || moreDropdownOpen) {
+    if (moreDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [roleDropdownOpen, moreDropdownOpen]);
+  }, [moreDropdownOpen]);
 
   // Primary links (Always visible on desktop lg+)
   const primaryLinks = [
@@ -214,41 +209,6 @@ export default function PublicNavbar({ settings }) {
         return tr.dashboard;
     }
   };
-
-  const roleOptions = [
-    {
-      id: 'owner',
-      title: tr.roles.owner.title,
-      subtitle: tr.roles.owner.subtitle,
-      icon: Shield,
-      color: 'from-amber-500 to-rose-600',
-      path: '/login?role=owner',
-    },
-    {
-      id: 'admin',
-      title: tr.roles.admin.title,
-      subtitle: tr.roles.admin.subtitle,
-      icon: UserCheck,
-      color: 'from-purple-500 to-indigo-600',
-      path: '/login?role=admin',
-    },
-    {
-      id: 'teacher',
-      title: tr.roles.teacher.title,
-      subtitle: tr.roles.teacher.subtitle,
-      icon: Users,
-      color: 'from-blue-500 to-cyan-600',
-      path: '/login?role=teacher',
-    },
-    {
-      id: 'student',
-      title: tr.roles.student.title,
-      subtitle: tr.roles.student.subtitle,
-      icon: GraduationCap,
-      color: 'from-emerald-500 to-teal-600',
-      path: '/login?role=student',
-    },
-  ];
 
   const handleNavClick = (e, href) => {
     if (href.startsWith('#')) {
@@ -427,81 +387,19 @@ export default function PublicNavbar({ settings }) {
                 </Link>
               </div>
             ) : (
-              <div className="relative shrink-0" ref={roleDropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setRoleDropdownOpen((prev) => !prev)}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 cursor-pointer ${
+              <div className="relative shrink-0">
+                <Link
+                  to="/login"
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4.5 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 cursor-pointer ${
                     isDark
-                      ? 'bg-gradient-to-r from-[#064e3b] via-emerald-600 to-teal-700 hover:from-[#053d2e] hover:to-emerald-800 shadow-emerald-950/40'
-                      : 'bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-900/25'
+                      ? 'bg-gradient-to-r from-[#064e3b] via-emerald-600 to-teal-700 hover:from-[#053d2e] hover:to-emerald-800 shadow-emerald-950/40 ring-1 ring-emerald-400/30'
+                      : 'bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-900/25 ring-1 ring-blue-300/30'
                   }`}
                 >
                   <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                   <span className="whitespace-nowrap">{tr.login}</span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 opacity-80 transition-transform duration-200 ${
-                      roleDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-
-                {/* Role Picker Dropdown Popover */}
-                {roleDropdownOpen && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-white dark:bg-[#1a2332] p-2.5 shadow-2xl border border-gray-100 dark:border-gray-700/80 space-y-1.5 z-50 animate-in fade-in zoom-in-95 duration-150"
-                  >
-                    <div className="px-2.5 py-1.5 border-b border-gray-100 dark:border-gray-800">
-                      <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
-                        {tr.chooseRole}
-                      </p>
-                      <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                        {tr.chooseRoleDesc}
-                      </p>
-                    </div>
-
-                    {roleOptions.map((role) => {
-                      const Icon = role.icon;
-                      return (
-                        <button
-                          key={role.id}
-                          type="button"
-                          onClick={() => {
-                            setRoleDropdownOpen(false);
-                            navigate(role.path);
-                          }}
-                          className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-blue-50/70 dark:hover:bg-gray-800/80 transition-all text-left cursor-pointer group"
-                        >
-                          <div
-                            className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${role.color} flex items-center justify-center text-white shrink-0 shadow-sm group-hover:scale-108 transition-transform`}
-                          >
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-emerald-400 transition-colors">
-                              {role.title}
-                            </h4>
-                            <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                              {role.subtitle}
-                            </p>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-emerald-400 group-hover:translate-x-1 transition-all shrink-0 rtl:rotate-180" />
-                        </button>
-                      );
-                    })}
-
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
-                      <Link
-                        to="/login"
-                        onClick={() => setRoleDropdownOpen(false)}
-                        className="block w-full py-2 text-center text-xs font-semibold text-blue-600 dark:text-emerald-400 hover:underline"
-                      >
-                        {tr.allRolesLogin}
-                      </Link>
-                    </div>
-                  </div>
-                )}
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 rtl:rotate-180" />
+                </Link>
               </div>
             )}
 

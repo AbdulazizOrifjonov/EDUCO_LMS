@@ -134,7 +134,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                   <a
                     href="#contact"
                     onClick={(e) => scrollToTarget(e, '#contact')}
-                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-emerald-950/40 hover:scale-103 active:scale-97 transition-all cursor-pointer ring-2 ring-emerald-300/40"
+                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-950/30 ring-2 ring-blue-300/40 dark:from-[#064e3b] dark:via-emerald-600 dark:to-teal-700 dark:hover:from-[#053d2e] dark:hover:to-emerald-800 dark:shadow-emerald-950/40 dark:ring-emerald-300/40 text-white font-extrabold text-sm sm:text-base shadow-xl hover:scale-103 active:scale-97 transition-all cursor-pointer"
                   >
                     <span className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
                       <Sparkles className="w-4 h-4 text-amber-300" />

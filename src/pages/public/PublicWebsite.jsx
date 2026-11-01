@@ -149,10 +149,10 @@ export default function PublicWebsite() {
           courses={courses}
           prefilledCourse={prefilledCourseTitle}
         />
-      </main>
 
-      {/* 13. Public Footer */}
-      <PublicFooter settings={settings} />
+        {/* 13. Public Footer */}
+        <PublicFooter settings={settings} />
+      </main>
 
       {/* Interactive Modals */}
       {selectedCourse && (
