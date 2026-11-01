@@ -3,7 +3,12 @@ import React from 'react';
 import { Play, Video, Clock, ArrowRight } from 'lucide-react';
 import ScrollReveal from '@/hooks/useScrollReveal';
 
-export default function VideoSection({ videos = [], onSelectVideo = () => {} }) {
+export default function VideoSection({ videos = [], onSelectVideo, onPlayVideo }) {
+  const handlePlay = (v) => {
+    if (onSelectVideo) onSelectVideo(v);
+    else if (onPlayVideo) onPlayVideo(v);
+  };
+
   return (
     <section id="videos" className="py-20 bg-gray-50/60 dark:bg-[#0c121e] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -31,14 +36,15 @@ export default function VideoSection({ videos = [], onSelectVideo = () => {} }) 
               animation="up"
               delay={(idx % 3) * 100}
               className="bg-white dark:bg-[#1a2332] rounded-3xl overflow-hidden border border-gray-200/90 dark:border-gray-800 shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
-              onClick={() => onSelectVideo(video)}
+              onClick={() => handlePlay(video)}
             >
               <div>
                 {/* Thumbnail with Play Icon */}
                 <div className="relative h-52 w-full overflow-hidden bg-gray-900">
                   <img
-                    src={video.thumbnail}
+                    src={video.thumbnail || video.image || '/educo-logo.png'}
                     alt={video.title}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 opacity-90"
                     loading="lazy"
                   />

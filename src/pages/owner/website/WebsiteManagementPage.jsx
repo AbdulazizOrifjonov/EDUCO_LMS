@@ -106,18 +106,26 @@ export default function WebsiteManagementPage() {
   const handleSaveSlide = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const imgUrl = fd.get('image');
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
       subtitle: fd.get('subtitle'),
       tag: fd.get('tag'),
+      badge: fd.get('tag'),
       primaryBtnText: fd.get('primaryBtnText'),
+      cta_text: fd.get('primaryBtnText'),
       primaryBtnLink: fd.get('primaryBtnLink'),
+      cta_link: fd.get('primaryBtnLink'),
       secondaryBtnText: fd.get('secondaryBtnText'),
+      secondary_cta_text: fd.get('secondaryBtnText'),
       secondaryBtnLink: fd.get('secondaryBtnLink'),
-      image: fd.get('image'),
+      secondary_cta_link: fd.get('secondaryBtnLink'),
+      image: imgUrl,
+      image_url: imgUrl,
       order: Number(fd.get('order') || 1),
       isActive: fd.get('isActive') === 'on',
+      is_active: fd.get('isActive') === 'on',
     };
     websiteService.saveHeroSlide(itemData);
     toast.success('Slayd muvaffaqiyatli saqlandi!');
@@ -130,18 +138,28 @@ export default function WebsiteManagementPage() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const syllabusRaw = fd.get('syllabus') || '';
+    const imgUrl = fd.get('image');
+    const teacherName = fd.get('teacherName');
+    const lessonsCount = Number(fd.get('lessonsCount') || 36);
+    const isFeatured = fd.get('featured') === 'on';
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
       category: fd.get('category'),
       level: fd.get('level'),
       duration: fd.get('duration'),
-      lessonsCount: Number(fd.get('lessonsCount') || 36),
-      teacherName: fd.get('teacherName'),
-      price: fd.get('price'),
+      lessonsCount: lessonsCount,
+      lessons_count: lessonsCount,
+      teacherName: teacherName,
+      teacher_name: teacherName,
+      price: fd.get('price') || '500,000 so‘m/oy',
       description: fd.get('description'),
-      image: fd.get('image'),
-      featured: fd.get('featured') === 'on',
+      image: imgUrl,
+      image_url: imgUrl,
+      featured: isFeatured,
+      is_featured: isFeatured,
+      isActive: true,
+      is_active: true,
       syllabus: syllabusRaw.split('\n').map((s) => s.trim()).filter(Boolean),
     };
     websiteService.saveWebsiteCourse(itemData);
@@ -158,6 +176,7 @@ export default function WebsiteManagementPage() {
       id: editingItem?.id,
       name: fd.get('name'),
       coursesCount: Number(fd.get('coursesCount') || 1),
+      courses_count: Number(fd.get('coursesCount') || 1),
       color: fd.get('color'),
       description: fd.get('description'),
     };
@@ -171,15 +190,26 @@ export default function WebsiteManagementPage() {
   const handleSaveTeacher = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const name = fd.get('name');
+    const photo = fd.get('photo');
+    const exp = fd.get('experience');
+    const subj = fd.get('subject');
     const itemData = {
       id: editingItem?.id,
-      name: fd.get('name'),
+      name: name,
+      full_name: name,
       role: fd.get('role'),
-      experience: fd.get('experience'),
-      subject: fd.get('subject'),
+      experience: exp,
+      experience_years: exp,
+      subject: subj,
+      specialization: subj,
       rating: Number(fd.get('rating') || 5),
-      photo: fd.get('photo'),
+      photo: photo,
+      photo_url: photo,
+      image_url: photo,
       bio: fd.get('bio'),
+      isActive: true,
+      is_active: true,
     };
     websiteService.saveWebsiteTeacher(itemData);
     toast.success('Ustoz maʼlumotlari saqlandi!');
@@ -191,12 +221,18 @@ export default function WebsiteManagementPage() {
   const handleSaveGalleryItem = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const imgUrl = fd.get('image');
+    const desc = fd.get('description');
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
       category: fd.get('category'),
-      image: fd.get('image'),
-      description: fd.get('description'),
+      image: imgUrl,
+      image_url: imgUrl,
+      description: desc,
+      caption: desc,
+      isActive: true,
+      is_active: true,
     };
     websiteService.saveWebsiteGalleryItem(itemData);
     toast.success('Lavha saqlandi!');
@@ -208,14 +244,28 @@ export default function WebsiteManagementPage() {
   const handleSaveVideo = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const thumb = fd.get('thumbnail');
+    const vUrl = fd.get('videoUrl');
+    let ytId = '';
+    if (vUrl) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = vUrl.match(regExp);
+      if (match && match[2].length === 11) ytId = match[2];
+    }
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
       category: fd.get('category'),
       duration: fd.get('duration'),
-      thumbnail: fd.get('thumbnail'),
-      videoUrl: fd.get('videoUrl'),
+      thumbnail: thumb,
+      image: thumb,
+      thumbnail_url: thumb,
+      videoUrl: vUrl,
+      video_url: vUrl,
+      youtube_id: ytId,
       description: fd.get('description'),
+      isActive: true,
+      is_active: true,
     };
     websiteService.saveWebsiteVideo(itemData);
     toast.success('Video lavha saqlandi!');
@@ -227,15 +277,24 @@ export default function WebsiteManagementPage() {
   const handleSaveNews = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const imgUrl = fd.get('image');
+    const sum = fd.get('summary');
+    const dt = fd.get('date');
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
       category: fd.get('category'),
-      date: fd.get('date'),
+      date: dt,
+      published_at: dt,
       readTime: fd.get('readTime'),
-      image: fd.get('image'),
-      summary: fd.get('summary'),
+      image: imgUrl,
+      cover_image: imgUrl,
+      image_url: imgUrl,
+      summary: sum,
+      excerpt: sum,
       content: fd.get('content'),
+      is_published: true,
+      isActive: true,
     };
     websiteService.saveWebsiteNews(itemData);
     toast.success('Yangilik saqlandi!');
@@ -466,7 +525,12 @@ export default function WebsiteManagementPage() {
                 className="relative rounded-3xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col"
               >
                 <div className="h-44 relative bg-gray-900">
-                  <img src={slide.image} alt={slide.title} className="w-full h-full object-cover opacity-80" />
+                  <img
+                    src={slide.image || slide.image_url || '/educo-logo.png'}
+                    alt={slide.title}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                    className="w-full h-full object-cover opacity-80"
+                  />
                   <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-[11px] font-bold bg-black/60 text-white backdrop-blur-md">
                     {slide.tag || 'Slayd'}
                   </div>
@@ -539,7 +603,12 @@ export default function WebsiteManagementPage() {
                 className="rounded-3xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col"
               >
                 <div className="h-40 relative bg-gray-900">
-                  <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                  <img
+                    src={course.image || course.image_url || '/educo-logo.png'}
+                    alt={course.title}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">
                     {course.category}
                   </div>
@@ -669,11 +738,16 @@ export default function WebsiteManagementPage() {
                 className="p-5 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between"
               >
                 <div className="flex items-center gap-3.5 mb-3">
-                  <img src={teacher.photo} alt={teacher.name} className="w-14 h-14 rounded-2xl object-cover shrink-0" />
+                  <img
+                    src={teacher.photo || teacher.photo_url || teacher.image_url || '/educo-logo.png'}
+                    alt={teacher.name || teacher.full_name}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                    className="w-14 h-14 rounded-2xl object-cover shrink-0"
+                  />
                   <div>
-                    <h3 className="font-bold text-sm text-gray-900 dark:text-white">{teacher.name}</h3>
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white">{teacher.name || teacher.full_name}</h3>
                     <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{teacher.role}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{teacher.experience} tajriba</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">{teacher.experience || teacher.experience_years || '5+ yil'} tajriba</p>
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed mb-4">{teacher.bio}</p>
@@ -736,7 +810,12 @@ export default function WebsiteManagementPage() {
                 className="rounded-3xl overflow-hidden bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between"
               >
                 <div>
-                  <img src={item.image} alt={item.title} className="w-full h-36 object-cover" />
+                  <img
+                    src={item.image || item.cover_image || item.image_url || '/educo-logo.png'}
+                    alt={item.title}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                    className="w-full h-36 object-cover"
+                  />
                   <div className="p-4">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300">
                       {item.category}
@@ -801,7 +880,12 @@ export default function WebsiteManagementPage() {
               >
                 <div>
                   <div className="relative h-40 bg-gray-950">
-                    <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-cover opacity-80" />
+                    <img
+                      src={vid.thumbnail || vid.image || vid.thumbnail_url || '/educo-logo.png'}
+                      alt={vid.title}
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                      className="w-full h-full object-cover opacity-80"
+                    />
                     <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/80 text-white">
                       {vid.duration}
                     </span>
@@ -862,7 +946,12 @@ export default function WebsiteManagementPage() {
                 key={img.id}
                 className="relative group rounded-3xl overflow-hidden bg-gray-900 aspect-square shadow-sm"
               >
-                <img src={img.image} alt={img.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img
+                  src={img.image || img.image_url || '/educo-logo.png'}
+                  alt={img.title}
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
                   <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">{img.category}</span>
                   <p className="text-xs font-bold text-white line-clamp-1">{img.title}</p>
@@ -931,7 +1020,12 @@ export default function WebsiteManagementPage() {
                 </div>
                 <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100 dark:border-gray-700">
                   <div className="flex items-center gap-2.5">
-                    <img src={test.avatar} alt={test.name} className="w-8 h-8 rounded-full object-cover" />
+                    <img
+                      src={test.avatar || test.image || test.photo || '/educo-logo.png'}
+                      alt={test.name || test.author}
+                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 dark:text-white">{test.name}</h4>
                       <p className="text-[10px] text-gray-400">{test.role}</p>
@@ -1257,7 +1351,7 @@ export default function WebsiteManagementPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold mb-1">Narxi (oyiga)</label>
-                <Input name="price" defaultValue={editingItem?.price || '650 000 soʻm / oy'} required />
+                <Input name="price" defaultValue={editingItem?.price || '500,000 so‘m/oy'} required />
               </div>
             </div>
             <div>
@@ -1274,7 +1368,7 @@ export default function WebsiteManagementPage() {
               <label className="block text-xs font-bold mb-1">Rasm havolasi (URL)</label>
               <Input
                 name="image"
-                defaultValue={editingItem?.image || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80'}
+                defaultValue={editingItem?.image || editingItem?.image_url || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80'}
                 required
               />
             </div>
@@ -1318,7 +1412,7 @@ export default function WebsiteManagementPage() {
           <form onSubmit={handleSaveTeacher} className="space-y-4">
             <div>
               <label className="block text-xs font-bold mb-1">Toʻliq ismi</label>
-              <Input name="name" defaultValue={editingItem?.name || ''} required />
+              <Input name="name" defaultValue={editingItem?.name || editingItem?.full_name || ''} required />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -1344,7 +1438,7 @@ export default function WebsiteManagementPage() {
               <label className="block text-xs font-bold mb-1">Fotosurat havolasi (URL)</label>
               <Input
                 name="photo"
-                defaultValue={editingItem?.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80'}
+                defaultValue={editingItem?.photo || editingItem?.photo_url || editingItem?.image_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80'}
                 required
               />
             </div>

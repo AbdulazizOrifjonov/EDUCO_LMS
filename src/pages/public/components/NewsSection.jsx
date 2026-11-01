@@ -37,8 +37,9 @@ export default function NewsSection({ news = [], onSelectNews = () => {} }) {
                 {/* News Image */}
                 <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                   <img
-                    src={item.cover_image}
+                    src={item.cover_image || item.image || item.image_url || '/educo-logo.png'}
                     alt={item.title}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
                     className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                     loading="lazy"
                   />

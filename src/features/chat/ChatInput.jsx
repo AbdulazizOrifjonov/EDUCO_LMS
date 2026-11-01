@@ -247,17 +247,23 @@ export default function ChatInput({
     setSwipeOffsetY(0);
     isHeldDownRef.current = false;
 
-    // Press & hold starts recording after 350ms (just like Telegram)
+    // Press & hold starts recording after 650ms (Telegram behavior)
+    // A single tap under 650ms switches mode between video and audio
     if (pointerHoldTimerRef.current) clearTimeout(pointerHoldTimerRef.current);
     pointerHoldTimerRef.current = setTimeout(() => {
       isHeldDownRef.current = true;
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try {
+          navigator.vibrate(35);
+        } catch (_) {}
+      }
       if (recordMode === 'video') {
         setVideoAutoStart(true);
         setShowVideoRecorder(true);
       } else {
         setShowAudioRecorder(true);
       }
-    }, 350);
+    }, 650);
   };
 
   const handleActionPointerMove = (e) => {

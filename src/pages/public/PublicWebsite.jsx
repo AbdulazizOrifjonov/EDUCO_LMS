@@ -86,7 +86,14 @@ export default function PublicWebsite() {
 
       <main className="overflow-hidden">
         {/* 2. Hero Section with Managed Multi-Slide Carousel */}
-        <HeroSlider slides={slides} />
+        <HeroSlider
+          slides={slides}
+          onOpenVideo={() => {
+            if (videos && videos.length > 0) {
+              setActiveVideo(videos[0]);
+            }
+          }}
+        />
 
         {/* 3. Statistics Section (Real-time animated counters) */}
         <StatsSection settings={settings} />
@@ -120,6 +127,7 @@ export default function PublicWebsite() {
         <VideoSection
           videos={videos}
           onPlayVideo={(v) => setActiveVideo(v)}
+          onSelectVideo={(v) => setActiveVideo(v)}
         />
 
         {/* 10. News & Announcements (Yangiliklar va e'lonlar) */}

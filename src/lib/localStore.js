@@ -1325,7 +1325,7 @@ class LocalStore {
   markChatMessageSeen(messageId, viewerUser) {
     if (!messageId || !viewerUser) return null;
     const list = this.getItem(STORAGE_KEYS.CHAT_MESSAGES, this.getInitialChatMessages());
-    const idx = list.findIndex((m) => m.id === messageId);
+    const idx = list.findIndex((m) => String(m.id) === String(messageId));
     if (idx >= 0) {
       const msg = list[idx];
       const isStaffChat = msg.group_id === 'staff-general-chat';
@@ -1408,7 +1408,7 @@ class LocalStore {
   updateChatMessage(messageId, newContent) {
     if (!messageId) return null;
     const list = this.getItem(STORAGE_KEYS.CHAT_MESSAGES, this.getInitialChatMessages());
-    const idx = list.findIndex((m) => m.id === messageId);
+    const idx = list.findIndex((m) => String(m.id) === String(messageId));
     if (idx >= 0) {
       const nowIso = new Date().toISOString();
       const updatedMsg = {
@@ -1450,7 +1450,7 @@ class LocalStore {
   toggleMessageReaction(messageId, emoji, userId) {
     if (!messageId || !emoji || !userId) return null;
     const list = this.getItem(STORAGE_KEYS.CHAT_MESSAGES, this.getInitialChatMessages());
-    const idx = list.findIndex((m) => m.id === messageId);
+    const idx = list.findIndex((m) => String(m.id) === String(messageId));
     if (idx < 0) return null;
 
     const msg = { ...list[idx] };

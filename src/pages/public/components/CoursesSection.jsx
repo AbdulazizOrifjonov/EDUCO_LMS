@@ -97,8 +97,9 @@ export default function CoursesSection({ courses = [], onSelectCourse = () => {}
               {/* Card Cover Image */}
               <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-gray-200 dark:bg-gray-800">
                 <img
-                  src={course.image_url}
+                  src={course.image_url || course.image || '/educo-logo.png'}
                   alt={course.title}
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
                   className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                   loading="lazy"
                 />

@@ -545,21 +545,77 @@ export async function updateMessage(messageId, newText) {
 }
 
 /**
+ * Automatic lightweight image compressor for cross-device mobile upload
+ */
+async function compressImageForCrossDevice(file) {
+  if (!file || typeof window === 'undefined') return file;
+  const isImage = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp)$/i.test(file.name || '');
+  if (!isImage || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+    return file;
+  }
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      const tempUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(tempUrl);
+        const maxDim = 1600;
+        let w = img.width || 1200;
+        let h = img.height || 1200;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(
+          (blob) => {
+            if (blob && (blob.size < file.size || file.size > 2 * 1024 * 1024)) {
+              resolve(new File([blob], file.name ? file.name.replace(/\.[^.]+$/, '.jpg') : 'photo.jpg', { type: 'image/jpeg' }));
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.82
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(tempUrl);
+        resolve(file);
+      };
+      img.src = tempUrl;
+    } catch (_) {
+      resolve(file);
+    }
+  });
+}
+
+/**
  * Upload attachment file (image, video, audio, document) to Cloudflare /api/chat/upload and IndexedDB
  */
 export async function uploadAttachment(groupId, file, customFileName = null, onProgress = null) {
   try {
+    const optimizedFile = await compressImageForCrossDevice(file);
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).slice(2, 8);
-    const originalName = customFileName || file.name || `recording_${timestamp}`;
-    const mimeType = inferMimeType(originalName, file.type);
+    const originalName = customFileName || optimizedFile.name || `recording_${timestamp}`;
+    const mimeType = inferMimeType(originalName, optimizedFile.type);
 
     if (onProgress) onProgress(20);
 
     const blobToStore =
-      file instanceof Blob && file.type === mimeType
-        ? file
-        : new Blob([file], { type: mimeType });
+      optimizedFile instanceof Blob && optimizedFile.type === mimeType
+        ? optimizedFile
+        : new Blob([optimizedFile], { type: mimeType });
 
     // 1. Create immediate Blob URL for instant sender preview
     const localBlobUrl = URL.createObjectURL(blobToStore);
@@ -594,10 +650,10 @@ export async function uploadAttachment(groupId, file, customFileName = null, onP
     }
 
     // 4. Cross-Device Sync Fallback:
-    // If cloud upload wasn't available or failed, convert images / small files (<= 4MB) to Base64 data URL.
+    // If cloud upload wasn't available or failed, convert images / small files (<= 8MB) to Base64 data URL.
     // The Data URL travels in the sync engine so gadget 2 (and any other device) renders the image instantly!
     let dataUrlFallback = null;
-    if (!cloudMediaUrl && blobToStore.size <= 4 * 1024 * 1024) {
+    if (!cloudMediaUrl && blobToStore.size <= 8 * 1024 * 1024) {
       try {
         dataUrlFallback = await new Promise((resolve) => {
           const reader = new FileReader();

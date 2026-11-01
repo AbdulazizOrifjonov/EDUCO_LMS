@@ -90,7 +90,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                 isActive ? 'scale-105' : 'scale-100'
               }`}
               style={{
-                backgroundImage: `url('${slide.image_url}')`,
+                backgroundImage: `url('${slide.image_url || slide.image || '/educo-logo.png'}')`,
               }}
             />
 

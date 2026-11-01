@@ -44,8 +44,9 @@ export default function TeachersSection({ teachers = [], onSelectTeacher = () =>
                 {/* Teacher Photo */}
                 <div className="relative h-64 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                   <img
-                    src={teacher.image_url}
-                    alt={teacher.full_name}
+                    src={teacher.image_url || teacher.photo || teacher.photo_url || '/educo-logo.png'}
+                    alt={teacher.full_name || teacher.name}
+                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
                     className="w-full h-full object-cover object-top group-hover:scale-106 transition-transform duration-500"
                     loading="lazy"
                   />

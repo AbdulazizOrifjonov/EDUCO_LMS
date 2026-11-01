@@ -326,6 +326,19 @@ export function LightboxModal({ imageItem, image, onClose }) {
 export function VideoPlayerModal({ video, onClose }) {
   if (!video) return null;
 
+  const rawUrl = video.video_url || video.videoUrl || '';
+  let ytId = video.youtube_id || video.youtubeId;
+
+  if (!ytId && rawUrl) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = rawUrl.match(regExp);
+    if (match && match[2].length === 11) {
+      ytId = match[2];
+    }
+  }
+
+  const embedUrl = ytId ? `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0` : null;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-150"
@@ -344,22 +357,26 @@ export function VideoPlayerModal({ video, onClose }) {
         </button>
 
         <div className="relative pt-[56.25%] w-full bg-black">
-          {video.youtube_id ? (
+          {embedUrl ? (
             <iframe
               className="absolute inset-0 w-full h-full"
-              src={`https://www.youtube.com/embed/${video.youtube_id}?autoplay=1`}
+              src={embedUrl}
               title={video.title}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
-          ) : (
+          ) : rawUrl ? (
             <video
               className="absolute inset-0 w-full h-full"
-              src={video.video_url}
+              src={rawUrl}
               controls
               autoPlay
             />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white/70 p-6 text-center">
+              <p className="text-sm">Video havolasi mavjud emas.</p>
+            </div>
           )}
         </div>
 

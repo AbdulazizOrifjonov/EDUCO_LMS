@@ -227,47 +227,38 @@ export default function VideoRecorder({
           } catch (_) {}
         });
 
-        const candidateConstraints = targetDeviceId
-          ? [
-              {
-                video: {
-                  deviceId: { exact: targetDeviceId },
-                  width: { ideal: 720 },
-                  height: { ideal: 720 },
+        const candidateConstraints = [
+          {
+            video: {
+              facingMode: { ideal: nextFacing },
+              width: { ideal: 720 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          },
+          {
+            video: {
+              facingMode: nextFacing,
+            },
+            audio: false,
+          },
+          ...(targetDeviceId
+            ? [
+                {
+                  video: {
+                    deviceId: { ideal: targetDeviceId },
+                    width: { ideal: 720 },
+                    height: { ideal: 720 },
+                  },
+                  audio: false,
                 },
-                audio: false,
-              },
-              {
-                video: { facingMode: { exact: nextFacing } },
-                audio: false,
-              },
-              {
-                video: { facingMode: nextFacing },
-                audio: false,
-              },
-            ]
-          : [
-              {
-                video: {
-                  facingMode: { exact: nextFacing },
-                  width: { ideal: 720 },
-                  height: { ideal: 720 },
-                },
-                audio: false,
-              },
-              {
-                video: {
-                  facingMode: nextFacing,
-                  width: { ideal: 720 },
-                  height: { ideal: 720 },
-                },
-                audio: false,
-              },
-              {
-                video: true,
-                audio: false,
-              },
-            ];
+              ]
+            : []),
+          {
+            video: true,
+            audio: false,
+          },
+        ];
 
         let newStream = null;
         for (const c of candidateConstraints) {

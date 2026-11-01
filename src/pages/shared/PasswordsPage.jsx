@@ -22,6 +22,7 @@ import {
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Select from '@/components/ui/Select';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import Avatar from '@/components/ui/Avatar';
@@ -683,27 +684,21 @@ export default function PasswordsPage() {
       {/* Main Card with Filter Tabs + Search Toolbar + Clean Table */}
       <Card>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
-          {/* Role Filter Select Option matching Image 8 */}
-          <div className="relative w-full sm:w-72">
-            <div className="relative flex items-center w-full h-11 px-3.5 rounded-xl border-2 border-emerald-500/80 bg-white dark:bg-[#1a2333] shadow-xs hover:border-emerald-400 transition-colors">
-              <Users className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 pointer-events-none mr-2.5" />
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full h-full bg-transparent text-sm font-bold text-gray-900 dark:text-white border-none outline-none cursor-pointer appearance-none pr-8"
-              >
-                {filterTabs.map((tab) => (
-                  <option
-                    key={tab.id}
-                    value={tab.id}
-                    className="bg-white dark:bg-[#1a2333] text-gray-900 dark:text-white py-2 font-semibold"
-                  >
-                    {tab.label} ({tab.count} ta)
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-300 absolute right-3 pointer-events-none" />
-            </div>
+          {/* Role Filter Select Option matching user request */}
+          <div className="w-full sm:w-72">
+            <Select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              headerTitle={t('users.filterByRole', 'Rol bo‘yicha saralash')}
+              icon={Users}
+              size="md"
+              options={filterTabs.map((tab) => ({
+                value: tab.id,
+                label: tab.label,
+                badge: `${tab.count} ta`,
+                icon: tab.icon,
+              }))}
+            />
           </div>
 
           {/* Clean Search Input */}
