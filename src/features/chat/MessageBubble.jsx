@@ -589,8 +589,8 @@ export default function MessageBubble({
         {/* Hover / Context Actions */}
         <div
           ref={menuRef}
-          className={`hidden sm:flex absolute -top-3 opacity-0 group-hover:opacity-100 transition-opacity items-center space-x-1 rtl:space-x-reverse z-10 ${
-            isOwn ? 'left-2' : 'right-2'
+          className={`hidden sm:flex absolute -top-3.5 opacity-0 group-hover:opacity-100 transition-opacity items-center space-x-1 rtl:space-x-reverse z-20 ${
+            isOwn ? 'right-1' : 'left-1'
           }`}
         >
           <button
