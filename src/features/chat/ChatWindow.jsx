@@ -759,87 +759,92 @@ export default function ChatWindow({
         </div>
       )}
 
-      {/* Message List Area */}
+      {/* Message List Area - Telegram-Style bottom alignment */}
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 min-h-0 min-w-0 max-w-full overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-4 md:p-6 space-y-2 relative"
+        className="flex-1 min-h-0 min-w-0 max-w-full overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-4 md:p-6 relative flex flex-col"
       >
-        {/* Loading History Spinner */}
-        {loadingHistory && (
-          <div className="flex flex-col items-center justify-center py-12 space-y-3">
-            <Loader2 className="w-8 h-8 text-[#123D78] animate-spin" />
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t('common.loading', 'Loading messages...')}
-            </p>
-          </div>
-        )}
+        <div className="min-h-full flex flex-col justify-end">
+          {/* Loading History Spinner */}
+          {loadingHistory && (
+            <div className="flex flex-col items-center justify-center py-12 space-y-3 my-auto">
+              <Loader2 className="w-8 h-8 text-[#123D78] animate-spin" />
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t('common.loading', 'Loading messages...')}
+              </p>
+            </div>
+          )}
 
-        {/* Loading Older indicator at top */}
-        {loadingOlder && (
-          <div className="flex items-center justify-center py-2">
-            <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-          </div>
-        )}
+          {/* Loading Older indicator at top */}
+          {loadingOlder && (
+            <div className="flex items-center justify-center py-2 shrink-0">
+              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+            </div>
+          )}
 
-        {/* No Messages Empty State */}
-        {!loadingHistory && messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-3">
-            {activeGroup.isAnnouncementChat ? (
-              <>
-                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm">
-                  <Megaphone className="w-8 h-8" />
-                </div>
-                <div>
-                  <p className="text-base font-bold text-gray-800 dark:text-gray-200">
-                    Hozircha rasmiy e&apos;lonlar yo&apos;q
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mt-1 leading-relaxed">
-                    Ushbu kanal orqali yozilgan xabarlar markazdagi barcha xodimlar va barcha o&apos;quv guruhlariga bir zumda avtomatik yetkaziladi.
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-gray-800/80 border border-blue-100 dark:border-gray-700/60 flex items-center justify-center text-[#123D78] dark:text-blue-400 shadow-sm">
-                  <MessageSquare className="w-8 h-8" />
-                </div>
-                <div>
-                  <p className="text-base font-bold text-gray-800 dark:text-gray-200">
-                    {t('chat.noMessages', 'Hozircha xabarlar yo‘q')}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mt-1 leading-relaxed">
-                    Suhbatni boshlash uchun matn, rasm, audio yoki video xabar yuboring!
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+          {/* No Messages Empty State */}
+          {!loadingHistory && messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center my-auto text-center p-8 space-y-3">
+              {activeGroup.isAnnouncementChat ? (
+                <>
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm">
+                    <Megaphone className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-gray-800 dark:text-gray-200">
+                      Hozircha rasmiy e&apos;lonlar yo&apos;q
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mt-1 leading-relaxed">
+                      Ushbu kanal orqali yozilgan xabarlar markazdagi barcha xodimlar va barcha o&apos;quv guruhlariga bir zumda avtomatik yetkaziladi.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-gray-800/80 border border-blue-100 dark:border-gray-700/60 flex items-center justify-center text-[#123D78] dark:text-blue-400 shadow-sm">
+                    <MessageSquare className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <p className="text-base font-bold text-gray-800 dark:text-gray-200">
+                      {t('chat.noMessages', 'Hozircha xabarlar yo‘q')}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mt-1 leading-relaxed">
+                      Suhbatni boshlash uchun matn, rasm, audio yoki video xabar yuboring!
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
-        {/* Messages List */}
-        {!loadingHistory &&
-          messages.map((msg) => (
-            <MessageBubble
-              key={msg.id}
-              message={msg}
-              currentUserId={currentUser?.id}
-              canDelete={
-                msg.sender_id === currentUser?.id ||
-                userRole === 'owner' ||
-                userRole === 'admin'
-              }
-              onReply={(m) => setReplyingTo(m)}
-              onDelete={handleDeleteMessage}
-              onImageClick={(src) => setPreviewImageSrc(src)}
-              onViewSeen={(m) => setSeenModalMessage(m)}
-              onToggleReaction={handleToggleReaction}
-              onEdit={(m) => {
-                setReplyingTo(null);
-                setEditingMessage(m);
-              }}
-            />
-          ))}
+          {/* Messages List - Telegram-style bottom alignment with mt-auto */}
+          {!loadingHistory && messages.length > 0 && (
+            <div className="mt-auto space-y-2.5 flex flex-col">
+              {messages.map((msg) => (
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  currentUserId={currentUser?.id}
+                  canDelete={
+                    msg.sender_id === currentUser?.id ||
+                    userRole === 'owner' ||
+                    userRole === 'admin'
+                  }
+                  onReply={(m) => setReplyingTo(m)}
+                  onDelete={handleDeleteMessage}
+                  onImageClick={(src) => setPreviewImageSrc(src)}
+                  onViewSeen={(m) => setSeenModalMessage(m)}
+                  onToggleReaction={handleToggleReaction}
+                  onEdit={(m) => {
+                    setReplyingTo(null);
+                    setEditingMessage(m);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* "New Messages" / Scroll to bottom float button */}

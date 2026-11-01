@@ -264,11 +264,10 @@ export default function DatePicker({
         value={value || ''}
       />
 
-      {/* Popover Calendar - EXACT width matching input container (100% w-full left-0 right-0 top-full) */}
+      {/* Popover Calendar - EXACT width matching input container (strictly 100% w-full, never overflows container) */}
       {isOpen && (
         <div
-          className="absolute z-50 left-0 right-0 w-full top-full mt-1.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-3 animate-in fade-in zoom-in-95 duration-150"
-          style={{ minWidth: '260px' }}
+          className="absolute z-50 left-0 right-0 w-full top-full mt-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-2.5 pb-3 animate-in fade-in zoom-in-95 duration-150 max-w-full"
         >
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-gray-100 dark:border-gray-800">

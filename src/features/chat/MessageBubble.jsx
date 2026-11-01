@@ -33,8 +33,24 @@ export default function MessageBubble({
   const { t, i18n } = useTranslation();
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [reactionPlacement, setReactionPlacement] = useState('top');
   const menuRef = useRef(null);
   const reactionPickerRef = useRef(null);
+  const bubbleRef = useRef(null);
+
+  const toggleReactionPicker = (e) => {
+    e?.stopPropagation?.();
+    if (!showReactionPicker && bubbleRef.current) {
+      const rect = bubbleRef.current.getBoundingClientRect();
+      // If message is within 140px of top of screen, flip downward so it never clips off-screen
+      if (rect.top < 140) {
+        setReactionPlacement('bottom');
+      } else {
+        setReactionPlacement('top');
+      }
+    }
+    setShowReactionPicker((prev) => !prev);
+  };
 
   const isRtl = i18n.language === 'ar' || document.documentElement.dir === 'rtl';
   const isOwn = message.sender_id === currentUserId;
@@ -224,7 +240,7 @@ export default function MessageBubble({
       )}
 
       {/* Message Bubble Container */}
-      <div className={`relative max-w-[85%] sm:max-w-[70%] md:max-w-[60%] min-w-0`}>
+      <div ref={bubbleRef} className={`relative max-w-[85%] sm:max-w-[70%] md:max-w-[60%] min-w-0`}>
         {/* Sender Name & Role Badge in Group Chat for others */}
         {!isOwn && (
           <div className="flex items-center gap-1.5 mb-1 ml-1 rtl:ml-0 rtl:mr-1">
@@ -534,13 +550,15 @@ export default function MessageBubble({
         </div>
       )}
 
-        {/* Floating Telegram Reaction Bar */}
+        {/* Floating Telegram Reaction Bar - Smart Directional Opening (Downwards near top, Upwards near bottom) */}
         {showReactionPicker && (
           <div
             ref={reactionPickerRef}
-            className={`absolute -top-11 z-50 flex items-center gap-1 px-2 py-1 bg-white dark:bg-gray-800 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-150 ${
-              isOwn ? 'right-0' : 'left-0'
-            }`}
+            className={`absolute z-50 flex items-center gap-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-150 ${
+              reactionPlacement === 'bottom'
+                ? 'top-full mt-2'
+                : 'bottom-full mb-2'
+            } ${isOwn ? 'right-0' : 'left-0'}`}
           >
             {TELEGRAM_REACTIONS.map((emoji) => {
               const existing = reactions.find((r) => r.emoji === emoji);
@@ -577,10 +595,7 @@ export default function MessageBubble({
         >
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowReactionPicker(!showReactionPicker);
-            }}
+            onClick={toggleReactionPicker}
             className="p-1 rounded-full bg-white dark:bg-gray-700 text-amber-500 hover:text-amber-600 dark:text-amber-400 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer"
             title="Emoji reaksiya"
           >

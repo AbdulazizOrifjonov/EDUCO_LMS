@@ -171,41 +171,40 @@ export default function TimePicker({
       )}
       {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
 
-      {/* Popover Dropdown - EXACT width matching input container (100% w-full left-0 right-0 top-full) */}
+      {/* Popover Dropdown - EXACT width matching input container (strictly 100% w-full, never overflows container) */}
       {isOpen && (
         <div
-          className="absolute z-50 left-0 right-0 w-full top-full mt-1.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
-          style={{ minWidth: '260px' }}
+          className="absolute z-50 left-0 right-0 w-full top-full mt-2 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-w-full"
         >
           {/* Header Display */}
-          <div className="p-3 sm:p-3.5 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-800/90 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/80">
-            <div className="flex items-center justify-between gap-1 mb-2">
-              <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+          <div className="p-2.5 sm:p-3 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-800/90 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/80">
+            <div className="flex items-center justify-between gap-1 mb-1.5">
+              <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
                 <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400 shrink-0" />
                 <span className="truncate">24 soatlik Toshkent vaqti</span>
               </span>
-              <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold shrink-0">
-                <PeriodIcon className={`w-3.5 h-3.5 ${periodInfo.color}`} />
-                <span className={periodInfo.color}>{periodInfo.label}</span>
+              <div className="flex items-center gap-1 text-[10px] font-bold shrink-0">
+                <PeriodIcon className={`w-3 h-3 ${periodInfo.color}`} />
+                <span className={`text-[10px] ${periodInfo.color}`}>{periodInfo.label}</span>
               </div>
             </div>
 
             {/* Large Digital Display */}
-            <div className="flex items-center justify-center gap-2 py-1">
-              <div className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
-                <span className="text-xl sm:text-2xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
+            <div className="flex items-center justify-center gap-1.5 py-0.5">
+              <div className="px-3 py-1 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
+                <span className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
                   {String(currentHour).padStart(2, '0')}
                 </span>
-                <span className="block text-[9px] font-bold uppercase text-gray-400 tracking-wider">
+                <span className="block text-[8px] font-bold uppercase text-gray-400 tracking-wider">
                   Soat
                 </span>
               </div>
-              <span className="text-xl sm:text-2xl font-black text-gray-400 font-mono -mt-3">:</span>
-              <div className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
-                <span className="text-xl sm:text-2xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
+              <span className="text-lg sm:text-xl font-black text-gray-400 font-mono -mt-2">:</span>
+              <div className="px-3 py-1 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
+                <span className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
                   {String(currentMinute).padStart(2, '0')}
                 </span>
-                <span className="block text-[9px] font-bold uppercase text-gray-400 tracking-wider">
+                <span className="block text-[8px] font-bold uppercase text-gray-400 tracking-wider">
                   Daqiqa
                 </span>
               </div>
@@ -213,18 +212,18 @@ export default function TimePicker({
           </div>
 
           {/* Popular Presets */}
-          <div className="px-3 py-2 bg-gray-50/70 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700/60">
-            <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+          <div className="px-2.5 py-1.5 bg-gray-50/70 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700/60">
+            <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
               <span>Tezkor tanlov</span>
               <button
                 type="button"
                 onClick={handleSetCurrentTime}
-                className="text-blue-600 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-1 lowercase"
+                className="text-blue-600 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-1 lowercase text-[10px]"
               >
-                <Sparkles className="w-3 h-3" /> hozirgi vaqt
+                <Sparkles className="w-2.5 h-2.5" /> hozirgi vaqt
               </button>
             </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-0.5">
               {popularPresets.map((preset) => {
                 const isSelected = preset === formattedTime;
                 return (
@@ -235,7 +234,7 @@ export default function TimePicker({
                       const [h, m] = preset.split(':').map(Number);
                       setFullTime(h, m);
                     }}
-                    className={`px-2 py-0.5 rounded-lg text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
+                    className={`px-1.5 py-0.5 rounded-lg text-[11px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
                       isSelected
                         ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-xs'
                         : 'bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600'
@@ -249,15 +248,15 @@ export default function TimePicker({
           </div>
 
           {/* Dual Column Picker: Soat va Daqiqa */}
-          <div className="grid grid-cols-2 divide-x divide-gray-100 dark:divide-gray-700/80 p-2">
+          <div className="grid grid-cols-2 divide-x divide-gray-100 dark:divide-gray-700/80 p-1.5">
             {/* Hours Column */}
-            <div className="pr-1.5">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center pb-1.5">
+            <div className="pr-1">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center pb-1">
                 Soat (00 - 23)
               </div>
               <div
                 ref={hoursListRef}
-                className="h-44 overflow-y-auto space-y-1 pr-1 custom-scrollbar"
+                className="h-40 overflow-y-auto space-y-0.5 pr-0.5 custom-scrollbar"
               >
                 {hours.map((h) => {
                   const isSelected = h === currentHour;
@@ -268,14 +267,14 @@ export default function TimePicker({
                       type="button"
                       data-selected={isSelected}
                       onClick={() => setHour(h)}
-                      className={`w-full h-8 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-2.5 transition-colors cursor-pointer ${
+                      className={`w-full h-7 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-2 transition-colors cursor-pointer ${
                         isSelected
                           ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-xs font-black'
                           : 'hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       <span>{hourLabel}:00</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3] shrink-0" />}
+                      {isSelected && <Check className="w-3 h-3 stroke-[3] shrink-0" />}
                     </button>
                   );
                 })}
@@ -283,13 +282,13 @@ export default function TimePicker({
             </div>
 
             {/* Minutes Column */}
-            <div className="pl-1.5">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center pb-1.5">
+            <div className="pl-1">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 text-center pb-1">
                 Daqiqa (00 - 59)
               </div>
               <div
                 ref={minutesListRef}
-                className="h-44 overflow-y-auto space-y-1 pr-1 custom-scrollbar"
+                className="h-40 overflow-y-auto space-y-0.5 pr-0.5 custom-scrollbar"
               >
                 {minutes.map((m) => {
                   const isSelected = m === currentMinute;
@@ -301,7 +300,7 @@ export default function TimePicker({
                       type="button"
                       data-selected={isSelected}
                       onClick={() => setMinute(m)}
-                      className={`w-full h-8 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-2.5 transition-colors cursor-pointer ${
+                      className={`w-full h-7 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-2 transition-colors cursor-pointer ${
                         isSelected
                           ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-xs font-black'
                           : isFiveMinStep
@@ -310,7 +309,7 @@ export default function TimePicker({
                       }`}
                     >
                       <span>:{minuteLabel}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3] shrink-0" />}
+                      {isSelected && <Check className="w-3 h-3 stroke-[3] shrink-0" />}
                     </button>
                   );
                 })}
@@ -318,15 +317,15 @@ export default function TimePicker({
             </div>
           </div>
 
-          {/* Footer with Confirm Button */}
-          <div className="p-2.5 bg-gray-50 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between gap-2">
+          {/* Footer with Confirm Button - Extra bottom padding for clean breathing room */}
+          <div className="p-2.5 pb-3 bg-gray-50 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between gap-2">
             <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
               Tanlandi: <strong className="font-mono text-gray-900 dark:text-gray-100">{formattedTime}</strong>
             </span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer shrink-0"
+              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer shrink-0"
             >
               Tayyor
             </button>
