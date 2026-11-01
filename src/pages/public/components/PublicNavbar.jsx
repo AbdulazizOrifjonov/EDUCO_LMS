@@ -296,26 +296,19 @@ export default function PublicNavbar({ settings }) {
           <a
             href="#top"
             onClick={(e) => handleNavClick(e, '#top')}
-            className="flex items-center gap-2 sm:gap-2.5 group focus:outline-none shrink-0"
-            title="EDUCO LMS"
+            className="flex items-center group focus:outline-none shrink-0"
+            title="EDUCO"
           >
-            <div className="flex items-center">
-              <img
-                src="/educo-logo.png"
-                alt="EDUCO"
-                className="h-7 sm:h-8 lg:h-9 w-auto object-contain dark:hidden group-hover:scale-102 transition-transform"
-              />
-              <img
-                src="/educo-logo-white.png"
-                alt="EDUCO"
-                className="h-7 sm:h-8 lg:h-9 w-auto object-contain hidden dark:block group-hover:scale-102 transition-transform"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800 border border-blue-300/80 dark:bg-emerald-950/80 dark:text-emerald-400 dark:border-emerald-700/60 shadow-xs transition-colors">
-                LMS
-              </span>
-            </div>
+            <img
+              src="/educo-logo.png"
+              alt="EDUCO"
+              className="h-7 sm:h-8 lg:h-9 w-auto object-contain dark:hidden group-hover:scale-102 transition-transform"
+            />
+            <img
+              src="/educo-logo-white.png"
+              alt="EDUCO"
+              className="h-7 sm:h-8 lg:h-9 w-auto object-contain hidden dark:block group-hover:scale-102 transition-transform"
+            />
           </a>
 
           {/* 2. Responsive Desktop Navigation Links */}
