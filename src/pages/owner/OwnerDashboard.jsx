@@ -206,7 +206,7 @@ export default function OwnerDashboard() {
             type="button"
             onClick={() => loadDashboardData(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-white dark:text-emerald-100 backdrop-blur text-sm font-medium transition-colors border border-white/15 dark:border-emerald-400/30 disabled:opacity-50 shadow-xs cursor-pointer"
+            className="h-10 inline-flex items-center justify-center gap-2 px-4 rounded-xl bg-white/10 hover:bg-white/20 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-white dark:text-emerald-100 backdrop-blur text-sm font-semibold transition-colors border border-white/15 dark:border-emerald-400/30 disabled:opacity-50 shadow-xs cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">
@@ -218,7 +218,7 @@ export default function OwnerDashboard() {
             variant="primary"
             size="md"
             icon={ClipboardCheck}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-lg font-bold"
+            className="h-10 !rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-lg font-bold"
           >
             {t('nav.attendance', 'Davomat')}
           </Button>

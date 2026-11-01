@@ -604,15 +604,22 @@ export default function PasswordsPage() {
         <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             icon={showAllPasswords ? EyeOff : Eye}
             onClick={handleToggleAll}
+            className="h-10 !rounded-xl font-semibold text-xs sm:text-sm"
           >
             {showAllPasswords
               ? t('passwords.hideAll', 'Parollarni yashirish')
               : t('passwords.showAll', 'Parollarni ko‘rsatish')}
           </Button>
-          <Button variant="ghost" size="sm" icon={RefreshCw} onClick={fetchCredentials}>
+          <Button
+            variant="ghost"
+            size="md"
+            icon={RefreshCw}
+            onClick={fetchCredentials}
+            className="h-10 !rounded-xl font-semibold text-xs sm:text-sm"
+          >
             {t('common.refresh', 'Yangilash')}
           </Button>
         </div>

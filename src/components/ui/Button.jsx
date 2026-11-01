@@ -34,9 +34,9 @@ export default function Button({
   };
 
   const sizes = {
-    sm: 'text-xs px-2.5 py-1.5 gap-1.5 min-h-[32px]',
-    md: 'text-sm px-4 py-2 gap-2 min-h-[40px]',
-    lg: 'text-base px-5 py-2.5 gap-2.5 min-h-[46px]',
+    sm: 'text-xs px-3 py-1.5 gap-1.5 h-8 min-h-[32px]',
+    md: 'text-sm px-4 py-2 gap-2 h-10 min-h-[40px]',
+    lg: 'text-base px-5 py-2.5 gap-2.5 h-12 min-h-[48px]',
   };
 
   const isActuallyDisabled = disabled || isLoading;

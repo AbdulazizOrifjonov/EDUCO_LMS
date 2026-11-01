@@ -286,12 +286,12 @@ export default function RemindersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           {activeView === 'create' ? (
             <button
               type="button"
               onClick={() => setActiveView('list')}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+              className="h-10 px-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer inline-flex items-center justify-center gap-2 shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Barcha eslatmalarga qaytish</span>
@@ -302,7 +302,7 @@ export default function RemindersPage() {
                 type="button"
                 onClick={loadData}
                 disabled={loading}
-                className="p-2 sm:px-3 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-xs flex items-center gap-1.5 text-xs font-semibold shrink-0 cursor-pointer disabled:opacity-50"
+                className="h-10 px-3.5 sm:px-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-xs inline-flex items-center justify-center gap-2 text-xs sm:text-sm font-bold shrink-0 cursor-pointer disabled:opacity-50"
                 title="Yangilash"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-600 dark:text-emerald-400' : ''}`} />
@@ -312,7 +312,7 @@ export default function RemindersPage() {
               <button
                 type="button"
                 onClick={() => setActiveView('create')}
-                className="inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer"
+                className="h-10 px-3.5 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer inline-flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4 shrink-0 stroke-[2.5]" />
                 <span className="hidden sm:inline">Yangi eslatma / Sinov darsi</span>
@@ -717,7 +717,7 @@ export default function RemindersPage() {
                       <button
                         type="button"
                         onClick={() => handleOpenComplete(item)}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer hover:shadow-sm"
+                        className="h-8 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer hover:shadow-sm"
                       >
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                         <span>{isTrial ? 'Dars o‘tildi' : 'Bog‘lanildi'}</span>
@@ -726,7 +726,7 @@ export default function RemindersPage() {
                       <button
                         type="button"
                         onClick={() => handlePostpone(item.id, 1)}
-                        className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        className="h-8 px-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center justify-center cursor-pointer"
                         title="1 kunga keyinga surish"
                       >
                         +1 kun
@@ -735,7 +735,7 @@ export default function RemindersPage() {
                       <button
                         type="button"
                         onClick={() => handlePostpone(item.id, 3)}
-                        className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer"
+                        className="h-8 px-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors whitespace-nowrap inline-flex items-center justify-center cursor-pointer"
                         title="3 kunga keyinga surish"
                       >
                         +3 kun
@@ -927,10 +927,22 @@ export default function RemindersPage() {
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 pt-5 border-t border-gray-100 dark:border-gray-800">
-              <Button variant="ghost" type="button" onClick={() => setActiveView('list')}>
+              <Button
+                variant="ghost"
+                type="button"
+                size="md"
+                className="h-10 !rounded-xl font-semibold"
+                onClick={() => setActiveView('list')}
+              >
                 Bekor qilish
               </Button>
-              <Button variant="primary" type="submit" icon={Check} className="px-6 py-2.5 font-bold">
+              <Button
+                variant="primary"
+                type="submit"
+                size="md"
+                icon={Check}
+                className="h-10 !rounded-xl px-6 font-bold"
+              >
                 💾 Saqlash va Rejalashtirish
               </Button>
             </div>
@@ -961,13 +973,19 @@ export default function RemindersPage() {
           />
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-            <Button variant="ghost" onClick={() => setCompleteModalItem(null)}>
+            <Button
+              variant="ghost"
+              size="md"
+              className="h-10 !rounded-xl font-semibold"
+              onClick={() => setCompleteModalItem(null)}
+            >
               Bekor qilish
             </Button>
             <Button
               variant="primary"
+              size="md"
+              className="h-10 !rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-bold"
               onClick={handleConfirmComplete}
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white"
               icon={Check}
             >
               Tasdiqlash

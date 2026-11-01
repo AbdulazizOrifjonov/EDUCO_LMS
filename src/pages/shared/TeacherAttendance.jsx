@@ -247,21 +247,22 @@ export default function TeacherAttendance() {
         <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             icon={RotateCcw}
             onClick={fetchRecords}
             disabled={loading}
+            className="h-10 !rounded-xl font-semibold text-xs sm:text-sm"
           >
             Yangilash
           </Button>
 
           <Button
             variant="primary"
-            size="sm"
+            size="md"
             icon={CheckCheck}
             onClick={handleMarkAllPresent}
             disabled={loading || stats.pending === 0}
-            className="!bg-blue-600 hover:!bg-blue-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 text-white shadow-md shadow-blue-600/25 dark:shadow-emerald-600/25"
+            className="h-10 !rounded-xl !bg-blue-600 hover:!bg-blue-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 text-white shadow-md shadow-blue-600/25 dark:shadow-emerald-600/25 font-semibold text-xs sm:text-sm"
           >
             Hammasini kelgan deb belgilash
           </Button>
