@@ -12,11 +12,15 @@ import {
   Shield,
   GraduationCap,
   Users,
-  Award,
   ChevronDown,
   UserCheck,
   PhoneCall,
   Sparkles,
+  BookOpen,
+  Image as ImageIcon,
+  Newspaper,
+  Video,
+  Info,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import useTheme from '@/hooks/useTheme';
@@ -34,6 +38,7 @@ const navTranslations = {
     videos: 'Video lavhalar',
     about: 'Biz haqimizda',
     contact: 'Aloqa',
+    more: 'Yana',
     login: 'Kabinetga kirish',
     dashboard: 'Kabinetga o‘tish',
     hotline: 'Qo‘ng‘iroq',
@@ -60,6 +65,7 @@ const navTranslations = {
     videos: 'Видео',
     about: 'О нас',
     contact: 'Контакты',
+    more: 'Еще',
     login: 'Войти в кабинет',
     dashboard: 'Личный кабинет',
     hotline: 'Горячая линия',
@@ -86,6 +92,7 @@ const navTranslations = {
     videos: 'Videos',
     about: 'About Us',
     contact: 'Contact',
+    more: 'More',
     login: 'Log in to Portal',
     dashboard: 'Go to Dashboard',
     hotline: 'Hotline',
@@ -108,7 +115,9 @@ export default function PublicNavbar({ settings }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const roleDropdownRef = useRef(null);
+  const moreDropdownRef = useRef(null);
 
   const { user, profile } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -117,6 +126,7 @@ export default function PublicNavbar({ settings }) {
 
   const currentLang = (i18n.language?.split('-')[0] || 'uz').toLowerCase();
   const tr = navTranslations[currentLang] || navTranslations.uz;
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -126,20 +136,41 @@ export default function PublicNavbar({ settings }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close dropdown when clicked outside
+  // Close dropdowns when clicked outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target)) {
         setRoleDropdownOpen(false);
       }
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(e.target)) {
+        setMoreDropdownOpen(false);
+      }
     };
-    if (roleDropdownOpen) {
+    if (roleDropdownOpen || moreDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [roleDropdownOpen]);
+  }, [roleDropdownOpen, moreDropdownOpen]);
 
-  const navLinks = [
+  // Primary links (Always visible on desktop lg+)
+  const primaryLinks = [
+    { label: tr.home, href: '#top' },
+    { label: tr.courses, href: '#courses' },
+    { label: tr.subjects, href: '#subjects' },
+    { label: tr.teachers, href: '#teachers' },
+    { label: tr.contact, href: '#contact' },
+  ];
+
+  // Secondary links (Nested under "Yana" on laptops, inline on 2xl screens)
+  const secondaryLinks = [
+    { label: tr.gallery, href: '#gallery', icon: ImageIcon },
+    { label: tr.news, href: '#news', icon: Newspaper },
+    { label: tr.videos, href: '#videos', icon: Video },
+    { label: tr.about, href: '#about', icon: Info },
+  ];
+
+  // All links combined for mobile menu and 2xl screens
+  const allNavLinks = [
     { label: tr.home, href: '#top' },
     { label: tr.courses, href: '#courses' },
     { label: tr.subjects, href: '#subjects' },
@@ -234,6 +265,7 @@ export default function PublicNavbar({ settings }) {
         }
       }
       setMobileMenuOpen(false);
+      setMoreDropdownOpen(false);
     }
   };
 
@@ -247,21 +279,24 @@ export default function PublicNavbar({ settings }) {
     }
   };
 
+  // Modern frosted glass styling based on theme and scroll position
+  const headerClass = isScrolled
+    ? isDark
+      ? 'public-navbar-scrolled-dark py-2.5 sm:py-3'
+      : 'public-navbar-scrolled-light py-2.5 sm:py-3'
+    : isDark
+      ? 'public-navbar-top-dark py-3 sm:py-3.5'
+      : 'public-navbar-top-light py-3 sm:py-3.5';
+
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md shadow-md border-b border-gray-200/90 dark:border-gray-800/90 py-2.5 sm:py-3'
-          : 'bg-white/90 dark:bg-[#0f172a]/90 backdrop-blur-sm py-3.5 sm:py-4 border-b border-gray-100 dark:border-gray-800/60'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-3">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerClass}`}>
+      <div className="w-full max-w-[1540px] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-2.5 lg:gap-4">
           {/* 1. Official EDUCO Logo with Dual Theme (Light=Blue/Red, Dark=White/Green) */}
           <a
             href="#top"
             onClick={(e) => handleNavClick(e, '#top')}
-            className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none shrink-0"
+            className="flex items-center gap-2 sm:gap-2.5 group focus:outline-none shrink-0"
             title="EDUCO LMS"
           >
             <div className="flex items-center">
@@ -277,76 +312,125 @@ export default function PublicNavbar({ settings }) {
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] sm:text-[11px] font-black px-1.5 sm:px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/90 dark:bg-emerald-950/80 dark:text-emerald-400 dark:border-emerald-700/60 shadow-xs transition-colors">
-                  LMS
-                </span>
-              </div>
-              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-tight hidden 2xl:block">
-                {tr.ecosystem}
+              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800 border border-blue-300/80 dark:bg-emerald-950/80 dark:text-emerald-400 dark:border-emerald-700/60 shadow-xs transition-colors">
+                LMS
               </span>
             </div>
           </a>
 
-          {/* 2. Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center space-x-0.5 2xl:space-x-1 rtl:space-x-reverse">
-            {navLinks.map((link) => (
+          {/* 2. Responsive Desktop Navigation Links */}
+          {/* 2A: Widescreen view (>= 2xl: 1536px): Show all 9 links */}
+          <nav className="hidden 2xl:flex items-center space-x-1 rtl:space-x-reverse">
+            {allNavLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="px-2.5 2xl:px-3 py-1.5 rounded-xl text-xs 2xl:text-[13px] font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-700 hover:bg-blue-50/90 dark:hover:text-emerald-400 dark:hover:bg-emerald-950/40 transition-all cursor-pointer whitespace-nowrap"
+                className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-700 hover:bg-blue-50/90 dark:hover:text-emerald-400 dark:hover:bg-emerald-950/40 transition-all cursor-pointer whitespace-nowrap"
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          {/* 3. Right Action Area: Hotline, Languages, Theme, Login */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Quick Contact Hotline Pill */}
+          {/* 2B: Laptop / Desktop view (lg to 2xl: 1024px to 1535px): Show primary 5 links + "Yana" dropdown */}
+          <nav className="hidden lg:flex 2xl:hidden items-center space-x-0.5 xl:space-x-1 rtl:space-x-reverse">
+            {primaryLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                className="px-2 xl:px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-700 hover:bg-blue-50/90 dark:hover:text-emerald-400 dark:hover:bg-emerald-950/40 transition-all cursor-pointer whitespace-nowrap"
+              >
+                {link.label}
+              </a>
+            ))}
+
+            {/* "Yana" (More) dropdown for secondary sections */}
+            <div className="relative" ref={moreDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setMoreDropdownOpen((prev) => !prev)}
+                className="inline-flex items-center gap-1 px-2 xl:px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-700 hover:bg-blue-50/90 dark:hover:text-emerald-400 dark:hover:bg-emerald-950/40 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <span>{tr.more}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${moreDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {moreDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-white dark:bg-[#0f172a] p-1.5 shadow-2xl border border-gray-100 dark:border-gray-800 space-y-0.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {secondaryLinks.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        onClick={(e) => handleNavClick(e, item.href)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-blue-50/90 hover:text-blue-700 dark:hover:bg-emerald-950/50 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+                      >
+                        <Icon className="w-4 h-4 opacity-75 shrink-0" />
+                        <span>{item.label}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </nav>
+
+          {/* 3. Right Action Area: Hotline, Languages, Kun/Tun Toggle, Kabinetga kirish */}
+          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 shrink-0">
+            {/* Quick Hotline Pill (Visible on large screens) */}
             <a
               href={`tel:${settings?.phone || '+998936101774'}`}
-              className="hidden 2xl:flex items-center gap-2 h-10 px-3 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-blue-50/90 hover:text-blue-700 hover:border-blue-200/90 dark:bg-gray-800/80 dark:hover:bg-gray-700 transition-colors shrink-0"
+              className="hidden 2xl:flex items-center gap-2 h-9 px-3 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 dark:bg-gray-800/80 dark:hover:bg-gray-700 transition-colors shrink-0"
               title="Qo‘ng‘iroq qilish"
             >
               <PhoneCall className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400 shrink-0" />
               <span className="whitespace-nowrap">{settings?.phone || '+998 93 610 17 74'}</span>
             </a>
 
-            {/* Official Language Selector Dropdown (UZ / EN / RU) */}
+            {/* Language Selector Dropdown (UZ / EN / RU) */}
             <div className="shrink-0">
               <LanguageSelector className="shrink-0" />
             </div>
 
-            {/* Day / Night Theme Toggle Button (Kun: Moon/Blue, Tun: Sun/Gold) */}
+            {/* Kun / Tun Theme Toggle Button (Kun: Blue accent with Moon, Tun: Gold/Green with Sun) */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/80 hover:bg-blue-50 hover:text-blue-700 dark:bg-gray-800/80 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 transition-colors shadow-xs cursor-pointer shrink-0"
-              title={theme === 'dark' ? tr.lightMode : tr.darkMode}
+              className={`h-9 w-9 sm:h-10 sm:w-10 inline-flex items-center justify-center rounded-xl border transition-all shadow-xs cursor-pointer shrink-0 ${
+                isDark
+                  ? 'border-emerald-700/60 bg-emerald-950/40 text-amber-400 hover:bg-emerald-900/60 hover:scale-105 active:scale-95'
+                  : 'border-blue-200/90 bg-blue-50/80 text-blue-700 hover:bg-blue-100 hover:scale-105 active:scale-95'
+              }`}
+              title={isDark ? tr.lightMode : tr.darkMode}
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5 text-amber-400 transition-transform hover:rotate-45" />
+              {isDark ? (
+                <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 transition-transform hover:rotate-45" />
               ) : (
-                <Moon className="w-5 h-5 text-blue-600 transition-transform hover:-rotate-12" />
+                <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700 transition-transform hover:-rotate-12" />
               )}
             </button>
 
-            {/* Login / Dashboard Button Area */}
+            {/* Login / Dashboard Button Area (Always Visible & Prominent) */}
             {isAuthenticated ? (
               <div className="relative shrink-0">
                 <Link
                   to={getDashboardPath()}
-                  className="flex items-center gap-2 px-3 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 dark:from-emerald-600 dark:to-teal-700 dark:hover:from-emerald-700 dark:hover:to-teal-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-700/25 dark:shadow-emerald-950/30 transition-all hover:scale-102 active:scale-98"
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 ${
+                    isDark
+                      ? 'bg-gradient-to-r from-[#064e3b] via-emerald-600 to-teal-700 hover:from-[#053d2e] hover:to-emerald-800 shadow-emerald-950/40'
+                      : 'bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-900/25'
+                  }`}
                 >
-                  <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs text-white">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-[10px] sm:text-xs text-white">
                     {(profile?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                   </div>
                   <span className="hidden sm:inline whitespace-nowrap">{tr.dashboard}</span>
                   <span className="sm:hidden">Kabinet</span>
-                  <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 rtl:rotate-180" />
                 </Link>
               </div>
             ) : (
@@ -354,9 +438,13 @@ export default function PublicNavbar({ settings }) {
                 <button
                   type="button"
                   onClick={() => setRoleDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 dark:from-[#064e3b] dark:via-emerald-600 dark:to-teal-700 dark:hover:from-[#053d2e] dark:hover:to-emerald-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-700/25 dark:shadow-emerald-950/40 transition-all hover:scale-102 active:scale-98 cursor-pointer"
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 cursor-pointer ${
+                    isDark
+                      ? 'bg-gradient-to-r from-[#064e3b] via-emerald-600 to-teal-700 hover:from-[#053d2e] hover:to-emerald-800 shadow-emerald-950/40'
+                      : 'bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-900/25'
+                  }`}
                 >
-                  <LogIn className="w-4 h-4 shrink-0" />
+                  <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                   <span className="whitespace-nowrap">{tr.login}</span>
                   <ChevronDown
                     className={`w-3.5 h-3.5 opacity-80 transition-transform duration-200 ${
@@ -428,17 +516,17 @@ export default function PublicNavbar({ settings }) {
             <button
               type="button"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="p-2 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 xl:hidden transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden transition-colors cursor-pointer shrink-0"
               aria-label="Menyu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
         </div>
 
         {/* Mobile Slide-down Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="xl:hidden pt-4 pb-6 mt-3 border-t border-gray-100 dark:border-gray-800 animate-in fade-in slide-in-from-top-4 duration-200 space-y-4">
+          <div className="lg:hidden pt-4 pb-6 mt-3 border-t border-gray-100 dark:border-gray-800 animate-in fade-in slide-in-from-top-4 duration-200 space-y-4">
             {/* Quick 1-tap Language Switcher for Mobile */}
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700">
               {[
@@ -464,7 +552,7 @@ export default function PublicNavbar({ settings }) {
 
             {/* Nav Links */}
             <nav className="flex flex-col space-y-1">
-              {navLinks.map((link) => (
+              {allNavLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
@@ -498,7 +586,7 @@ export default function PublicNavbar({ settings }) {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 dark:from-[#064e3b] dark:to-emerald-600 text-white font-bold text-sm shadow-md"
+                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] dark:from-[#064e3b] dark:to-emerald-600 text-white font-bold text-sm shadow-md"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>{tr.login}</span>

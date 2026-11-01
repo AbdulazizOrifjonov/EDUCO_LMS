@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import websiteService from '@/services/websiteService';
 import PublicNavbar from './components/PublicNavbar';
+import PublicAnimatedBackground from './components/PublicAnimatedBackground';
 import HeroSlider from './components/HeroSlider';
 import StatsSection from './components/StatsSection';
 import AboutSection from './components/AboutSection';
@@ -80,11 +81,14 @@ export default function PublicWebsite() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-600 dark:selection:bg-emerald-500 selection:text-white transition-colors duration-200">
+    <div className="relative min-h-screen bg-slate-50/50 dark:bg-[#060b14] text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-600 dark:selection:bg-emerald-500 selection:text-white transition-colors duration-500 overflow-x-hidden">
+      {/* Dynamic Animated Background with Ambient Orbs & Floating Stars for Tun & Kun */}
+      <PublicAnimatedBackground />
+
       {/* 1. Header & Sticky Navbar */}
       <PublicNavbar settings={settings} />
 
-      <main className="overflow-hidden">
+      <main className="relative z-10 overflow-hidden">
         {/* 2. Hero Section with Managed Multi-Slide Carousel */}
         <HeroSlider
           slides={slides}

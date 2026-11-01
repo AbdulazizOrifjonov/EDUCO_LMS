@@ -103,7 +103,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
             <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
             {/* Slide Content Box */}
-            <div className="relative z-20 max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
+            <div className="relative z-20 max-w-[1540px] mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
               <div className="max-w-2xl sm:max-w-3xl space-y-4 sm:space-y-6">
                 {/* Badge Pill */}
                 {slide.badge && (

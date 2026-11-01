@@ -269,4 +269,94 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   }
 }
 
+/* ==========================================================================
+   PUBLIC WEBSITE ANIMATED BACKGROUND & FROSTED GLASS NAVBAR STYLES
+   ========================================================================== */
+
+@keyframes bgOrb1 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(60px, 45px, 0) scale(1.12); }
+  100% { transform: translate3d(-35px, 70px, 0) scale(0.95); }
+}
+
+@keyframes bgOrb2 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-55px, 50px, 0) scale(1.15); }
+  100% { transform: translate3d(40px, -30px, 0) scale(0.9); }
+}
+
+@keyframes bgOrb3 {
+  0% { transform: translate3d(-50%, 0, 0) scale(1); }
+  50% { transform: translate3d(-46%, -40px, 0) scale(1.18); }
+  100% { transform: translate3d(-54%, 50px, 0) scale(0.92); }
+}
+
+@keyframes bgBeam {
+  0% { transform: translateY(-100%); opacity: 0; }
+  25% { opacity: 0.25; }
+  75% { opacity: 0.25; }
+  100% { transform: translateY(120vh); opacity: 0; }
+}
+
+@keyframes floatSparkle {
+  0% { transform: translateY(0) scale(0.8); opacity: 0.2; }
+  50% { transform: translateY(-40px) scale(1.2); opacity: 0.85; }
+  100% { transform: translateY(-80px) scale(0.8); opacity: 0.2; }
+}
+
+.animate-bg-orb-1 {
+  animation: bgOrb1 20s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-bg-orb-2 {
+  animation: bgOrb2 25s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-bg-orb-3 {
+  animation: bgOrb3 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.animate-bg-beam {
+  animation: bgBeam 18s linear infinite;
+  will-change: transform;
+}
+
+.animate-float-sparkle {
+  animation: floatSparkle 12s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.public-navbar-top-light {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.public-navbar-top-dark {
+  background: rgba(6, 11, 20, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.public-navbar-scrolled-light {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(18, 61, 120, 0.15) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08) !important;
+}
+
+.public-navbar-scrolled-dark {
+  background: rgba(6, 11, 20, 0.95) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.22) !important;
+  box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.6) !important;
+}
+
 
