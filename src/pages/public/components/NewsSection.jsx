@@ -6,7 +6,7 @@ import ScrollReveal from '@/hooks/useScrollReveal';
 export default function NewsSection({ news = [], onSelectNews = () => {} }) {
   return (
     <section id="news" className="py-20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <ScrollReveal animation="up" className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-emerald-950/60 text-blue-800 dark:text-emerald-300 text-xs font-bold border border-blue-300/60 dark:border-emerald-800/60">

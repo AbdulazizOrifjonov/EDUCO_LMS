@@ -19,7 +19,7 @@ export default function PublicFooter({ settings }) {
 
   return (
     <footer className="bg-gray-950 text-white pt-16 pb-12 border-t border-gray-800/80 select-none">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Brand Info with Official EDUCO Logo */}
           <div className="lg:col-span-4 space-y-4">

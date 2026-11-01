@@ -6,7 +6,7 @@ import ScrollReveal from '@/hooks/useScrollReveal';
 export default function TestimonialsSection({ testimonials = [] }) {
   return (
     <section className="py-20 bg-gray-50/60 dark:bg-[#0c121e] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <ScrollReveal animation="up" className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-xs font-bold border border-amber-300/60 dark:border-amber-800/60">

@@ -40,7 +40,7 @@ export default function StatsSection({ settings }) {
   ];
 
   return (
-    <section id="stats" className="relative -mt-12 z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="stats" className="relative z-20 pt-10 sm:pt-14 pb-4 sm:pb-6 max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;

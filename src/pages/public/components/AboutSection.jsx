@@ -42,8 +42,8 @@ export default function AboutSection({ settings }) {
   ];
 
   return (
-    <section id="about" className="py-20 lg:py-28 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="pt-8 sm:pt-12 pb-20 lg:pb-28 overflow-hidden">
+      <div className="max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Mission, Vision & Description (Enters from Left) */}
           <ScrollReveal animation="left" className="lg:col-span-6 space-y-6">
