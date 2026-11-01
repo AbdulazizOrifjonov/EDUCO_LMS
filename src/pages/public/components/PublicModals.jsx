@@ -219,8 +219,9 @@ export function TeacherModal({ teacher, onClose }) {
   );
 }
 
-export function NewsDetailModal({ newsItem, onClose }) {
-  if (!newsItem) return null;
+export function NewsDetailModal({ newsItem, news, onClose }) {
+  const currentNews = newsItem || news;
+  if (!currentNews) return null;
 
   return (
     <div
@@ -233,8 +234,8 @@ export function NewsDetailModal({ newsItem, onClose }) {
       >
         <div className="relative h-60 w-full bg-gray-900 shrink-0">
           <img
-            src={newsItem.cover_image}
-            alt={newsItem.title}
+            src={currentNews.cover_image || currentNews.image || currentNews.image_url}
+            alt={currentNews.title}
             className="w-full h-full object-cover"
           />
           <button
@@ -249,30 +250,32 @@ export function NewsDetailModal({ newsItem, onClose }) {
         <div className="p-6 overflow-y-auto space-y-4 flex-1">
           <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-semibold">
             <span className="px-3 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold">
-              {newsItem.category}
+              {currentNews.category}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
-              {newsItem.published_at}
+              {currentNews.published_at || currentNews.date}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <Eye className="w-3.5 h-3.5" />
-              {newsItem.views || 0} ko‘rildi
+              {currentNews.views || 0} ko‘rildi
             </span>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black text-gray-950 dark:text-white leading-tight">
-            {newsItem.title}
+            {currentNews.title}
           </h2>
 
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 italic border-l-4 border-emerald-500 pl-3">
-            {newsItem.excerpt}
-          </p>
+          {(currentNews.excerpt || currentNews.summary) && (
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 italic border-l-4 border-emerald-500 pl-3">
+              {currentNews.excerpt || currentNews.summary}
+            </p>
+          )}
 
           <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line pt-2">
-            {newsItem.content}
+            {currentNews.content}
           </div>
         </div>
       </div>
@@ -280,8 +283,9 @@ export function NewsDetailModal({ newsItem, onClose }) {
   );
 }
 
-export function LightboxModal({ imageItem, onClose }) {
-  if (!imageItem) return null;
+export function LightboxModal({ imageItem, image, onClose }) {
+  const currentImage = imageItem || image;
+  if (!currentImage) return null;
 
   return (
     <div
@@ -301,17 +305,17 @@ export function LightboxModal({ imageItem, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <img
-          src={imageItem.image_url}
-          alt={imageItem.title}
+          src={currentImage.image_url || currentImage.image}
+          alt={currentImage.title}
           className="max-h-[70vh] w-auto max-w-full rounded-2xl shadow-2xl object-contain border border-white/10"
         />
         <div className="text-center text-white space-y-1">
           <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-600 text-white inline-block">
-            {imageItem.category}
+            {currentImage.category}
           </span>
-          <h3 className="text-lg font-bold">{imageItem.title}</h3>
-          {imageItem.caption && (
-            <p className="text-xs text-gray-300 max-w-md mx-auto">{imageItem.caption}</p>
+          <h3 className="text-lg font-bold">{currentImage.title}</h3>
+          {(currentImage.caption || currentImage.description) && (
+            <p className="text-xs text-gray-300 max-w-md mx-auto">{currentImage.caption || currentImage.description}</p>
           )}
         </div>
       </div>

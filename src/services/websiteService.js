@@ -919,7 +919,102 @@ class WebsiteService {
       testimonialsCount: this.getTestimonials(true).length,
     };
   }
+
+  // --- COMPATIBILITY ALIASES ---
+  getWebsiteSettings() {
+    return this.getSettings();
+  }
+  updateWebsiteSettings(patch) {
+    return this.updateSettings(patch);
+  }
+
+  getHeroSlides(onlyActive = false) {
+    return this.getSlides(onlyActive);
+  }
+  saveHeroSlide(data) {
+    return this.saveSlide(data);
+  }
+  deleteHeroSlide(id) {
+    return this.deleteSlide(id);
+  }
+
+  getWebsiteCourses(onlyActive = false) {
+    return this.getCourses(onlyActive);
+  }
+  saveWebsiteCourse(data) {
+    return this.saveCourse(data);
+  }
+  deleteWebsiteCourse(id) {
+    return this.deleteCourse(id);
+  }
+
+  getWebsiteSubjects(onlyActive = false) {
+    return this.getSubjects(onlyActive);
+  }
+  saveWebsiteSubject(data) {
+    return this.saveSubject(data);
+  }
+  deleteWebsiteSubject(id) {
+    return this.deleteSubject(id);
+  }
+
+  getWebsiteTeachers(onlyActive = false) {
+    return this.getTeachers(onlyActive);
+  }
+  saveWebsiteTeacher(data) {
+    return this.saveTeacher(data);
+  }
+  deleteWebsiteTeacher(id) {
+    return this.deleteTeacher(id);
+  }
+
+  getWebsiteGallery(onlyActive = false) {
+    return this.getGallery(onlyActive);
+  }
+  saveWebsiteGalleryItem(data) {
+    return this.saveGalleryItem(data);
+  }
+  deleteWebsiteGalleryItem(id) {
+    return this.deleteGalleryItem(id);
+  }
+
+  getWebsiteVideos(onlyActive = false) {
+    return this.getVideos(onlyActive);
+  }
+  saveWebsiteVideo(data) {
+    return this.saveVideo(data);
+  }
+  deleteWebsiteVideo(id) {
+    return this.deleteVideo(id);
+  }
+
+  getWebsiteNews(onlyPublished = false) {
+    return this.getNews(onlyPublished);
+  }
+  saveWebsiteNews(data) {
+    return this.saveNews(data);
+  }
+  deleteWebsiteNews(id) {
+    return this.deleteNews(id);
+  }
+
+  getWebsiteTestimonials(onlyActive = false) {
+    return this.getTestimonials(onlyActive);
+  }
+  saveWebsiteTestimonial(data) {
+    return this.saveTestimonial(data);
+  }
+  deleteWebsiteTestimonial(id) {
+    return this.deleteTestimonial(id);
+  }
 }
 
 export const websiteService = new WebsiteService();
+
+if (typeof window !== 'undefined') {
+  try {
+    window.websiteService = websiteService;
+  } catch (_) {}
+}
+
 export default websiteService;

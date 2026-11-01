@@ -23,15 +23,15 @@ import {
 
 export default function PublicWebsite() {
   // Live website content states
-  const [settings, setSettings] = useState(() => websiteService.getWebsiteSettings());
-  const [slides, setSlides] = useState(() => websiteService.getHeroSlides());
-  const [courses, setCourses] = useState(() => websiteService.getWebsiteCourses());
-  const [subjects, setSubjects] = useState(() => websiteService.getWebsiteSubjects());
-  const [teachers, setTeachers] = useState(() => websiteService.getWebsiteTeachers());
-  const [gallery, setGallery] = useState(() => websiteService.getWebsiteGallery());
-  const [videos, setVideos] = useState(() => websiteService.getWebsiteVideos());
-  const [news, setNews] = useState(() => websiteService.getWebsiteNews());
-  const [testimonials, setTestimonials] = useState(() => websiteService.getWebsiteTestimonials());
+  const [settings, setSettings] = useState(() => (websiteService.getWebsiteSettings ? websiteService.getWebsiteSettings() : websiteService.getSettings?.() || {}));
+  const [slides, setSlides] = useState(() => (websiteService.getHeroSlides ? websiteService.getHeroSlides() : websiteService.getSlides?.() || []));
+  const [courses, setCourses] = useState(() => (websiteService.getWebsiteCourses ? websiteService.getWebsiteCourses() : websiteService.getCourses?.() || []));
+  const [subjects, setSubjects] = useState(() => (websiteService.getWebsiteSubjects ? websiteService.getWebsiteSubjects() : websiteService.getSubjects?.() || []));
+  const [teachers, setTeachers] = useState(() => (websiteService.getWebsiteTeachers ? websiteService.getWebsiteTeachers() : websiteService.getTeachers?.() || []));
+  const [gallery, setGallery] = useState(() => (websiteService.getWebsiteGallery ? websiteService.getWebsiteGallery() : websiteService.getGallery?.() || []));
+  const [videos, setVideos] = useState(() => (websiteService.getWebsiteVideos ? websiteService.getWebsiteVideos() : websiteService.getVideos?.() || []));
+  const [news, setNews] = useState(() => (websiteService.getWebsiteNews ? websiteService.getWebsiteNews() : websiteService.getNews?.() || []));
+  const [testimonials, setTestimonials] = useState(() => (websiteService.getWebsiteTestimonials ? websiteService.getWebsiteTestimonials() : websiteService.getTestimonials?.() || []));
 
   // Modal inspection states
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -45,15 +45,15 @@ export default function PublicWebsite() {
 
   // Synchronize state with websiteService
   const refreshWebsiteData = useCallback(() => {
-    setSettings(websiteService.getWebsiteSettings());
-    setSlides(websiteService.getHeroSlides());
-    setCourses(websiteService.getWebsiteCourses());
-    setSubjects(websiteService.getWebsiteSubjects());
-    setTeachers(websiteService.getWebsiteTeachers());
-    setGallery(websiteService.getWebsiteGallery());
-    setVideos(websiteService.getWebsiteVideos());
-    setNews(websiteService.getWebsiteNews());
-    setTestimonials(websiteService.getWebsiteTestimonials());
+    setSettings(websiteService.getWebsiteSettings ? websiteService.getWebsiteSettings() : websiteService.getSettings?.() || {});
+    setSlides(websiteService.getHeroSlides ? websiteService.getHeroSlides() : websiteService.getSlides?.() || []);
+    setCourses(websiteService.getWebsiteCourses ? websiteService.getWebsiteCourses() : websiteService.getCourses?.() || []);
+    setSubjects(websiteService.getWebsiteSubjects ? websiteService.getWebsiteSubjects() : websiteService.getSubjects?.() || []);
+    setTeachers(websiteService.getWebsiteTeachers ? websiteService.getWebsiteTeachers() : websiteService.getTeachers?.() || []);
+    setGallery(websiteService.getWebsiteGallery ? websiteService.getWebsiteGallery() : websiteService.getGallery?.() || []);
+    setVideos(websiteService.getWebsiteVideos ? websiteService.getWebsiteVideos() : websiteService.getVideos?.() || []);
+    setNews(websiteService.getWebsiteNews ? websiteService.getWebsiteNews() : websiteService.getNews?.() || []);
+    setTestimonials(websiteService.getWebsiteTestimonials ? websiteService.getWebsiteTestimonials() : websiteService.getTestimonials?.() || []);
   }, []);
 
   useEffect(() => {
@@ -89,10 +89,10 @@ export default function PublicWebsite() {
         <HeroSlider slides={slides} />
 
         {/* 3. Statistics Section (Real-time animated counters) */}
-        <StatsSection stats={settings.stats} />
+        <StatsSection settings={settings} />
 
         {/* 4. About EDUCO (Mission, vision, values, why choose us) */}
-        <AboutSection about={settings.about} />
+        <AboutSection settings={settings} />
 
         {/* 5. Courses Section (Interactive catalog with filter & detail modal) */}
         <CoursesSection
