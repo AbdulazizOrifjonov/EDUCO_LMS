@@ -26,7 +26,7 @@ export default function Button({
     danger:
       'bg-brand-red hover:bg-brand-red-dark text-white focus:ring-brand-red dark:focus:ring-offset-surface-dark shadow-sm',
     secondary:
-      'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-surface-dark-tertiary dark:hover:bg-gray-700 dark:text-gray-200 focus:ring-gray-400',
+      'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 focus:ring-gray-400 border border-gray-300 dark:border-gray-700 shadow-xs font-semibold',
     ghost:
       'bg-transparent hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 focus:ring-gray-400',
     outline:

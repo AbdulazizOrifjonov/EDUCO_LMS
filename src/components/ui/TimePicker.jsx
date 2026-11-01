@@ -18,7 +18,6 @@ export default function TimePicker({
   name,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef(null);
   const hoursListRef = useRef(null);
   const minutesListRef = useRef(null);
@@ -48,19 +47,6 @@ export default function TimePicker({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  // Determine if popover should open upwards when close to bottom of screen
-  useEffect(() => {
-    if (isOpen && containerRef.current && typeof window !== 'undefined') {
-      const rect = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      if (spaceBelow < 380 && rect.top > 380) {
-        setOpenUpward(true);
-      } else {
-        setOpenUpward(false);
-      }
-    }
   }, [isOpen]);
 
   // Scroll selected hour and minute into view when popover opens
@@ -185,12 +171,10 @@ export default function TimePicker({
       )}
       {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
 
-      {/* Popover Dropdown - EXACT width matching input container (100% w-full left-0 right-0) */}
+      {/* Popover Dropdown - EXACT width matching input container (100% w-full left-0 right-0 top-full) */}
       {isOpen && (
         <div
-          className={`absolute z-50 left-0 right-0 w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${
-            openUpward ? 'bottom-full mb-2' : 'top-full mt-1.5'
-          }`}
+          className="absolute z-50 left-0 right-0 w-full top-full mt-1.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           style={{ minWidth: '260px' }}
         >
           {/* Header Display */}

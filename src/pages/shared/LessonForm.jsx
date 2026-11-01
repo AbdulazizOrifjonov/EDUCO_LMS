@@ -402,10 +402,16 @@ export default function LessonForm({
         />
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+          <Button
+            variant="secondary"
+            size="md"
+            className="h-10 !rounded-xl px-5 font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 shadow-xs"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             {t('common.cancel', 'Bekor qilish')}
           </Button>
-          <Button type="submit" variant="primary" isLoading={isSubmitting}>
+          <Button type="submit" variant="primary" size="md" className="h-10 !rounded-xl px-5 font-bold" isLoading={isSubmitting}>
             {isEditing ? t('common.save', 'Saqlash') : t('schedule.scheduleLesson', 'Jadvalga kiritish')}
           </Button>
         </div>

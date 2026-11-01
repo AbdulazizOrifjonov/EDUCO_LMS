@@ -28,7 +28,6 @@ export default function DatePicker({
 }) {
   const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef(null);
 
   // Parse incoming value (expected YYYY-MM-DD or ISO string)
@@ -68,19 +67,6 @@ export default function DatePicker({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  // Determine if calendar should open upwards when close to bottom of screen
-  useEffect(() => {
-    if (isOpen && containerRef.current && typeof window !== 'undefined') {
-      const rect = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      if (spaceBelow < 320 && rect.top > 320) {
-        setOpenUpward(true);
-      } else {
-        setOpenUpward(false);
-      }
-    }
   }, [isOpen]);
 
   const viewYear = viewDate.getFullYear();
@@ -278,12 +264,10 @@ export default function DatePicker({
         value={value || ''}
       />
 
-      {/* Popover Calendar - EXACT width matching input container (100% w-full) */}
+      {/* Popover Calendar - EXACT width matching input container (100% w-full left-0 right-0 top-full) */}
       {isOpen && (
         <div
-          className={`absolute z-50 left-0 right-0 w-full rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-3 animate-in fade-in zoom-in-95 duration-150 ${
-            openUpward ? 'bottom-full mb-2' : 'top-full mt-1.5'
-          }`}
+          className="absolute z-50 left-0 right-0 w-full top-full mt-1.5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-3 animate-in fade-in zoom-in-95 duration-150"
           style={{ minWidth: '260px' }}
         >
           {/* Calendar Header */}

@@ -929,10 +929,10 @@ export default function RemindersPage() {
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 pt-5 border-t border-gray-100 dark:border-gray-800">
               <Button
-                variant="ghost"
+                variant="secondary"
                 type="button"
                 size="md"
-                className="h-10 !rounded-xl font-semibold"
+                className="h-10 !rounded-xl px-5 font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 shadow-xs"
                 onClick={() => setActiveView('list')}
               >
                 Bekor qilish
@@ -975,9 +975,9 @@ export default function RemindersPage() {
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
             <Button
-              variant="ghost"
+              variant="secondary"
               size="md"
-              className="h-10 !rounded-xl font-semibold"
+              className="h-10 !rounded-xl px-5 font-semibold bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 shadow-xs"
               onClick={() => setCompleteModalItem(null)}
             >
               Bekor qilish
