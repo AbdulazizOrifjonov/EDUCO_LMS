@@ -165,15 +165,20 @@ export async function getGroups({
   }
 
   const from = (page - 1) * limit;
-  const paginated = list.slice(from, from + limit).map((g) => ({
-    ...g,
-    avatar_url: g.avatar_url || g.image_url || null,
-    image_url: g.image_url || g.avatar_url || null,
-    courseName: g.course_name || 'Frontend React',
-    courseColor: '#064e3b',
-    studentCount: g.enrolled_count || 0,
-    primaryTeacher: g.teacher_name ? { fullName: g.teacher_name } : null,
-  }));
+  const allSchedules = localStore.getSchedules ? localStore.getSchedules() : [];
+  const paginated = list.slice(from, from + limit).map((g) => {
+    const grpSchedules = allSchedules.filter((s) => s.group_id === g.id);
+    return {
+      ...g,
+      avatar_url: g.avatar_url || g.image_url || null,
+      image_url: g.image_url || g.avatar_url || null,
+      courseName: g.course_name || 'Frontend React',
+      courseColor: '#064e3b',
+      studentCount: g.enrolled_count || 0,
+      primaryTeacher: g.teacher_name ? { fullName: g.teacher_name } : null,
+      schedules: grpSchedules,
+    };
+  });
 
   return {
     groups: paginated,
@@ -257,7 +262,7 @@ export async function getGroupById(id) {
       teachers: allUsers.filter((u) => u.role === 'teacher').slice(0, 1),
       studentCount: enrichedStudents.length,
       capacity: found.capacity || 20,
-      schedules: [],
+      schedules: localStore.getSchedules ? localStore.getSchedules().filter((s) => s.group_id === id) : [],
     };
   }
   throw new Error('Group not found');

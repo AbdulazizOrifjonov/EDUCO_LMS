@@ -790,13 +790,33 @@ export default function GroupDetail({ groupId: propGroupId }) {
       {activeTab === 'schedule' && (
         <Card>
           <div className="space-y-3">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-              {t('groups.weeklySchedule', 'Regular Weekly Timetable')}
-            </h3>
+            <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                {t('groups.weeklySchedule', 'Regular Weekly Timetable')}
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Calendar}
+                onClick={() => navigate(isTeacher ? '/teacher/schedule' : `/${currentUserRole}/schedule`)}
+              >
+                Dars jadvalini belgilash
+              </Button>
+            </div>
             {!group.schedules || group.schedules.length === 0 ? (
-              <p className="text-xs text-gray-500 py-4">
-                {t('groups.noSchedule', 'No recurring weekly schedule configured for this group.')}
-              </p>
+              <div className="py-6 text-center space-y-3">
+                <p className="text-xs text-gray-500">
+                  {t('groups.noSchedule', 'Ushbu guruh uchun hali haftalik dars jadvali tuzilmagan.')}
+                </p>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => navigate(isTeacher ? '/teacher/schedule' : `/${currentUserRole}/schedule`)}
+                >
+                  Dars vaqtini kiritish
+                </Button>
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
                 {group.schedules.map((sch) => (

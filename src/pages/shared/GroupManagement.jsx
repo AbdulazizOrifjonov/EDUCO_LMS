@@ -268,8 +268,10 @@ export default function GroupManagement() {
         header: t('nav.schedule', 'Lessons'),
         key: 'schedule',
         render: (row) => (
-          <span className="text-xs text-gray-600 dark:text-gray-400">
-            {row.schedules?.length
+          <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+            {row.schedule
+              ? row.schedule
+              : row.schedules?.length
               ? `${row.schedules.length} ${t('schedule.perWeek', '/ week')}`
               : t('schedule.noSchedule', 'No timetable')}
           </span>

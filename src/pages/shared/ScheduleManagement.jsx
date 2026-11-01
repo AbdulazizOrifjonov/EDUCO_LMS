@@ -99,10 +99,11 @@ export default function ScheduleManagement() {
           const myName = teacherFullName.trim().toLowerCase();
           const myId = profile?.id;
           groupList = groupList.filter((g) => {
-            const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId));
+            const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId || g.primaryTeacher?.id === myId));
+            const matchGt = Array.isArray(g.group_teachers) && g.group_teachers.some(t => (t.teacher_id || t.id || t.profiles?.id) === myId);
             const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
             const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
-            return matchId || matchName;
+            return matchId || matchGt || matchName;
           });
           setGroups(groupList);
           setTeachers([]);
@@ -188,20 +189,18 @@ export default function ScheduleManagement() {
           </p>
         </div>
 
-        {!isTeacher && (
-          <Button
-            variant="primary"
-            size="md"
-            icon={Plus}
-            onClick={() => {
-              setSelectedLesson(null);
-              setInitialSlot({ day: patternFilter === 'even' ? 2 : 1, time: '09:00' });
-              setIsFormOpen(true);
-            }}
-          >
-            {t('schedule.addLesson', 'Dars qo‘shish')}
-          </Button>
-        )}
+        <Button
+          variant="primary"
+          size="md"
+          icon={Plus}
+          onClick={() => {
+            setSelectedLesson(null);
+            setInitialSlot({ day: patternFilter === 'even' ? 2 : 1, time: '09:00' });
+            setIsFormOpen(true);
+          }}
+        >
+          {t('schedule.addLesson', 'Dars qo‘shish')}
+        </Button>
       </div>
 
       {/* Filters */}
@@ -367,7 +366,7 @@ export default function ScheduleManagement() {
                       className="h-28 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-gray-400 hover:text-brand-navy hover:border-brand-navy cursor-pointer transition-colors p-2 text-center"
                     >
                       <Plus className="w-4 h-4 mb-1" />
-                      <span className="text-[11px] font-medium">+ {t('schedule.addLesson', 'Add Lesson')}</span>
+                      <span className="text-[11px] font-medium">{t('schedule.addLesson', 'Dars qo‘shish')}</span>
                     </div>
                   ) : (
                     dayLessons.map((item) => (
@@ -439,10 +438,10 @@ export default function ScheduleManagement() {
                         setInitialSlot({ day: day.id, time: '14:00' });
                         setIsFormOpen(true);
                       }}
-                      className="w-full py-1.5 rounded-lg border border-dashed border-gray-200 dark:border-gray-800 text-[11px] text-gray-400 hover:text-brand-navy hover:border-brand-navy transition-colors flex items-center justify-center gap-1"
+                      className="w-full py-1.5 rounded-lg border border-dashed border-gray-200 dark:border-gray-800 text-[11px] text-gray-400 hover:text-brand-navy hover:border-brand-navy transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Plus className="w-3 h-3" />
-                      <span>Add</span>
+                      <span>{t('schedule.addLesson', 'Dars qo‘shish')}</span>
                     </button>
                   )}
                 </div>
@@ -521,7 +520,7 @@ export default function ScheduleManagement() {
                     setIsFormOpen(true);
                   }}
                 >
-                  + Dars qo‘shish
+                  {t('schedule.addLesson', 'Dars qo‘shish')}
                 </Button>
               </div>
 
@@ -631,6 +630,8 @@ export default function ScheduleManagement() {
           initialDay={initialSlot.day}
           initialTime={initialSlot.time}
           existingLessons={schedules}
+          availableGroups={groups}
+          isTeacher={isTeacher}
           onSuccess={fetchScheduleData}
         />
       )}

@@ -12,6 +12,7 @@ import TimePicker from '@/components/ui/TimePicker';
 import { toast } from '@/components/ui/Toast';
 import { localStore } from '@/lib/localStore';
 import { getGroups } from '@/services/groupService';
+import useAuth from '@/hooks/useAuth';
 
 const PATTERN_DAYS = {
   odd: [1, 3, 5],  // Dushanba, Chorshanba, Juma
@@ -38,11 +39,17 @@ export default function LessonForm({
   initialDay = 1,
   initialTime = '09:00',
   existingLessons = [],
+  availableGroups = [],
+  isTeacher = false,
   onSuccess,
 }) {
   const { t } = useTranslation();
+  const { profile } = useAuth();
+  const userIsTeacher = isTeacher || profile?.role === 'teacher';
+  const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.name || profile?.full_name || '';
+
   const isEditing = Boolean(lesson?.id);
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState(availableGroups || []);
   const [conflictWarning, setConflictWarning] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -77,8 +84,31 @@ export default function LessonForm({
 
     const loadGroups = async () => {
       try {
-        const res = await getGroups({ status: 'active', limit: 100 });
-        setGroups(res.groups || []);
+        if (availableGroups && availableGroups.length > 0) {
+          setGroups(availableGroups);
+          return;
+        }
+
+        const res = await getGroups({
+          status: 'active',
+          limit: 100,
+          teacherId: userIsTeacher ? profile?.id : undefined,
+          teacherName: userIsTeacher ? teacherFullName : undefined,
+        });
+
+        let gList = res.groups || [];
+        if (userIsTeacher) {
+          const myName = teacherFullName.trim().toLowerCase();
+          const myId = profile?.id;
+          gList = gList.filter((g) => {
+            const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId || g.primaryTeacher?.id === myId));
+            const matchGt = Array.isArray(g.group_teachers) && g.group_teachers.some(t => (t.teacher_id || t.id || t.profiles?.id) === myId);
+            const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
+            const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
+            return matchId || matchGt || matchName;
+          });
+        }
+        setGroups(gList);
       } catch (err) {
         console.error(err);
       }
@@ -95,15 +125,26 @@ export default function LessonForm({
         room: lesson.room || '',
       });
     } else {
+      const defaultGroup = availableGroups[0] || groups[0];
       reset({
-        groupId: '',
+        groupId: defaultGroup ? defaultGroup.id : '',
         dayPattern: getDefaultPattern(initialDay),
         startTime: initialTime || '09:00',
         endTime: '10:30',
-        room: '',
+        room: defaultGroup?.room || '',
       });
     }
-  }, [lesson, isOpen, initialDay, initialTime, reset]);
+  }, [lesson, isOpen, initialDay, initialTime, reset, availableGroups, userIsTeacher, profile?.id, teacherFullName]);
+
+  // Auto-select group for teacher or single-group context
+  useEffect(() => {
+    if (!lesson && groups.length > 0 && !selectedGroup) {
+      setValue('groupId', groups[0].id, { shouldValidate: true });
+      if (groups[0].room && !selectedRoom) {
+        setValue('room', groups[0].room);
+      }
+    }
+  }, [groups, lesson, selectedGroup, selectedRoom, setValue]);
 
   // Auto-fill room if group is selected and room is empty
   useEffect(() => {
@@ -173,6 +214,10 @@ export default function LessonForm({
         room: data.room?.trim() || '101-xona',
         existingLesson: isEditing ? lesson : null,
       });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
+      }
 
       const patternText =
         data.dayPattern === 'even'

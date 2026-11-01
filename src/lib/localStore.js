@@ -698,19 +698,32 @@ class LocalStore {
       const c = g ? courses.find((crs) => crs.id === g.course_id) : null;
       const t = g ? users.find((usr) => usr.id === g.teacher_id) : null;
 
+      const teacherId = g?.teacher_id || t?.id || '';
+      const teacherName = g?.teacher_name || (t ? `${t.first_name || ''} ${t.last_name || ''}`.trim() : '');
+
       return {
         ...s,
+        group_id: s.group_id,
         groupName: g?.name || 'Group',
-        courseName: c?.name || '',
+        courseName: c?.name || g?.course_name || '',
         color: c?.color || '#123D78',
+        room: s.room || g?.room || '101-xona',
+        teacher_id: teacherId,
+        teacher_name: teacherName,
+        teachers: teacherName
+          ? [{ id: teacherId, first_name: teacherName, last_name: '' }]
+          : (t ? [{ id: t.id, first_name: t.first_name, last_name: t.last_name }] : []),
         groups: g
           ? {
               id: g.id,
               name: g.name,
+              room: g.room || s.room,
+              teacher_id: teacherId,
+              teacher_name: teacherName,
               courses: c ? { id: c.id, name: c.name, color: c.color } : null,
-              group_teachers: t
-                ? [{ teacher_id: t.id, profiles: { id: t.id, first_name: t.first_name, last_name: t.last_name } }]
-                : [],
+              group_teachers: teacherName
+                ? [{ teacher_id: teacherId, profiles: { id: teacherId, first_name: teacherName, last_name: '' } }]
+                : (t ? [{ teacher_id: t.id, profiles: { id: t.id, first_name: t.first_name, last_name: t.last_name } }] : []),
             }
           : null,
       };
@@ -815,12 +828,23 @@ class LocalStore {
       this.setItem(STORAGE_KEYS.GROUPS, groups);
     }
 
+    try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
+      }
+    } catch (_) {}
+
     return savedItems;
   }
 
   deleteSchedule(id) {
     const list = this.getItem(STORAGE_KEYS.LESSON_SCHEDULES, INITIAL_SCHEDULES).filter((s) => s.id !== id);
     this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, list);
+    try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
+      }
+    } catch (_) {}
     return true;
   }
 
