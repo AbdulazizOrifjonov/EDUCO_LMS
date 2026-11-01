@@ -8,15 +8,17 @@ let currentStoreVersion = 1;
 let lastStoreUpdatedAt = Date.now();
 
 // Helper to return JSON with CORS headers
-function jsonResponse(data, status = 200) {
+function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-None-Match',
+      'Access-Control-Expose-Headers': 'ETag',
       'Cache-Control': 'no-store, no-cache, must-revalidate',
+      ...extraHeaders,
     },
   });
 }
@@ -157,7 +159,8 @@ export default {
 
     // --- API: STORE SYNC (/api/sync-store) ---
     if (url.pathname === '/api/sync-store') {
-      const db = env.DB;
+      const db = env.DB || env.DATABASE;
+      const kv = env.KV || env.EDUCO_KV || env.STORE_KV;
       if (db) await initD1Tables(db);
 
       // GET /api/sync-store - Fetch all shared data (supports 304 Not Modified ETag caching)
@@ -174,6 +177,7 @@ export default {
               'Access-Control-Allow-Origin': '*',
               'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
               'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-None-Match',
+              'Access-Control-Expose-Headers': 'ETag',
               'Cache-Control': 'no-cache, no-store, must-revalidate',
               'Pragma': 'no-cache',
             },
@@ -234,6 +238,7 @@ export default {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Authorization, If-None-Match',
+            'Access-Control-Expose-Headers': 'ETag',
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
           },
@@ -248,6 +253,7 @@ export default {
             currentStoreVersion++;
             lastStoreUpdatedAt = Date.now();
             const now = new Date().toISOString();
+            const postETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
 
             // Data protection: Wipe flag ignored to prevent data loss on redeploys or client resets
             if (payload._wipe_to_clean === true) {
@@ -271,7 +277,14 @@ export default {
                   console.warn(`D1 save error for ${key}:`, e);
                 }
               }
+
+              if (kv && typeof kv.put === 'function') {
+                try {
+                  await kv.put(key, JSON.stringify(value));
+                } catch (_) {}
+              }
             }
+            return jsonResponse({ success: true, timestamp: now }, 200, { 'ETag': postETag });
           }
           return jsonResponse({ success: true, timestamp: new Date().toISOString() });
         } catch (err) {

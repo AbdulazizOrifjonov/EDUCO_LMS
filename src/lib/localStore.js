@@ -216,12 +216,18 @@ class LocalStore {
   async syncWithServer() {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
-    // Skip if offline or tab is completely hidden in background
-    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
-    if (typeof document !== 'undefined' && document.hidden) return;
+    // Skip if offline
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
 
-    if (this._isSyncing) return;
+    if (this._isSyncing) {
+      if (Date.now() - (this._syncStartTime || 0) > 4000) {
+        this._isSyncing = false;
+      } else {
+        return;
+      }
+    }
     this._isSyncing = true;
+    this._syncStartTime = Date.now();
 
     try {
       const headers = {
@@ -231,9 +237,10 @@ class LocalStore {
       if (this._lastServerETag) {
         headers['If-None-Match'] = this._lastServerETag;
       }
-      const res = await fetch(`/api/sync-store?t=${Date.now()}`, { headers });
+      const syncUrl = this._lastServerETag ? '/api/sync-store' : `/api/sync-store?t=${Date.now()}`;
+      const res = await fetch(syncUrl, { headers });
       if (res.status === 304) {
-        // Data on server is unchanged - 0 bytes downloaded!
+        // Data on server is unchanged - ultra fast 0-byte 1-second heartbeat!
         this._isSyncing = false;
         return;
       }
@@ -280,11 +287,17 @@ class LocalStore {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
     try {
-      await fetch('/api/sync-store', {
+      const res = await fetch('/api/sync-store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      if (res.ok) {
+        const etag = res.headers.get('ETag') || res.headers.get('etag');
+        if (etag) {
+          this._lastServerETag = etag;
+        }
+      }
     } catch (e) {}
   }
 
@@ -1767,10 +1780,13 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
   // 2. Initial sync when tab opens
   setTimeout(() => {
     localStore.syncWithServer().catch(() => {});
-  }, 250);
+  }, 100);
 
-  // 3. Sync immediately when user switches to this tab or window gets focus
+  // 3. Instant sync on focus, page show, visibility change, and online
   window.addEventListener('focus', () => {
+    localStore.syncWithServer().catch(() => {});
+  });
+  window.addEventListener('pageshow', () => {
     localStore.syncWithServer().catch(() => {});
   });
   document.addEventListener('visibilitychange', () => {
@@ -1778,13 +1794,31 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
       localStore.syncWithServer().catch(() => {});
     }
   });
+  window.addEventListener('online', () => {
+    localStore.syncWithServer().catch(() => {});
+  });
 
-  // 4. Realtime periodic sync (every 2s) when tab is active and visible
+  // 4. Realtime periodic sync (har 1 sekundda / every 1000ms)
   setInterval(() => {
     if (typeof document !== 'undefined' && !document.hidden && navigator.onLine) {
       localStore.syncWithServer().catch(() => {});
     }
-  }, 2000);
+  }, 1000);
+
+  // 5. Connect to SSE Realtime stream if available (dev / supported servers)
+  if (typeof window !== 'undefined' && typeof EventSource !== 'undefined') {
+    try {
+      const es = new EventSource('/api/realtime');
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data?.type === 'SYNC' && data?.payload) {
+            localStore.applyIncomingData(data.payload);
+          }
+        } catch (_) {}
+      };
+    } catch (_) {}
+  }
 }
 
 export default localStore;
