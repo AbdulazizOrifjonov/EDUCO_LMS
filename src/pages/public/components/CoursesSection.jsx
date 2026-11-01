@@ -50,8 +50,8 @@ export default function CoursesSection({ courses = [], onSelectCourse = () => {}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Section Header */}
         <ScrollReveal animation="up" className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-300/60 dark:border-emerald-800/60">
-            <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-emerald-950/60 text-blue-800 dark:text-emerald-300 text-xs font-bold border border-blue-300/60 dark:border-emerald-800/60">
+            <BookOpen className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
             <span>Bizning Kurslar</span>
           </div>
 
@@ -74,7 +74,7 @@ export default function CoursesSection({ courses = [], onSelectCourse = () => {}
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md shadow-emerald-600/30 scale-103'
+                      ? 'bg-gradient-to-r from-blue-700 to-indigo-700 dark:from-emerald-600 dark:to-teal-700 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 scale-103'
                       : 'bg-white dark:bg-[#1a2332] text-gray-700 dark:text-gray-300 border border-gray-200/80 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
@@ -127,7 +127,7 @@ export default function CoursesSection({ courses = [], onSelectCourse = () => {}
               {/* Card Body */}
               <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-2.5">
-                  <h3 className="text-lg sm:text-xl font-black text-gray-950 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
+                  <h3 className="text-lg sm:text-xl font-black text-gray-950 dark:text-white group-hover:text-blue-700 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
                     {course.title}
                   </h3>
 
@@ -165,7 +165,7 @@ export default function CoursesSection({ courses = [], onSelectCourse = () => {}
                   <button
                     type="button"
                     onClick={() => scrollToContact(course.title)}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 transition-all cursor-pointer text-center flex items-center justify-center gap-1"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 dark:from-emerald-600 dark:to-teal-700 dark:hover:from-emerald-700 dark:hover:to-teal-800 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-600/20 dark:shadow-emerald-600/20 transition-all cursor-pointer text-center flex items-center justify-center gap-1"
                   >
                     <span>Yozilish</span>
                     <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />

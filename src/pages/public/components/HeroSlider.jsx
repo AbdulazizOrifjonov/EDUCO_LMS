@@ -107,8 +107,8 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
               <div className="max-w-2xl sm:max-w-3xl space-y-4 sm:space-y-6">
                 {/* Badge Pill */}
                 {slide.badge && (
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs sm:text-sm font-bold backdrop-blur-md animate-in fade-in slide-in-from-top-3 duration-500">
-                    <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/25 text-blue-200 border border-blue-400/40 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-400/30 text-xs sm:text-sm font-bold backdrop-blur-md animate-in fade-in slide-in-from-top-3 duration-500">
+                    <Sparkles className="w-4 h-4 text-blue-300 dark:text-emerald-400 shrink-0" />
                     <span>{slide.badge}</span>
                   </div>
                 )}
@@ -129,7 +129,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                   <a
                     href={slide.cta_link || '#courses'}
                     onClick={(e) => scrollToTarget(e, slide.cta_link || '#courses')}
-                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-700 hover:from-emerald-600 hover:to-teal-800 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-emerald-950/40 hover:scale-103 active:scale-97 transition-all cursor-pointer ring-2 ring-emerald-400/40"
+                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 dark:from-emerald-500 dark:via-emerald-600 dark:to-teal-700 dark:hover:from-emerald-600 dark:hover:to-teal-800 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-blue-950/40 dark:shadow-emerald-950/40 hover:scale-103 active:scale-97 transition-all cursor-pointer ring-2 ring-blue-400/40 dark:ring-emerald-400/40"
                   >
                     <span>{slide.cta_text || 'Kurslarni ko‘rish'}</span>
                     <ArrowRight className="w-5 h-5 rtl:rotate-180" />
@@ -152,7 +152,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                     onClick={onOpenVideo}
                     className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-black/40 hover:bg-black/60 text-white/90 text-xs sm:text-sm font-semibold border border-white/15 backdrop-blur-md transition-colors cursor-pointer"
                   >
-                    <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 dark:bg-emerald-500 text-white flex items-center justify-center shrink-0">
                       <Play className="w-3 h-3 fill-current ml-0.5" />
                     </div>
                     <span className="hidden sm:inline">Markaz videosi</span>
@@ -198,7 +198,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                 onClick={() => setCurrentIndex(idx)}
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   isActive
-                    ? 'w-9 h-3 bg-emerald-400 shadow-md shadow-emerald-400/50'
+                    ? 'w-9 h-3 bg-blue-500 shadow-md shadow-blue-500/50 dark:bg-emerald-400 dark:shadow-emerald-400/50'
                     : 'w-3 h-3 bg-white/40 hover:bg-white/70'
                 }`}
                 aria-label={`Slayd ${idx + 1}`}

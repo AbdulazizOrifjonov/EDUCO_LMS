@@ -46,7 +46,7 @@ export default function VideoSection({ videos = [], onSelectVideo = () => {} }) 
 
                   {/* Play Button Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-xl group-hover:scale-115 transition-transform">
+                    <div className="w-14 h-14 rounded-full bg-blue-600 dark:bg-emerald-600 text-white flex items-center justify-center shadow-xl group-hover:scale-115 transition-transform">
                       <Play className="w-6 h-6 fill-current ml-1" />
                     </div>
                   </div>

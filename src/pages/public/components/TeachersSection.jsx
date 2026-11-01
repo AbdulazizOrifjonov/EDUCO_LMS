@@ -17,8 +17,8 @@ export default function TeachersSection({ teachers = [], onSelectTeacher = () =>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <ScrollReveal animation="up" className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-300/60 dark:border-emerald-800/60">
-            <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-emerald-950/60 text-blue-800 dark:text-emerald-300 text-xs font-bold border border-blue-300/60 dark:border-emerald-800/60">
+            <Users className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
             <span>Bizning Ustozlar</span>
           </div>
 
@@ -52,7 +52,7 @@ export default function TeachersSection({ teachers = [], onSelectTeacher = () =>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
 
                   {/* Experience Badge */}
-                  <span className="absolute bottom-3 left-3 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500 text-white shadow-md">
+                  <span className="absolute bottom-3 left-3 px-3 py-1 rounded-full text-xs font-extrabold bg-blue-600 dark:bg-emerald-500 text-white shadow-md">
                     {teacher.experience_years} tajriba
                   </span>
 
@@ -72,11 +72,11 @@ export default function TeachersSection({ teachers = [], onSelectTeacher = () =>
 
                 {/* Content */}
                 <div className="p-5 space-y-2">
-                  <h3 className="text-lg font-black text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-emerald-400 transition-colors">
                     {teacher.full_name}
                   </h3>
 
-                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  <p className="text-xs font-bold text-blue-700 dark:text-emerald-400">
                     {teacher.role}
                   </p>
 
@@ -95,7 +95,7 @@ export default function TeachersSection({ teachers = [], onSelectTeacher = () =>
                 <button
                   type="button"
                   onClick={() => onSelectTeacher(teacher)}
-                  className="w-full py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-emerald-50 dark:bg-gray-800 dark:hover:bg-emerald-950/40 text-gray-900 dark:text-gray-100 hover:text-emerald-600 dark:hover:text-emerald-400 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 px-3 rounded-xl bg-gray-100 hover:bg-blue-50 dark:bg-gray-800 dark:hover:bg-emerald-950/40 text-gray-900 dark:text-gray-100 hover:text-blue-700 dark:hover:text-emerald-400 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <span>Batafsil ma’lumot</span>
                   <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />

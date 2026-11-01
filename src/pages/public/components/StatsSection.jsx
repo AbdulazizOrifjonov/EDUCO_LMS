@@ -57,7 +57,7 @@ export default function StatsSection({ settings }) {
                 >
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-emerald-950/60 text-blue-700 dark:text-emerald-300 border border-blue-200/60 dark:border-emerald-800/60">
                   {stat.badge}
                 </span>
               </div>

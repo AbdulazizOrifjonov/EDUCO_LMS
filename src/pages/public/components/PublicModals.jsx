@@ -43,7 +43,7 @@ export function CourseDetailModal({ course, onClose, onRegister }) {
           </button>
 
           <div className="absolute bottom-4 left-5 right-5 text-white">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500 text-white inline-block mb-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 dark:bg-emerald-500 text-white inline-block mb-2">
               {course.category}
             </span>
             <h2 className="text-xl sm:text-2xl font-black">{course.title}</h2>
@@ -78,11 +78,11 @@ export function CourseDetailModal({ course, onClose, onRegister }) {
                 {course.level}
               </span>
             </div>
-            <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800">
-              <span className="text-[11px] text-emerald-700 dark:text-emerald-300 block font-semibold">
+            <div className="p-3 rounded-2xl bg-blue-50 dark:bg-emerald-950/60 border border-blue-200 dark:border-emerald-800">
+              <span className="text-[11px] text-blue-700 dark:text-emerald-300 block font-semibold">
                 Oylik to‘lov
               </span>
-              <span className="text-sm font-black text-emerald-700 dark:text-emerald-300">
+              <span className="text-sm font-black text-blue-700 dark:text-emerald-300">
                 {course.price}
               </span>
             </div>
@@ -129,7 +129,7 @@ export function CourseDetailModal({ course, onClose, onRegister }) {
               onClose();
               onRegister(course.title);
             }}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 dark:from-emerald-600 dark:to-teal-700 dark:hover:from-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
           >
             <span>Ushbu kursga yozilish</span>
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />

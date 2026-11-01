@@ -80,7 +80,7 @@ export default function PublicWebsite() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-600 dark:selection:bg-emerald-500 selection:text-white transition-colors duration-200">
       {/* 1. Header & Sticky Navbar */}
       <PublicNavbar settings={settings} />
 

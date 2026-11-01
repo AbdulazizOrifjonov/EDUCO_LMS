@@ -47,8 +47,8 @@ export default function AboutSection({ settings }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Mission, Vision & Description (Enters from Left) */}
           <ScrollReveal animation="left" className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-300/60 dark:border-emerald-800/60">
-              <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-emerald-950/60 text-blue-800 dark:text-emerald-300 text-xs font-bold border border-blue-300/60 dark:border-emerald-800/60">
+              <Sparkles className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
               <span>Biz haqimizda</span>
             </div>
 

@@ -21,17 +21,16 @@ export default function PublicFooter({ settings }) {
     <footer className="bg-gray-950 text-white pt-16 pb-12 border-t border-gray-800/80 select-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
-          {/* Brand Info */}
+          {/* Brand Info with Official EDUCO Logo */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-[#064e3b] via-[#047857] to-emerald-500 flex items-center justify-center text-white font-black text-xl shadow-md">
-                E
-              </div>
-              <span className="text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
-                EDUCO
-                <span className="text-xs px-2 py-0.5 rounded-md font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
-                  LMS
-                </span>
+              <img
+                src="/educo-logo-white.png"
+                alt="EDUCO"
+                className="h-8 sm:h-9 w-auto object-contain"
+              />
+              <span className="text-xs px-2 py-0.5 rounded-md font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-400/30">
+                LMS
               </span>
             </div>
 
@@ -96,32 +95,32 @@ export default function PublicFooter({ settings }) {
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
               <li>
-                <a href="#courses" className="hover:text-emerald-400 transition-colors">
+                <a href="#courses" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Barcha Kurslar
                 </a>
               </li>
               <li>
-                <a href="#subjects" className="hover:text-emerald-400 transition-colors">
+                <a href="#subjects" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Fanlar & Yo‘nalishlar
                 </a>
               </li>
               <li>
-                <a href="#teachers" className="hover:text-emerald-400 transition-colors">
+                <a href="#teachers" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Ustozlarimiz
                 </a>
               </li>
               <li>
-                <a href="#gallery" className="hover:text-emerald-400 transition-colors">
+                <a href="#gallery" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Darslardan Lavhalar
                 </a>
               </li>
               <li>
-                <a href="#news" className="hover:text-emerald-400 transition-colors">
+                <a href="#news" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Yangiliklar
                 </a>
               </li>
               <li>
-                <a href="#videos" className="hover:text-emerald-400 transition-colors">
+                <a href="#videos" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Video Lavhalar
                 </a>
               </li>
@@ -135,22 +134,22 @@ export default function PublicFooter({ settings }) {
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
               <li>
-                <a href="/login" className="hover:text-emerald-400 transition-colors">
+                <a href="/login" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Kabinetga kirish (Login)
                 </a>
               </li>
               <li>
-                <a href="#about" className="hover:text-emerald-400 transition-colors">
+                <a href="#about" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Biz haqimizda
                 </a>
               </li>
               <li>
-                <a href="#stats" className="hover:text-emerald-400 transition-colors">
+                <a href="#stats" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Natijalarimiz
                 </a>
               </li>
               <li>
-                <a href="#contact" className="hover:text-emerald-400 transition-colors">
+                <a href="#contact" className="hover:text-blue-400 dark:hover:text-emerald-400 transition-colors">
                   Bepul Sinov Darsi
                 </a>
               </li>
@@ -164,23 +163,23 @@ export default function PublicFooter({ settings }) {
             </h4>
             <div className="space-y-2.5 text-xs sm:text-sm text-gray-400">
               <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span>{settings?.address || 'Toshkent shahar, Yunusobod tumani, Amir Temur ko‘chasi, 107-B bino'}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
+                <Phone className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0" />
                 <a href={`tel:${settings?.phone || '+998936101774'}`} className="hover:text-white transition-colors">
                   {settings?.phone || '+998 (93) 610-17-74'}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
+                <Mail className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0" />
                 <a href={`mailto:${settings?.email || 'info@educo-lms.uz'}`} className="hover:text-white transition-colors">
                   {settings?.email || 'info@educo-lms.uz'}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
-                <Clock className="w-4 h-4 text-emerald-400 shrink-0" />
+                <Clock className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0" />
                 <span>{settings?.working_hours || 'Dushanba - Shanba: 08:30 - 20:30'}</span>
               </div>
             </div>
@@ -195,7 +194,7 @@ export default function PublicFooter({ settings }) {
             <button
               type="button"
               onClick={scrollToTop}
-              className="p-2.5 rounded-xl bg-gray-900 hover:bg-emerald-600 text-gray-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
+              className="p-2.5 rounded-xl bg-gray-900 hover:bg-blue-600 dark:hover:bg-emerald-600 text-gray-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Yuqoriga qaytish"
             >
               <span>Tepaga</span>

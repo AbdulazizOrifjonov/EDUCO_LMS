@@ -53,8 +53,8 @@ export default function CtaSection({ settings, courses = [] }) {
           {/* Left Column: Contact Details (Enters from Left) */}
           <ScrollReveal animation="left" className="lg:col-span-5 space-y-8">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-300/60 dark:border-emerald-800/60">
-                <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-emerald-950/60 text-blue-800 dark:text-emerald-300 text-xs font-bold border border-blue-300/60 dark:border-emerald-800/60">
+                <Sparkles className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
                 <span>Birinchi Dars Bepul!</span>
               </div>
 
@@ -72,16 +72,16 @@ export default function CtaSection({ settings, courses = [] }) {
             <div className="space-y-4">
               <a
                 href={`tel:${settings?.phone || '+998936101774'}`}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-emerald-500/50 transition-all group"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-blue-500/50 dark:hover:border-emerald-500/50 transition-all group"
               >
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-emerald-950/80 text-blue-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                   <PhoneCall className="w-6 h-6" />
                 </div>
                 <div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                     Tezkor Aloqa Raqami:
                   </span>
-                  <h4 className="text-base font-extrabold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                  <h4 className="text-base font-extrabold text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-emerald-400 transition-colors">
                     {settings?.phone || '+998 (93) 610-17-74'}
                   </h4>
                 </div>
@@ -219,7 +219,7 @@ export default function CtaSection({ settings, courses = [] }) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-extrabold text-base shadow-xl shadow-emerald-600/30 transition-all hover:scale-101 active:scale-99 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 dark:from-emerald-600 dark:via-emerald-500 dark:to-teal-700 dark:hover:from-emerald-700 dark:hover:to-teal-800 text-white font-extrabold text-base shadow-xl shadow-blue-700/30 dark:shadow-emerald-600/30 transition-all hover:scale-101 active:scale-99 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <Send className="w-5 h-5" />
                   <span>{submitting ? 'Yuborilmoqda...' : 'Bepul darsga ro‘yxatdan o‘tish'}</span>

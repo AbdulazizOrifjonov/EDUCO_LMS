@@ -9,8 +9,8 @@ export default function NewsSection({ news = [], onSelectNews = () => {} }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <ScrollReveal animation="up" className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 text-xs font-bold border border-blue-300/60 dark:border-blue-800/60">
-            <Newspaper className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-emerald-950/60 text-blue-800 dark:text-emerald-300 text-xs font-bold border border-blue-300/60 dark:border-emerald-800/60">
+            <Newspaper className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
             <span>Yangiliklar & E’lonlar</span>
           </div>
 
@@ -64,7 +64,7 @@ export default function NewsSection({ news = [], onSelectNews = () => {} }) {
                     </span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+                  <h3 className="text-base sm:text-lg font-black text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
                     {item.title}
                   </h3>
 
@@ -75,7 +75,7 @@ export default function NewsSection({ news = [], onSelectNews = () => {} }) {
               </div>
 
               {/* Read More */}
-              <div className="p-5 pt-0 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
+              <div className="p-5 pt-0 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
                 <span>Batafsil o‘qish</span>
                 <ArrowRight className="w-4 h-4 rtl:rotate-180" />
               </div>

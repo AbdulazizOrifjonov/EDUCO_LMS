@@ -24,8 +24,8 @@ export default function GallerySection({ gallery = [], onSelectImage = () => {} 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <ScrollReveal animation="up" className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-xs font-bold border border-emerald-300/60 dark:border-emerald-800/60">
-            <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-emerald-950/60 text-blue-800 dark:text-emerald-300 text-xs font-bold border border-blue-300/60 dark:border-emerald-800/60">
+            <Camera className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
             <span>Darslardan Lavhalar</span>
           </div>
 
@@ -48,7 +48,7 @@ export default function GallerySection({ gallery = [], onSelectImage = () => {} 
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md shadow-emerald-600/30 scale-103'
+                      ? 'bg-gradient-to-r from-blue-700 to-indigo-700 dark:from-emerald-600 dark:to-teal-700 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 scale-103'
                       : 'bg-white dark:bg-[#1a2332] text-gray-700 dark:text-gray-300 border border-gray-200/80 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
