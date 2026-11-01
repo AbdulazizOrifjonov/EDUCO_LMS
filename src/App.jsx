@@ -52,6 +52,8 @@ const NotificationsPage = React.lazy(() => import('@/pages/shared/NotificationsP
 const ChatPage = React.lazy(() => import('@/pages/shared/ChatPage'));
 const RemindersPage = React.lazy(() => import('@/pages/shared/RemindersPage'));
 const SmsManagementPage = React.lazy(() => import('@/pages/owner/SmsManagementPage'));
+const PublicWebsite = React.lazy(() => import('@/pages/public/PublicWebsite'));
+const WebsiteManagementPage = React.lazy(() => import('@/pages/owner/website/WebsiteManagementPage'));
 
 function RootRedirect() {
   const { user, profile, loading } = useAuth();
@@ -99,7 +101,9 @@ export default function App() {
       <Suspense fallback={<LoadingSpinner fullPage text="Loading EDUCO LMS..." />}>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<RootRedirect />} />
+          <Route path="/" element={<PublicWebsite />} />
+          <Route path="/home" element={<PublicWebsite />} />
+          <Route path="/website" element={<PublicWebsite />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/invite/:token" element={<InvitePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -144,6 +148,7 @@ export default function App() {
             <Route path="reports" element={<ReportsPage />} />
             <Route path="audit" element={<Navigate to="/owner/dashboard" replace />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="website" element={<WebsiteManagementPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="reminders" element={<RemindersPage />} />
             <Route path="chat" element={<ChatPage />} />
@@ -186,6 +191,7 @@ export default function App() {
             <Route path="tuition" element={<TuitionPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="website" element={<WebsiteManagementPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="reminders" element={<RemindersPage />} />
             <Route path="chat" element={<ChatPage />} />

@@ -197,18 +197,35 @@ export default function VideoRecorder({
 
     if (navigator.mediaDevices?.getUserMedia) {
       try {
-        // Find specific deviceId if available from enumerateDevices
+        // 1. Fresh device enumeration (labels are populated once camera was opened)
+        let freshVideoDevices = [];
+        try {
+          const allDevs = await navigator.mediaDevices.enumerateDevices();
+          freshVideoDevices = allDevs.filter((d) => d.kind === 'videoinput');
+          setAvailableDevices(freshVideoDevices);
+        } catch (_) {}
+
+        // Find matched deviceId for target facing
         let targetDeviceId = null;
-        if (availableDevices.length > 1) {
+        if (freshVideoDevices.length > 1) {
           const isTargetBack = nextFacing === 'environment';
-          const match = availableDevices.find((d) => {
+          const match = freshVideoDevices.find((d) => {
             const lbl = (d.label || '').toLowerCase();
             return isTargetBack
-              ? (lbl.includes('back') || lbl.includes('rear') || lbl.includes('environment') || lbl.includes('orqa'))
-              : (lbl.includes('front') || lbl.includes('user') || lbl.includes('facing') || lbl.includes('old'));
+              ? (lbl.includes('back') || lbl.includes('rear') || lbl.includes('environment') || lbl.includes('orqa') || lbl.includes('0'))
+              : (lbl.includes('front') || lbl.includes('user') || lbl.includes('facing') || lbl.includes('old') || lbl.includes('1'));
           });
           if (match) targetDeviceId = match.deviceId;
         }
+
+        // 2. CRITICAL FOR ANDROID/MOBILE: Stop old video tracks to release camera hardware sensor!
+        const existingAudioTracks = streamRef.current?.getAudioTracks() || [];
+        const oldVideoTracks = streamRef.current?.getVideoTracks() || [];
+        oldVideoTracks.forEach((t) => {
+          try {
+            t.stop();
+          } catch (_) {}
+        });
 
         const candidateConstraints = targetDeviceId
           ? [
@@ -220,18 +237,30 @@ export default function VideoRecorder({
                 },
                 audio: false,
               },
+              {
+                video: { facingMode: { exact: nextFacing } },
+                audio: false,
+              },
+              {
+                video: { facingMode: nextFacing },
+                audio: false,
+              },
             ]
           : [
               {
                 video: {
-                  facingMode: { ideal: nextFacing },
+                  facingMode: { exact: nextFacing },
                   width: { ideal: 720 },
                   height: { ideal: 720 },
                 },
                 audio: false,
               },
               {
-                video: { facingMode: nextFacing },
+                video: {
+                  facingMode: nextFacing,
+                  width: { ideal: 720 },
+                  height: { ideal: 720 },
+                },
                 audio: false,
               },
               {
@@ -249,19 +278,11 @@ export default function VideoRecorder({
         }
 
         if (newStream && newStream.getVideoTracks().length > 0) {
-          // Keep existing microphone track
-          const audioTracks = streamRef.current?.getAudioTracks() || [];
-          if (audioTracks.length > 0) {
-            newStream.addTrack(audioTracks[0]);
-          }
-
-          // Stop old video tracks to release camera hardware sensor
-          if (streamRef.current) {
-            streamRef.current.getVideoTracks().forEach((t) => {
-              try {
-                t.stop();
-              } catch (_) {}
-            });
+          // Re-attach microphone audio track so recording is uninterrupted
+          if (existingAudioTracks.length > 0) {
+            try {
+              newStream.addTrack(existingAudioTracks[0]);
+            } catch (_) {}
           }
 
           streamRef.current = newStream;
@@ -285,6 +306,7 @@ export default function VideoRecorder({
       }
     }
 
+    // Fallback if not recording
     if (!isRecording) {
       setFacingMode(nextFacing);
       facingModeRef.current = nextFacing;

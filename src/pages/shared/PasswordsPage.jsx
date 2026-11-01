@@ -683,88 +683,27 @@ export default function PasswordsPage() {
       {/* Main Card with Filter Tabs + Search Toolbar + Clean Table */}
       <Card>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
-          {/* Role Filter Custom Designed Dropdown */}
-          <div ref={roleDropdownRef} className="relative w-full sm:w-80 select-none">
-            {(() => {
-              const currentTab = filterTabs.find((t) => t.id === roleFilter) || filterTabs[0];
-              const CurrentIcon = currentTab.icon;
-              const currentMeta = getRoleMeta(currentTab.id);
-
-              return (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setIsRoleDropdownOpen((prev) => !prev)}
-                    className={`w-full h-11 px-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary hover:bg-gray-50 dark:hover:bg-gray-800/80 shadow-xs flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
-                      isRoleDropdownOpen ? 'ring-2 ring-blue-500 dark:ring-emerald-500 border-transparent' : ''
-                    }`}
+          {/* Role Filter Select Option matching Image 8 */}
+          <div className="relative w-full sm:w-72">
+            <div className="relative flex items-center w-full h-11 px-3.5 rounded-xl border-2 border-emerald-500/80 bg-white dark:bg-[#1a2333] shadow-xs hover:border-emerald-400 transition-colors">
+              <Users className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0 pointer-events-none mr-2.5" />
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="w-full h-full bg-transparent text-sm font-bold text-gray-900 dark:text-white border-none outline-none cursor-pointer appearance-none pr-8"
+              >
+                {filterTabs.map((tab) => (
+                  <option
+                    key={tab.id}
+                    value={tab.id}
+                    className="bg-white dark:bg-[#1a2333] text-gray-900 dark:text-white py-2 font-semibold"
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${currentMeta.iconBg}`}>
-                        <CurrentIcon className={`w-4 h-4 ${currentMeta.iconColor}`} />
-                      </div>
-                      <span className="truncate text-sm font-bold text-gray-900 dark:text-white">
-                        {currentTab.label}
-                      </span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${currentMeta.badgeCls}`}>
-                        {currentTab.count} ta
-                      </span>
-                    </div>
-
-                    <ChevronDown
-                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${
-                        isRoleDropdownOpen ? 'rotate-180 text-blue-600 dark:text-emerald-400' : ''
-                      }`}
-                    />
-                  </button>
-
-                  {/* Custom Designed Dropdown Popover */}
-                  {isRoleDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white dark:bg-surface-dark-secondary rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
-                      {filterTabs.map((tab) => {
-                        const TabIcon = tab.icon;
-                        const isSelected = roleFilter === tab.id;
-                        const meta = getRoleMeta(tab.id);
-
-                        return (
-                          <button
-                            key={tab.id}
-                            type="button"
-                            onClick={() => {
-                              setRoleFilter(tab.id);
-                              setIsRoleDropdownOpen(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                              isSelected
-                                ? 'bg-gray-100/90 dark:bg-gray-800 text-gray-950 dark:text-white shadow-2xs'
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 text-gray-700 dark:text-gray-300'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${meta.iconBg}`}>
-                                <TabIcon className={`w-4 h-4 ${meta.iconColor}`} />
-                              </div>
-                              <span className="truncate">{tab.label}</span>
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${meta.badgeCls}`}>
-                                {tab.count} ta
-                              </span>
-                              {isSelected ? (
-                                <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
-                              ) : (
-                                <span className="w-4 h-4" />
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              );
-            })()}
+                    {tab.label} ({tab.count} ta)
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-300 absolute right-3 pointer-events-none" />
+            </div>
           </div>
 
           {/* Clean Search Input */}

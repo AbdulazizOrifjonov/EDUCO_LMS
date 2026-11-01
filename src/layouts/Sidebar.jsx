@@ -5,6 +5,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Sun,
   Moon,
   Globe,
@@ -35,6 +36,17 @@ export default function Sidebar({
   const { theme, toggleTheme } = useTheme();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [cropAvatarFile, setCropAvatarFile] = useState(null);
+  const [expandedSubmenus, setExpandedSubmenus] = useState({
+    '/owner/website': true,
+    '/admin/website': true,
+  });
+
+  const toggleSubmenu = (menuPath) => {
+    setExpandedSubmenus((prev) => ({
+      ...prev,
+      [menuPath]: !prev[menuPath],
+    }));
+  };
 
   // Dismiss mobile virtual keyboard whenever sidebar opens
   useEffect(() => {
@@ -256,6 +268,92 @@ export default function Sidebar({
             let badgeCount = item.badge;
             if (item.path && item.path.includes('/reminders') && dueRemindersCount > 0) {
               badgeCount = dueRemindersCount;
+            }
+
+            const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+            const isSubmenuExpanded = Boolean(expandedSubmenus[item.path]);
+            const isChildActive = hasChildren && item.children.some((child) => {
+              const currentSearch = new URLSearchParams(location.search);
+              return location.pathname.startsWith(item.path) && currentSearch.get('tab') === child.tab;
+            });
+
+            if (hasChildren) {
+              return (
+                <div key={item.path || index} className="space-y-1">
+                  <div
+                    onClick={() => {
+                      if (collapsed && !mobileOpen) {
+                        onToggleCollapse();
+                      }
+                      toggleSubmenu(item.path);
+                    }}
+                    title={collapsed && !mobileOpen ? label : undefined}
+                    className={`
+                      group relative flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm transition-all duration-200 cursor-pointer
+                      ${
+                        isActiveRoute || isChildActive
+                          ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold shadow-lg shadow-emerald-950/50 ring-1 ring-emerald-400/25'
+                          : 'font-medium text-white/80 hover:bg-white/10 hover:text-white dark:text-gray-300 dark:hover:bg-gray-800/70 dark:hover:text-white'
+                      }
+                      ${collapsed && !mobileOpen ? 'justify-center px-2' : ''}
+                    `}
+                  >
+                    {/* Nav Icon */}
+                    <Icon
+                      className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 ${
+                        isActiveRoute || isChildActive ? 'scale-105 text-white' : 'group-hover:scale-110'
+                      }`}
+                    />
+
+                    {/* Nav Label */}
+                    {(!collapsed || mobileOpen) && (
+                      <span className="flex-1 truncate tracking-wide">{label}</span>
+                    )}
+
+                    {/* Chevron toggle icon */}
+                    {(!collapsed || mobileOpen) && (
+                      <ChevronDown
+                        className={`w-4 h-4 text-white/70 transition-transform duration-200 ${
+                          isSubmenuExpanded ? 'rotate-180 text-white' : ''
+                        }`}
+                      />
+                    )}
+                  </div>
+
+                  {/* Nested Sub-Menu with smooth slide animation */}
+                  {isSubmenuExpanded && (!collapsed || mobileOpen) && (
+                    <div className="pl-6 pr-1 py-1 space-y-0.5 border-l-2 border-emerald-500/30 ml-4 animate-in fade-in slide-in-from-top-1 duration-150">
+                      {item.children.map((child) => {
+                        const ChildIcon = child.icon || Sparkles;
+                        const currentSearch = new URLSearchParams(location.search);
+                        const isThisTabActive =
+                          location.pathname.startsWith(item.path) &&
+                          (currentSearch.get('tab') === child.tab ||
+                            (!currentSearch.get('tab') && child.tab === 'overview'));
+
+                        return (
+                          <NavLink
+                            key={child.tab}
+                            to={`${item.path}?tab=${child.tab}`}
+                            onClick={onCloseMobile}
+                            className={`
+                              flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150
+                              ${
+                                isThisTabActive
+                                  ? 'bg-emerald-500/20 text-emerald-300 font-bold border-l-2 border-emerald-400 shadow-2xs'
+                                  : 'text-white/70 hover:text-white hover:bg-white/5 dark:text-gray-400 dark:hover:text-gray-200'
+                              }
+                            `}
+                          >
+                            <ChildIcon className={`w-3.5 h-3.5 shrink-0 ${isThisTabActive ? 'text-emerald-400' : 'opacity-70'}`} />
+                            <span className="truncate">{child.label}</span>
+                          </NavLink>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
             }
 
             return (

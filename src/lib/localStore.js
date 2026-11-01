@@ -1957,9 +1957,18 @@ export function startRealtimeEngine(intervalMs = 1000) {
   } catch (_) {}
 }
 
+if (!localStore.startRealtimeEngine) {
+  localStore.startRealtimeEngine = function(intervalMs = 1000) {
+    return startRealtimeEngine(intervalMs);
+  };
+}
+
 if (typeof window !== 'undefined') {
   try {
     window.localStore = localStore;
+    if (!window.localStore.startRealtimeEngine) {
+      window.localStore.startRealtimeEngine = (intervalMs = 1000) => startRealtimeEngine(intervalMs);
+    }
     window.startRealtimeEngine = startRealtimeEngine;
   } catch (_) {}
 }

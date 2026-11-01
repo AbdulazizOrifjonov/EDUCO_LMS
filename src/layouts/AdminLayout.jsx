@@ -15,6 +15,14 @@ import {
   BellRing,
   Settings,
   KeyRound,
+  Globe,
+  Sliders,
+  Newspaper,
+  Video,
+  Image as ImageIcon,
+  MessageSquareQuote,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -96,6 +104,24 @@ const ADMIN_NAV_ITEMS = [
     label: 'Notifications',
     path: '/admin/notifications',
     icon: Bell,
+  },
+  {
+    label: 'Website',
+    path: '/admin/website',
+    icon: Globe,
+    children: [
+      { label: 'Umumiy hisobot', tab: 'overview', icon: Layers },
+      { label: 'Bosh sahifa slayderi', tab: 'slider', icon: Sliders },
+      { label: 'Kurslar', tab: 'courses', icon: BookOpen },
+      { label: 'Fanlar', tab: 'subjects', icon: GraduationCap },
+      { label: 'Ustozlar', tab: 'teachers', icon: Users },
+      { label: 'Yangiliklar', tab: 'news', icon: Newspaper },
+      { label: 'Video lavhalar', tab: 'videos', icon: Video },
+      { label: 'Darslardan lavhalar', tab: 'gallery', icon: ImageIcon },
+      { label: 'Fikrlar va sharhlar', tab: 'testimonials', icon: MessageSquareQuote },
+      { label: 'Biz haqimizda & Statistika', tab: 'about', icon: Sparkles },
+      { label: 'Website sozlamalari', tab: 'settings', icon: Settings },
+    ],
   },
   {
     labelKey: 'nav.settings',

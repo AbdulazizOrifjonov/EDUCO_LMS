@@ -1,0 +1,183 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import websiteService from '@/services/websiteService';
+import PublicNavbar from './components/PublicNavbar';
+import HeroSlider from './components/HeroSlider';
+import StatsSection from './components/StatsSection';
+import AboutSection from './components/AboutSection';
+import CoursesSection from './components/CoursesSection';
+import SubjectsSection from './components/SubjectsSection';
+import TeachersSection from './components/TeachersSection';
+import GallerySection from './components/GallerySection';
+import VideoSection from './components/VideoSection';
+import NewsSection from './components/NewsSection';
+import TestimonialsSection from './components/TestimonialsSection';
+import CtaSection from './components/CtaSection';
+import PublicFooter from './components/PublicFooter';
+import {
+  CourseDetailModal,
+  TeacherModal,
+  NewsDetailModal,
+  LightboxModal,
+  VideoPlayerModal,
+} from './components/PublicModals';
+
+export default function PublicWebsite() {
+  // Live website content states
+  const [settings, setSettings] = useState(() => websiteService.getWebsiteSettings());
+  const [slides, setSlides] = useState(() => websiteService.getHeroSlides());
+  const [courses, setCourses] = useState(() => websiteService.getWebsiteCourses());
+  const [subjects, setSubjects] = useState(() => websiteService.getWebsiteSubjects());
+  const [teachers, setTeachers] = useState(() => websiteService.getWebsiteTeachers());
+  const [gallery, setGallery] = useState(() => websiteService.getWebsiteGallery());
+  const [videos, setVideos] = useState(() => websiteService.getWebsiteVideos());
+  const [news, setNews] = useState(() => websiteService.getWebsiteNews());
+  const [testimonials, setTestimonials] = useState(() => websiteService.getWebsiteTestimonials());
+
+  // Modal inspection states
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [selectedNews, setSelectedNews] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [activeVideo, setActiveVideo] = useState(null);
+
+  // CTA form pre-fill from course selection
+  const [prefilledCourseTitle, setPrefilledCourseTitle] = useState('');
+
+  // Synchronize state with websiteService
+  const refreshWebsiteData = useCallback(() => {
+    setSettings(websiteService.getWebsiteSettings());
+    setSlides(websiteService.getHeroSlides());
+    setCourses(websiteService.getWebsiteCourses());
+    setSubjects(websiteService.getWebsiteSubjects());
+    setTeachers(websiteService.getWebsiteTeachers());
+    setGallery(websiteService.getWebsiteGallery());
+    setVideos(websiteService.getWebsiteVideos());
+    setNews(websiteService.getWebsiteNews());
+    setTestimonials(websiteService.getWebsiteTestimonials());
+  }, []);
+
+  useEffect(() => {
+    // Listen for live updates broadcast from the admin/owner management dashboard
+    window.addEventListener('educo-website-update', refreshWebsiteData);
+    window.addEventListener('educo-data-sync', refreshWebsiteData);
+    window.addEventListener('storage', refreshWebsiteData);
+
+    return () => {
+      window.removeEventListener('educo-website-update', refreshWebsiteData);
+      window.removeEventListener('educo-data-sync', refreshWebsiteData);
+      window.removeEventListener('storage', refreshWebsiteData);
+    };
+  }, [refreshWebsiteData]);
+
+  // Handle course enrollment click (pre-fill CTA form and scroll smoothly)
+  const handleEnrollCourse = (course) => {
+    setSelectedCourse(null);
+    setPrefilledCourseTitle(course.title);
+    const ctaEl = document.getElementById('aloqa');
+    if (ctaEl) {
+      ctaEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-200">
+      {/* 1. Header & Sticky Navbar */}
+      <PublicNavbar settings={settings} />
+
+      <main className="overflow-hidden">
+        {/* 2. Hero Section with Managed Multi-Slide Carousel */}
+        <HeroSlider slides={slides} />
+
+        {/* 3. Statistics Section (Real-time animated counters) */}
+        <StatsSection stats={settings.stats} />
+
+        {/* 4. About EDUCO (Mission, vision, values, why choose us) */}
+        <AboutSection about={settings.about} />
+
+        {/* 5. Courses Section (Interactive catalog with filter & detail modal) */}
+        <CoursesSection
+          courses={courses}
+          onSelectCourse={(c) => setSelectedCourse(c)}
+          onEnrollCourse={handleEnrollCourse}
+        />
+
+        {/* 6. Subjects Section (Fanlar cards) */}
+        <SubjectsSection subjects={subjects} />
+
+        {/* 7. Teachers Section (Professional ustozlar) */}
+        <TeachersSection
+          teachers={teachers}
+          onSelectTeacher={(t) => setSelectedTeacher(t)}
+        />
+
+        {/* 8. Lessons Gallery (Darslardan lavhalar with Lightbox) */}
+        <GallerySection
+          gallery={gallery}
+          onSelectImage={(img) => setSelectedImage(img)}
+        />
+
+        {/* 9. Video Gallery (Video lavhalar with interactive player) */}
+        <VideoSection
+          videos={videos}
+          onPlayVideo={(v) => setActiveVideo(v)}
+        />
+
+        {/* 10. News & Announcements (Yangiliklar va e'lonlar) */}
+        <NewsSection
+          news={news}
+          onSelectNews={(n) => setSelectedNews(n)}
+        />
+
+        {/* 11. Testimonials (O'quvchilar va ota-onalar fikrlari) */}
+        <TestimonialsSection testimonials={testimonials} />
+
+        {/* 12. Call to Action & Direct Application Form */}
+        <CtaSection
+          settings={settings}
+          courses={courses}
+          prefilledCourse={prefilledCourseTitle}
+        />
+      </main>
+
+      {/* 13. Public Footer */}
+      <PublicFooter settings={settings} />
+
+      {/* Interactive Modals */}
+      {selectedCourse && (
+        <CourseDetailModal
+          course={selectedCourse}
+          onClose={() => setSelectedCourse(null)}
+          onEnroll={handleEnrollCourse}
+        />
+      )}
+
+      {selectedTeacher && (
+        <TeacherModal
+          teacher={selectedTeacher}
+          onClose={() => setSelectedTeacher(null)}
+        />
+      )}
+
+      {selectedNews && (
+        <NewsDetailModal
+          news={selectedNews}
+          onClose={() => setSelectedNews(null)}
+        />
+      )}
+
+      {selectedImage && (
+        <LightboxModal
+          image={selectedImage}
+          onClose={() => setSelectedImage(null)}
+        />
+      )}
+
+      {activeVideo && (
+        <VideoPlayerModal
+          video={activeVideo}
+          onClose={() => setActiveVideo(null)}
+        />
+      )}
+    </div>
+  );
+}

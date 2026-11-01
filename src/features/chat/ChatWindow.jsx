@@ -791,18 +791,6 @@ export default function ChatWindow({
                       disabled={avatarUploading}
                     />
                   </label>
-
-                  {activeGroupAvatar && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveGroupAvatar}
-                      disabled={avatarUploading}
-                      title="Guruh rasmini olib tashlash"
-                      className="p-1.5 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 text-xs transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
                 </div>
               )}
 
