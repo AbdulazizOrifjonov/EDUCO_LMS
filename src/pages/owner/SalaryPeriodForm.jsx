@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, DatePicker } from '@/components/ui';
 
 const salaryPeriodSchema = z
   .object({

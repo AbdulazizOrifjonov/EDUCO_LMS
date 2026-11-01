@@ -18,6 +18,7 @@ import {
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import Modal from '@/components/ui/Modal';

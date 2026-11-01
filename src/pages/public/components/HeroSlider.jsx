@@ -134,9 +134,11 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                   <a
                     href="#contact"
                     onClick={(e) => scrollToTarget(e, '#contact')}
-                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-emerald-950/40 hover:scale-103 active:scale-97 transition-all cursor-pointer ring-2 ring-emerald-300/40"
+                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-emerald-950/40 hover:scale-103 active:scale-97 transition-all cursor-pointer ring-2 ring-emerald-300/40"
                   >
-                    <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+                    <span className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-amber-300" />
+                    </span>
                     <span>Sinov darsiga yozilish</span>
                   </a>
 

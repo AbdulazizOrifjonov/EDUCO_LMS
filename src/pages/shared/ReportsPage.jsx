@@ -16,7 +16,7 @@ import {
   GraduationCap,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { Button, Card, Badge, Input, Select, EmptyState, LoadingSpinner } from '@/components/ui';
+import { Button, Card, Badge, Input, Select, EmptyState, LoadingSpinner, DatePicker } from '@/components/ui';
 import {
   generateAttendanceReport,
   generateGradeReport,

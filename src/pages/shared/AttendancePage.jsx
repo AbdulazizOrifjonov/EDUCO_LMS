@@ -265,20 +265,6 @@ export default function AttendancePage() {
     refreshGroupStatuses();
   }, [refreshGroupStatuses]);
 
-  useEffect(() => {
-    const handleSync = () => {
-      refreshGroupStatuses();
-      if (activeTab === 'analytics') {
-        loadAnalytics();
-      }
-      if (activeTab === 'roster' && selectedRosterGroupId && !savingRoster) {
-        loadGroupAttendance();
-      }
-    };
-    window.addEventListener('educo-data-sync', handleSync);
-    return () => window.removeEventListener('educo-data-sync', handleSync);
-  }, [refreshGroupStatuses, activeTab, loadAnalytics, selectedRosterGroupId, savingRoster, loadGroupAttendance]);
-
   // Load lesson and students for Roster
   const loadGroupAttendance = useCallback(async () => {
     if (!selectedRosterGroupId || !selectedDate) return;
@@ -340,6 +326,20 @@ export default function AttendancePage() {
       setLoadingRoster(false);
     }
   }, [selectedRosterGroupId, selectedDate, profile, t]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      refreshGroupStatuses();
+      if (activeTab === 'analytics') {
+        loadAnalytics();
+      }
+      if (activeTab === 'roster' && selectedRosterGroupId && !savingRoster) {
+        loadGroupAttendance();
+      }
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [refreshGroupStatuses, activeTab, loadAnalytics, selectedRosterGroupId, savingRoster, loadGroupAttendance]);
 
   useEffect(() => {
     if (activeTab === 'roster') {

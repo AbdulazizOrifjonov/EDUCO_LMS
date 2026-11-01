@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
-import { Button, Input, Select } from '@/components/ui';
+import { Button, Input, Select, DatePicker } from '@/components/ui';
 
 const paymentSchema = z.object({
   student_id: z.string().min(1, 'Please select a student'),

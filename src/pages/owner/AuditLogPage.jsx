@@ -14,7 +14,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
-import { Button, Card, Badge, Input, EmptyState, LoadingSpinner } from '@/components/ui';
+import { Button, Card, Badge, Input, EmptyState, LoadingSpinner, DatePicker } from '@/components/ui';
 import Select from '@/components/ui/Select';
 import { getAuditLogs } from '@/services/auditService';
 import { formatDate } from '@/utils/csvExport';

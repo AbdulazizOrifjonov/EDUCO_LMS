@@ -227,35 +227,55 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 
 .reveal-init-left {
   opacity: 0;
-  transform: translateX(-40px);
-  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(-45px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-init-right {
   opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(45px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-init-up {
   opacity: 0;
-  transform: translateY(35px);
-  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-init-zoom {
   opacity: 0;
-  transform: scale(0.93);
-  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.9) translateY(25px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-active {
   opacity: 1 !important;
-  transform: translate(0, 0) scale(1) !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+/* ==========================================================================
+   LMS DASHBOARD & APPLICATION PAGE ENTRANCE TRANSITIONS
+   ========================================================================== */
+
+@keyframes lmsPageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-lms-page {
+  animation: lmsPageEnter 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
 }
 
 @media (prefers-reduced-motion: reduce) {

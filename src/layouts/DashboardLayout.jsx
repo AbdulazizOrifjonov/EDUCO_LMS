@@ -869,7 +869,9 @@ export default function DashboardLayout({
               : 'p-3 sm:p-5 lg:p-6'
           }`}
         >
-          {children || <Outlet />}
+          <div key={location.pathname} className="animate-lms-page w-full">
+            {children || <Outlet />}
+          </div>
         </main>
       </div>
 
