@@ -504,6 +504,25 @@ export async function deleteMessage(messageId) {
 }
 
 /**
+ * Clear all chat messages for a specific group/channel (Owner and Admin only)
+ * @param {string} groupId
+ */
+export async function clearChatHistory(groupId) {
+  try {
+    localStore.clearChatHistory(groupId);
+    window.dispatchEvent(
+      new CustomEvent('educo-chat-update', {
+        detail: { event: 'CLEAR_HISTORY', groupId: String(groupId) },
+      })
+    );
+    return true;
+  } catch (error) {
+    console.error('clearChatHistory error:', error);
+    throw error;
+  }
+}
+
+/**
  * Edit / Update text of a chat message
  * @param {string} messageId
  * @param {string} newText
@@ -574,10 +593,25 @@ export async function uploadAttachment(groupId, file, customFileName = null, onP
       console.warn('Cloud upload fallback to local URL:', netErr);
     }
 
+    // 4. Cross-Device Sync Fallback:
+    // If cloud upload wasn't available or failed, convert images / small files (<= 4MB) to Base64 data URL.
+    // The Data URL travels in the sync engine so gadget 2 (and any other device) renders the image instantly!
+    let dataUrlFallback = null;
+    if (!cloudMediaUrl && blobToStore.size <= 4 * 1024 * 1024) {
+      try {
+        dataUrlFallback = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(blobToStore);
+        });
+      } catch (_) {}
+    }
+
     if (onProgress) onProgress(100);
 
-    const finalPath = cloudMediaUrl || mediaKey;
-    const finalDisplayUrl = cloudMediaUrl || localBlobUrl;
+    const finalPath = cloudMediaUrl || dataUrlFallback || mediaKey;
+    const finalDisplayUrl = cloudMediaUrl || dataUrlFallback || localBlobUrl;
 
     const fn = originalName.toLowerCase();
     const isAudio =
@@ -710,6 +744,8 @@ export function subscribeToMessages(groupId, callback) {
       callback({ event: 'UPDATE', message: detail.message });
     } else if (detail.event === 'DELETE' && detail.message) {
       callback({ event: 'DELETE', message: detail.message });
+    } else if (detail.event === 'CLEAR_HISTORY' && String(detail.groupId) === String(groupId)) {
+      callback({ event: 'CLEAR_HISTORY', groupId: detail.groupId });
     }
   };
 

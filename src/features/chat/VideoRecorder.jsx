@@ -189,14 +189,41 @@ export default function VideoRecorder({
   }, [autoStart, hasCameraSupport, uploadMode, isRecording, videoBlob]);
 
   const switchCameraFacing = async () => {
+    if (isSwitchingCamera) return;
     const nextFacing = facingMode === 'user' ? 'environment' : 'user';
     setIsSwitchingCamera(true);
 
     if (navigator.mediaDevices?.getUserMedia && streamRef.current) {
       try {
+        // 1. Keep audio track safe
+        const audioTracks = streamRef.current.getAudioTracks();
+        const existingAudioTrack = audioTracks.length > 0 ? audioTracks[0] : null;
+
+        // 2. CRITICAL FOR ANDROID/MOBILE: Stop old video track BEFORE requesting new camera,
+        // so the device hardware sensor is fully released!
+        const oldVideoTracks = streamRef.current.getVideoTracks();
+        if (oldVideoTracks.length > 0) {
+          oldVideoTracks.forEach((t) => {
+            try {
+              streamRef.current.removeTrack(t);
+              t.stop();
+            } catch (_) {}
+          });
+        }
+
+        // 3. Request opposite camera sensor
         let newStream = null;
-        try {
-          newStream = await navigator.mediaDevices.getUserMedia({
+        const candidateConstraints = [
+          {
+            video: {
+              facingMode: { exact: nextFacing },
+              width: { ideal: 720 },
+              height: { ideal: 720 },
+              aspectRatio: { ideal: 1 },
+            },
+            audio: false,
+          },
+          {
             video: {
               facingMode: { ideal: nextFacing },
               width: { ideal: 720 },
@@ -204,20 +231,37 @@ export default function VideoRecorder({
               aspectRatio: { ideal: 1 },
             },
             audio: false,
-          });
-        } catch {
-          newStream = await navigator.mediaDevices.getUserMedia({
+          },
+          {
             video: { facingMode: nextFacing },
             audio: false,
-          });
+          },
+        ];
+
+        for (const c of candidateConstraints) {
+          try {
+            newStream = await navigator.mediaDevices.getUserMedia(c);
+            if (newStream && newStream.getVideoTracks().length > 0) break;
+          } catch (_) {}
         }
 
-        const newVideoTrack = newStream?.getVideoTracks()[0];
-        const oldVideoTrack = streamRef.current.getVideoTracks()[0];
-        if (oldVideoTrack && newVideoTrack) {
-          streamRef.current.removeTrack(oldVideoTrack);
-          oldVideoTrack.stop();
+        // Fallback: if switching failed, try reverting back to original facing mode
+        if (!newStream) {
+          try {
+            newStream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode },
+              audio: false,
+            });
+          } catch (_) {}
+        }
+
+        if (newStream && newStream.getVideoTracks().length > 0) {
+          const newVideoTrack = newStream.getVideoTracks()[0];
           streamRef.current.addTrack(newVideoTrack);
+          if (existingAudioTrack && !streamRef.current.getAudioTracks().includes(existingAudioTrack)) {
+            streamRef.current.addTrack(existingAudioTrack);
+          }
+
           setFacingMode(nextFacing);
           setSelectedDeviceId(null);
 

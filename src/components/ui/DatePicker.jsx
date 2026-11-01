@@ -28,7 +28,20 @@ export default function DatePicker({
 }) {
   const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [placement, setPlacement] = useState('left');
   const containerRef = useRef(null);
+
+  // Smart placement: if container is on the right side of screen, anchor to right-0
+  useEffect(() => {
+    if (isOpen && containerRef.current && typeof window !== 'undefined') {
+      const rect = containerRef.current.getBoundingClientRect();
+      if (rect.right > window.innerWidth - 60 || rect.left > window.innerWidth / 2) {
+        setPlacement('right');
+      } else {
+        setPlacement('left');
+      }
+    }
+  }, [isOpen]);
 
   // Parse incoming value (expected YYYY-MM-DD or ISO string)
   const selectedDate = useMemo(() => {
@@ -264,10 +277,12 @@ export default function DatePicker({
         value={value || ''}
       />
 
-      {/* Popover Calendar - EXACT width matching input container (strictly 100% w-full, never overflows container) */}
+      {/* Popover Calendar - Smart responsive width and boundary-aware positioning */}
       {isOpen && (
         <div
-          className="absolute z-50 left-0 right-0 w-full top-full mt-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-2.5 pb-3 animate-in fade-in zoom-in-95 duration-150 max-w-full"
+          className={`absolute z-50 ${
+            placement === 'right' ? 'right-0' : 'left-0'
+          } w-[285px] sm:w-[305px] max-w-[calc(100vw-24px)] top-full mt-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-2.5 pb-3 animate-in fade-in zoom-in-95 duration-150`}
         >
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-gray-100 dark:border-gray-800">

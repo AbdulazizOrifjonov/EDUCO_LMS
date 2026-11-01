@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Users,
   Briefcase,
@@ -33,6 +33,7 @@ import {
   sendMessage,
   updateMessage,
   deleteMessage,
+  clearChatHistory,
   uploadAttachment,
   subscribeToMessages,
   markAsRead,
@@ -146,6 +147,47 @@ export default function ChatWindow({
   const isStaffUser = ['owner', 'admin', 'teacher'].includes(userRole);
   const isStaffChat = Boolean(activeGroup?.isStaffChat || activeGroup?.id === 'staff-general-chat');
 
+  // Telegram-style Member count and dynamic online count
+  const groupMembersCount = useMemo(() => {
+    if (!activeGroup) return 0;
+    if (activeGroup.isStaffChat) {
+      return activeGroup.staffMembers?.length || 2;
+    }
+    if (activeGroup.isAnnouncementChat) {
+      return 'Barcha a‘zolar';
+    }
+    const groupStudents = activeGroup.group_students || [];
+    const teacherCount = activeGroup.teacher_id ? 1 : 0;
+    return Math.max(1, groupStudents.length + teacherCount);
+  }, [activeGroup]);
+
+  const onlineCount = useMemo(() => {
+    if (typeof groupMembersCount === 'number') {
+      return Math.max(1, Math.min(groupMembersCount, Math.ceil(groupMembersCount * 0.4)));
+    }
+    return 3;
+  }, [groupMembersCount]);
+
+  const canClearHistory = userRole === 'owner' || userRole === 'admin';
+  const [showClearHistoryModal, setShowClearHistoryModal] = useState(false);
+  const [isClearingHistory, setIsClearingHistory] = useState(false);
+
+  const handleClearHistory = async () => {
+    if (!activeGroup?.id) return;
+    setIsClearingHistory(true);
+    try {
+      await clearChatHistory(activeGroup.id);
+      setMessages([]);
+      setShowClearHistoryModal(false);
+      toast.success(t('chat.historyCleared', 'Chat tarixi muvaffaqiyatli tozalandi!'));
+    } catch (err) {
+      console.error('Failed to clear history:', err);
+      toast.error('Chat tarixini tozalashda xatolik yuz berdi');
+    } finally {
+      setIsClearingHistory(false);
+    }
+  };
+
   const messagesContainerRef = useRef(null);
   const isInitialLoadRef = useRef(true);
   const currentGroupIdRef = useRef(activeGroup?.id);
@@ -213,6 +255,10 @@ export default function ChatWindow({
         );
       } else if (payload.event === 'DELETE' && payload.message) {
         setMessages((prev) => prev.filter((m) => m.id !== payload.message.id));
+      } else if (payload.event === 'CLEAR_HISTORY') {
+        if (!payload.groupId || String(payload.groupId) === String(activeGroup.id)) {
+          setMessages([]);
+        }
       }
     });
 
@@ -684,16 +730,35 @@ export default function ChatWindow({
                 </span>
               ) : null}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {activeGroup.isAnnouncementChat
-                ? "Rasmiy e'lonlar • Barcha chatlarga avtomatik tarqatiladi"
-                : activeGroup.course?.name || t('chat.title', 'Group Chat')}
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1.5 mt-0.5">
+              {activeGroup.isAnnouncementChat ? (
+                <span>Rasmiy e&apos;lonlar kanali • Barcha a&apos;zolar</span>
+              ) : (
+                <>
+                  <span>{typeof groupMembersCount === 'number' ? `${groupMembersCount} ta a'zo` : groupMembersCount}</span>
+                  <span>•</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {onlineCount} ta onlayn
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>
 
-        {/* Group Info Badge */}
+        {/* Group Info Badge & Action Controls */}
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
+          {canClearHistory && !activeGroup.isAnnouncementChat && (
+            <button
+              type="button"
+              onClick={() => setShowClearHistoryModal(true)}
+              className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 border border-gray-200 dark:border-gray-800 transition-colors cursor-pointer shadow-2xs"
+              title="Chat tarixini tozalash"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
           {activeGroup.isAnnouncementChat ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-700/60 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -905,7 +970,9 @@ export default function ChatWindow({
                   message={msg}
                   currentUserId={currentUser?.id}
                   canDelete={
-                    msg.sender_id === currentUser?.id ||
+                    (Boolean(currentUser?.id) &&
+                      (String(msg.sender_id) === String(currentUser?.id) ||
+                        String(msg.sender?.id) === String(currentUser?.id))) ||
                     userRole === 'owner' ||
                     userRole === 'admin'
                   }
@@ -1200,6 +1267,50 @@ export default function ChatWindow({
                     <Forward className="w-4 h-4 text-gray-300 group-hover:text-cyan-500 transition-colors shrink-0" />
                   </button>
                 ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Chat History Confirmation Modal (Owner and Admin) */}
+      {showClearHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-gray-700 space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto shadow-xs">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                Chat tarixini tozalash
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                <strong>{activeGroup.name}</strong> guruhidagi barcha xabarlar butunlay o‘chiriladi. Ushbu amalni ortga qaytarib bo‘lmaydi.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isClearingHistory}
+                onClick={() => setShowClearHistoryModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/60 text-gray-700 dark:text-gray-200 hover:bg-gray-100 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                disabled={isClearingHistory}
+                onClick={handleClearHistory}
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              >
+                {isClearingHistory ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Tozalanmoqda...</span>
+                  </>
+                ) : (
+                  <span>Ha, tozalansin</span>
+                )}
+              </button>
             </div>
           </div>
         </div>

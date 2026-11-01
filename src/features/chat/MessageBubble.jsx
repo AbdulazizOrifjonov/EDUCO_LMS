@@ -138,7 +138,10 @@ export default function MessageBubble({
   };
 
   const isRtl = i18n.language === 'ar' || document.documentElement.dir === 'rtl';
-  const isOwn = message.sender_id === currentUserId;
+  const isOwn =
+    Boolean(currentUserId) &&
+    (String(message.sender_id) === String(currentUserId) ||
+      String(message.sender?.id) === String(currentUserId));
 
   // Parse reply header and announcement metadata safely using Regex
   let replyData = null;

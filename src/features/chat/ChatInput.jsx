@@ -245,13 +245,15 @@ export default function ChatInput({
       isHeldDownRef.current = false;
       return;
     }
-    // Single click opens recorder directly
-    if (recordMode === 'video') {
-      setVideoAutoStart(true);
-      setShowVideoRecorder(true);
-    } else {
-      setShowAudioRecorder(true);
-    }
+    // Telegram behavior: Single tap switches mode between Video (Camera) and Audio (Mic)
+    const nextMode = recordMode === 'video' ? 'audio' : 'video';
+    setRecordMode(nextMode);
+    toast.success(
+      nextMode === 'video'
+        ? '🎥 Dumaloq video rejimi (Yozish uchun bosib turing)'
+        : '🎙️ Ovozli xabar rejimi (Yozish uchun bosib turing)',
+      { duration: 1600 }
+    );
   };
 
   const toggleRecordMode = (e) => {

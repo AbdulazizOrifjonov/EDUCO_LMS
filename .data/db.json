@@ -1,6 +1,25 @@
 {
   "educo_db_users": [
     {
+      "id": "usr-1793463763683",
+      "username": "abdulazizbek_orifjonov",
+      "first_name": "Abdulazizbek",
+      "last_name": "Orifjonov",
+      "fullName": "Abdulazizbek Orifjonov",
+      "full_name": "Abdulazizbek Orifjonov",
+      "avatar_url": "",
+      "role": "teacher",
+      "email": "abdulazizbek_orifjonov@educo.app",
+      "phone": "+998 93 582 17 74",
+      "father_phone": "",
+      "mother_phone": "",
+      "password": "Hbwy%22A7",
+      "password_updated_at": "2026-10-31T16:22:43.684Z",
+      "is_active": true,
+      "created_at": "2026-10-31T16:22:43.684Z",
+      "updated_at": "2026-10-31T16:22:43.684Z"
+    },
+    {
       "id": "usr-owner-1",
       "username": "abbosbek",
       "first_name": "Abbosbek",
@@ -11,18 +30,113 @@
       "email": "abbosbek@educo.app",
       "phone": "+998 98 800 14 15",
       "password": "AbbosBek1415",
-      "password_updated_at": "2026-10-31T05:02:37.920Z",
+      "password_updated_at": "2026-10-31T10:12:20.835Z",
       "is_active": true,
-      "created_at": "2026-10-31T05:02:37.920Z",
+      "created_at": "2026-10-31T10:12:20.835Z",
       "avatar_url": ""
     }
   ],
   "educo_db_groups": [],
-  "educo_db_courses": [],
+  "educo_db_courses": [
+    {
+      "id": "crs-1793463755078",
+      "name": "Frontend",
+      "code": "CRS-2901",
+      "description": "HTML, CSS, JAVASCRIPT, REACT.JS",
+      "monthly_fee": 500000,
+      "color": "#064e3b",
+      "is_active": true,
+      "created_at": "2026-10-31T16:22:35.078Z",
+      "updated_at": "2026-10-31T16:22:35.078Z",
+      "groupsCount": 0,
+      "activeGroupsCount": 0
+    }
+  ],
   "educo_db_memberships": [],
   "educo_db_lesson_schedules": [],
   "educo_db_lessons": [],
-  "educo_db_attendance": [],
+  "educo_db_attendance": [
+    {
+      "id": "att-oct-02-1",
+      "lesson_id": "lsn-grp-1-2026-10-02",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "React asoslari darsida juda faol qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-02",
+      "created_at": "2026-10-02T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-05-1",
+      "lesson_id": "lsn-grp-1-2026-10-05",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Uy vazifasini o‘z vaqtida to‘liq topshirdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-05",
+      "created_at": "2026-10-05T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-07-1",
+      "lesson_id": "lsn-grp-1-2026-10-07",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Darsga to‘liq qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-07",
+      "created_at": "2026-10-07T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-09-1",
+      "lesson_id": "lsn-grp-1-2026-10-09",
+      "student_id": "usr-student-1",
+      "status": "late",
+      "remark": "Tirbandlik sababli 10 daqiqa kechikib keldi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-09",
+      "created_at": "2026-10-09T09:25:00.000Z"
+    },
+    {
+      "id": "att-oct-12-1",
+      "lesson_id": "lsn-grp-1-2026-10-12",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Mustaqil amaliy ishni a’lo darajada bajardi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-12",
+      "created_at": "2026-10-12T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-14-1",
+      "lesson_id": "lsn-grp-1-2026-10-14",
+      "student_id": "usr-student-1",
+      "status": "excused",
+      "remark": "Shifokor ko‘rigi sababli maʼmuriyatdan ruxsat so‘ralgan",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-14",
+      "created_at": "2026-10-14T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-16-1",
+      "lesson_id": "lsn-grp-1-2026-10-16",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Darsga o‘z vaqtida keldi va faol qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-16",
+      "created_at": "2026-10-16T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-19-1",
+      "lesson_id": "lsn-grp-1-2026-10-19",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Bugungi darsda faol qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-19",
+      "created_at": "2026-10-19T09:15:00.000Z"
+    }
+  ],
   "educo_db_grades": [],
   "educo_db_homework": [],
   "educo_db_submissions": [],
@@ -30,8 +144,81 @@
   "educo_db_payments": [],
   "educo_db_student_reminders": [],
   "educo_db_teacher_attendance": [],
-  "educo_db_chat_messages": [],
-  "educo_db_notifications": [],
+  "educo_db_chat_messages": [
+    {
+      "id": "msg-1793517363341-xiyp",
+      "group_id": "staff-general-chat",
+      "sender_id": "usr-owner-1",
+      "message": "s",
+      "created_at": "2026-11-01T07:16:03.341Z",
+      "updated_at": "2026-11-01T07:48:21.940Z",
+      "chat_attachments": [],
+      "seen_by": [],
+      "reactions": []
+    }
+  ],
+  "educo_db_notifications": [
+    {
+      "id": "notif-1",
+      "user_id": "usr-student-1",
+      "type": "ATTENDANCE",
+      "title": "Davomat qayd etildi",
+      "message": "Frontend React guruhi bo‘yicha bugungi dars davomati \"Bor\" deb belgilandi.",
+      "link": "/student/attendance",
+      "is_read": false,
+      "created_at": "2026-10-31T11:41:31.244Z"
+    },
+    {
+      "id": "notif-2",
+      "user_id": "usr-student-1",
+      "type": "SYSTEM",
+      "title": "Dars jadvali tasdiqlandi",
+      "message": "FE-24 React guruhi darslari Dushanba, Chorshanba, Juma kunlari 09:00 - 10:30 ga belgilandi.",
+      "link": "/student/schedule",
+      "is_read": false,
+      "created_at": "2026-10-31T08:41:31.244Z"
+    },
+    {
+      "id": "notif-3",
+      "user_id": "usr-student-1",
+      "type": "PAYMENT",
+      "title": "O‘qish to‘lovi qabul qilindi",
+      "message": "Frontend React kursi uchun 1,200,000 so‘m oylik to‘lov muvaffaqiyatli qabul qilindi.",
+      "link": "/student/dashboard",
+      "is_read": true,
+      "created_at": "2026-10-30T13:41:31.244Z"
+    },
+    {
+      "id": "notif-4",
+      "user_id": "usr-teacher-1",
+      "type": "ATTENDANCE",
+      "title": "Davomat eslatmasi",
+      "message": "FE-24 React guruhining bugungi darsi uchun talabalar davomatini to‘ldirishni unutmang.",
+      "link": "/teacher/attendance",
+      "is_read": false,
+      "created_at": "2026-10-31T12:41:31.244Z"
+    },
+    {
+      "id": "notif-5",
+      "user_id": "usr-admin-1",
+      "type": "SYSTEM",
+      "title": "Yangi o‘quvchi qo‘shildi",
+      "message": "Jasur Rustamov FE-24 guruhiga muvaffaqiyatli biriktirildi.",
+      "link": "/admin/users",
+      "is_read": false,
+      "created_at": "2026-10-31T10:41:31.244Z"
+    },
+    {
+      "id": "notif-6",
+      "user_id": "usr-owner-1",
+      "type": "PAYMENT",
+      "title": "Yangi to‘lov tushumi",
+      "message": "Frontend kursi uchun yangi to‘lov qaydnomasi kiritildi.",
+      "link": "/owner/tuition",
+      "is_read": false,
+      "created_at": "2026-10-31T11:41:31.244Z"
+    }
+  ],
   "educo_db_sms_devices": [
     {
       "id": "dev-primary-1",
@@ -41,9 +228,10 @@
       "api_token": "SXP6_F:_8_-fv9uvdsyrp",
       "is_active": true,
       "status": "online",
-      "last_seen_at": null,
+      "last_seen_at": "2026-10-31T10:12:20.835Z",
       "last_error": null,
-      "phone_number": "+998 90 648 40 40"
+      "phone_number": "+998 93 582 17 74",
+      "created_at": "2026-10-31T10:12:20.835Z"
     },
     {
       "id": "dev-backup-2",
@@ -55,9 +243,45 @@
       "status": "offline",
       "last_seen_at": null,
       "last_error": null,
-      "phone_number": "+998 93 582 17 74"
+      "phone_number": "+998 93 582 17 74",
+      "created_at": "2026-10-31T10:12:20.835Z"
     }
   ],
   "educo_db_sms_queue": [],
-  "educo_db_sms_logs": []
+  "educo_db_sms_logs": [],
+  "_wipe_to_clean": true,
+  "educo_db_announcements": [
+    {
+      "id": "ann-1792490964541",
+      "title": "kjhghhjhh",
+      "content": "kjhghhjhh",
+      "author_name": "Alisher Qodirov",
+      "is_pinned": true,
+      "created_at": "2026-10-20T10:09:24.541Z"
+    },
+    {
+      "id": "ann-1792490942438",
+      "title": "jhgf",
+      "content": "jhgf",
+      "author_name": "Alisher Qodirov",
+      "is_pinned": true,
+      "created_at": "2026-10-20T10:09:02.438Z"
+    },
+    {
+      "id": "ann-1792306618781",
+      "title": "bugun dam olish",
+      "content": "bugun dam olish",
+      "author_name": "Alisher Qodirov",
+      "is_pinned": true,
+      "created_at": "2026-10-18T06:56:58.781Z"
+    },
+    {
+      "id": "ann-1",
+      "title": "Yangi oʻquv mavsumi boshlanishi",
+      "content": "Barcha oʻquvchilar va ustozlar diqqatiga! Darslar belgilangan jadval boʻyicha oʻz vaqtida boshlanadi.",
+      "author_name": "Alisher Qodirov (Owner)",
+      "is_pinned": true,
+      "created_at": "2026-10-16T06:56:58.781Z"
+    }
+  ]
 }

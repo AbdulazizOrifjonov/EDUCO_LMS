@@ -18,6 +18,7 @@ export default function TimePicker({
   name,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [placement, setPlacement] = useState('left');
   const containerRef = useRef(null);
   const hoursListRef = useRef(null);
   const minutesListRef = useRef(null);
@@ -35,6 +36,18 @@ export default function TimePicker({
   }, [value]);
 
   const formattedTime = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
+
+  // Smart placement: if container is on the right side of the screen, anchor to right-0 so it never clips offscreen
+  useEffect(() => {
+    if (isOpen && containerRef.current && typeof window !== 'undefined') {
+      const rect = containerRef.current.getBoundingClientRect();
+      if (rect.right > window.innerWidth - 60 || rect.left > window.innerWidth / 2) {
+        setPlacement('right');
+      } else {
+        setPlacement('left');
+      }
+    }
+  }, [isOpen]);
 
   // Close on click outside
   useEffect(() => {
@@ -171,10 +184,12 @@ export default function TimePicker({
       )}
       {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
 
-      {/* Popover Dropdown - EXACT width matching input container (strictly 100% w-full, never overflows container) */}
+      {/* Popover Dropdown - Smart responsive width and boundary-aware positioning */}
       {isOpen && (
         <div
-          className="absolute z-50 left-0 right-0 w-full top-full mt-2 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-w-full"
+          className={`absolute z-50 ${
+            placement === 'right' ? 'right-0' : 'left-0'
+          } w-[285px] sm:w-[305px] max-w-[calc(100vw-24px)] top-full mt-2 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150`}
         >
           {/* Header Display */}
           <div className="p-2.5 sm:p-3 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-800/90 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/80">

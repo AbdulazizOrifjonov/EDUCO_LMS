@@ -1427,7 +1427,18 @@ class LocalStore {
 
   deleteChatMessage(messageId) {
     const list = this.getItem(STORAGE_KEYS.CHAT_MESSAGES, this.getInitialChatMessages()).filter(
-      (m) => m.id !== messageId
+      (m) => String(m.id) !== String(messageId)
+    );
+    this.setItem(STORAGE_KEYS.CHAT_MESSAGES, list);
+    this.pushToServer({ [STORAGE_KEYS.CHAT_MESSAGES]: list }).catch(() => {});
+    return true;
+  }
+
+  clearChatHistory(groupId) {
+    if (!groupId) return false;
+    const targetGroupId = String(groupId);
+    const list = this.getItem(STORAGE_KEYS.CHAT_MESSAGES, this.getInitialChatMessages()).filter(
+      (m) => String(m.group_id || m.groupId) !== targetGroupId
     );
     this.setItem(STORAGE_KEYS.CHAT_MESSAGES, list);
     this.pushToServer({ [STORAGE_KEYS.CHAT_MESSAGES]: list }).catch(() => {});

@@ -312,7 +312,7 @@ export default function RemindersPage() {
               <button
                 type="button"
                 onClick={() => setActiveView('create')}
-                className="h-10 px-3.5 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer inline-flex items-center justify-center gap-2"
+                className="h-10 px-3.5 sm:px-4 rounded-xl border border-transparent bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer inline-flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4 shrink-0 stroke-[2.5]" />
                 <span className="hidden sm:inline">Yangi eslatma / Sinov darsi</span>
