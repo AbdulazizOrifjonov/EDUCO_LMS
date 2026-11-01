@@ -69,8 +69,19 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [serverError, setServerError] = useState('');
-  const [quickLoggingInRole, setQuickLoggingInRole] = useState(null);
   const [installModalOpen, setInstallModalOpen] = useState(false);
+
+  // Role passed from navbar dropdown (e.g. ?role=owner)
+  const searchParams = new URLSearchParams(location.search);
+  const roleParam = searchParams.get('role')?.toLowerCase();
+
+  const ROLE_BADGES = {
+    owner: { label: 'Boshqaruvchi (Asoschi)', icon: '👑', color: 'from-amber-500/10 to-orange-500/10 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700/60' },
+    admin: { label: 'Administrator', icon: '👨‍💼', color: 'from-blue-500/10 to-indigo-500/10 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700/60' },
+    teacher: { label: "O'qituvchi", icon: '👨‍🏫', color: 'from-purple-500/10 to-indigo-500/10 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-700/60' },
+    student: { label: "O'quvchi", icon: '🎓', color: 'from-emerald-500/10 to-teal-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60' },
+  };
+  const activeRoleBadge = roleParam ? ROLE_BADGES[roleParam] : null;
 
   const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) || SUPPORTED_LANGUAGES[0];
   const isRTL = currentLang.dir === 'rtl';
@@ -159,38 +170,6 @@ export default function LoginPage() {
       }
     } catch (err) {
       setServerError(err.message || t('common.error', 'An error occurred during sign in'));
-    }
-  };
-
-  const handleQuickLogin = async (loginIdentifier, password, roleKey = '') => {
-    setServerError('');
-    setQuickLoggingInRole(roleKey || loginIdentifier);
-    setValue('username', loginIdentifier);
-    setValue('password', password);
-    try {
-      const { data, error } = await signIn(loginIdentifier, password);
-      if (error) {
-        setServerError(error.message || t('auth.invalidCredentials', 'Invalid username or password'));
-        setQuickLoggingInRole(null);
-        return;
-      }
-      const rawRole = data?.user?.user_metadata?.role || data?.profile?.role || roleKey || 'student';
-      const userRole = String(rawRole).toLowerCase().trim();
-      const targetPath = `/${userRole}/dashboard`;
-
-      navigate(targetPath, { replace: true });
-
-      // Safety fallback to ensure page transitions even on browser edge cases
-      if (typeof window !== 'undefined') {
-        setTimeout(() => {
-          if (window.location.pathname === '/login' || window.location.pathname === '/') {
-            window.location.replace(targetPath);
-          }
-        }, 150);
-      }
-    } catch (err) {
-      setServerError(err.message || 'Kirishda xatolik yuz berdi');
-      setQuickLoggingInRole(null);
     }
   };
 
@@ -296,6 +275,14 @@ export default function LoginPage() {
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
                 {t('auth.loginSubtitle', 'Enter your credentials to continue to your dashboard')}
               </p>
+              {activeRoleBadge && (
+                <div className="mt-3 flex justify-center">
+                  <div className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border bg-gradient-to-r ${activeRoleBadge.color} shadow-xs`}>
+                    <span className="text-sm">{activeRoleBadge.icon}</span>
+                    <span>{activeRoleBadge.label} kabineti</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Error Banner */}
@@ -437,68 +424,6 @@ export default function LoginPage() {
                 {t('auth.signIn', 'Sign In')}
               </Button>
             </form>
-
-            {/* Owner Quick Access Section */}
-            <div className="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base">👑</span>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-brand-navy dark:text-blue-400">
-                    {t('common.ownerAccounts', 'Boshqaruvchi / Rahbar (Owner) kabineti')}
-                  </h3>
-                </div>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/80 text-brand-navy dark:text-blue-300">
-                  1-klikda kirish
-                </span>
-              </div>
-              <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-3">
-                {t('common.ownerAccountsHint', 'Owner sifatida tizimga kirish uchun quyidagi rahbar hisobini tanlang:')}
-              </p>
-
-              <div className="space-y-2.5">
-                {/* Owner: Abbosbek */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => handleQuickLogin('+998 98 800 14 15', 'AbbosBek1415', 'owner')}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleQuickLogin('+998 98 800 14 15', 'AbbosBek1415', 'owner');
-                    }
-                  }}
-                  className="p-3 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20 hover:bg-blue-100/70 dark:hover:bg-blue-950/50 transition-all flex items-center justify-between gap-3 shadow-xs cursor-pointer active:scale-[0.99] group select-none"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-brand-navy dark:group-hover:text-blue-300 transition-colors">
-                        Abbosbek
-                      </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-semibold">
-                        👑 Boshqaruvchi (Owner)
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono mt-0.5 flex items-center gap-2">
-                      <span>+998 98 800 14 15</span>
-                      <span className="text-[10px] text-gray-400">•</span>
-                      <span className="text-gray-700 dark:text-gray-300 font-semibold">AbbosBek1415</span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={isSubmitting || authLoading}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleQuickLogin('+998 98 800 14 15', 'AbbosBek1415', 'owner');
-                    }}
-                    className="shrink-0 px-3.5 py-1.5 rounded-lg bg-brand-navy hover:bg-blue-900 active:scale-95 text-white text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>{quickLoggingInRole === 'owner' && watch('username') === '+998 98 800 14 15' ? 'Kirilmoqda...' : 'Kirish'}</span>
-                    <span className="text-[10px]">→</span>
-                  </button>
-                </div>
-              </div>
-            </div>
 
             {/* Quick Demo Switcher Tip */}
             <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
