@@ -28,6 +28,7 @@ import {
   ChevronRight,
   MessageSquare,
   BookOpen,
+  Globe,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -128,6 +129,15 @@ export default function RemindersPage() {
     const todayDue = reminders.filter(
       (r) => r.status === 'pending' && r.due_date <= todayStr
     ).length;
+    const websiteLeads = reminders.filter(
+      (r) => r.type === 'website_lead' || r.source === 'website'
+    ).length;
+    const websiteLeadsPending = reminders.filter(
+      (r) => (r.type === 'website_lead' || r.source === 'website') && r.status === 'pending'
+    ).length;
+    const systemReminders = reminders.filter(
+      (r) => r.type !== 'website_lead' && r.source !== 'website'
+    ).length;
     const trials = reminders.filter(
       (r) => r.type === 'trial_lesson' || (r.note && r.note.toLowerCase().includes('sinov'))
     ).length;
@@ -136,14 +146,27 @@ export default function RemindersPage() {
     ).length;
     const completed = reminders.filter((r) => r.status === 'completed').length;
 
-    return { todayDue, trials, calls, completed, total: reminders.length };
+    return {
+      todayDue,
+      websiteLeads,
+      websiteLeadsPending,
+      systemReminders,
+      trials,
+      calls,
+      completed,
+      total: reminders.length,
+    };
   }, [reminders, todayStr]);
 
   const filteredReminders = useMemo(() => {
     let list = reminders;
 
     // Tab filter
-    if (activeTab === 'trial') {
+    if (activeTab === 'website') {
+      list = list.filter((r) => r.type === 'website_lead' || r.source === 'website');
+    } else if (activeTab === 'system') {
+      list = list.filter((r) => r.type !== 'website_lead' && r.source !== 'website');
+    } else if (activeTab === 'trial') {
       list = list.filter(
         (r) => r.type === 'trial_lesson' || (r.note && r.note.toLowerCase().includes('sinov'))
       );
@@ -176,11 +199,13 @@ export default function RemindersPage() {
   // Handle Complete
   const handleOpenComplete = (item) => {
     setCompleteModalItem(item);
-    setCompleteNote(
-      item.type === 'trial_lesson'
-        ? 'Sinov darsida qatnashdi va kursga yozildi'
-        : 'Ota-onasi bilan gaplashildi va kelishildi'
-    );
+    if (item.type === 'website_lead' || item.source === 'website') {
+      setCompleteNote('Veb-sayt arizasi bo‘yicha o‘quvchi bilan bog‘lanildi, sinov darsi belgilandi');
+    } else if (item.type === 'trial_lesson') {
+      setCompleteNote('Sinov darsida qatnashdi va kursga yozildi');
+    } else {
+      setCompleteNote('Ota-onasi bilan gaplashildi va kelishildi');
+    }
   };
 
   const handleConfirmComplete = async () => {
@@ -326,168 +351,214 @@ export default function RemindersPage() {
       {/* VIEW: LIST (Stats, filters, reminders table/cards) */}
       {activeView === 'list' && (
         <div className="space-y-6">
-          {/* 4 Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-        <div
-          onClick={() => setActiveTab('today')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === 'today'
-              ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-400 ring-2 ring-amber-500/25'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-amber-300'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase text-amber-700 dark:text-amber-400">
-              Bugun bajarilishi kerak
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 flex items-center justify-center">
-              <Clock className="w-4 h-4 animate-pulse" />
-            </div>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
-            {stats.todayDue}
-          </div>
-          <p className="text-[11px] text-gray-500 mt-0.5">Muddati kelgan yoki o‘tgan</p>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('trial')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === 'trial'
-              ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-400 ring-2 ring-purple-500/25'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-purple-300'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase text-purple-700 dark:text-purple-400">
-              Sinov darslari
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center">
-              <GraduationCap className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
-            {stats.trials}
-          </div>
-          <p className="text-[11px] text-gray-500 mt-0.5">Yangi o‘quvchi sinovlari</p>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('upcoming')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === 'upcoming'
-              ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-400 ring-2 ring-blue-500/25'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-blue-300'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase text-blue-700 dark:text-blue-400">
-              Kutilayotganlar
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center">
-              <CalendarDays className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
-            {reminders.filter((r) => r.status === 'pending' && r.due_date > todayStr).length}
-          </div>
-          <p className="text-[11px] text-gray-500 mt-0.5">Kelgusi kunlar jadvali</p>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('completed')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === 'completed'
-              ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 ring-2 ring-emerald-500/25'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-emerald-300'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-400">
-              Bajarilganlar
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
-            {stats.completed}
-          </div>
-          <p className="text-[11px] text-gray-500 mt-0.5">Kelishilgan & o‘tkazilgan</p>
-        </div>
-      </div>
-
-      {/* Tabs & Search Filter */}
-      <Card noPadding>
-        <div className="p-4 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            {/* Filter Tabs */}
-            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-gray-100 dark:bg-gray-800">
-              <button
-                type="button"
-                onClick={() => setActiveTab('all')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === 'all'
-                    ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                }`}
-              >
-                Barchasi ({stats.total})
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('trial')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeTab === 'trial'
-                    ? 'bg-purple-600 text-white shadow-xs font-black'
-                    : 'text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40'
-                }`}
-              >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Sinov darslari ({stats.trials})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('today')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeTab === 'today'
-                    ? 'bg-amber-500 text-white shadow-xs font-black'
-                    : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
-                }`}
-              >
-                <Clock className="w-3.5 h-3.5" />
-                <span>Bugun ({stats.todayDue})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('upcoming')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === 'upcoming'
-                    ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-xs'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                }`}
-              >
-                Kutilayotganlar
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('completed')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  activeTab === 'completed'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                }`}
-              >
-                <Check className="w-3.5 h-3.5" />
-                <span>Bajarilgan ({stats.completed})</span>
-              </button>
+          {/* 5 Stats Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+            {/* Card 1: Due Today */}
+            <div
+              onClick={() => setActiveTab('today')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                activeTab === 'today'
+                  ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-400 ring-2 ring-amber-500/25'
+                  : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-amber-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase text-amber-700 dark:text-amber-400">
+                  Bugun bajarish
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 flex items-center justify-center">
+                  <Clock className="w-4 h-4 animate-pulse" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
+                {stats.todayDue}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-0.5">Muddati kelganlar</p>
             </div>
 
-            {/* Search Input */}
+            {/* Card 2: Website Leads */}
+            <div
+              onClick={() => setActiveTab('website')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                activeTab === 'website'
+                  ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-400 ring-2 ring-sky-500/25 shadow-sm'
+                  : 'bg-gradient-to-br from-sky-50/50 via-white to-blue-50/30 dark:from-sky-950/20 dark:via-gray-900 dark:to-blue-950/10 border-sky-200 dark:border-sky-900/60 hover:border-sky-400'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase text-sky-700 dark:text-sky-400 flex items-center gap-1">
+                  <span>🌐 Veb-sayt arizalari</span>
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                  <Globe className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2 flex items-baseline gap-2">
+                <span>{stats.websiteLeads}</span>
+                {stats.websiteLeadsPending > 0 && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-sky-500 text-white animate-pulse">
+                    {stats.websiteLeadsPending} yangi
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-0.5">Saytdan sinov darsiga lidlar</p>
+            </div>
+
+            {/* Card 3: Trial Lessons */}
+            <div
+              onClick={() => setActiveTab('trial')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                activeTab === 'trial'
+                  ? 'bg-purple-50 dark:bg-purple-950/30 border-purple-400 ring-2 ring-purple-500/25'
+                  : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-purple-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase text-purple-700 dark:text-purple-400">
+                  Sinov darslari
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
+                {stats.trials}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-0.5">O‘quvchi sinov darslari</p>
+            </div>
+
+            {/* Card 4: Upcoming */}
+            <div
+              onClick={() => setActiveTab('upcoming')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                activeTab === 'upcoming'
+                  ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-400 ring-2 ring-blue-500/25'
+                  : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-blue-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase text-blue-700 dark:text-blue-400">
+                  Kutilayotganlar
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center">
+                  <CalendarDays className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
+                {reminders.filter((r) => r.status === 'pending' && r.due_date > todayStr).length}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-0.5">Kelgusi kunlar jadvali</p>
+            </div>
+
+            {/* Card 5: Completed */}
+            <div
+              onClick={() => setActiveTab('completed')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer col-span-2 sm:col-span-1 ${
+                activeTab === 'completed'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 ring-2 ring-emerald-500/25'
+                  : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-emerald-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-400">
+                  Bajarilganlar
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
+                {stats.completed}
+              </div>
+              <p className="text-[11px] text-gray-500 mt-0.5">Kelishilgan & o‘tkazilgan</p>
+            </div>
+          </div>
+
+          {/* Tabs & Search Filter */}
+          <Card noPadding>
+            <div className="p-4 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* Filter Tabs */}
+                <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-gray-100 dark:bg-gray-800">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('all')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'all'
+                        ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
+                    }`}
+                  >
+                    Barchasi ({stats.total})
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('website')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activeTab === 'website'
+                        ? 'bg-sky-600 text-white shadow-xs font-black'
+                        : 'text-sky-700 dark:text-sky-300 hover:bg-sky-50 dark:hover:bg-sky-950/40'
+                    }`}
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>🌐 Veb-sayt arizalari ({stats.websiteLeads})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('system')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activeTab === 'system'
+                        ? 'bg-indigo-600 text-white shadow-xs font-black'
+                        : 'text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40'
+                    }`}
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    <span>📅 Tizim eslatmalari ({stats.systemReminders})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('today')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activeTab === 'today'
+                        ? 'bg-amber-500 text-white shadow-xs font-black'
+                        : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Bugun ({stats.todayDue})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('trial')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activeTab === 'trial'
+                        ? 'bg-purple-600 text-white shadow-xs font-black'
+                        : 'text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40'
+                    }`}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>Sinov darslari ({stats.trials})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('completed')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activeTab === 'completed'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
+                    }`}
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Bajarilgan ({stats.completed})</span>
+                  </button>
+                </div>
+
+                {/* Search Input */}
             <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -539,9 +610,11 @@ export default function RemindersPage() {
           filteredReminders.map((item) => {
             const isDueToday = item.status === 'pending' && item.due_date <= todayStr;
             const isCompleted = item.status === 'completed';
+            const isWebsiteLead = item.type === 'website_lead' || item.source === 'website';
             const isTrial =
-              item.type === 'trial_lesson' ||
-              (item.note && item.note.toLowerCase().includes('sinov'));
+              !isWebsiteLead &&
+              (item.type === 'trial_lesson' ||
+              (item.note && item.note.toLowerCase().includes('sinov')));
 
             return (
               <div
@@ -549,6 +622,8 @@ export default function RemindersPage() {
                 className={`rounded-2xl border p-3.5 sm:p-4.5 transition-all duration-200 space-y-3 ${
                   isCompleted
                     ? 'bg-gray-50/70 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 opacity-75'
+                    : isWebsiteLead
+                    ? 'bg-gradient-to-r from-sky-50/80 via-white to-blue-50/50 dark:from-sky-950/30 dark:via-gray-900 dark:to-blue-950/20 border-sky-300 dark:border-sky-700/80 shadow-sm ring-1 ring-sky-400/25'
                     : isDueToday
                     ? 'bg-white dark:bg-gray-900 border-rose-300 dark:border-rose-900/70 shadow-sm ring-1 ring-rose-400/20'
                     : isTrial
@@ -563,6 +638,8 @@ export default function RemindersPage() {
                       className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
                         isCompleted
                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                          : isWebsiteLead
+                          ? 'bg-sky-100 text-sky-800 dark:bg-sky-950/90 dark:text-sky-300 ring-1 ring-sky-300/40'
                           : isTrial
                           ? 'bg-purple-100 text-purple-800 dark:bg-purple-950/90 dark:text-purple-300'
                           : 'bg-amber-100 text-amber-800 dark:bg-amber-950/90 dark:text-amber-300'
@@ -570,6 +647,8 @@ export default function RemindersPage() {
                     >
                       {isCompleted ? (
                         <Check className="w-5 h-5" />
+                      ) : isWebsiteLead ? (
+                        <Globe className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                       ) : isTrial ? (
                         <GraduationCap className="w-5 h-5" />
                       ) : (
@@ -584,7 +663,12 @@ export default function RemindersPage() {
                         </h3>
 
                         {/* Type Badge */}
-                        {isTrial ? (
+                        {isWebsiteLead ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-sky-500/20 to-blue-500/20 text-sky-800 dark:text-sky-200 border border-sky-300/80 dark:border-sky-700 shadow-2xs">
+                            <Globe className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                            <span>🌐 Veb-sayt arizasi</span>
+                          </span>
+                        ) : isTrial ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60">
                             <GraduationCap className="w-3 h-3" />
                             <span>Sinov darsi</span>
@@ -606,6 +690,17 @@ export default function RemindersPage() {
                             Bugun!
                           </span>
                         ) : null}
+
+                        {/* Quick phone call button for website lead */}
+                        {isWebsiteLead && item.student_phone && (
+                          <a
+                            href={`tel:${item.student_phone}`}
+                            className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition-colors cursor-pointer"
+                          >
+                            <Phone className="w-3 h-3" />
+                            <span>Bog‘lanish: {formatUzPhone(item.student_phone)}</span>
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -650,7 +745,18 @@ export default function RemindersPage() {
 
                 {/* Note / Purpose */}
                 {item.note && (
-                  <div className="text-xs text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800/50 p-2.5 rounded-xl border-l-3 border-purple-500 dark:border-purple-400 font-normal leading-relaxed">
+                  <div
+                    className={`text-xs p-2.5 rounded-xl border-l-3 leading-relaxed ${
+                      isWebsiteLead
+                        ? 'bg-sky-50/90 dark:bg-sky-950/40 text-sky-950 dark:text-sky-200 border-sky-500 font-medium'
+                        : 'bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-200 border-purple-500 dark:border-purple-400 font-normal'
+                    }`}
+                  >
+                    {isWebsiteLead && (
+                      <span className="font-bold text-sky-800 dark:text-sky-300 block mb-1">
+                        💬 Veb-saytdan ariza xabari / istagi:
+                      </span>
+                    )}
                     {item.note}
                   </div>
                 )}
@@ -720,7 +826,7 @@ export default function RemindersPage() {
                         className="h-8 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer hover:shadow-sm"
                       >
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                        <span>{isTrial ? 'Dars o‘tildi' : 'Bog‘lanildi'}</span>
+                        <span>{isWebsiteLead ? 'Bog‘lanildi & Qabul qilish' : isTrial ? 'Dars o‘tildi' : 'Bog‘lanildi'}</span>
                       </button>
 
                       <button

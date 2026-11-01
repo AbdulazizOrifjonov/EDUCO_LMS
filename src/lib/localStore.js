@@ -1551,6 +1551,7 @@ class LocalStore {
       due_time: reminderData.due_time || reminderData.dueTime || '10:00',
       note: reminderData.note || 'Dars boshlanish sanasi va guruh haqida xabar berish',
       status: reminderData.status || 'pending',
+      source: reminderData.source || (reminderData.type === 'website_lead' ? 'website' : 'system'),
       created_at: reminderData.created_at || new Date().toISOString(),
       completed_at: reminderData.completed_at || null,
       completed_note: reminderData.completed_note || null,

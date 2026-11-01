@@ -61,6 +61,11 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
         const yOffset = -80;
         const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: y, behavior: 'smooth' });
+        if (hash === '#contact') {
+          setTimeout(() => {
+            document.getElementById('registration-name-input')?.focus();
+          }, 600);
+        }
       }
     }
   };
@@ -125,14 +130,24 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
 
                 {/* Action CTA Buttons */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2 sm:pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-                  {/* Primary CTA */}
+                  {/* Sinov darsiga yozilish CTA (Direct scroll to registration form) */}
+                  <a
+                    href="#contact"
+                    onClick={(e) => scrollToTarget(e, '#contact')}
+                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-600 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-emerald-950/40 hover:scale-103 active:scale-97 transition-all cursor-pointer ring-2 ring-emerald-300/40"
+                  >
+                    <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+                    <span>Sinov darsiga yozilish</span>
+                  </a>
+
+                  {/* Primary CTA: Courses */}
                   <a
                     href={slide.cta_link || '#courses'}
                     onClick={(e) => scrollToTarget(e, slide.cta_link || '#courses')}
-                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 dark:from-emerald-500 dark:via-emerald-600 dark:to-teal-700 dark:hover:from-emerald-600 dark:hover:to-teal-800 text-white font-extrabold text-sm sm:text-base shadow-xl shadow-blue-950/40 dark:shadow-emerald-950/40 hover:scale-103 active:scale-97 transition-all cursor-pointer ring-2 ring-blue-400/40 dark:ring-emerald-400/40"
+                    className="inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base backdrop-blur-md border border-white/25 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98"
                   >
-                    <span>{slide.cta_text || 'Kurslarni ko‘rish'}</span>
-                    <ArrowRight className="w-5 h-5 rtl:rotate-180" />
+                    <span>{slide.cta_text || 'Kurslar katalogi'}</span>
+                    <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                   </a>
 
                   {/* Secondary CTA */}

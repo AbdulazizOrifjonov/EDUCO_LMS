@@ -489,6 +489,29 @@ export default function Sidebar({
             </button>
           </div>
 
+          {/* Go to Website Button */}
+          <button
+            type="button"
+            onClick={() => {
+              navigate('/');
+              onCloseMobile();
+            }}
+            className={`w-full flex items-center rounded-xl p-2.5 text-xs font-bold text-white transition-all group shadow-xs cursor-pointer border ${
+              collapsed && !mobileOpen
+                ? 'justify-center bg-white/10 hover:bg-white/20 border-white/15'
+                : 'gap-2.5 bg-gradient-to-r from-blue-500/25 to-indigo-500/25 hover:from-blue-500/40 hover:to-indigo-500/40 dark:from-emerald-500/25 dark:to-teal-500/25 dark:hover:from-emerald-500/40 dark:hover:to-teal-500/40 border-white/20'
+            }`}
+            title="Veb-saytga o‘tish (Bosh sahifa)"
+          >
+            <Globe className="h-4 w-4 shrink-0 text-blue-300 dark:text-emerald-300 group-hover:scale-110 transition-transform" />
+            {(!collapsed || mobileOpen) && (
+              <span className="flex-1 text-left truncate flex items-center justify-between">
+                <span>Veb-saytga o‘tish</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/20 text-white font-semibold">Sayt ↗</span>
+              </span>
+            )}
+          </button>
+
           {/* User Profile Info Card */}
           <div
             className={`flex items-center rounded-xl bg-white/10 p-2.5 backdrop-blur-sm transition-all dark:bg-gray-800/50

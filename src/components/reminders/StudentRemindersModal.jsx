@@ -14,6 +14,7 @@ import {
   Plus,
   RefreshCw,
   ExternalLink,
+  Globe,
 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
@@ -227,7 +228,12 @@ export default function StudentRemindersModal({
                             Qo‘ng‘iroq vaqti keldi!
                           </span>
                         )}
-                        {item.group_name && item.group_name !== 'Guruhsiz' ? (
+                        {(item.type === 'website_lead' || item.source === 'website') ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-800/60">
+                            <Globe className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                            <span>🌐 Saytdan: {item.course_name || 'Sinov darsi'}</span>
+                          </span>
+                        ) : item.group_name && item.group_name !== 'Guruhsiz' ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/60">
                             <GraduationCap className="w-3 h-3" />
                             <span>{item.group_name}</span>
