@@ -635,8 +635,33 @@ export default function PasswordsPage() {
       {/* Main Card with Filter Tabs + Search Toolbar + Clean Table */}
       <Card>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
-          {/* Role Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Mobile Role Filter Select Option (< sm) */}
+          <div className="block sm:hidden w-full">
+            <div className="relative">
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="w-full h-11 pl-10 pr-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-gray-800 text-sm font-bold text-gray-900 dark:text-gray-100 appearance-none shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              >
+                {filterTabs.map((tab) => (
+                  <option key={tab.id} value={tab.id} className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 py-2">
+                    {tab.label} ({tab.count} ta)
+                  </option>
+                ))}
+              </select>
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-blue-600 dark:text-emerald-400">
+                {(() => {
+                  const currentTab = filterTabs.find((t) => t.id === roleFilter) || filterTabs[0];
+                  const Icon = currentTab.icon;
+                  return <Icon className="w-4 h-4" />;
+                })()}
+              </div>
+              <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Desktop / Tablet Horizontal Role Pills (>= sm) */}
+          <div className="hidden sm:flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
             {filterTabs.map((tab) => {
               const Icon = tab.icon;
               const active = roleFilter === tab.id;
@@ -647,7 +672,7 @@ export default function PasswordsPage() {
                   key={tab.id}
                   type="button"
                   onClick={() => setRoleFilter(tab.id)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
                     active ? cfg.active : cfg.inactive
                   }`}
                 >
@@ -799,29 +824,63 @@ export default function PasswordsPage() {
 
                     {/* Middle Row 2: Parents Phone (if Student) */}
                     {user.role === ROLES.STUDENT && (user.father_phone || user.mother_phone) && (
-                      <div className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/40">
-                        <span className="text-amber-800 dark:text-amber-300 font-medium text-[11px] flex items-center gap-1">
-                          <Users className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                          <span>Ota-onasi:</span>
-                        </span>
-                        <div className="flex items-center gap-2">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-amber-900 dark:text-amber-300">
+                          <span className="flex items-center gap-1.5">
+                            <Users className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>Ota-onasi telefoni:</span>
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
                           {user.father_phone && (
-                            <a
-                              href={`tel:${user.father_phone}`}
-                              className="font-mono text-[11px] font-bold text-indigo-700 dark:text-indigo-300 hover:underline"
-                              title="Otasi"
-                            >
-                              Otasi: {formatUzPhone(user.father_phone)}
-                            </a>
+                            <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-800/80 border border-amber-200/50 dark:border-amber-800/30">
+                              <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Otasi:</span>
+                              <div className="flex items-center gap-1">
+                                <a
+                                  href={`tel:${user.father_phone}`}
+                                  className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                                >
+                                  {formatUzPhone(user.father_phone)}
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopy(user.father_phone, `father-${user.id}`)}
+                                  className="p-0.5 text-gray-400 hover:text-emerald-600 cursor-pointer"
+                                  title="Nusxa olish"
+                                >
+                                  {copiedId === `father-${user.id}` ? (
+                                    <Check className="w-3 h-3 text-emerald-500" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
                           )}
                           {user.mother_phone && (
-                            <a
-                              href={`tel:${user.mother_phone}`}
-                              className="font-mono text-[11px] font-bold text-rose-700 dark:text-rose-300 hover:underline"
-                              title="Onasi"
-                            >
-                              Onasi: {formatUzPhone(user.mother_phone)}
-                            </a>
+                            <div className="flex items-center justify-between px-2.5 py-1 rounded-lg bg-white/80 dark:bg-gray-800/80 border border-amber-200/50 dark:border-amber-800/30">
+                              <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Onasi:</span>
+                              <div className="flex items-center gap-1">
+                                <a
+                                  href={`tel:${user.mother_phone}`}
+                                  className="font-mono text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline"
+                                >
+                                  {formatUzPhone(user.mother_phone)}
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopy(user.mother_phone, `mother-${user.id}`)}
+                                  className="p-0.5 text-gray-400 hover:text-emerald-600 cursor-pointer"
+                                  title="Nusxa olish"
+                                >
+                                  {copiedId === `mother-${user.id}` ? (
+                                    <Check className="w-3 h-3 text-emerald-500" />
+                                  ) : (
+                                    <Copy className="w-3 h-3" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>

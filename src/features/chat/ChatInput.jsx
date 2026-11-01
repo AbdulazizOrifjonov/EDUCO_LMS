@@ -18,6 +18,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/components/ui/Toast';
 import EmojiPicker from './EmojiPicker';
 import AudioRecorder from './AudioRecorder';
 import VideoRecorder from './VideoRecorder';
@@ -127,6 +128,55 @@ export default function ChatInput({
 
   const removeAttachment = (index) => {
     setSelectedAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Telegram-style Paste support for images (Ctrl + V on PC or Paste on mobile)
+  const handlePaste = (e) => {
+    const clipboardData = e.clipboardData || window.clipboardData;
+    if (!clipboardData) return;
+
+    const items = clipboardData.items;
+    const pastedFiles = [];
+
+    if (items && items.length > 0) {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind === 'file') {
+          const file = item.getAsFile();
+          if (file) {
+            const timestamp = Date.now();
+            const isImg = file.type.startsWith('image/');
+            const ext = isImg ? (file.type.split('/')[1] || 'png') : 'dat';
+            const namedFile = new File([file], isImg ? `rasm_${timestamp}.${ext}` : file.name || `file_${timestamp}`, {
+              type: file.type || 'image/png',
+              lastModified: timestamp,
+            });
+            pastedFiles.push(namedFile);
+          }
+        }
+      }
+    }
+
+    // Fallback: check clipboardData.files (e.g. copied files in OS file manager)
+    if (pastedFiles.length === 0 && clipboardData.files && clipboardData.files.length > 0) {
+      for (let i = 0; i < clipboardData.files.length; i++) {
+        const file = clipboardData.files[i];
+        if (file.type && file.type.startsWith('image/')) {
+          pastedFiles.push(file);
+        }
+      }
+    }
+
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      setSelectedAttachments((prev) => [...prev, ...pastedFiles]);
+      toast.success(
+        pastedFiles.length === 1
+          ? '📸 Rasm muvaffaqiyatli joylandi! (Ctrl+V / Vstavit)'
+          : `📸 ${pastedFiles.length} ta rasm joylandi!`,
+        { duration: 2500 }
+      );
+    }
   };
 
   const handleSend = async () => {
@@ -262,7 +312,10 @@ export default function ChatInput({
   };
 
   return (
-    <div className="relative shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-2.5 sm:p-3 md:p-4 pb-[max(0.625rem,env(safe-area-inset-bottom))] mb-0">
+    <div
+      onPaste={handlePaste}
+      className="relative shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-2.5 sm:p-3 md:p-4 pb-[max(0.625rem,env(safe-area-inset-bottom))] mb-0"
+    >
       {/* Upload Progress Bar */}
       {uploading && uploadProgress !== null && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden">
@@ -329,25 +382,52 @@ export default function ChatInput({
         </div>
       )}
 
-      {/* Selected Attachments Preview */}
+      {/* Selected Attachments Preview with Rich Image Thumbnails */}
       {selectedAttachments.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2.5">
-          {selectedAttachments.map((file, idx) => (
-            <div
-              key={idx}
-              className="flex items-center space-x-1.5 rtl:space-x-reverse bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2.5 py-1 rounded-xl text-xs text-gray-700 dark:text-gray-300"
-            >
-              <File className="w-3.5 h-3.5 text-[#123D78] flex-shrink-0" />
-              <span className="max-w-[120px] truncate">{file.name}</span>
-              <button
-                type="button"
-                onClick={() => removeAttachment(idx)}
-                className="text-gray-400 hover:text-red-500 ml-1 rtl:ml-0 rtl:mr-1"
+        <div className="flex flex-wrap items-center gap-2 mb-2.5 p-2 bg-gray-50/90 dark:bg-gray-800/80 rounded-2xl border border-gray-200 dark:border-gray-700 animate-in fade-in duration-150">
+          {selectedAttachments.map((file, idx) => {
+            const isImage = file.type?.startsWith('image/');
+            const previewUrl = isImage ? URL.createObjectURL(file) : null;
+
+            return (
+              <div
+                key={idx}
+                className="relative group flex items-center gap-2 p-1.5 pr-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs shadow-xs"
               >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
+                {isImage && previewUrl ? (
+                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 border border-gray-200 dark:border-gray-700">
+                    <img
+                      src={previewUrl}
+                      alt={file.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <File className="w-4 h-4" />
+                  </div>
+                )}
+
+                <div className="min-w-0 max-w-[140px] sm:max-w-[200px]">
+                  <p className="font-bold text-gray-900 dark:text-gray-100 truncate text-[11px]">
+                    {file.name}
+                  </p>
+                  <p className="text-[10px] text-gray-400 font-mono">
+                    {file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(idx)}
+                  className="w-5 h-5 rounded-full bg-gray-100 hover:bg-red-100 dark:bg-gray-800 dark:hover:bg-red-950/60 text-gray-400 hover:text-red-500 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-1"
+                  title="O‘chirish"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -425,6 +505,7 @@ export default function ChatInput({
                 value={inputText}
                 onChange={handleTextChange}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 placeholder={
                   isAnnouncementChat
                     ? "Barcha xodimlar va guruhlarga e'lon yozing..."
