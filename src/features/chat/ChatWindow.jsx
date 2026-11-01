@@ -171,6 +171,7 @@ export default function ChatWindow({
   const canClearHistory = userRole === 'owner' || userRole === 'admin';
   const [showClearHistoryModal, setShowClearHistoryModal] = useState(false);
   const [isClearingHistory, setIsClearingHistory] = useState(false);
+  const [messageToDeleteId, setMessageToDeleteId] = useState(null);
 
   const handleClearHistory = async () => {
     if (!activeGroup?.id) return;
@@ -534,20 +535,21 @@ export default function ChatWindow({
     }
   };
 
-  const handleDeleteMessage = async (messageId) => {
-    const ok = await confirmDelete({
-      title: 'Chat xabarini o‘chirish',
-      description: 'Ushbu xabar barcha foydalanuvchilar chatidan butunlay o‘chiriladi.',
-      confirmButtonText: 'Ha, xabar o‘chirilsin',
-    });
-    if (!ok) return;
+  const handleDeleteMessage = (messageId) => {
+    setMessageToDeleteId(messageId);
+  };
+
+  const confirmDeleteChatMsg = async () => {
+    if (!messageToDeleteId) return;
+    const id = messageToDeleteId;
+    setMessageToDeleteId(null);
     try {
-      await deleteMessage(messageId);
-      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      await deleteMessage(id);
+      setMessages((prev) => prev.filter((m) => m.id !== id));
       toast.success('Xabar o‘chirildi');
     } catch (err) {
       console.error('Failed to delete message:', err);
-      toast.error('Xabarni o‘chirishda xatolik');
+      toast.error('Xabarni o‘chirishda xatolik yuz berdi');
     }
   };
 
@@ -1310,6 +1312,44 @@ export default function ChatWindow({
                 ) : (
                   <span>Ha, tozalansin</span>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Telegram-style 1-Click Message Delete Confirmation Modal */}
+      {messageToDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-2xl border border-gray-100 dark:border-gray-700 space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+                  Xabarni o‘chirish
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Ushbu xabar barcha foydalanuvchilar chatidan butunlay o‘chiriladi.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-gray-100 dark:border-gray-700">
+              <button
+                type="button"
+                onClick={() => setMessageToDeleteId(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteChatMsg}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 transition-all shadow-sm active:scale-95 cursor-pointer"
+              >
+                O‘chirish
               </button>
             </div>
           </div>

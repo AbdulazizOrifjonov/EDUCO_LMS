@@ -453,6 +453,26 @@ export default function DashboardLayout({
                   <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
 
+                {/* 1-Step Back Navigation Button for Mobile / Compact Screens */}
+                {location.pathname !== `/${userRole}/dashboard` && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.history.length > 1) {
+                        navigate(-1);
+                      } else {
+                        navigate(`/${userRole}/dashboard`);
+                      }
+                    }}
+                    className="shrink-0 rounded-xl p-1.5 sm:p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center gap-1 font-bold text-xs lg:hidden active:scale-95 cursor-pointer bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 shadow-xs"
+                    aria-label="1 qadam ortga qaytish"
+                    title="1 qadam ortga qaytish"
+                  >
+                    <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700 dark:text-gray-200" />
+                    <span className="text-[11px] font-bold hidden xs:inline">Ortga</span>
+                  </button>
+                )}
+
                 {/* Official EDUCO Logo - shown on mobile, and on desktop ONLY when sidebar is collapsed */}
                 <Link
                   to={`/${userRole}/dashboard`}

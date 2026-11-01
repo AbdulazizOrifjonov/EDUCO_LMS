@@ -61,11 +61,25 @@ export default function MessageBubble({
     setShowReactionPicker((prev) => !prev);
   };
 
-  const openContextMenu = () => {
+  const [swipeX, setSwipeX] = useState(0);
+  const isSwipingRef = useRef(false);
+  const hasVibratedSwipe = useRef(false);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
+  const lastTapTimeRef = useRef(0);
+  const singleTapTimerRef = useRef(null);
+  const longPressTimerRef = useRef(null);
+  const isLongPressTriggered = useRef(false);
+  const isTouchDevice = useRef(false);
+
+  const openContextMenu = (e) => {
+    e?.stopPropagation?.();
     if (bubbleRef.current) {
       const rect = bubbleRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
-      if (spaceBelow < 340 && rect.top > 250) {
+      // If space below is less than 360px or more space above, open upwards
+      if (spaceBelow < 360 || rect.top > spaceBelow) {
         setMenuPlacement('top');
       } else {
         setMenuPlacement('bottom');
@@ -74,36 +88,67 @@ export default function MessageBubble({
     setShowContextMenu(true);
   };
 
-  const touchStartPos = useRef({ x: 0, y: 0, time: 0 });
-  const longPressTimerRef = useRef(null);
-  const isLongPressTriggered = useRef(false);
-
   const handleTouchStart = (e) => {
     if (e.target.closest('button, a, input, audio, video')) return;
     const touch = e.touches[0];
-    touchStartPos.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    touchStartTime.current = Date.now();
+    isSwipingRef.current = false;
     isLongPressTriggered.current = false;
+    hasVibratedSwipe.current = false;
+    isTouchDevice.current = true;
 
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
     longPressTimerRef.current = setTimeout(() => {
-      isLongPressTriggered.current = true;
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        try {
-          navigator.vibrate(40);
-        } catch (_) {}
+      if (!isSwipingRef.current) {
+        isLongPressTriggered.current = true;
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          try {
+            navigator.vibrate(40);
+          } catch (_) {}
+        }
+        openContextMenu();
       }
-      openContextMenu();
     }, 380);
   };
 
   const handleTouchMove = (e) => {
-    if (!longPressTimerRef.current) return;
     const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.current.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.current.y);
-    if (dx > 10 || dy > 10) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
+    const dx = touch.clientX - touchStartX.current;
+    const dy = touch.clientY - touchStartY.current;
+
+    // Vertical scrolling: cancel swipe & long press
+    if (Math.abs(dy) > 15 && Math.abs(dx) < 15) {
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+      return;
+    }
+
+    // Telegram Swipe to Reply: Swiping left (dx < -10)
+    if (dx < -10) {
+      isSwipingRef.current = true;
+      if (longPressTimerRef.current) {
+        clearTimeout(longPressTimerRef.current);
+        longPressTimerRef.current = null;
+      }
+      // Elastic resistance clamp: max 75px
+      const distance = Math.min(75, Math.abs(dx));
+      setSwipeX(-distance);
+
+      // Haptic tick when passing reply threshold (45px)
+      if (distance >= 45 && !hasVibratedSwipe.current) {
+        hasVibratedSwipe.current = true;
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          try {
+            navigator.vibrate(25);
+          } catch (_) {}
+        }
+      } else if (distance < 45) {
+        hasVibratedSwipe.current = false;
+      }
     }
   };
 
@@ -112,24 +157,62 @@ export default function MessageBubble({
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
-    if (isLongPressTriggered.current) {
-      e.preventDefault();
+
+    // Handle completed Swipe to Reply
+    if (isSwipingRef.current) {
+      if (Math.abs(swipeX) >= 45) {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          try {
+            navigator.vibrate(35);
+          } catch (_) {}
+        }
+        onReply?.(message);
+      }
+      setSwipeX(0);
+      hasVibratedSwipe.current = false;
+      setTimeout(() => {
+        isSwipingRef.current = false;
+      }, 80);
       return;
     }
-    const elapsed = Date.now() - touchStartPos.current.time;
-    if (elapsed < 350) {
-      handleBubbleClick(e);
+
+    if (isLongPressTriggered.current) {
+      e?.preventDefault?.();
+      return;
+    }
+
+    // Handle Tap on Touch Screen
+    const elapsed = Date.now() - touchStartTime.current;
+    if (elapsed < 320) {
+      const now = Date.now();
+      if (now - lastTapTimeRef.current < 280) {
+        // True double tap: toggle like 👍
+        clearTimeout(singleTapTimerRef.current);
+        singleTapTimerRef.current = null;
+        lastTapTimeRef.current = 0;
+        onToggleReaction?.(message.id, '👍');
+      } else {
+        lastTapTimeRef.current = now;
+        singleTapTimerRef.current = setTimeout(() => {
+          singleTapTimerRef.current = null;
+          openContextMenu();
+        }, 220);
+      }
     }
   };
 
   const handleBubbleClick = (e) => {
-    // If clicked on an interactive control (audio player, link, button), don't open context menu
+    // If it was already handled by touch, skip synthetic click
+    if (isTouchDevice.current) {
+      isTouchDevice.current = false;
+      return;
+    }
+
     if (e?.target?.closest('button, a, input, audio, video')) {
       return;
     }
 
     if (clickTimerRef.current) {
-      // Double click/tap detected: quick Telegram like 👍
       clearTimeout(clickTimerRef.current);
       clickTimerRef.current = null;
       setShowContextMenu(false);
@@ -139,7 +222,6 @@ export default function MessageBubble({
 
     clickTimerRef.current = setTimeout(() => {
       clickTimerRef.current = null;
-      // Single tap/click detected: Open Telegram Menu!
       openContextMenu();
     }, 200);
   };
@@ -229,27 +311,19 @@ export default function MessageBubble({
     .replace(/<!--REPLY:[\s\S]*?-->/g, '')
     .trim();
 
-  // Close context menu on outside click or touch
+  // Close context menu on ESC key
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (
-        contextMenuRef.current &&
-        !contextMenuRef.current.contains(e.target) &&
-        !bubbleRef.current?.contains(e.target)
-      ) {
+    if (!showContextMenu && !showReactionPicker) return;
+
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') {
         setShowContextMenu(false);
-      }
-      if (reactionPickerRef.current && !reactionPickerRef.current.contains(e.target)) {
         setShowReactionPicker(false);
       }
     }
-    if (showContextMenu || showReactionPicker) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showContextMenu, showReactionPicker]);
 
@@ -397,8 +471,36 @@ export default function MessageBubble({
         </div>
       )}
 
+      {/* Telegram Swipe-to-Reply Icon on the right */}
+      {swipeX < 0 && (
+        <div
+          className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center transition-all pointer-events-none z-10"
+          style={{
+            opacity: Math.min(1, Math.abs(swipeX) / 35),
+            transform: `translateY(-50%) scale(${Math.min(1.15, 0.6 + Math.abs(swipeX) / 70)})`,
+          }}
+        >
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors ${
+              Math.abs(swipeX) >= 45
+                ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-blue-500/40 ring-2 ring-white/60'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
+            }`}
+          >
+            <Reply className="w-4 h-4 stroke-[2.5]" />
+          </div>
+        </div>
+      )}
+
       {/* Message Bubble Container */}
-      <div ref={bubbleRef} className={`relative max-w-[85%] sm:max-w-[70%] md:max-w-[60%] min-w-0`}>
+      <div
+        ref={bubbleRef}
+        style={{
+          transform: `translateX(${swipeX}px)`,
+          transition: swipeX === 0 ? 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none',
+        }}
+        className={`relative max-w-[85%] sm:max-w-[70%] md:max-w-[60%] min-w-0`}
+      >
         {/* Sender Name & Role Badge in Group Chat for others */}
         {!isOwn && (
           <div className="flex items-center gap-1.5 mb-1 ml-1 rtl:ml-0 rtl:mr-1">
@@ -818,10 +920,14 @@ export default function MessageBubble({
         {/* Telegram-style Action & Reaction Menu on Single Tap / Long Press / Right Click */}
         {showContextMenu && (
           <>
-            {/* Touch Backdrop for mobile / desktop outside dismiss */}
+            {/* Fullscreen Backdrop for mobile & desktop - 1 tap outside closes */}
             <div
-              className="fixed inset-0 z-40 bg-black/20 sm:bg-transparent"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-100"
               onClick={(e) => {
+                e.stopPropagation();
+                setShowContextMenu(false);
+              }}
+              onTouchEnd={(e) => {
                 e.stopPropagation();
                 setShowContextMenu(false);
               }}
@@ -830,6 +936,8 @@ export default function MessageBubble({
             {/* Telegram Popup Menu with Emojis & Actions */}
             <div
               ref={contextMenuRef}
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
               className={`absolute z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 w-64 sm:w-72 max-w-[calc(100vw-24px)] text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
                 menuPlacement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
               } ${isOwn ? 'right-0' : 'left-0'}`}
