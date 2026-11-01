@@ -18,6 +18,7 @@ export default function TimePicker({
   name,
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const containerRef = useRef(null);
   const hoursListRef = useRef(null);
   const minutesListRef = useRef(null);
@@ -47,6 +48,19 @@ export default function TimePicker({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Determine if popover should open upwards when close to bottom of screen
+  useEffect(() => {
+    if (isOpen && containerRef.current && typeof window !== 'undefined') {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 380 && rect.top > 380) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    }
   }, [isOpen]);
 
   // Scroll selected hour and minute into view when popover opens
@@ -116,7 +130,7 @@ export default function TimePicker({
   const minutes = Array.from({ length: 60 }, (_, i) => i);
 
   return (
-    <div ref={containerRef} className={`relative select-none ${className}`}>
+    <div ref={containerRef} className={`relative select-none w-full ${className}`}>
       {label && (
         <label
           htmlFor={id}
@@ -171,17 +185,22 @@ export default function TimePicker({
       )}
       {error && <p className="mt-1 text-xs text-red-500 font-medium">{error}</p>}
 
-      {/* Popover Dropdown */}
+      {/* Popover Dropdown - EXACT width matching input container (100% w-full left-0 right-0) */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 z-50 w-72 sm:w-80 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute z-50 left-0 right-0 w-full rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 ${
+            openUpward ? 'bottom-full mb-2' : 'top-full mt-1.5'
+          }`}
+          style={{ minWidth: '260px' }}
+        >
           {/* Header Display */}
-          <div className="p-3.5 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-800/90 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/80">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
-                24 soatlik Toshkent vaqti
+          <div className="p-3 sm:p-3.5 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-800/90 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/80">
+            <div className="flex items-center justify-between gap-1 mb-2">
+              <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+                <Clock className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400 shrink-0" />
+                <span className="truncate">24 soatlik Toshkent vaqti</span>
               </span>
-              <div className="flex items-center gap-1 text-[11px] font-bold">
+              <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold shrink-0">
                 <PeriodIcon className={`w-3.5 h-3.5 ${periodInfo.color}`} />
                 <span className={periodInfo.color}>{periodInfo.label}</span>
               </div>
@@ -189,17 +208,17 @@ export default function TimePicker({
 
             {/* Large Digital Display */}
             <div className="flex items-center justify-center gap-2 py-1">
-              <div className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
-                <span className="text-2xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
+              <div className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
+                <span className="text-xl sm:text-2xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
                   {String(currentHour).padStart(2, '0')}
                 </span>
                 <span className="block text-[9px] font-bold uppercase text-gray-400 tracking-wider">
                   Soat
                 </span>
               </div>
-              <span className="text-2xl font-black text-gray-400 font-mono -mt-3">:</span>
-              <div className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
-                <span className="text-2xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
+              <span className="text-xl sm:text-2xl font-black text-gray-400 font-mono -mt-3">:</span>
+              <div className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-900 border border-blue-200 dark:border-gray-700 shadow-xs text-center">
+                <span className="text-xl sm:text-2xl font-black font-mono text-blue-600 dark:text-emerald-400 tracking-wider">
                   {String(currentMinute).padStart(2, '0')}
                 </span>
                 <span className="block text-[9px] font-bold uppercase text-gray-400 tracking-wider">
@@ -265,14 +284,14 @@ export default function TimePicker({
                       type="button"
                       data-selected={isSelected}
                       onClick={() => setHour(h)}
-                      className={`w-full h-8 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-3 transition-colors cursor-pointer ${
+                      className={`w-full h-8 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-2.5 transition-colors cursor-pointer ${
                         isSelected
                           ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-xs font-black'
                           : 'hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       <span>{hourLabel}:00</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3] shrink-0" />}
                     </button>
                   );
                 })}
@@ -298,7 +317,7 @@ export default function TimePicker({
                       type="button"
                       data-selected={isSelected}
                       onClick={() => setMinute(m)}
-                      className={`w-full h-8 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-3 transition-colors cursor-pointer ${
+                      className={`w-full h-8 rounded-lg text-xs font-mono font-bold flex items-center justify-between px-2.5 transition-colors cursor-pointer ${
                         isSelected
                           ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-xs font-black'
                           : isFiveMinStep
@@ -307,7 +326,7 @@ export default function TimePicker({
                       }`}
                     >
                       <span>:{minuteLabel}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3] shrink-0" />}
                     </button>
                   );
                 })}
@@ -317,13 +336,13 @@ export default function TimePicker({
 
           {/* Footer with Confirm Button */}
           <div className="p-2.5 bg-gray-50 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
               Tanlandi: <strong className="font-mono text-gray-900 dark:text-gray-100">{formattedTime}</strong>
             </span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer shrink-0"
             >
               Tayyor
             </button>

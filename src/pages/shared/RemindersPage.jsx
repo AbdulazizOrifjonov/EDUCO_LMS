@@ -907,6 +907,7 @@ export default function RemindersPage() {
                   label="Vaqti (Toshkent vaqti)"
                   value={formData.due_time || '10:00'}
                   onChange={(val) => setFormData((p) => ({ ...p, due_time: val }))}
+                  className="w-full"
                 />
               </div>
             </div>
