@@ -51,6 +51,8 @@ export default function PasswordsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchQuery || '');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const roleDropdownRef = useRef(null);
 
   // Synchronize with Navbar global search bar
   useEffect(() => {
@@ -58,6 +60,23 @@ export default function PasswordsPage() {
       setSearch(searchQuery);
     }
   }, [searchQuery]);
+
+  // Outside click listener for custom role dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (roleDropdownRef.current && !roleDropdownRef.current.contains(event.target)) {
+        setIsRoleDropdownOpen(false);
+      }
+    }
+    if (isRoleDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isRoleDropdownOpen]);
   const [showAllPasswords, setShowAllPasswords] = useState(true);
   const [visibleRowIds, setVisibleRowIds] = useState({});
   const [copiedId, setCopiedId] = useState(null);
@@ -582,6 +601,35 @@ export default function PasswordsPage() {
     },
   };
 
+  const getRoleMeta = (id) => {
+    switch (id) {
+      case ROLES.STUDENT:
+        return {
+          iconBg: 'bg-emerald-100 dark:bg-emerald-950/70',
+          iconColor: 'text-emerald-600 dark:text-emerald-400',
+          badgeCls: 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-700/60',
+        };
+      case ROLES.TEACHER:
+        return {
+          iconBg: 'bg-amber-100 dark:bg-amber-950/70',
+          iconColor: 'text-amber-600 dark:text-amber-400',
+          badgeCls: 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60',
+        };
+      case ROLES.ADMIN:
+        return {
+          iconBg: 'bg-purple-100 dark:bg-purple-950/70',
+          iconColor: 'text-purple-600 dark:text-purple-400',
+          badgeCls: 'bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-300 border border-purple-300/60 dark:border-purple-700/60',
+        };
+      default:
+        return {
+          iconBg: 'bg-blue-100 dark:bg-blue-950/70',
+          iconColor: 'text-blue-600 dark:text-blue-400',
+          badgeCls: 'bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300 border border-blue-300/60 dark:border-blue-700/60',
+        };
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* Page Header Banner */}
@@ -635,31 +683,88 @@ export default function PasswordsPage() {
       {/* Main Card with Filter Tabs + Search Toolbar + Clean Table */}
       <Card>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
-          {/* Role Filter Select Option (Replaces all buttons on all screens!) */}
-          <div className="relative w-full sm:w-72 select-none">
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-2 text-blue-600 dark:text-emerald-400">
-              {(() => {
-                const currentTab = filterTabs.find((t) => t.id === roleFilter) || filterTabs[0];
-                const Icon = currentTab.icon;
-                return <Icon className="w-4 h-4" />;
-              })()}
-            </div>
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full h-11 pl-10 pr-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-bold text-gray-900 dark:text-gray-100 shadow-xs appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-emerald-500 cursor-pointer transition-all"
-            >
-              {filterTabs.map((tab) => (
-                <option
-                  key={tab.id}
-                  value={tab.id}
-                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2 font-medium"
-                >
-                  {tab.label} ({tab.count} ta)
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          {/* Role Filter Custom Designed Dropdown */}
+          <div ref={roleDropdownRef} className="relative w-full sm:w-80 select-none">
+            {(() => {
+              const currentTab = filterTabs.find((t) => t.id === roleFilter) || filterTabs[0];
+              const CurrentIcon = currentTab.icon;
+              const currentMeta = getRoleMeta(currentTab.id);
+
+              return (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setIsRoleDropdownOpen((prev) => !prev)}
+                    className={`w-full h-11 px-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary hover:bg-gray-50 dark:hover:bg-gray-800/80 shadow-xs flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                      isRoleDropdownOpen ? 'ring-2 ring-blue-500 dark:ring-emerald-500 border-transparent' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${currentMeta.iconBg}`}>
+                        <CurrentIcon className={`w-4 h-4 ${currentMeta.iconColor}`} />
+                      </div>
+                      <span className="truncate text-sm font-bold text-gray-900 dark:text-white">
+                        {currentTab.label}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold shrink-0 ${currentMeta.badgeCls}`}>
+                        {currentTab.count} ta
+                      </span>
+                    </div>
+
+                    <ChevronDown
+                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0 ${
+                        isRoleDropdownOpen ? 'rotate-180 text-blue-600 dark:text-emerald-400' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {/* Custom Designed Dropdown Popover */}
+                  {isRoleDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white dark:bg-surface-dark-secondary rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700/80 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                      {filterTabs.map((tab) => {
+                        const TabIcon = tab.icon;
+                        const isSelected = roleFilter === tab.id;
+                        const meta = getRoleMeta(tab.id);
+
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => {
+                              setRoleFilter(tab.id);
+                              setIsRoleDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-gray-100/90 dark:bg-gray-800 text-gray-950 dark:text-white shadow-2xs'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 text-gray-700 dark:text-gray-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${meta.iconBg}`}>
+                                <TabIcon className={`w-4 h-4 ${meta.iconColor}`} />
+                              </div>
+                              <span className="truncate">{tab.label}</span>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${meta.badgeCls}`}>
+                                {tab.count} ta
+                              </span>
+                              {isSelected ? (
+                                <Check className="w-4 h-4 text-emerald-500 stroke-[2.5]" />
+                              ) : (
+                                <span className="w-4 h-4" />
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Clean Search Input */}

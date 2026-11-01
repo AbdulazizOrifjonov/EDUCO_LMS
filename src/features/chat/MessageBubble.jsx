@@ -226,48 +226,47 @@ export default function MessageBubble({
     }, 200);
   };
 
-  const handleCopy = (e) => {
-    e?.stopPropagation?.();
+  const runMenuAction = (fn) => (e) => {
+    if (e) {
+      e.stopPropagation?.();
+      e.preventDefault?.();
+    }
     setShowContextMenu(false);
+    setShowReactionPicker(false);
+    fn?.();
+  };
+
+  const handleCopy = () => {
     const contentToCopy = displayMessageText || message.chat_attachments?.[0]?.file_name || '';
     if (contentToCopy) {
-      navigator.clipboard?.writeText(contentToCopy);
+      try {
+        navigator.clipboard?.writeText(contentToCopy);
+      } catch (_) {}
       toast.success(t('chat.copied', 'Xabar nusxalandi! 📋'));
     }
   };
 
-  const handlePin = (e) => {
-    e?.stopPropagation?.();
-    setShowContextMenu(false);
+  const handlePin = () => {
     onPin?.(message);
   };
 
-  const handleForward = (e) => {
-    e?.stopPropagation?.();
-    setShowContextMenu(false);
+  const handleForward = () => {
     onForward?.(message);
   };
 
-  const handleEdit = (e) => {
-    e?.stopPropagation?.();
-    setShowContextMenu(false);
+  const handleEdit = () => {
     onEdit?.(message);
   };
 
-  const handleReply = (e) => {
-    e?.stopPropagation?.();
-    setShowContextMenu(false);
+  const handleReply = () => {
     onReply?.(message);
   };
 
-  const handleDelete = (e) => {
-    e?.stopPropagation?.();
-    setShowContextMenu(false);
+  const handleDelete = () => {
     onDelete?.(message.id);
   };
 
   const handleReact = (emoji) => {
-    setShowContextMenu(false);
     onToggleReaction?.(message.id, emoji);
   };
 
@@ -741,6 +740,7 @@ export default function MessageBubble({
                   <button
                     key={r.emoji}
                     type="button"
+                    onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
                       e.stopPropagation();
                       onToggleReaction?.(message.id, r.emoji);
@@ -863,14 +863,14 @@ export default function MessageBubble({
         {/* Hover / Context Actions */}
         <div
           ref={menuRef}
-          className={`hidden sm:flex absolute -top-3.5 opacity-0 group-hover:opacity-100 transition-opacity items-center space-x-1 rtl:space-x-reverse z-20 ${
-            isOwn ? 'right-0' : 'left-0'
+          className={`hidden sm:flex absolute -top-3.5 opacity-0 group-hover:opacity-100 transition-all items-center gap-1 z-20 ${
+            isOwn ? 'right-2' : 'left-2'
           }`}
         >
           <button
             type="button"
             onClick={toggleReactionPicker}
-            className="p-1 rounded-full bg-white dark:bg-gray-700 text-amber-500 hover:text-amber-600 dark:text-amber-400 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer"
+            className="p-1 rounded-full bg-white dark:bg-gray-700 text-amber-500 hover:text-amber-600 dark:text-amber-400 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer shrink-0"
             title="Emoji reaksiya"
           >
             <Smile className="w-3.5 h-3.5" />
@@ -879,7 +879,7 @@ export default function MessageBubble({
           <button
             type="button"
             onClick={() => onViewSeen?.(message)}
-            className="p-1 rounded-full bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/40 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer"
+            className="p-1 rounded-full bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/40 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer shrink-0"
             title="Kimlar ko‘rdi"
           >
             <Eye className="w-3.5 h-3.5" />
@@ -889,7 +889,7 @@ export default function MessageBubble({
             <button
               type="button"
               onClick={() => onEdit?.(message)}
-              className="p-1 rounded-full bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer"
+              className="p-1 rounded-full bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer shrink-0"
               title="Tahrirlash"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -899,7 +899,7 @@ export default function MessageBubble({
           <button
             type="button"
             onClick={() => onReply?.(message)}
-            className="p-1 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-[#123D78] dark:hover:text-white shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer"
+            className="p-1 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-[#123D78] dark:hover:text-white shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer shrink-0"
             title={t('chat.reply', 'Reply')}
           >
             <Reply className="w-3.5 h-3.5" />
@@ -909,7 +909,7 @@ export default function MessageBubble({
             <button
               type="button"
               onClick={() => onDelete?.(message.id)}
-              className="p-1 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-red-600 dark:hover:text-red-400 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer"
+              className="p-1 rounded-full bg-white dark:bg-gray-700 text-gray-500 hover:text-red-600 dark:hover:text-red-400 shadow-sm border border-gray-200 dark:border-gray-600 transition-transform active:scale-95 cursor-pointer shrink-0"
               title={t('chat.delete', 'Delete')}
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -923,11 +923,11 @@ export default function MessageBubble({
             {/* Fullscreen Backdrop for mobile & desktop - 1 tap outside closes */}
             <div
               className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-100"
-              onClick={(e) => {
+              onPointerDown={(e) => {
                 e.stopPropagation();
                 setShowContextMenu(false);
               }}
-              onTouchEnd={(e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 setShowContextMenu(false);
               }}
@@ -937,7 +937,10 @@ export default function MessageBubble({
             <div
               ref={contextMenuRef}
               onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               onTouchStart={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
               className={`absolute z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 w-64 sm:w-72 max-w-[calc(100vw-24px)] text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
                 menuPlacement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
               } ${isOwn ? 'right-0' : 'left-0'}`}
@@ -951,7 +954,8 @@ export default function MessageBubble({
                     <button
                       key={emoji}
                       type="button"
-                      onClick={() => handleReact(emoji)}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={runMenuAction(() => handleReact(emoji))}
                       className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:scale-125 transition-transform active:scale-90 text-base sm:text-lg cursor-pointer shrink-0 select-none ${
                         hasReacted
                           ? 'bg-blue-100 dark:bg-emerald-900/60 ring-2 ring-blue-500 dark:ring-emerald-400'
@@ -970,7 +974,8 @@ export default function MessageBubble({
                 {/* Reply */}
                 <button
                   type="button"
-                  onClick={handleReply}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={runMenuAction(handleReply)}
                   className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
                 >
                   <Reply className="w-4 h-4 text-blue-500 shrink-0" />
@@ -981,7 +986,8 @@ export default function MessageBubble({
                 {isOwn && (
                   <button
                     type="button"
-                    onClick={handleEdit}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={runMenuAction(handleEdit)}
                     className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
                   >
                     <Pencil className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -992,7 +998,8 @@ export default function MessageBubble({
                 {/* Pin */}
                 <button
                   type="button"
-                  onClick={handlePin}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={runMenuAction(handlePin)}
                   className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
                 >
                   <Pin className="w-4 h-4 text-amber-500 rotate-45 shrink-0" />
@@ -1002,7 +1009,8 @@ export default function MessageBubble({
                 {/* Copy */}
                 <button
                   type="button"
-                  onClick={handleCopy}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={runMenuAction(handleCopy)}
                   className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
                 >
                   <Copy className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" />
@@ -1012,7 +1020,8 @@ export default function MessageBubble({
                 {/* Forward */}
                 <button
                   type="button"
-                  onClick={handleForward}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={runMenuAction(handleForward)}
                   className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
                 >
                   <Forward className="w-4 h-4 text-cyan-500 shrink-0" />
@@ -1022,11 +1031,8 @@ export default function MessageBubble({
                 {/* Kimlar ko'rdi (Viewers) */}
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowContextMenu(false);
-                    onViewSeen?.(message);
-                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={runMenuAction(() => onViewSeen?.(message))}
                   className="w-full flex items-center justify-between px-3.5 py-2 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-left font-semibold cursor-pointer transition-colors"
                 >
                   <div className="flex items-center space-x-2.5 rtl:space-x-reverse">
@@ -1042,7 +1048,8 @@ export default function MessageBubble({
                 {canDelete && (
                   <button
                     type="button"
-                    onClick={handleDelete}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={runMenuAction(handleDelete)}
                     className="w-full flex items-center space-x-2.5 rtl:space-x-reverse px-3.5 py-2 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-left font-semibold cursor-pointer transition-colors border-t border-gray-100 dark:border-gray-700/60 mt-1"
                   >
                     <Trash2 className="w-4 h-4 text-red-500 shrink-0" />

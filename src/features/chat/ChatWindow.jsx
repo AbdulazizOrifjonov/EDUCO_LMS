@@ -355,10 +355,12 @@ export default function ChatWindow({
     };
 
     window.addEventListener('educo-data-sync', handleSyncEvent);
+    window.addEventListener('educo-chat-update', handleSyncEvent);
 
     return () => {
       clearInterval(chatPollTimer);
       window.removeEventListener('educo-data-sync', handleSyncEvent);
+      window.removeEventListener('educo-chat-update', handleSyncEvent);
       if (channel) {
         channel.unsubscribe();
       }
@@ -544,8 +546,8 @@ export default function ChatWindow({
     const id = messageToDeleteId;
     setMessageToDeleteId(null);
     try {
+      setMessages((prev) => prev.filter((m) => String(m.id) !== String(id)));
       await deleteMessage(id);
-      setMessages((prev) => prev.filter((m) => m.id !== id));
       toast.success('Xabar o‘chirildi');
     } catch (err) {
       console.error('Failed to delete message:', err);
@@ -559,7 +561,7 @@ export default function ChatWindow({
       const updated = localStore.toggleMessageReaction(messageId, emoji, currentUser.id);
       if (updated) {
         setMessages((prev) =>
-          prev.map((m) => (m.id === messageId ? { ...m, reactions: updated.reactions } : m))
+          prev.map((m) => (String(m.id) === String(messageId) ? { ...m, reactions: updated.reactions } : m))
         );
       }
     } catch (err) {
@@ -751,16 +753,6 @@ export default function ChatWindow({
 
         {/* Group Info Badge & Action Controls */}
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          {canClearHistory && !activeGroup.isAnnouncementChat && (
-            <button
-              type="button"
-              onClick={() => setShowClearHistoryModal(true)}
-              className="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 border border-gray-200 dark:border-gray-800 transition-colors cursor-pointer shadow-2xs"
-              title="Chat tarixini tozalash"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          )}
           {activeGroup.isAnnouncementChat ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-700/60 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -972,11 +964,11 @@ export default function ChatWindow({
                   message={msg}
                   currentUserId={currentUser?.id}
                   canDelete={
+                    userRole === 'owner' ||
+                    userRole === 'admin' ||
                     (Boolean(currentUser?.id) &&
                       (String(msg.sender_id) === String(currentUser?.id) ||
-                        String(msg.sender?.id) === String(currentUser?.id))) ||
-                    userRole === 'owner' ||
-                    userRole === 'admin'
+                        String(msg.sender?.id) === String(currentUser?.id)))
                   }
                   onReply={(m) => setReplyingTo(m)}
                   onDelete={handleDeleteMessage}
@@ -1320,8 +1312,14 @@ export default function ChatWindow({
 
       {/* Telegram-style 1-Click Message Delete Confirmation Modal */}
       {messageToDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-2xl border border-gray-100 dark:border-gray-700 space-y-4 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setMessageToDeleteId(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-800 p-5 shadow-2xl border border-gray-100 dark:border-gray-700 space-y-4 animate-in zoom-in-95 duration-150"
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5" />

@@ -100,6 +100,7 @@ class LocalStore {
   constructor() {
     this.memoryStore = {};
     this.ensureCleanStart();
+    this.startRealtimeEngine = this.startRealtimeEngine.bind(this);
   }
 
   ensureCleanStart() {
@@ -1946,6 +1947,21 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
       };
     } catch (_) {}
   }
+}
+
+export function startRealtimeEngine(intervalMs = 1000) {
+  try {
+    if (localStore && typeof localStore.startRealtimeEngine === 'function') {
+      return localStore.startRealtimeEngine(intervalMs);
+    }
+  } catch (_) {}
+}
+
+if (typeof window !== 'undefined') {
+  try {
+    window.localStore = localStore;
+    window.startRealtimeEngine = startRealtimeEngine;
+  } catch (_) {}
 }
 
 export default localStore;
