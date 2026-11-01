@@ -567,6 +567,25 @@ export default {
           headers: request.headers,
         }));
       }
+
+      // Prevent Cloudflare Edge & Browser from caching index.html so updates are instant
+      const isHtml =
+        url.pathname === '/' ||
+        url.pathname === '/index.html' ||
+        assetResponse.headers.get('content-type')?.includes('text/html');
+
+      if (isHtml && assetResponse.status === 200) {
+        const freshHeaders = new Headers(assetResponse.headers);
+        freshHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        freshHeaders.set('Pragma', 'no-cache');
+        freshHeaders.set('Expires', '0');
+        return new Response(assetResponse.body, {
+          status: assetResponse.status,
+          statusText: assetResponse.statusText,
+          headers: freshHeaders,
+        });
+      }
+
       return assetResponse;
     } catch (assetErr) {
       console.warn('Asset fetch fallback:', assetErr);
