@@ -48,6 +48,8 @@ export default function VideoRecorder({
   const fileInputRef = useRef(null);
   const rearCameraInputRef = useRef(null);
   const frontCameraInputRef = useRef(null);
+  const facingModeRef = useRef('user');
+  const drawingLoopRef = useRef(null);
 
   const MAX_SECONDS = 60; // 60 seconds Telegram video note limit
 
@@ -193,51 +195,52 @@ export default function VideoRecorder({
     const nextFacing = facingMode === 'user' ? 'environment' : 'user';
     setIsSwitchingCamera(true);
 
-    if (navigator.mediaDevices?.getUserMedia && streamRef.current) {
+    if (navigator.mediaDevices?.getUserMedia) {
       try {
-        // 1. Keep audio track safe
-        const audioTracks = streamRef.current.getAudioTracks();
-        const existingAudioTrack = audioTracks.length > 0 ? audioTracks[0] : null;
-
-        // 2. CRITICAL FOR ANDROID/MOBILE: Stop old video track BEFORE requesting new camera,
-        // so the device hardware sensor is fully released!
-        const oldVideoTracks = streamRef.current.getVideoTracks();
-        if (oldVideoTracks.length > 0) {
-          oldVideoTracks.forEach((t) => {
-            try {
-              streamRef.current.removeTrack(t);
-              t.stop();
-            } catch (_) {}
+        // Find specific deviceId if available from enumerateDevices
+        let targetDeviceId = null;
+        if (availableDevices.length > 1) {
+          const isTargetBack = nextFacing === 'environment';
+          const match = availableDevices.find((d) => {
+            const lbl = (d.label || '').toLowerCase();
+            return isTargetBack
+              ? (lbl.includes('back') || lbl.includes('rear') || lbl.includes('environment') || lbl.includes('orqa'))
+              : (lbl.includes('front') || lbl.includes('user') || lbl.includes('facing') || lbl.includes('old'));
           });
+          if (match) targetDeviceId = match.deviceId;
         }
 
-        // 3. Request opposite camera sensor
-        let newStream = null;
-        const candidateConstraints = [
-          {
-            video: {
-              facingMode: { exact: nextFacing },
-              width: { ideal: 720 },
-              height: { ideal: 720 },
-              aspectRatio: { ideal: 1 },
-            },
-            audio: false,
-          },
-          {
-            video: {
-              facingMode: { ideal: nextFacing },
-              width: { ideal: 720 },
-              height: { ideal: 720 },
-              aspectRatio: { ideal: 1 },
-            },
-            audio: false,
-          },
-          {
-            video: { facingMode: nextFacing },
-            audio: false,
-          },
-        ];
+        const candidateConstraints = targetDeviceId
+          ? [
+              {
+                video: {
+                  deviceId: { exact: targetDeviceId },
+                  width: { ideal: 720 },
+                  height: { ideal: 720 },
+                },
+                audio: false,
+              },
+            ]
+          : [
+              {
+                video: {
+                  facingMode: { ideal: nextFacing },
+                  width: { ideal: 720 },
+                  height: { ideal: 720 },
+                },
+                audio: false,
+              },
+              {
+                video: { facingMode: nextFacing },
+                audio: false,
+              },
+              {
+                video: true,
+                audio: false,
+              },
+            ];
 
+        let newStream = null;
         for (const c of candidateConstraints) {
           try {
             newStream = await navigator.mediaDevices.getUserMedia(c);
@@ -245,28 +248,29 @@ export default function VideoRecorder({
           } catch (_) {}
         }
 
-        // Fallback: if switching failed, try reverting back to original facing mode
-        if (!newStream) {
-          try {
-            newStream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode },
-              audio: false,
-            });
-          } catch (_) {}
-        }
-
         if (newStream && newStream.getVideoTracks().length > 0) {
-          const newVideoTrack = newStream.getVideoTracks()[0];
-          streamRef.current.addTrack(newVideoTrack);
-          if (existingAudioTrack && !streamRef.current.getAudioTracks().includes(existingAudioTrack)) {
-            streamRef.current.addTrack(existingAudioTrack);
+          // Keep existing microphone track
+          const audioTracks = streamRef.current?.getAudioTracks() || [];
+          if (audioTracks.length > 0) {
+            newStream.addTrack(audioTracks[0]);
           }
 
+          // Stop old video tracks to release camera hardware sensor
+          if (streamRef.current) {
+            streamRef.current.getVideoTracks().forEach((t) => {
+              try {
+                t.stop();
+              } catch (_) {}
+            });
+          }
+
+          streamRef.current = newStream;
           setFacingMode(nextFacing);
-          setSelectedDeviceId(null);
+          facingModeRef.current = nextFacing;
+          setSelectedDeviceId(targetDeviceId);
 
           if (videoLiveRef.current) {
-            videoLiveRef.current.srcObject = streamRef.current;
+            videoLiveRef.current.srcObject = newStream;
             videoLiveRef.current.play().catch(() => {});
           }
 
@@ -277,12 +281,13 @@ export default function VideoRecorder({
           return;
         }
       } catch (e) {
-        console.warn('Live track switch note:', e);
+        console.warn('Switch camera error:', e);
       }
     }
 
     if (!isRecording) {
       setFacingMode(nextFacing);
+      facingModeRef.current = nextFacing;
       setSelectedDeviceId(null);
       startCameraStream(nextFacing);
     }
@@ -307,9 +312,61 @@ export default function VideoRecorder({
     }
 
     try {
+      // Create hidden 1:1 square canvas stream so camera switching mid-recording
+      // never freezes or terminates the MediaRecorder track!
+      let recordStream = streamRef.current;
+      let isDrawing = true;
+
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 480;
+        canvas.height = 480;
+        const ctx = canvas.getContext('2d');
+
+        const drawLoop = () => {
+          if (!isDrawing) return;
+          const v = videoLiveRef.current;
+          if (v && v.readyState >= 2) {
+            const vw = v.videoWidth || 480;
+            const vh = v.videoHeight || 480;
+            const minDim = Math.min(vw, vh);
+            const sx = (vw - minDim) / 2;
+            const sy = (vh - minDim) / 2;
+
+            ctx.save();
+            ctx.clearRect(0, 0, 480, 480);
+            if (facingModeRef.current === 'user') {
+              // Mirror front camera for natural selfie orientation
+              ctx.translate(480, 0);
+              ctx.scale(-1, 1);
+            }
+            ctx.drawImage(v, sx, sy, minDim, minDim, 0, 0, 480, 480);
+            ctx.restore();
+          }
+          requestAnimationFrame(drawLoop);
+        };
+        drawLoop();
+
+        drawingLoopRef.current = () => {
+          isDrawing = false;
+        };
+
+        if (canvas.captureStream) {
+          const cStream = canvas.captureStream(30);
+          const micTrack = streamRef.current.getAudioTracks()[0];
+          if (micTrack) {
+            cStream.addTrack(micTrack);
+          }
+          recordStream = cStream;
+        }
+      } catch (canvasErr) {
+        console.warn('Canvas stream fallback to direct stream:', canvasErr);
+        recordStream = streamRef.current;
+      }
+
       const recorder = mimeType
-        ? new MediaRecorder(streamRef.current, { mimeType })
-        : new MediaRecorder(streamRef.current);
+        ? new MediaRecorder(recordStream, { mimeType })
+        : new MediaRecorder(recordStream);
 
       mediaRecorderRef.current = recorder;
 
@@ -320,6 +377,7 @@ export default function VideoRecorder({
       };
 
       recorder.onstop = () => {
+        drawingLoopRef.current?.();
         const type = recorder.mimeType || 'video/webm';
         const blob = new Blob(chunksRef.current, { type });
         setVideoBlob(blob);
@@ -343,11 +401,13 @@ export default function VideoRecorder({
       }, 1000);
     } catch (err) {
       console.error('Failed to start MediaRecorder:', err);
+      drawingLoopRef.current?.();
       setPermissionError('Video yozishni boshlab bo‘lmadi.');
     }
   };
 
   const stopRecording = () => {
+    drawingLoopRef.current?.();
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -369,6 +429,7 @@ export default function VideoRecorder({
   };
 
   const handleSend = () => {
+    drawingLoopRef.current?.();
     if (isRecording) {
       // If user clicks send while recording, stop and send immediately
       if (timerRef.current) {

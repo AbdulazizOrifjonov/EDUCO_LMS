@@ -37,11 +37,14 @@ export default function TimePicker({
 
   const formattedTime = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')}`;
 
-  // Smart placement: if container is on the right side of the screen, anchor to right-0 so it never clips offscreen
+  // Smart placement: if container is on the right side of the screen or modal, anchor to right-0 so it never clips offscreen
   useEffect(() => {
     if (isOpen && containerRef.current && typeof window !== 'undefined') {
       const rect = containerRef.current.getBoundingClientRect();
-      if (rect.right > window.innerWidth - 60 || rect.left > window.innerWidth / 2) {
+      const modalOrContainer = containerRef.current.closest('[role="dialog"], .modal, form, .relative');
+      const boundaryRight = modalOrContainer ? Math.min(window.innerWidth, modalOrContainer.getBoundingClientRect().right) : window.innerWidth;
+
+      if (rect.left + 285 > boundaryRight - 10 || rect.left > window.innerWidth / 2 || rect.right > window.innerWidth - 60) {
         setPlacement('right');
       } else {
         setPlacement('left');
@@ -189,7 +192,7 @@ export default function TimePicker({
         <div
           className={`absolute z-50 ${
             placement === 'right' ? 'right-0' : 'left-0'
-          } w-[285px] sm:w-[305px] max-w-[calc(100vw-24px)] top-full mt-2 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150`}
+          } w-[270px] xs:w-[285px] sm:w-[295px] max-w-[calc(100vw-24px)] top-full mt-2 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150`}
         >
           {/* Header Display */}
           <div className="p-2.5 sm:p-3 bg-gradient-to-r from-blue-50 via-white to-blue-50 dark:from-gray-800 dark:via-gray-800/90 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700/80">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   KeyRound,
@@ -634,60 +634,32 @@ export default function PasswordsPage() {
 
       {/* Main Card with Filter Tabs + Search Toolbar + Clean Table */}
       <Card>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
-          {/* Mobile Role Filter Select Option (< sm) */}
-          <div className="block sm:hidden w-full">
-            <div className="relative">
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full h-11 pl-10 pr-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-gray-800 text-sm font-bold text-gray-900 dark:text-gray-100 appearance-none shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                {filterTabs.map((tab) => (
-                  <option key={tab.id} value={tab.id} className="text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 py-2">
-                    {tab.label} ({tab.count} ta)
-                  </option>
-                ))}
-              </select>
-              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-blue-600 dark:text-emerald-400">
-                {(() => {
-                  const currentTab = filterTabs.find((t) => t.id === roleFilter) || filterTabs[0];
-                  const Icon = currentTab.icon;
-                  return <Icon className="w-4 h-4" />;
-                })()}
-              </div>
-              <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
+          {/* Role Filter Select Option (Replaces all buttons on all screens!) */}
+          <div className="relative w-full sm:w-72 select-none">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center gap-2 text-blue-600 dark:text-emerald-400">
+              {(() => {
+                const currentTab = filterTabs.find((t) => t.id === roleFilter) || filterTabs[0];
+                const Icon = currentTab.icon;
+                return <Icon className="w-4 h-4" />;
+              })()}
             </div>
-          </div>
-
-          {/* Desktop / Tablet Horizontal Role Pills (>= sm) */}
-          <div className="hidden sm:flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-            {filterTabs.map((tab) => {
-              const Icon = tab.icon;
-              const active = roleFilter === tab.id;
-              const cfg = tabColorConfig[tab.id] || tabColorConfig.all;
-
-              return (
-                <button
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="w-full h-11 pl-10 pr-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-bold text-gray-900 dark:text-gray-100 shadow-xs appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-emerald-500 cursor-pointer transition-all"
+            >
+              {filterTabs.map((tab) => (
+                <option
                   key={tab.id}
-                  type="button"
-                  onClick={() => setRoleFilter(tab.id)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
-                    active ? cfg.active : cfg.inactive
-                  }`}
+                  value={tab.id}
+                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 py-2 font-medium"
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{tab.label}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
-                      active ? cfg.activeCount : cfg.inactiveCount
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              );
-            })}
+                  {tab.label} ({tab.count} ta)
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Clean Search Input */}

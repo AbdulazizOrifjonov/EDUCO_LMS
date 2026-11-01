@@ -31,11 +31,14 @@ export default function DatePicker({
   const [placement, setPlacement] = useState('left');
   const containerRef = useRef(null);
 
-  // Smart placement: if container is on the right side of screen, anchor to right-0
+  // Smart placement: if container is on the right side of screen or modal, anchor to right-0
   useEffect(() => {
     if (isOpen && containerRef.current && typeof window !== 'undefined') {
       const rect = containerRef.current.getBoundingClientRect();
-      if (rect.right > window.innerWidth - 60 || rect.left > window.innerWidth / 2) {
+      const modalOrContainer = containerRef.current.closest('[role="dialog"], .modal, form, .relative');
+      const boundaryRight = modalOrContainer ? Math.min(window.innerWidth, modalOrContainer.getBoundingClientRect().right) : window.innerWidth;
+
+      if (rect.left + 285 > boundaryRight - 10 || rect.left > window.innerWidth / 2 || rect.right > window.innerWidth - 60) {
         setPlacement('right');
       } else {
         setPlacement('left');
@@ -282,7 +285,7 @@ export default function DatePicker({
         <div
           className={`absolute z-50 ${
             placement === 'right' ? 'right-0' : 'left-0'
-          } w-[285px] sm:w-[305px] max-w-[calc(100vw-24px)] top-full mt-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-2.5 pb-3 animate-in fade-in zoom-in-95 duration-150`}
+          } w-[275px] xs:w-[290px] sm:w-[300px] max-w-[calc(100vw-24px)] top-full mt-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl p-2.5 pb-3 animate-in fade-in zoom-in-95 duration-150`}
         >
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-gray-100 dark:border-gray-800">

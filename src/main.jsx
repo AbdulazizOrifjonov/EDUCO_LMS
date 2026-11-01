@@ -37,29 +37,6 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   window.addEventListener('gesturestart', (e) => e.preventDefault());
   window.addEventListener('gesturechange', (e) => e.preventDefault());
   window.addEventListener('gestureend', (e) => e.preventDefault());
-
-  // Prevent double-tap zoom on non-input elements
-  let lastTouchEnd = 0;
-  window.addEventListener(
-    'touchend',
-    (e) => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) {
-        const target = e.target;
-        const isInput =
-          target &&
-          (target.tagName === 'INPUT' ||
-            target.tagName === 'TEXTAREA' ||
-            target.tagName === 'SELECT' ||
-            target.isContentEditable);
-        if (!isInput) {
-          e.preventDefault();
-        }
-      }
-      lastTouchEnd = now;
-    },
-    { passive: false }
-  );
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

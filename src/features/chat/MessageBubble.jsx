@@ -61,9 +61,70 @@ export default function MessageBubble({
     setShowReactionPicker((prev) => !prev);
   };
 
+  const openContextMenu = () => {
+    if (bubbleRef.current) {
+      const rect = bubbleRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 340 && rect.top > 250) {
+        setMenuPlacement('top');
+      } else {
+        setMenuPlacement('bottom');
+      }
+    }
+    setShowContextMenu(true);
+  };
+
+  const touchStartPos = useRef({ x: 0, y: 0, time: 0 });
+  const longPressTimerRef = useRef(null);
+  const isLongPressTriggered = useRef(false);
+
+  const handleTouchStart = (e) => {
+    if (e.target.closest('button, a, input, audio, video')) return;
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+    isLongPressTriggered.current = false;
+
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressTriggered.current = true;
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try {
+          navigator.vibrate(40);
+        } catch (_) {}
+      }
+      openContextMenu();
+    }, 380);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!longPressTimerRef.current) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - touchStartPos.current.x);
+    const dy = Math.abs(touch.clientY - touchStartPos.current.y);
+    if (dx > 10 || dy > 10) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    if (isLongPressTriggered.current) {
+      e.preventDefault();
+      return;
+    }
+    const elapsed = Date.now() - touchStartPos.current.time;
+    if (elapsed < 350) {
+      handleBubbleClick(e);
+    }
+  };
+
   const handleBubbleClick = (e) => {
     // If clicked on an interactive control (audio player, link, button), don't open context menu
-    if (e.target.closest('button, a, input, audio, video')) {
+    if (e?.target?.closest('button, a, input, audio, video')) {
       return;
     }
 
@@ -79,17 +140,8 @@ export default function MessageBubble({
     clickTimerRef.current = setTimeout(() => {
       clickTimerRef.current = null;
       // Single tap/click detected: Open Telegram Menu!
-      if (bubbleRef.current) {
-        const rect = bubbleRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        if (spaceBelow < 340 && rect.top > 250) {
-          setMenuPlacement('top');
-        } else {
-          setMenuPlacement('bottom');
-        }
-      }
-      setShowContextMenu((prev) => !prev);
-    }, 220);
+      openContextMenu();
+    }, 200);
   };
 
   const handleCopy = (e) => {
@@ -365,6 +417,9 @@ export default function MessageBubble({
           /* Pure Circular Video Note - Freestanding Telegram Style (NO background box!) */
           <div
             onClick={handleBubbleClick}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className={`relative select-none my-1 flex flex-col cursor-pointer ${isOwn ? 'items-end' : 'items-start'}`}
           >
             <TelegramVideoPlayer
@@ -381,7 +436,10 @@ export default function MessageBubble({
         ) : (
           <div
             onClick={handleBubbleClick}
-            className={`rounded-2xl px-3.5 py-2.5 shadow-sm text-sm break-words relative transition-colors cursor-pointer select-none ${
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className={`rounded-2xl px-3.5 py-2.5 shadow-sm text-sm break-words relative transition-colors cursor-pointer select-none min-w-[70px] sm:min-w-[90px] ${
             isOwn
               ? isAnnouncement
                 ? 'bg-gradient-to-r from-rose-900 to-[#123D78] text-white rounded-br-xs ring-2 ring-rose-500/50'
@@ -704,7 +762,7 @@ export default function MessageBubble({
         <div
           ref={menuRef}
           className={`hidden sm:flex absolute -top-3.5 opacity-0 group-hover:opacity-100 transition-opacity items-center space-x-1 rtl:space-x-reverse z-20 ${
-            isOwn ? 'right-1' : 'left-1'
+            isOwn ? 'right-0' : 'left-0'
           }`}
         >
           <button
@@ -772,7 +830,7 @@ export default function MessageBubble({
             {/* Telegram Popup Menu with Emojis & Actions */}
             <div
               ref={contextMenuRef}
-              className={`absolute z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 w-64 sm:w-72 text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
+              className={`absolute z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1.5 w-64 sm:w-72 max-w-[calc(100vw-24px)] text-xs font-medium animate-in fade-in zoom-in-95 duration-100 ${
                 menuPlacement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
               } ${isOwn ? 'right-0' : 'left-0'}`}
             >
