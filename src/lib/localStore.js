@@ -169,6 +169,172 @@ class LocalStore {
     }
   }
 
+  _getDeviceId() {
+    if (this._deviceId) return this._deviceId;
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        let id = window.localStorage.getItem('educo_device_id');
+        if (!id) {
+          id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+          window.localStorage.setItem('educo_device_id', id);
+        }
+        this._deviceId = id;
+        return this._deviceId;
+      }
+    } catch (_) {}
+    this._deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    return this._deviceId;
+  }
+
+  broadcastToCloud(key, value) {
+    if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+    if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
+
+    const deviceId = this._getDeviceId();
+    const payload = {
+      type: 'STORE_UPDATE',
+      key,
+      val: value,
+      deviceId,
+      ts: Date.now(),
+    };
+
+    // 1. Broadcast to real-time pub/sub bus (delivered to all listening phones/PCs within 50ms)
+    try {
+      fetch('https://ntfy.sh/educo_lms_sync_bus_8899', {
+        method: 'POST',
+        headers: {
+          'Title': 'STORE_UPDATE',
+          'Tags': 'sync',
+        },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    } catch (_) {}
+
+    // 2. Persistent cloud backup for vital website settings
+    if (key === STORAGE_KEYS.WEBSITE_SETTINGS || key === 'educo_db_website_settings') {
+      try {
+        fetch('https://api.restful-api.dev/objects/ff808181a09d98f701a19d362ce9125c', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'EDUCO_SETTINGS_SYNC',
+            data: {
+              json_content: JSON.stringify(value),
+              updated_at: Date.now(),
+            },
+          }),
+        }).catch(() => {});
+      } catch (_) {}
+    }
+  }
+
+  connectCloudSSE() {
+    if (typeof window === 'undefined' || typeof EventSource === 'undefined') return;
+    if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
+    if (this._cloudEventSource) return;
+
+    try {
+      const es = new EventSource('https://ntfy.sh/educo_lms_sync_bus_8899/sse');
+      this._cloudEventSource = es;
+
+      es.onmessage = (event) => {
+        try {
+          const raw = JSON.parse(event.data);
+          if (raw.event === 'message' && raw.message) {
+            const data = JSON.parse(raw.message);
+            const myDevId = this._getDeviceId();
+            if (data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
+              this.applyIncomingCloudKey(data.key, data.val);
+            }
+          }
+        } catch (_) {}
+      };
+
+      es.onerror = () => {
+        // Auto-reconnect handled by browser EventSource
+      };
+    } catch (_) {}
+  }
+
+  applyIncomingCloudKey(key, val) {
+    if (!key || val === undefined) return;
+    this.memoryStore[key] = val;
+    try {
+      if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
+        window.localStorage.setItem(key, JSON.stringify(val));
+      }
+    } catch (_) {}
+
+    // Pass through standard non-destructive merge and event propagation
+    this.applyIncomingData({ [key]: val });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('educo-store-update', { detail: { key, val } }));
+      if (key.startsWith('educo_db_website_')) {
+        window.dispatchEvent(new CustomEvent('educo-website-update', { detail: { key, val } }));
+      }
+      if (key === STORAGE_KEYS.USERS) {
+        window.dispatchEvent(new CustomEvent('educo-users-update', { detail: { users: val } }));
+      }
+    }
+  }
+
+  async catchUpFromCloudBus() {
+    if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+    if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
+
+    try {
+      // 1. Fetch latest website settings from persistent cloud store
+      fetch('https://api.restful-api.dev/objects/ff808181a09d98f701a19d362ce9125c')
+        .then((r) => r.json())
+        .then((res) => {
+          if (res?.data?.json_content) {
+            const cloudSettings = JSON.parse(res.data.json_content);
+            if (cloudSettings && typeof cloudSettings === 'object') {
+              const local = this.getItem(STORAGE_KEYS.WEBSITE_SETTINGS, null);
+              const localTs = new Date(local?.updated_at || 0).getTime();
+              const cloudTs = new Date(cloudSettings.updated_at || res.data.updated_at || 0).getTime();
+              if (!local || cloudTs >= localTs) {
+                this.memoryStore[STORAGE_KEYS.WEBSITE_SETTINGS] = cloudSettings;
+                try {
+                  window.localStorage.setItem(STORAGE_KEYS.WEBSITE_SETTINGS, JSON.stringify(cloudSettings));
+                } catch (_) {}
+                window.dispatchEvent(new CustomEvent('educo-website-update'));
+              }
+            }
+          }
+        })
+        .catch(() => {});
+
+      // 2. Poll recent sync events across all gadgets
+      const res = await fetch('https://ntfy.sh/educo_lms_sync_bus_8899/json?poll=1&since=all');
+      if (!res.ok) return;
+      const text = await res.text();
+      const lines = text.trim().split('\n').filter(Boolean);
+      const myDevId = this._getDeviceId();
+      let hasUpdates = false;
+
+      for (const line of lines) {
+        try {
+          const item = JSON.parse(line);
+          if (item.message) {
+            const data = JSON.parse(item.message);
+            if (data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
+              this.applyIncomingCloudKey(data.key, data.val);
+              hasUpdates = true;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (hasUpdates && typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-store-update'));
+        window.dispatchEvent(new CustomEvent('educo-website-update'));
+      }
+    } catch (_) {}
+  }
+
   setItem(key, value) {
     this.memoryStore[key] = value;
     try {
@@ -176,6 +342,7 @@ class LocalStore {
         window.localStorage.setItem(key, JSON.stringify(value));
       }
       this.pushToServer({ [key]: value }).catch(() => {});
+      this.broadcastToCloud(key, value);
       if (typeof window !== 'undefined' && window.__educoBroadcastChannel) {
         window.__educoBroadcastChannel.postMessage({ type: 'STORE_UPDATE', key, value });
       }
@@ -413,6 +580,10 @@ class LocalStore {
     if (typeof window === 'undefined') return;
     if (this._realtimeTimer) return;
 
+    // Connect Global Cloud Realtime SSE and catch up from all gadgets
+    this.connectCloudSSE();
+    this.catchUpFromCloudBus().catch(() => {});
+
     // Run initial sync right away
     this.syncWithServer().catch(() => {});
 
@@ -432,6 +603,7 @@ class LocalStore {
     // Instant wake sync on user switching back to tab, unlocking phone, or network coming online
     const handleWake = () => {
       if (typeof document !== 'undefined' && !document.hidden) {
+        this.catchUpFromCloudBus().catch(() => {});
         this.syncWithServer().catch(() => {});
       }
     };

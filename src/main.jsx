@@ -11,6 +11,24 @@ import { initPushNotifications } from './services/pushNotificationService';
 // Initialize Service Worker for mobile push & status bar notifications
 initPushNotifications();
 
+// Version-based cache buster to force browsers and PWAs to purge old cached chunks
+const APP_RELEASE_VERSION = 'EDUCO_RELEASE_V12_FULLPAGE_CLOUD_SYNC';
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    const installed = window.localStorage.getItem('educo_release_version');
+    if (installed && installed !== APP_RELEASE_VERSION) {
+      console.log(`[EDUCO Update] Upgrading to ${APP_RELEASE_VERSION}`);
+      window.localStorage.setItem('educo_release_version', APP_RELEASE_VERSION);
+      if ('caches' in window) {
+        caches.keys().then((names) => Promise.all(names.map((n) => caches.delete(n))));
+      }
+      window.location.reload();
+    } else if (!installed) {
+      window.localStorage.setItem('educo_release_version', APP_RELEASE_VERSION);
+    }
+  } catch (_) {}
+}
+
 // Auto-reload on Vite dynamic import failure (when new deployment replaces old asset chunks)
 if (typeof window !== 'undefined') {
   window.addEventListener('vite:preloadError', (event) => {

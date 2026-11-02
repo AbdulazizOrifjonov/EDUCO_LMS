@@ -13,6 +13,8 @@ import {
   Filter,
   Users,
   GraduationCap,
+  User,
+  BookOpen,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -35,6 +37,27 @@ const DAYS = [
   { id: 6, key: 'saturday', name: 'Shanba', short: 'Shan', pattern: 'even' },
   { id: 7, key: 'sunday', name: 'Yakshanba', short: 'Yak', pattern: 'sunday' },
 ];
+
+/**
+ * High-contrast, easily distinguishable color theme helper for subjects
+ */
+const getSubjectColor = (groupName, courseName, existingColor) => {
+  if (existingColor && existingColor !== '#123D78' && existingColor !== '#064e3b' && existingColor !== '#000000') {
+    return existingColor;
+  }
+  const name = `${groupName || ''} ${courseName || ''}`.toLowerCase();
+  if (name.includes('matem') || name.includes('math')) return '#059669'; // Emerald Green
+  if (name.includes('rus') || name.includes('russian')) return '#ea580c'; // Vibrant Orange
+  if (name.includes('mental')) return '#d946ef'; // Magenta / Pink
+  if (name.includes('ingliz') || name.includes('english')) return '#2563eb'; // Royal Blue
+  if (name.includes('arab') || name.includes('arabic')) return '#0891b2'; // Cyan / Teal
+  if (name.includes('shaxmat') || name.includes('chess')) return '#7c3aed'; // Purple
+  if (name.includes('python') || name.includes('dastur') || name.includes('it') || name.includes('frontend')) return '#0284c7'; // Sky Blue
+  if (name.includes('fizika') || name.includes('physics')) return '#dc2626'; // Red
+  if (name.includes('ona tili') || name.includes('adabiyot')) return '#4f46e5'; // Indigo
+  if (name.includes('biolog') || name.includes('kimyo')) return '#16a34a'; // Green
+  return existingColor || '#2563eb';
+};
 
 export default function ScheduleManagement() {
   const { t } = useTranslation();
@@ -312,31 +335,34 @@ export default function ScheduleManagement() {
       <div className="hidden md:block overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary shadow-card">
         <div className="min-w-[850px]">
           {/* Day Headers */}
-          <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-surface-dark-tertiary">
+          <div className="grid grid-cols-7 border-b border-gray-200 dark:border-gray-800 bg-gray-100/90 dark:bg-surface-dark-tertiary">
             {DAYS.map((day) => {
               const dayLessons = filteredSchedules.filter((s) => Number(s.day_of_week) === day.id);
+              const isSunday = day.pattern === 'sunday';
               return (
                 <div
                   key={day.id}
-                  className="p-3 text-center border-r last:border-r-0 border-gray-200 dark:border-gray-800"
+                  className={`p-3 text-center border-r last:border-r-0 border-gray-200 dark:border-gray-800 ${
+                    isSunday ? 'bg-rose-50/50 dark:bg-rose-950/20' : ''
+                  }`}
                 >
                   <div className="flex items-center justify-center gap-1.5">
-                    <p className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                    <p className="font-extrabold text-sm text-gray-900 dark:text-gray-100">
                       {t(`schedule.${day.key}`, day.name)}
                     </p>
                     {day.pattern !== 'sunday' && (
                       <span
-                        className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                        className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-2xs ${
                           day.pattern === 'odd'
-                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300'
-                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/60'
+                            : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/60'
                         }`}
                       >
                         {day.pattern === 'odd' ? 'Toq' : 'Juft'}
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] text-gray-500 font-medium">
+                  <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 mt-0.5 block">
                     {dayLessons.length} {t('schedule.lessonsCount', 'dars')}
                   </span>
                 </div>
@@ -345,7 +371,7 @@ export default function ScheduleManagement() {
           </div>
 
           {/* Day Columns */}
-          <div className="grid grid-cols-7 min-h-[500px] divide-x divide-gray-200 dark:divide-gray-800">
+          <div className="grid grid-cols-7 min-h-[520px] divide-x divide-gray-200 dark:divide-gray-800 bg-slate-50/60 dark:bg-gray-950/30">
             {DAYS.map((day) => {
               const dayLessons = filteredSchedules
                 .filter((s) => Number(s.day_of_week) === day.id)
@@ -354,7 +380,7 @@ export default function ScheduleManagement() {
               return (
                 <div
                   key={day.id}
-                  className="p-2 space-y-2.5 bg-white dark:bg-surface-dark-secondary hover:bg-gray-50/40 dark:hover:bg-surface-dark-tertiary/20 transition-colors"
+                  className="p-2 space-y-2.5 transition-colors"
                 >
                   {dayLessons.length === 0 ? (
                     <div
@@ -363,70 +389,111 @@ export default function ScheduleManagement() {
                         setInitialSlot({ day: day.id, time: '09:00' });
                         setIsFormOpen(true);
                       }}
-                      className="h-28 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 flex flex-col items-center justify-center text-gray-400 hover:text-brand-navy hover:border-brand-navy cursor-pointer transition-colors p-2 text-center"
+                      className="h-28 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-white/70 dark:bg-surface-dark-secondary/60 flex flex-col items-center justify-center text-gray-500 hover:text-blue-600 hover:border-blue-500 cursor-pointer transition-all p-2 text-center group"
                     >
-                      <Plus className="w-4 h-4 mb-1" />
-                      <span className="text-[11px] font-medium">{t('schedule.addLesson', 'Dars qo‘shish')}</span>
+                      <Plus className="w-4 h-4 mb-1 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                      <span className="text-[11px] font-bold">{t('schedule.addLesson', 'Dars qo‘shish')}</span>
                     </div>
                   ) : (
-                    dayLessons.map((item) => (
-                      <div
-                        key={item.id}
-                        className="rounded-xl p-3 border shadow-sm relative group transition-all hover:shadow-md"
-                        style={{
-                          borderLeftWidth: '4px',
-                          borderLeftColor: item.color || '#064e3b',
-                          backgroundColor: `${item.color || '#064e3b'}0d`,
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-1 mb-1">
-                          <h4 className="font-bold text-xs text-gray-900 dark:text-gray-100 line-clamp-1">
-                            {item.groupName}
-                          </h4>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedLesson(item);
-                                setIsFormOpen(true);
-                              }}
-                              className="p-1 hover:text-brand-navy text-gray-500 rounded"
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteLesson(item.id)}
-                              className="p-1 hover:text-brand-red text-gray-500 rounded"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
+                    dayLessons.map((item) => {
+                      const cardColor = getSubjectColor(item.groupName, item.courseName, item.color);
+                      const teacher = item.teachers?.[0];
+                      const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : null;
 
-                        <div className="space-y-1 text-[11px] text-gray-600 dark:text-gray-300">
-                          <div className="flex items-center gap-1 font-semibold text-brand-navy dark:text-blue-300">
-                            <Clock className="w-3 h-3 shrink-0" />
-                            <span>
-                              {item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}
-                            </span>
-                          </div>
-
-                          {item.room && (
-                            <div className="flex items-center gap-1 text-gray-500">
-                              <Building2 className="w-3 h-3 shrink-0" />
-                              <span className="truncate">{item.room}</span>
+                      return (
+                        <div
+                          key={item.id}
+                          className="group relative rounded-xl p-3 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-700/80 shadow-xs hover:shadow-md transition-all duration-150 hover:-translate-y-0.5"
+                          style={{
+                            borderLeftWidth: '5px',
+                            borderLeftColor: cardColor,
+                            backgroundColor: `${cardColor}14`,
+                          }}
+                        >
+                          {/* Course / Group Title */}
+                          <div className="flex items-start justify-between gap-1 mb-1.5">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className="w-2 h-2 rounded-full shrink-0 shadow-2xs"
+                                  style={{ backgroundColor: cardColor }}
+                                />
+                                <h4
+                                  className="font-extrabold text-xs text-gray-950 dark:text-white leading-tight truncate"
+                                  title={item.groupName}
+                                >
+                                  {item.groupName}
+                                </h4>
+                              </div>
+                              {item.courseName && item.courseName.toLowerCase() !== item.groupName.toLowerCase() && (
+                                <p className="text-[10px] font-semibold text-gray-600 dark:text-gray-300 truncate mt-0.5 pl-3.5">
+                                  {item.courseName}
+                                </p>
+                              )}
                             </div>
-                          )}
 
-                          {item.teachers?.[0] && (
-                            <p className="text-[10px] text-gray-400 truncate pt-0.5">
-                              {item.teachers[0].first_name} {item.teachers[0].last_name}
-                            </p>
-                          )}
+                            {/* Actions on hover */}
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 bg-white/95 dark:bg-gray-800/95 rounded-md p-0.5 shadow-xs border border-gray-200/70 dark:border-gray-700">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedLesson(item);
+                                  setIsFormOpen(true);
+                                }}
+                                className="p-1 hover:text-blue-600 text-gray-500 rounded transition-colors"
+                                title={t('common.edit', 'Tahrirlash')}
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteLesson(item.id)}
+                                className="p-1 hover:text-red-600 text-gray-500 rounded transition-colors"
+                                title={t('common.delete', 'O‘chirish')}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Time & Room Pills */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {/* Time Chip */}
+                              <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-extrabold bg-white dark:bg-gray-800 text-gray-950 dark:text-white border border-gray-200/90 dark:border-gray-700 shadow-2xs">
+                                <Clock className="w-3 h-3 shrink-0" style={{ color: cardColor }} />
+                                <span>
+                                  {item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}
+                                </span>
+                              </div>
+
+                              {/* Room Chip */}
+                              {item.room && (
+                                <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200/90 dark:border-gray-700 shadow-2xs">
+                                  <Building2 className="w-3 h-3 text-gray-500 shrink-0" />
+                                  <span>{item.room}-xona</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Teacher Info - High Contrast, Crystal Clear */}
+                            {teacherName && (
+                              <div className="flex items-center gap-1.5 pt-1.5 border-t border-gray-200/70 dark:border-gray-700/60">
+                                <div
+                                  className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white shrink-0 shadow-2xs"
+                                  style={{ backgroundColor: cardColor }}
+                                >
+                                  {teacherName.charAt(0)}
+                                </div>
+                                <span className="text-[11px] font-bold text-gray-900 dark:text-gray-100 truncate">
+                                  {teacherName}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
 
                   {/* Add additional slot button at bottom of day column */}
@@ -438,7 +505,7 @@ export default function ScheduleManagement() {
                         setInitialSlot({ day: day.id, time: '14:00' });
                         setIsFormOpen(true);
                       }}
-                      className="w-full py-1.5 rounded-lg border border-dashed border-gray-200 dark:border-gray-800 text-[11px] text-gray-400 hover:text-brand-navy hover:border-brand-navy transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      className="w-full py-1.5 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-surface-dark-secondary/40 text-[11px] font-bold text-gray-600 dark:text-gray-400 hover:text-blue-600 hover:border-blue-500 dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Plus className="w-3 h-3" />
                       <span>{t('schedule.addLesson', 'Dars qo‘shish')}</span>
@@ -544,73 +611,97 @@ export default function ScheduleManagement() {
                 </div>
               ) : (
                 <div className="space-y-2.5">
-                  {currentDayLessons.map((item) => (
-                    <div
-                      key={item.id}
-                      className="rounded-2xl p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary shadow-sm space-y-2.5 transition-all"
-                      style={{
-                        borderLeftWidth: '5px',
-                        borderLeftColor: item.color || '#123D78',
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">
-                            {item.groupName}
-                          </h4>
-                          {item.courseName && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                              {item.courseName}
-                            </p>
+                  {currentDayLessons.map((item) => {
+                    const cardColor = getSubjectColor(item.groupName, item.courseName, item.color);
+                    const teacher = item.teachers?.[0];
+                    const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : null;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-2xl p-4 border border-gray-200/90 dark:border-gray-700/80 bg-white dark:bg-surface-dark-secondary shadow-xs hover:shadow-md space-y-3 transition-all"
+                        style={{
+                          borderLeftWidth: '5px',
+                          borderLeftColor: cardColor,
+                          backgroundColor: `${cardColor}14`,
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs"
+                                style={{ backgroundColor: cardColor }}
+                              />
+                              <h4 className="font-extrabold text-sm text-gray-950 dark:text-white truncate">
+                                {item.groupName}
+                              </h4>
+                            </div>
+                            {item.courseName && item.courseName.toLowerCase() !== item.groupName.toLowerCase() && (
+                              <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mt-0.5 pl-4 truncate">
+                                {item.courseName}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0 bg-white/95 dark:bg-gray-800/95 rounded-lg p-0.5 shadow-xs border border-gray-200/70 dark:border-gray-700">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedLesson(item);
+                                setIsFormOpen(true);
+                              }}
+                              className="p-1.5 hover:text-blue-600 text-gray-500 rounded-lg transition-colors"
+                              title={t('common.edit', 'Tahrirlash')}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteLesson(item.id)}
+                              className="p-1.5 hover:text-red-600 text-gray-500 rounded-lg transition-colors"
+                              title={t('common.delete', 'O‘chirish')}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-200/70 dark:border-gray-700/60 text-xs">
+                          {/* Time Chip */}
+                          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-extrabold bg-white dark:bg-gray-800 text-gray-950 dark:text-white border border-gray-200/90 dark:border-gray-700 shadow-2xs">
+                            <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: cardColor }} />
+                            <span>
+                              {item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}
+                            </span>
+                          </div>
+
+                          {/* Room Chip */}
+                          {item.room && (
+                            <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200/90 dark:border-gray-700 shadow-2xs">
+                              <Building2 className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                              <span>{item.room}-xona</span>
+                            </div>
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedLesson(item);
-                              setIsFormOpen(true);
-                            }}
-                            className="p-1.5 hover:text-brand-navy text-gray-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            title={t('common.edit', 'Tahrirlash')}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteLesson(item.id)}
-                            className="p-1.5 hover:text-brand-red text-gray-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                            title={t('common.delete', 'O‘chirish')}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
-                        <div className="flex items-center gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
-                          <Clock className="w-3.5 h-3.5 shrink-0" />
-                          <span>
-                            {item.start_time?.slice(0, 5)} - {item.end_time?.slice(0, 5)}
-                          </span>
-                        </div>
-
-                        {item.room && (
-                          <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                            <Building2 className="w-3.5 h-3.5 shrink-0 text-gray-400" />
-                            <span className="truncate">{item.room}-xona</span>
+                        {/* Teacher Info */}
+                        {teacherName && (
+                          <div className="flex items-center gap-2 pt-1 border-t border-gray-200/60 dark:border-gray-700/60">
+                            <div
+                              className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0 shadow-2xs"
+                              style={{ backgroundColor: cardColor }}
+                            >
+                              {teacherName.charAt(0)}
+                            </div>
+                            <span className="text-xs font-bold text-gray-900 dark:text-gray-100 truncate">
+                              Ustoz: {teacherName}
+                            </span>
                           </div>
                         )}
                       </div>
-
-                      {item.teachers?.[0] && (
-                        <p className="text-[11px] text-gray-400 pt-0.5">
-                          O‘qituvchi: {item.teachers[0].first_name} {item.teachers[0].last_name}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

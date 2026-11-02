@@ -49,8 +49,6 @@ import {
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Modal from '@/components/ui/Modal';
-import ImageCropperModal from '@/components/ui/ImageCropperModal';
 
 const SUBJECT_ICONS = [
   { name: 'Calculator', icon: Calculator, label: 'Matematika' },
@@ -1630,39 +1628,27 @@ export default function WebsiteFullPageEditor({
         </form>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Inline Delete Confirmation Banner (Zero Modals) */}
       {deleteConfirmItem && (
-        <Modal
-          isOpen={true}
-          onClose={() => setDeleteConfirmItem(null)}
-          size="sm"
-          title="Oʻchirishni tasdiqlang"
-        >
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Haqiqatan ham <strong>{deleteConfirmItem.title || 'ushbu elementni'}</strong> oʻchirib tashlamoqchimisiz? Ushbu amalni qaytarib boʻlmaydi.
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirmItem(null)}>
-                Bekor qilish
-              </Button>
-              <Button variant="danger" size="sm" onClick={confirmDelete} icon={Trash2}>
-                Ha, oʻchirish
-              </Button>
+        <div className="p-4 my-6 rounded-2xl border-2 border-red-500/50 bg-red-500/10 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-200">
+          <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+            <Trash2 className="w-6 h-6 shrink-0" />
+            <div>
+              <div className="font-bold text-base">Haqiqatan ham o‘chirmoqchimisiz?</div>
+              <div className="text-xs text-surface-600 dark:text-surface-300">
+                "{deleteConfirmItem.title || 'Ushbu element'}" saytdan butunlay o‘chiriladi. Bu amalni qaytarib bo‘lmaydi.
+              </div>
             </div>
           </div>
-        </Modal>
-      )}
-
-      {/* Image Cropper Modal */}
-      {cropperFile && (
-        <ImageCropperModal
-          isOpen={true}
-          imageSrc={cropperFile}
-          aspectRatio={cropperAspectRatio}
-          onClose={() => setCropperFile(null)}
-          onCropComplete={handleCropComplete}
-        />
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={() => setDeleteConfirmItem(null)}>
+              Bekor qilish
+            </Button>
+            <Button variant="danger" size="sm" onClick={confirmDelete} icon={Trash2}>
+              Ha, butunlay o‘chirilsin
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

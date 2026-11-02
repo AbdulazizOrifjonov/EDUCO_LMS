@@ -1,10 +1,16 @@
 // EDUCO LMS Service Worker for System Push Notifications
+const CACHE_NAME = 'educo-v12-cloud-sync';
+
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
 });
 
 // 1. Show notification from client postMessage (instant foreground & background trigger)

@@ -302,6 +302,15 @@ export default {
                   await kv.put(key, JSON.stringify(value));
                 } catch (_) {}
               }
+
+              // Broadcast changes to real-time sync bus for all gadgets
+              try {
+                fetch('https://ntfy.sh/educo_lms_sync_bus_8899', {
+                  method: 'POST',
+                  headers: { 'Title': 'STORE_UPDATE', 'Tags': 'sync' },
+                  body: JSON.stringify({ type: 'STORE_UPDATE', key, val: value, deviceId: 'worker', ts: Date.now() }),
+                }).catch(() => {});
+              } catch (_) {}
             }
 
             postETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;

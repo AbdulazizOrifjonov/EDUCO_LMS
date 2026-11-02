@@ -52,8 +52,6 @@ import {
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Modal from '@/components/ui/Modal';
-import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { toast } from '@/components/ui/Toast';
 import websiteService, { getImageTransformStyle } from '@/services/websiteService';
 
@@ -128,6 +126,9 @@ const compressImageFile = (file, maxWidth = 1600, maxHeight = 1000, quality = 0.
 export default function WebsiteManagementPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'overview';
+  const actionParam = searchParams.get('action'); // 'edit' | 'create'
+  const typeParam = searchParams.get('type');
+  const idParam = searchParams.get('id');
 
   const setTab = (tabId) => {
     setSearchParams({ tab: tabId });
@@ -194,10 +195,18 @@ export default function WebsiteManagementPage() {
   // Search filter inside lists
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Open Editor Helper
-  const openEditor = (type, item = null) => {
+  // Open Editor Helper (URL-Driven & Full Page)
+  const openEditor = (type, item = null, updateUrl = true) => {
     setEditingItem(item);
     setModalType(type);
+
+    if (updateUrl) {
+      if (item?.id) {
+        setSearchParams({ tab: currentTab, action: 'edit', type, id: String(item.id) });
+      } else {
+        setSearchParams({ tab: currentTab, action: 'create', type });
+      }
+    }
 
     const initialImg =
       item?.image ||
@@ -223,7 +232,7 @@ export default function WebsiteManagementPage() {
     setVideoUploadMode(item?.video_url?.startsWith('data:') ? 'file' : 'url');
   };
 
-  const closeEditor = () => {
+  const closeEditor = (updateUrl = true) => {
     setModalType(null);
     setEditingItem(null);
     setActiveImage('');
@@ -233,7 +242,47 @@ export default function WebsiteManagementPage() {
     setActiveOffsetY(0);
     setCropperFile(null);
     setUploadLoading(false);
+    if (updateUrl) {
+      setSearchParams({ tab: currentTab });
+    }
   };
+
+  // Sync URL search params with Full-Page Editor state
+  useEffect(() => {
+    if (actionParam && typeParam) {
+      if (actionParam === 'edit' && idParam) {
+        let found = null;
+        if (typeParam === 'slide') found = slides.find((s) => String(s.id) === String(idParam));
+        else if (typeParam === 'course') found = courses.find((c) => String(c.id) === String(idParam));
+        else if (typeParam === 'subject') found = subjects.find((s) => String(s.id) === String(idParam));
+        else if (typeParam === 'teacher') found = teachers.find((t) => String(t.id) === String(idParam));
+        else if (typeParam === 'gallery') found = gallery.find((g) => String(g.id) === String(idParam));
+        else if (typeParam === 'video') found = videos.find((v) => String(v.id) === String(idParam));
+        else if (typeParam === 'news') found = news.find((n) => String(n.id) === String(idParam));
+        else if (typeParam === 'testimonial') found = testimonials.find((t) => String(t.id) === String(idParam));
+
+        if (found && (!editingItem || String(editingItem.id) !== String(found.id) || modalType !== typeParam)) {
+          openEditor(typeParam, found, false);
+        }
+      } else if (actionParam === 'create') {
+        if (!modalType || modalType !== typeParam) {
+          const defaults = {
+            slide: { order: slides.length + 1, isActive: true, fit_mode: 'cover' },
+            course: { featured: true, isActive: true, fit_mode: 'cover' },
+            subject: { coursesCount: 1, isActive: true, color: 'from-emerald-600 to-teal-700', icon_name: 'Sparkles' },
+            teacher: { rating: 5, experience: '3+ yil', isActive: true, fit_mode: 'cover', object_position: 'top' },
+            gallery: { category: 'Darslar', isActive: true, fit_mode: 'cover' },
+            video: { duration: '03:00', category: 'Tanishtiruv', isActive: true, fit_mode: 'cover' },
+            news: { date: new Date().toISOString().split('T')[0], readTime: '3 daqiqa', category: 'Yangiliklar', isActive: true, fit_mode: 'cover' },
+            testimonial: { rating: 5, isActive: true, fit_mode: 'cover' },
+          };
+          openEditor(typeParam, defaults[typeParam] || {}, false);
+        }
+      }
+    } else if (!actionParam && modalType) {
+      closeEditor(false);
+    }
+  }, [actionParam, typeParam, idParam, slides, courses, subjects, teachers, gallery, videos, news, testimonials]);
 
   // File Upload Handlers with Automatic Apply & Clean Removal
   const handleImageUpload = (e) => {
@@ -896,10 +945,11 @@ export default function WebsiteManagementPage() {
   const filteredTestimonials = useMemo(() => testimonials.filter((t) => !q || t.name?.toLowerCase().includes(q) || t.role?.toLowerCase().includes(q) || t.quote?.toLowerCase().includes(q)), [testimonials, q]);
 
   // Dedicated Full-Page CRUD Editor: No Cramped Modals!
-  if (modalType) {
+  const activeEditorType = modalType || (actionParam && typeParam ? typeParam : null);
+  if (activeEditorType) {
     return (
       <WebsiteFullPageEditor
-        modalType={modalType}
+        modalType={activeEditorType}
         editingItem={editingItem}
         activeImage={activeImage}
         setActiveImage={setActiveImage}
@@ -1133,15 +1183,27 @@ export default function WebsiteManagementPage() {
                   className="pl-8 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36 sm:w-48"
                 />
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => openEditor('slide', { order: slides.length + 1, isActive: true, fit_mode: 'cover' })}
-                className="!rounded-xl whitespace-nowrap"
-              >
-                Yangi slayd qoʻshish
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => openEditor('slide', { order: slides.length + 1, isActive: true, fit_mode: 'cover' })}
+                  className="!rounded-xl whitespace-nowrap"
+                >
+                  Yangi slayd qoʻshish
+                </Button>
+                <a
+                  href="/owner/website?tab=slider&action=create&type=slide"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                  title="Yangi oynada ochish"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Yangi oynada</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1186,6 +1248,15 @@ export default function WebsiteManagementPage() {
                       >
                         Tahrirlash
                       </Button>
+                      <a
+                        href={`/owner/website?tab=slider&action=edit&type=slide&id=${slide.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        title="Yangi oynada ochish"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
                       <Button
                         variant="ghost"
                         size="xs"
@@ -1231,15 +1302,27 @@ export default function WebsiteManagementPage() {
                   className="pl-8 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36 sm:w-48"
                 />
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => openEditor('course', { featured: true, isActive: true, fit_mode: 'cover' })}
-                className="!rounded-xl whitespace-nowrap"
-              >
-                Yangi kurs yaratish
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => openEditor('course', { featured: true, isActive: true, fit_mode: 'cover' })}
+                  className="!rounded-xl whitespace-nowrap"
+                >
+                  Yangi kurs yaratish
+                </Button>
+                <a
+                  href="/owner/website?tab=courses&action=create&type=course"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                  title="Yangi oynada ochish"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Yangi oynada</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1290,6 +1373,15 @@ export default function WebsiteManagementPage() {
                       >
                         Tahrirlash
                       </Button>
+                      <a
+                        href={`/owner/website?tab=courses&action=edit&type=course&id=${course.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        title="Yangi oynada ochish"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
                       <Button
                         variant="ghost"
                         size="xs"
@@ -1335,15 +1427,27 @@ export default function WebsiteManagementPage() {
                   className="pl-8 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36 sm:w-48"
                 />
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => openEditor('subject', { coursesCount: 1, isActive: true, color: 'from-emerald-600 to-teal-700', icon_name: 'Sparkles' })}
-                className="!rounded-xl whitespace-nowrap"
-              >
-                Yangi fan qoʻshish
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => openEditor('subject', { coursesCount: 1, isActive: true, color: 'from-emerald-600 to-teal-700', icon_name: 'Sparkles' })}
+                  className="!rounded-xl whitespace-nowrap"
+                >
+                  Yangi fan qoʻshish
+                </Button>
+                <a
+                  href="/owner/website?tab=subjects&action=create&type=subject"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                  title="Yangi oynada ochish"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Yangi oynada</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1378,6 +1482,15 @@ export default function WebsiteManagementPage() {
                     >
                       Tahrirlash
                     </Button>
+                    <a
+                      href={`/owner/website?tab=subjects&action=edit&type=subject&id=${subj.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="Yangi oynada ochish"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                     <Button
                       variant="ghost"
                       size="xs"
@@ -1422,15 +1535,27 @@ export default function WebsiteManagementPage() {
                   className="pl-8 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36 sm:w-48"
                 />
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => openEditor('teacher', { rating: 5, experience: '3+ yil', isActive: true, fit_mode: 'cover', object_position: 'top' })}
-                className="!rounded-xl whitespace-nowrap"
-              >
-                Ustoz qoʻshish
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => openEditor('teacher', { rating: 5, experience: '3+ yil', isActive: true, fit_mode: 'cover', object_position: 'top' })}
+                  className="!rounded-xl whitespace-nowrap"
+                >
+                  Ustoz qoʻshish
+                </Button>
+                <a
+                  href="/owner/website?tab=teachers&action=create&type=teacher"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                  title="Yangi oynada ochish"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Yangi oynada</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1472,6 +1597,15 @@ export default function WebsiteManagementPage() {
                     >
                       Tahrirlash
                     </Button>
+                    <a
+                      href={`/owner/website?tab=teachers&action=edit&type=teacher&id=${teacher.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="Yangi oynada ochish"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                     <Button
                       variant="ghost"
                       size="xs"
@@ -1516,15 +1650,27 @@ export default function WebsiteManagementPage() {
                   className="pl-8 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36 sm:w-48"
                 />
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => openEditor('news', { date: new Date().toISOString().split('T')[0], readTime: '3 daqiqa', category: 'Yangiliklar', isActive: true, fit_mode: 'cover' })}
-                className="!rounded-xl whitespace-nowrap"
-              >
-                Yangilik eʼlon qilish
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => openEditor('news', { date: new Date().toISOString().split('T')[0], readTime: '3 daqiqa', category: 'Yangiliklar', isActive: true, fit_mode: 'cover' })}
+                  className="!rounded-xl whitespace-nowrap"
+                >
+                  Yangilik eʼlon qilish
+                </Button>
+                <a
+                  href="/owner/website?tab=news&action=create&type=news"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                  title="Yangi oynada ochish"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Yangi oynada</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1565,6 +1711,15 @@ export default function WebsiteManagementPage() {
                     >
                       Tahrirlash
                     </Button>
+                    <a
+                      href={`/owner/website?tab=news&action=edit&type=news&id=${item.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="Yangi oynada ochish"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                     <Button
                       variant="ghost"
                       size="xs"
@@ -1663,6 +1818,15 @@ export default function WebsiteManagementPage() {
                   >
                     Tahrirlash
                   </Button>
+                  <a
+                    href={`/owner/website?tab=videos&action=edit&type=video&id=${vid.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    title="Yangi oynada ochish"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                   <Button
                     variant="ghost"
                     size="xs"
@@ -1706,15 +1870,27 @@ export default function WebsiteManagementPage() {
                   className="pl-8 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36 sm:w-48"
                 />
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => openEditor('gallery', { category: 'Darslar', isActive: true, fit_mode: 'cover' })}
-                className="!rounded-xl whitespace-nowrap"
-              >
-                Rasm qoʻshish
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => openEditor('gallery', { category: 'Darslar', isActive: true, fit_mode: 'cover' })}
+                  className="!rounded-xl whitespace-nowrap"
+                >
+                  Rasm qoʻshish
+                </Button>
+                <a
+                  href="/owner/website?tab=gallery&action=create&type=gallery"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                  title="Yangi oynada ochish"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Yangi oynada</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1743,6 +1919,15 @@ export default function WebsiteManagementPage() {
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
+                    <a
+                      href={`/owner/website?tab=gallery&action=edit&type=gallery&id=${img.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 rounded-lg bg-white/20 hover:bg-white/40 text-white text-xs cursor-pointer inline-flex items-center justify-center"
+                      title="Yangi oynada ochish"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                     <button
                       type="button"
                       onClick={() => setDeleteConfirmItem({ type: 'gallery', id: img.id, title: img.title })}
@@ -1788,15 +1973,27 @@ export default function WebsiteManagementPage() {
                   className="pl-8 pr-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-36 sm:w-48"
                 />
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => openEditor('testimonial', { rating: 5, isActive: true, fit_mode: 'cover' })}
-                className="!rounded-xl whitespace-nowrap"
-              >
-                Fikr qoʻshish
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() => openEditor('testimonial', { rating: 5, isActive: true, fit_mode: 'cover' })}
+                  className="!rounded-xl whitespace-nowrap"
+                >
+                  Fikr qoʻshish
+                </Button>
+                <a
+                  href="/owner/website?tab=testimonials&action=create&type=testimonial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+                  title="Yangi oynada ochish"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Yangi oynada</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1842,6 +2039,15 @@ export default function WebsiteManagementPage() {
                     >
                       Tahrirlash
                     </Button>
+                    <a
+                      href={`/owner/website?tab=testimonials&action=edit&type=testimonial&id=${test.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="Yangi oynada ochish"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                     <Button
                       variant="ghost"
                       size="xs"
@@ -2051,58 +2257,28 @@ export default function WebsiteManagementPage() {
         </Card>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Inline Delete Confirmation Banner (Zero Modals) */}
       {deleteConfirmItem && (
-        <Modal
-          isOpen={true}
-          onClose={() => setDeleteConfirmItem(null)}
-          size="sm"
-          title="Oʻchirishni tasdiqlang"
-        >
-          <div className="space-y-4">
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-              Haqiqatan ham <strong>{deleteConfirmItem.title || 'ushbu elementni'}</strong> oʻchirib tashlamoqchimisiz?
-              Bu amal saytdan darhol olib tashlanadi.
-            </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirmItem(null)}>
-                Bekor qilish
-              </Button>
-              <Button variant="danger" size="sm" onClick={confirmDelete} icon={Trash2}>
-                Ha, oʻchirilsin
-              </Button>
+        <div className="p-4 my-6 rounded-2xl border-2 border-red-500/50 bg-red-500/10 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-200">
+          <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+            <Trash2 className="w-6 h-6 shrink-0" />
+            <div>
+              <div className="font-bold text-base">Haqiqatan ham o‘chirmoqchimisiz?</div>
+              <div className="text-xs text-surface-600 dark:text-surface-300">
+                "{deleteConfirmItem.title || deleteConfirmItem.name || 'Ushbu element'}" saytdan butunlay o‘chiriladi. Bu amal saytdan darhol olib tashlanadi.
+              </div>
             </div>
           </div>
-        </Modal>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={() => setDeleteConfirmItem(null)}>
+              Bekor qilish
+            </Button>
+            <Button variant="danger" size="sm" onClick={confirmDelete} icon={Trash2}>
+              Ha, butunlay o‘chirilsin
+            </Button>
+          </div>
+        </div>
       )}
-
-      {/* Universal Interactive Image Cropper Modal for Website Management */}
-      <ImageCropperModal
-        isOpen={Boolean(cropperFile)}
-        imageFile={cropperFile}
-        onClose={() => setCropperFile(null)}
-        onCrop={handleCropComplete}
-        aspectRatio={cropperAspectRatio}
-        allowAspectChange={true}
-        title={
-          modalType === 'teacher'
-            ? 'Ustoz fotosuratini moslashtirish'
-            : modalType === 'slider'
-            ? 'Slayder bannerini moslashtirish'
-            : modalType === 'course'
-            ? 'Kurs muqovasini moslashtirish'
-            : modalType === 'subject'
-            ? 'Fan muqovasini moslashtirish'
-            : modalType === 'gallery'
-            ? 'Dars lavhasini moslashtirish'
-            : modalType === 'news'
-            ? 'Yangilik rasmini moslashtirish'
-            : modalType === 'testimonial'
-            ? 'Mijoz rasmini moslashtirish'
-            : 'Rasmni moslashtirish'
-        }
-        subtitle="Rasmni suring, kattalashtiring, burang va to‘g‘ri joylashtiring"
-      />
     </div>
   );
 }
