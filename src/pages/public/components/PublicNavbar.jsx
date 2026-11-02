@@ -15,6 +15,7 @@ import {
   ChevronDown,
   UserCheck,
   PhoneCall,
+  Send,
   Sparkles,
   BookOpen,
   Image as ImageIcon,
@@ -331,16 +332,38 @@ export default function PublicNavbar({ settings }) {
             </div>
           </nav>
 
-          {/* 3. Right Action Area: Hotline, Languages, Kun/Tun Toggle, Kabinetga kirish */}
-          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 shrink-0">
-            {/* Quick Hotline Pill (Visible on large screens) */}
+          {/* 3. Right Action Area: Hotline, Telegram, Instagram, Languages, Kun/Tun Toggle, Kabinetga kirish */}
+          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2 shrink-0">
+            {/* Quick Hotline Pill */}
             <a
-              href={`tel:${settings?.phone || '+998936101774'}`}
-              className="hidden 2xl:flex items-center gap-2 h-9 px-3 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 dark:bg-gray-800/80 dark:hover:bg-gray-700 transition-colors shrink-0"
+              href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
+              className="hidden xl:flex items-center gap-2 h-9 px-3 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 dark:bg-gray-800/80 dark:hover:bg-gray-700 transition-colors shrink-0"
               title="Qo‘ng‘iroq qilish"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400 shrink-0" />
-              <span className="whitespace-nowrap">{settings?.phone || '+998 93 610 17 74'}</span>
+              <PhoneCall className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="whitespace-nowrap">{settings?.phone || '+998 (99) 541-89-89'}</span>
+            </a>
+
+            {/* Telegram Admin Quick Icon */}
+            <a
+              href={settings?.telegram || "https://t.me/educomarkaz36"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden lg:flex items-center justify-center w-9 h-9 rounded-xl text-[#229ED9] border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-[#229ED9]/15 hover:border-[#229ED9]/40 dark:bg-gray-800/80 transition-all hover:scale-105 shrink-0"
+              title="Telegram Admin (@educomarkaz36)"
+            >
+              <Send className="w-4 h-4 -ml-0.5" />
+            </a>
+
+            {/* Instagram Quick Icon */}
+            <a
+              href={settings?.instagram || "https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden lg:flex items-center justify-center w-9 h-9 rounded-xl text-pink-500 border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-pink-50 hover:border-pink-300 dark:bg-gray-800/80 dark:hover:bg-pink-950/30 transition-all hover:scale-105 shrink-0"
+              title="Instagram (@educomarkaz)"
+            >
+              <span className="text-[11px] font-black">IG</span>
             </a>
 
             {/* Language Selector Dropdown (UZ / EN / RU) */}
@@ -457,12 +480,34 @@ export default function PublicNavbar({ settings }) {
 
             <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-2.5">
               <a
-                href={`tel:${settings?.phone || '+998936101774'}`}
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors"
               >
-                <PhoneCall className="w-4 h-4 text-blue-600 dark:text-emerald-400" />
-                <span>{tr.hotline}: {settings?.phone || '+998 93 610 17 74'}</span>
+                <PhoneCall className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{tr.hotline}: {settings?.phone || '+998 (99) 541-89-89'}</span>
               </a>
+
+              {/* Mobile Quick Socials */}
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={settings?.telegram || "https://t.me/educomarkaz36"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold bg-[#229ED9]/10 text-[#229ED9] border border-[#229ED9]/30 transition-colors"
+                >
+                  <Send className="w-3.5 h-3.5 -ml-0.5" />
+                  <span>@educomarkaz36</span>
+                </a>
+                <a
+                  href={settings?.instagram || "https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold bg-pink-500/10 text-pink-600 dark:text-pink-400 border border-pink-500/30 transition-colors"
+                >
+                  <span className="text-[11px] font-black">IG</span>
+                  <span>@educomarkaz</span>
+                </a>
+              </div>
 
               {isAuthenticated ? (
                 <Link

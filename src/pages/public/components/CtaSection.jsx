@@ -165,24 +165,72 @@ export default function CtaSection({ settings, courses = [], prefilledCourse = '
             </div>
 
             {/* Direct Contact Cards */}
-            <div className="space-y-4">
+            <div className="space-y-3.5">
+              {/* Phone Call Card */}
               <a
-                href={`tel:${settings?.phone || '+998936101774'}`}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-blue-500/50 dark:hover:border-emerald-500/50 transition-all group"
+                href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-emerald-500/50 transition-all group cursor-pointer"
+                title="Qo'ng'iroq qilish"
               >
-                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-emerald-950/80 text-blue-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs">
                   <PhoneCall className="w-6 h-6" />
                 </div>
                 <div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                    Tezkor Aloqa Raqami:
+                    Tezkor Aloqa Raqami (Qo‘ng‘iroq):
                   </span>
-                  <h4 className="text-base font-extrabold text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-emerald-400 transition-colors">
-                    {settings?.phone || '+998 (93) 610-17-74'}
+                  <h4 className="text-base font-extrabold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                    {settings?.phone || '+998 (99) 541-89-89'}
                   </h4>
                 </div>
               </a>
 
+              {/* Telegram Admin Card */}
+              <a
+                href={settings?.telegram || "https://t.me/educomarkaz36"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-[#229ED9]/50 transition-all group cursor-pointer"
+                title="Telegram orqali yozish"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#229ED9]/15 dark:bg-[#229ED9]/25 text-[#229ED9] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+                  <Send className="w-6 h-6 -ml-0.5" />
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    Telegram Admin (Onlayn savol-javob):
+                  </span>
+                  <h4 className="text-base font-extrabold text-[#229ED9] group-hover:underline transition-colors flex items-center gap-2">
+                    <span>@educomarkaz36</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#229ED9]/15 text-[#229ED9] font-bold uppercase">
+                      Tezkor javob
+                    </span>
+                  </h4>
+                </div>
+              </a>
+
+              {/* Instagram Card */}
+              <a
+                href={settings?.instagram || "https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-pink-500/50 transition-all group cursor-pointer"
+                title="Instagram sahifamizga o'tish"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs font-black text-sm">
+                  IG
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                    Instagram Rasmiy Sahifamiz:
+                  </span>
+                  <h4 className="text-base font-extrabold text-pink-600 dark:text-pink-400 group-hover:underline transition-colors">
+                    @educomarkaz
+                  </h4>
+                </div>
+              </a>
+
+              {/* Address Card */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm">
                 <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                   <MapPin className="w-6 h-6" />
@@ -197,6 +245,7 @@ export default function CtaSection({ settings, courses = [], prefilledCourse = '
                 </div>
               </div>
 
+              {/* Working Hours Card */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#1a2332] border border-gray-200/80 dark:border-gray-800 shadow-sm">
                 <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
                   <Clock className="w-6 h-6" />

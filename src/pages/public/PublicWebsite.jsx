@@ -21,6 +21,7 @@ import {
   LightboxModal,
   VideoPlayerModal,
 } from './components/PublicModals';
+import { Send, Phone } from 'lucide-react';
 
 export default function PublicWebsite() {
   // Live website content states
@@ -156,6 +157,33 @@ export default function PublicWebsite() {
         {/* 13. Public Footer */}
         <PublicFooter settings={settings} />
       </main>
+
+      {/* Floating Quick Contact Dock (Telegram & Phone Call) */}
+      <div className="fixed bottom-6 right-5 sm:right-7 z-40 flex flex-col items-end gap-2.5 select-none pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+        {/* Telegram Direct Floating Button */}
+        <a
+          href={settings?.telegram || "https://t.me/educomarkaz36"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#229ED9] hover:bg-[#1b8bc2] text-white shadow-xl hover:shadow-[#229ED9]/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
+          title="Telegram orqali savol berish (@educomarkaz36)"
+        >
+          <Send className="w-4 h-4 -ml-0.5 animate-pulse" />
+          <span className="text-xs font-bold hidden sm:inline">Telegram: @educomarkaz36</span>
+          <span className="text-xs font-bold sm:hidden">Telegram</span>
+        </a>
+
+        {/* Phone Call Floating Button */}
+        <a
+          href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
+          className="group flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl hover:shadow-emerald-600/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
+          title="Tezkor qo‘ng‘iroq: +998 (99) 541-89-89"
+        >
+          <Phone className="w-4 h-4" />
+          <span className="text-xs font-bold hidden sm:inline">{settings?.phone || '+998 (99) 541-89-89'}</span>
+          <span className="text-xs font-bold sm:hidden">Qo‘ng‘iroq</span>
+        </a>
+      </div>
 
       {/* Interactive Modals */}
       {selectedCourse && (

@@ -15,7 +15,7 @@ const WEBSITE_KEYS = {
   TESTIMONIALS: 'educo_db_website_testimonials',
 };
 
-const SYNC_VERSION = 'educo_website_v6_500k_final';
+const SYNC_VERSION = 'educo_website_v7_contact_official';
 
 // --- DEFAULT RICH REALISTIC CONTENT ---
 
@@ -23,21 +23,24 @@ export const DEFAULT_WEBSITE_SETTINGS = {
   site_name: 'EDUCO LMS',
   name: 'EDUCO LMS',
   tagline: 'Kelajak kasblari va zamonaviy bilimlar akademiyasi',
-  phone: '+998 (93) 610-17-74',
-  phonePrimary: '+998 (93) 610-17-74',
-  secondary_phone: '+998 (90) 800-14-15',
-  phoneSecondary: '+998 (90) 800-14-15',
+  phone: '+998 (99) 541-89-89',
+  phonePrimary: '+998 (99) 541-89-89',
+  secondary_phone: '+998 (99) 541-89-89',
+  phoneSecondary: '+998 (99) 541-89-89',
   email: 'info@educo-lms.uz',
   address: 'Toshkent shahar, Yunusobod tumani, Amir Temur ko‘chasi, 107-B bino',
   working_hours: 'Dushanba - Shanba: 08:30 - 20:30',
   workingHours: 'Dushanba - Shanba: 08:30 - 20:30',
-  telegram: 'https://t.me/educo_lms',
-  instagram: 'https://instagram.com/educo_lms',
+  telegram: 'https://t.me/educomarkaz36',
+  telegram_admin: 'https://t.me/educomarkaz36',
+  telegramHandle: '@educomarkaz36',
+  instagram: 'https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr',
+  instagramHandle: '@educomarkaz',
   youtube: 'https://youtube.com/@educo_lms',
   facebook: 'https://facebook.com/educo.lms',
   socials: {
-    telegram: 'https://t.me/educo_lms',
-    instagram: 'https://instagram.com/educo_lms',
+    telegram: 'https://t.me/educomarkaz36',
+    instagram: 'https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr',
     youtube: 'https://youtube.com/@educo_lms',
   },
   stats_students: 1250,
@@ -1023,7 +1026,20 @@ class WebsiteService {
 
   // --- SETTINGS ---
   getSettings() {
-    return { ...DEFAULT_WEBSITE_SETTINGS, ...this._get(WEBSITE_KEYS.SETTINGS, DEFAULT_WEBSITE_SETTINGS) };
+    const raw = this._get(WEBSITE_KEYS.SETTINGS, DEFAULT_WEBSITE_SETTINGS);
+    const merged = { ...DEFAULT_WEBSITE_SETTINGS, ...raw };
+    // Auto-migrate legacy placeholder contact info to user's real official details
+    if (!merged.phone || merged.phone.includes('610-17-74')) {
+      merged.phone = DEFAULT_WEBSITE_SETTINGS.phone;
+      merged.phonePrimary = DEFAULT_WEBSITE_SETTINGS.phone;
+    }
+    if (!merged.telegram || merged.telegram.includes('educo_lms')) {
+      merged.telegram = DEFAULT_WEBSITE_SETTINGS.telegram;
+    }
+    if (!merged.instagram || merged.instagram.includes('instagram.com/educo_lms')) {
+      merged.instagram = DEFAULT_WEBSITE_SETTINGS.instagram;
+    }
+    return merged;
   }
 
   updateSettings(patch) {

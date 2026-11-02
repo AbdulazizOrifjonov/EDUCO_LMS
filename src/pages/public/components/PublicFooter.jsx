@@ -55,52 +55,68 @@ export default function PublicFooter({ settings }) {
                 'EDUCO LMS — zamonaviy ta’lim, IT, xorijiy tillar va mantiqiy fanlar akademiyasi hamda innovatsion ta’lim boshqaruv ekotizimi.'}
             </p>
 
-            {/* Social Links */}
-            <div className="flex items-center gap-2.5 pt-2">
-              {settings?.telegram && (
+            {/* Official Social & Quick Contact Badges */}
+            <div className="space-y-2 pt-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 block">
+                Rasmiy sahifalarimiz va aloqa:
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* Telegram Admin */}
                 <a
-                  href={settings.telegram}
+                  href={settings?.telegram || "https://t.me/educomarkaz36"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/10 hover:bg-blue-600 dark:hover:bg-emerald-600 text-gray-200 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-                  title="Telegram"
+                  className="flex items-center gap-2.5 p-2 rounded-xl bg-white/5 hover:bg-[#229ED9]/25 border border-white/10 hover:border-[#229ED9]/60 transition-all group"
+                  title="Telegram orqali yozish"
                 >
-                  <Send className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg bg-[#229ED9] text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    <Send className="w-4 h-4 -ml-0.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-gray-400 block leading-tight font-medium">Telegram Admin</span>
+                    <span className="text-xs font-bold text-white group-hover:text-[#229ED9] transition-colors truncate block">
+                      @educomarkaz36
+                    </span>
+                  </div>
                 </a>
-              )}
-              {settings?.instagram && (
+
+                {/* Instagram */}
                 <a
-                  href={settings.instagram}
+                  href={settings?.instagram || "https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/10 hover:bg-pink-600 text-gray-200 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-                  title="Instagram"
+                  className="flex items-center gap-2.5 p-2 rounded-xl bg-white/5 hover:bg-pink-900/25 border border-white/10 hover:border-pink-500/60 transition-all group"
+                  title="Instagram sahifamizga o'tish"
                 >
-                  <span className="text-xs font-bold">IG</span>
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform font-black text-[11px]">
+                    IG
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-gray-400 block leading-tight font-medium">Instagram</span>
+                    <span className="text-xs font-bold text-white group-hover:text-pink-400 transition-colors truncate block">
+                      @educomarkaz
+                    </span>
+                  </div>
                 </a>
-              )}
-              {settings?.youtube && (
-                <a
-                  href={settings.youtube}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/10 hover:bg-red-600 text-gray-200 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-                  title="YouTube"
-                >
-                  <span className="text-xs font-bold">YT</span>
-                </a>
-              )}
-              {settings?.facebook && (
-                <a
-                  href={settings.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-white/10 hover:bg-blue-700 text-gray-200 hover:text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
-                  title="Facebook"
-                >
-                  <span className="text-xs font-bold">FB</span>
-                </a>
-              )}
+              </div>
+
+              {/* Direct Phone Call Card */}
+              <a
+                href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/60 transition-all group"
+                title="Qo'ng'iroq qilish"
+              >
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] text-emerald-400 block leading-tight font-medium">Qo‘ng‘iroq uchun:</span>
+                  <span className="text-xs font-extrabold text-white group-hover:text-emerald-300 transition-colors">
+                    {settings?.phone || '+998 (99) 541-89-89'}
+                  </span>
+                </div>
+              </a>
             </div>
           </div>
 
@@ -219,25 +235,53 @@ export default function PublicFooter({ settings }) {
               <span className="w-2 h-2 rounded-full bg-blue-500 dark:bg-emerald-400" />
               <span>Aloqa & Manzil</span>
             </h4>
-            <div className="space-y-2.5 text-xs sm:text-sm text-gray-300 dark:text-gray-400">
+            <div className="space-y-3 text-xs sm:text-sm text-gray-300 dark:text-gray-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span>{settings?.address || 'Toshkent shahar, Yunusobod tumani, Amir Temur ko‘chasi, 107-B bino'}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0" />
-                <a href={`tel:${settings?.phone || '+998936101774'}`} className="hover:text-white transition-colors">
-                  {settings?.phone || '+998 (93) 610-17-74'}
-                </a>
+                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div>
+                  <span className="text-[10px] text-gray-400 block leading-tight">Telefon raqam:</span>
+                  <a
+                    href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
+                    className="hover:text-emerald-400 font-bold text-white transition-colors"
+                  >
+                    {settings?.phone || '+998 (99) 541-89-89'}
+                  </a>
+                </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0" />
-                <a href={`mailto:${settings?.email || 'info@educo-lms.uz'}`} className="hover:text-white transition-colors">
-                  {settings?.email || 'info@educo-lms.uz'}
-                </a>
+                <Send className="w-4 h-4 text-[#229ED9] shrink-0" />
+                <div>
+                  <span className="text-[10px] text-gray-400 block leading-tight">Telegram Admin:</span>
+                  <a
+                    href={settings?.telegram || "https://t.me/educomarkaz36"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[#229ED9] font-bold text-white transition-colors"
+                  >
+                    @educomarkaz36
+                  </a>
+                </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <Clock className="w-4 h-4 text-blue-400 dark:text-emerald-400 shrink-0" />
+                <span className="w-4 h-4 text-pink-400 font-black text-[11px] shrink-0 text-center">IG</span>
+                <div>
+                  <span className="text-[10px] text-gray-400 block leading-tight">Instagram sahifa:</span>
+                  <a
+                    href={settings?.instagram || "https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-pink-400 font-bold text-white transition-colors"
+                  >
+                    @educomarkaz
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Clock className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>{settings?.working_hours || 'Dushanba - Shanba: 08:30 - 20:30'}</span>
               </div>
             </div>
