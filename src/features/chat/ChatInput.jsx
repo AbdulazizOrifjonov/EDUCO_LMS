@@ -37,6 +37,7 @@ export default function ChatInput({
   const { t, i18n } = useTranslation();
   const [inputText, setInputText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [showAudioRecorder, setShowAudioRecorder] = useState(false);
   const [showVideoRecorder, setShowVideoRecorder] = useState(false);
   const [videoAutoStart, setVideoAutoStart] = useState(false);
@@ -49,7 +50,36 @@ export default function ChatInput({
   const [selectedAttachments, setSelectedAttachments] = useState([]);
 
   const textareaRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const attachMenuRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
+  const videoCamInputRef = useRef(null);
+  const documentInputRef = useRef(null);
+
+  // Close attach menu on click outside or escape key
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target)) {
+        setShowAttachMenu(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowAttachMenu(false);
+        setShowEmojiPicker(false);
+      }
+    };
+    if (showAttachMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showAttachMenu]);
 
   // Auto-resize textarea as user types
   useEffect(() => {
@@ -111,19 +141,20 @@ export default function ChatInput({
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Validate size (max 50MB per file)
+    // Validate size (max 100MB per file to allow HD video)
     const validFiles = files.filter((f) => {
-      if (f.size > 50 * 1024 * 1024) {
-        alert(`${f.name} exceeds the maximum file size limit of 50MB.`);
+      if (f.size > 100 * 1024 * 1024) {
+        toast.error(`${f.name} hajmi 100MB dan oshmasligi kerak.`);
         return false;
       }
       return true;
     });
 
     setSelectedAttachments((prev) => [...prev, ...validFiles]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (e.target) {
+      e.target.value = '';
     }
+    setShowAttachMenu(false);
   };
 
   const removeAttachment = (index) => {
@@ -388,12 +419,13 @@ export default function ChatInput({
         </div>
       )}
 
-      {/* Selected Attachments Preview with Rich Image Thumbnails */}
+      {/* Selected Attachments Preview with Rich Image & Video Thumbnails */}
       {selectedAttachments.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-2.5 p-2 bg-gray-50/90 dark:bg-gray-800/80 rounded-2xl border border-gray-200 dark:border-gray-700 animate-in fade-in duration-150">
           {selectedAttachments.map((file, idx) => {
             const isImage = file.type?.startsWith('image/');
-            const previewUrl = isImage ? URL.createObjectURL(file) : null;
+            const isVideo = file.type?.startsWith('video/') || /\.(mp4|webm|mov|mkv)$/i.test(file.name);
+            const previewUrl = (isImage || isVideo) ? URL.createObjectURL(file) : null;
 
             return (
               <div
@@ -408,6 +440,11 @@ export default function ChatInput({
                       className="w-full h-full object-cover"
                     />
                   </div>
+                ) : isVideo ? (
+                  <div className="w-12 h-12 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex flex-col items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800 shadow-2xs">
+                    <Video className="w-5 h-5" />
+                    <span className="text-[8px] font-black uppercase mt-0.5">Video</span>
+                  </div>
                 ) : (
                   <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                     <File className="w-4 h-4" />
@@ -419,7 +456,7 @@ export default function ChatInput({
                     {file.name}
                   </p>
                   <p className="text-[10px] text-gray-400 font-mono">
-                    {file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}
+                    {file.size ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : ''}
                   </p>
                 </div>
 
@@ -521,22 +558,132 @@ export default function ChatInput({
                 className="flex-1 min-w-0 bg-transparent border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm leading-relaxed max-h-32 resize-none py-2 px-1 focus:outline-none focus:ring-0"
               />
 
-              {/* Right inside pill: File Paperclip */}
-              <div className="shrink-0 mb-0.5">
+              {/* Right inside pill: File Paperclip with Telegram Attachment Popover */}
+              <div className="shrink-0 mb-0.5 relative" ref={attachMenuRef}>
+                {/* Telegram Attach Popover Menu */}
+                {showAttachMenu && (
+                  <div className="absolute bottom-12 right-0 sm:right-auto sm:left-0 z-50 w-60 p-2 rounded-2xl bg-white/95 dark:bg-[#1f293d]/95 backdrop-blur-xl border border-gray-200/90 dark:border-gray-700/80 shadow-2xl animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-150">
+                    <div className="space-y-1">
+                      {/* 1. Kamera (Rasmga olish) */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          cameraInputRef.current?.click();
+                          setShowAttachMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-800 dark:text-gray-100 transition-colors text-left cursor-pointer group"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform shrink-0">
+                          <Camera className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold block leading-tight">Rasmga olish</span>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">Kamera orqali rasm</span>
+                        </div>
+                      </button>
+
+                      {/* 2. Galereya (Rasm & Video) */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          galleryInputRef.current?.click();
+                          setShowAttachMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-800 dark:text-gray-100 transition-colors text-left cursor-pointer group"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform shrink-0">
+                          <ImageIcon className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold block leading-tight">Galereya</span>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">Rasm va videolar</span>
+                        </div>
+                      </button>
+
+                      {/* 3. Video olish (Kamera) */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          videoCamInputRef.current?.click();
+                          setShowAttachMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-800 dark:text-gray-100 transition-colors text-left cursor-pointer group"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform shrink-0">
+                          <Video className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold block leading-tight">Video olish</span>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">Kameradan video yozish</span>
+                        </div>
+                      </button>
+
+                      {/* 4. Fayl / Hujjat */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          documentInputRef.current?.click();
+                          setShowAttachMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-800 dark:text-gray-100 transition-colors text-left cursor-pointer group"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-slate-700 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform shrink-0">
+                          <File className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold block leading-tight">Fayl / Hujjat</span>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">PDF, ZIP, hujjatlar</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Hidden File Inputs */}
                 <input
-                  ref={fileInputRef}
+                  ref={cameraInputRef}
                   type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <input
+                  ref={galleryInputRef}
+                  type="file"
+                  accept="image/*,video/*"
                   multiple
                   onChange={handleFileSelect}
                   className="hidden"
                 />
+                <input
+                  ref={videoCamInputRef}
+                  type="file"
+                  accept="video/*"
+                  capture="environment"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <input
+                  ref={documentInputRef}
+                  type="file"
+                  accept="*/*"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
                 <button
                   type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-1.5 sm:p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  title={t('chat.attachment', 'Fayl biriktirish')}
+                  onClick={() => setShowAttachMenu((prev) => !prev)}
+                  className={`p-1.5 sm:p-2 rounded-full transition-all cursor-pointer ${
+                    showAttachMenu
+                      ? 'bg-blue-100 dark:bg-emerald-950/60 text-blue-600 dark:text-emerald-400 rotate-45 scale-105'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-black/5 dark:hover:bg-white/5'
+                  }`}
+                  title={t('chat.attachment', 'Fayl biriktirish (Kamera, Galereya, Video, Hujjat)')}
                 >
-                  <Paperclip className="w-5 h-5" />
+                  <Paperclip className="w-5 h-5 transition-transform" />
                 </button>
               </div>
             </div>

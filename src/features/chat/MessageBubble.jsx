@@ -27,6 +27,7 @@ export default function MessageBubble({
   message,
   currentUserId,
   canDelete = false,
+  searchQuery = '',
   onReply,
   onDelete,
   onImageClick,
@@ -412,6 +413,25 @@ export default function MessageBubble({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const renderHighlightedText = (text, query) => {
+    if (!query || !query.trim() || !text) return text;
+    try {
+      const escaped = query.trim().replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+      return parts.map((part, i) =>
+        part.toLowerCase() === query.trim().toLowerCase() ? (
+          <mark key={i} className="bg-amber-300 dark:bg-amber-500/80 text-black px-1 rounded font-bold shadow-2xs">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      );
+    } catch (_) {
+      return text;
+    }
+  };
+
   const otherViewers = (message.seen_by || []).filter(
     (s) => String(s.user_id) !== String(message.sender_id)
   );
@@ -731,7 +751,7 @@ export default function MessageBubble({
           {/* Text Message Content */}
           {displayMessageText && (
             <p className="whitespace-pre-wrap leading-relaxed select-text font-normal">
-              {displayMessageText}
+              {renderHighlightedText(displayMessageText, searchQuery)}
             </p>
           )}
 

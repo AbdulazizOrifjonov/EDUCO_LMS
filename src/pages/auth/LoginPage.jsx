@@ -169,7 +169,43 @@ export default function LoginPage() {
           break;
       }
     } catch (err) {
-      setServerError(err.message || t('common.error', 'An error occurred during sign in'));
+      setServerError(err.message || 'Kirishda xatolik yuz berdi');
+    }
+  };
+
+  const handleQuickDemoLogin = async (username, password) => {
+    setValue('username', username, { shouldValidate: true });
+    setValue('password', password, { shouldValidate: true });
+    setServerError('');
+    try {
+      const { data, error } = await signIn(username, password);
+      if (error) {
+        setServerError(error.message || 'Kirishda xatolik yuz berdi');
+        return;
+      }
+      try {
+        window.localStorage?.setItem?.('educo_remember_username', username);
+      } catch (_) {}
+
+      const rawRole = data?.user?.user_metadata?.role || 'student';
+      const userRole = String(rawRole).toLowerCase().trim();
+      switch (userRole) {
+        case 'owner':
+          navigate('/owner/dashboard', { replace: true });
+          break;
+        case 'admin':
+          navigate('/admin/dashboard', { replace: true });
+          break;
+        case 'teacher':
+          navigate('/teacher/dashboard', { replace: true });
+          break;
+        case 'student':
+        default:
+          navigate('/student/dashboard', { replace: true });
+          break;
+      }
+    } catch (err) {
+      setServerError(err.message || 'Kirishda xatolik yuz berdi');
     }
   };
 
@@ -424,6 +460,80 @@ export default function LoginPage() {
                 {t('auth.signIn', 'Sign In')}
               </Button>
             </form>
+
+            {/* Quick Demo Login Section (As requested by user: Boshliq va boshqa rollar) */}
+            <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  Tezkor Demo kirish:
+                </span>
+                <span className="text-[10px] text-gray-400 font-medium">1-bosishda kirish</span>
+              </div>
+
+              {/* Featured Boshliq Button */}
+              <button
+                type="button"
+                onClick={() => handleQuickDemoLogin('abbosbek', 'AbbosBek1415')}
+                disabled={isSubmitting || authLoading}
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 hover:from-amber-500/25 hover:to-orange-500/20 border-2 border-amber-400 dark:border-amber-600/60 text-amber-950 dark:text-amber-200 font-bold text-sm shadow-xs transition-all active:scale-[0.98] cursor-pointer mb-2.5"
+                title="Boshliq kabinetiga 1 bosishda kirish"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center text-base shadow-xs shrink-0">
+                    👑
+                  </div>
+                  <div className="text-left">
+                    <div className="leading-tight flex items-center gap-1.5">
+                      <span>Boshliq (Abbosbek)</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-black uppercase">Owner</span>
+                    </div>
+                    <span className="text-[11px] font-normal text-amber-800/80 dark:text-amber-300/80">
+                      abbosbek • AbbosBek1415
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold shrink-0 shadow-xs">
+                  Kirish &rarr;
+                </span>
+              </button>
+
+              {/* Other demo roles in a row */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin('admin', 'Admin123!')}
+                  disabled={isSubmitting || authLoading}
+                  className="flex flex-col items-center p-2 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-100/70 transition-colors cursor-pointer text-center"
+                >
+                  <span className="text-base mb-0.5">👨‍💼</span>
+                  <span className="text-xs font-bold text-blue-900 dark:text-blue-300">Admin</span>
+                  <span className="text-[9px] text-gray-500 dark:text-gray-400">admin</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin('teacher', 'Teacher123!')}
+                  disabled={isSubmitting || authLoading}
+                  className="flex flex-col items-center p-2 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/50 dark:bg-purple-950/30 hover:bg-purple-100/70 transition-colors cursor-pointer text-center"
+                >
+                  <span className="text-base mb-0.5">👨‍🏫</span>
+                  <span className="text-xs font-bold text-purple-900 dark:text-purple-300">O‘qituvchi</span>
+                  <span className="text-[9px] text-gray-500 dark:text-gray-400">teacher</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoLogin('student', 'Student123!')}
+                  disabled={isSubmitting || authLoading}
+                  className="flex flex-col items-center p-2 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/70 transition-colors cursor-pointer text-center"
+                >
+                  <span className="text-base mb-0.5">🎓</span>
+                  <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">O‘quvchi</span>
+                  <span className="text-[9px] text-gray-500 dark:text-gray-400">student</span>
+                </button>
+              </div>
+            </div>
 
             {/* Quick Demo Switcher Tip */}
             <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
