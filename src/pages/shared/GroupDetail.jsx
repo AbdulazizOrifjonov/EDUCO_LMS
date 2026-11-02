@@ -22,6 +22,7 @@ import {
   Tag,
   Percent,
   DollarSign,
+  Edit2,
   Edit3,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
@@ -42,6 +43,7 @@ import {
   transferStudent,
   uploadGroupAvatar,
   updateStudentDiscount,
+  deleteGroup,
 } from '@/services/groupService';
 import { getStudents } from '@/services/userService';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
@@ -337,20 +339,42 @@ export default function GroupDetail({ groupId: propGroupId }) {
 
   const daysOfWeek = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+  const handleDeleteCurrentGroup = async () => {
+    if (!group) return;
+    const ok = await confirmDelete({
+      title: 'Guruhni butunlay o‘chirish',
+      itemName: `${group.name} (${group.code || ''})`.trim(),
+      description: 'Diqqat: Ushbu guruh tizimdan butunlay o‘chiriladi. Bu amalni ortga qaytarib bo‘lmaydi!',
+      confirmButtonText: 'Ha, guruh butunlay o‘chirilsin',
+    });
+    if (!ok) return;
+
+    try {
+      await deleteGroup(group.id);
+      toast.success(t('groups.deleteSuccess', 'Guruh muvaffaqiyatli o‘chirildi!'));
+      navigate(`/${currentUserRole}/groups`);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || t('common.error', 'Guruhni o‘chirishda xatolik yuz berdi'));
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header & Back Button */}
       {/* Group Profile Header Card */}
       <Card className="p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-          <Button
-            variant="outline"
-            size="sm"
-            icon={ArrowLeft}
-            onClick={() => navigate(-1)}
-            className="!p-2 h-9 w-9 shrink-0 self-start"
-            title="Orqaga"
-          />
+          <div className="flex items-center gap-2 self-start shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              icon={ArrowLeft}
+              onClick={() => navigate(-1)}
+              className="!p-2 h-9 w-9"
+              title="Orqaga"
+            />
+          </div>
 
           {/* Group Avatar with Camera Upload */}
           <div className="relative group shrink-0">
@@ -452,6 +476,30 @@ export default function GroupDetail({ groupId: propGroupId }) {
               )}
             </div>
           </div>
+
+          {/* Group Management Actions (Owner & Admin) */}
+          {!isTeacher && (
+            <div className="flex items-center gap-2 self-center sm:self-start shrink-0 mt-2 sm:mt-0">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Edit2}
+                onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
+                className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+              >
+                Tahrirlash
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                onClick={handleDeleteCurrentGroup}
+                className="text-xs font-semibold"
+              >
+                Guruhni o‘chirish
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 

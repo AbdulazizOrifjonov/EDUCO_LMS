@@ -20,6 +20,8 @@ import {
   ChevronDown,
   MoreVertical,
   Phone,
+  Trash2,
+  Eye,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -35,6 +37,7 @@ import {
   toggleUserStatus,
   resetUserPassword,
   exportUsersToCSV,
+  deleteUser,
 } from '@/services/userService';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone } from '@/utils/phoneFormat';
@@ -51,10 +54,11 @@ export default function UserManagement() {
   const urlRole = searchParams.get('role');
   const { searchQuery, setSearchQuery } = useSearch();
 
+  const isTeacher = String(currentUserRole).toLowerCase() === 'teacher';
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchQuery || '');
-  const [roleFilter, setRoleFilter] = useState(urlRole || 'all');
+  const [roleFilter, setRoleFilter] = useState(isTeacher ? ROLES.STUDENT : (urlRole || 'all'));
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -72,14 +76,19 @@ export default function UserManagement() {
   // Modal state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserForView, setSelectedUserForView] = useState(null);
   const [formDefaultRole, setFormDefaultRole] = useState(ROLES.STUDENT);
 
   // Sync roleFilter if URL changes
   useEffect(() => {
+    if (isTeacher) {
+      setRoleFilter(ROLES.STUDENT);
+      return;
+    }
     if (urlRole && ['owner', 'admin', 'teacher', 'student', 'all'].includes(urlRole)) {
       setRoleFilter(urlRole);
     }
-  }, [urlRole]);
+  }, [urlRole, isTeacher]);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -142,6 +151,72 @@ export default function UserManagement() {
   const handleResetPassword = (user) => {
     setSelectedUser(user);
     setIsFormOpen(true);
+  };
+
+  /**
+   * Strict Hierarchical Delete Permissions:
+   * - Owner: Can delete Admin, Teacher, Student (cannot delete other Owner or self).
+   * - Admin: Can delete Teacher, Student (cannot delete other Admin, Owner, or self).
+   * - Teacher: Can ONLY delete Student (cannot delete other Teacher, Admin, Owner, or self).
+   */
+  const canDeleteUser = (row) => {
+    if (!row || !profile) return false;
+    // Cannot delete own active account
+    if (row.id === profile.id) return false;
+
+    const myRole = String(profile.role || currentUserRole || '').toLowerCase();
+    const theirRole = String(row.role || 'student').toLowerCase();
+
+    // Owner can delete anyone below Owner
+    if (myRole === ROLES.OWNER || myRole === 'owner') {
+      return theirRole !== ROLES.OWNER && theirRole !== 'owner';
+    }
+
+    // Admin can delete Teacher and Student (cannot delete other Admin or Owner)
+    if (myRole === ROLES.ADMIN || myRole === 'admin') {
+      return (
+        theirRole === ROLES.TEACHER ||
+        theirRole === ROLES.STUDENT ||
+        theirRole === 'teacher' ||
+        theirRole === 'student'
+      );
+    }
+
+    // Teacher can ONLY delete Student
+    if (myRole === ROLES.TEACHER || myRole === 'teacher') {
+      return theirRole === ROLES.STUDENT || theirRole === 'student';
+    }
+
+    return false;
+  };
+
+  const handleDeleteUser = async (user) => {
+    if (!canDeleteUser(user)) {
+      toast.error(t('users.cannotDeleteRole', "Siz ushbu roldagi foydalanuvchini o'chira olmaysiz!"));
+      return;
+    }
+
+    const roleLabel = t(`roles.${user.role}`, user.role);
+    const ok = await confirmDelete({
+      title: t('users.deleteConfirmTitle', "Foydalanuvchini butunlay o‘chirish"),
+      itemName: `${user.fullName || user.username} (${roleLabel})`,
+      description: t(
+        'users.deleteConfirmDesc',
+        "Ushbu foydalanuvchi hisobi va unga tegishli barcha ma’lumotlar tizimdan butunlay o‘chiriladi. Ushbu amalni qaytarib bo‘lmaydi!"
+      ),
+      confirmButtonText: t('common.yesDelete', "Ha, o‘chirilsin"),
+    });
+
+    if (!ok) return;
+
+    try {
+      await deleteUser(user.id);
+      toast.success(t('users.deletedSuccess', "Foydalanuvchi tizimdan muvaffaqiyatli o‘chirildi"));
+      fetchUsers();
+    } catch (err) {
+      console.error('Delete user error:', err);
+      toast.error(err.message || t('common.error', "Foydalanuvchini o‘chirishda xatolik yuz berdi"));
+    }
   };
 
   const handleExportCSV = () => {
@@ -336,6 +411,15 @@ export default function UserManagement() {
           <Button
             variant="ghost"
             size="sm"
+            className="!p-1.5 h-8 w-8 text-blue-600 dark:text-blue-400 hover:bg-blue-500/15 rounded-lg"
+            title={t('common.view', 'Batafsil ko‘rish')}
+            onClick={() => setSelectedUserForView(row)}
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             className="!p-1.5 h-8 w-8 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15 rounded-lg"
             title={t('common.edit', 'Tahrirlash')}
             onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
@@ -370,6 +454,17 @@ export default function UserManagement() {
               )}
             </Button>
           )}
+          {canDeleteUser(row) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="!p-1.5 h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 rounded-lg"
+              title={t('common.delete', 'O‘chirish')}
+              onClick={() => handleDeleteUser(row)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -399,15 +494,17 @@ export default function UserManagement() {
             {t('common.export', 'Export CSV')}
           </Button>
 
-          <Button
-            variant="outline"
-            size="md"
-            icon={UserCheck}
-            className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold"
-            onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.TEACHER}`)}
-          >
-            {t('users.createTeacher', "O'qituvchi qo'shish")}
-          </Button>
+          {!isTeacher && (
+            <Button
+              variant="outline"
+              size="md"
+              icon={UserCheck}
+              className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold"
+              onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.TEACHER}`)}
+            >
+              {t('users.createTeacher', "O'qituvchi qo'shish")}
+            </Button>
+          )}
 
           <Button
             variant="primary"
@@ -455,14 +552,18 @@ export default function UserManagement() {
             },
           };
 
-          return [
-            { key: 'all', label: t('users.allMembersTab', 'Barcha foydalanuvchilar'), icon: Users },
-            { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap },
-            { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), icon: UserCheck },
-            ...(currentUserRole === ROLES.OWNER
-              ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), icon: Shield }]
-              : []),
-          ].map((tab) => {
+          const tabs = isTeacher
+            ? [{ key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap }]
+            : [
+                { key: 'all', label: t('users.allMembersTab', 'Barcha foydalanuvchilar'), icon: Users },
+                { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap },
+                { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), icon: UserCheck },
+                ...(currentUserRole === ROLES.OWNER || currentUserRole === 'owner'
+                  ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), icon: Shield }]
+                  : []),
+              ];
+
+          return tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = roleFilter === tab.key;
             const cfg = tabColorMap[tab.key] || tabColorMap.all;
@@ -705,6 +806,15 @@ export default function UserManagement() {
                       <Button
                         variant="outline"
                         size="sm"
+                        icon={Eye}
+                        className="flex-1 justify-center text-xs py-1.5 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                        onClick={() => setSelectedUserForView(row)}
+                      >
+                        {t('common.view', 'Batafsil')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         icon={Edit2}
                         className="flex-1 justify-center text-xs py-1.5 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
                         onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
@@ -734,6 +844,17 @@ export default function UserManagement() {
                       >
                         {row.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                       </Button>
+                      {canDeleteUser(row) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="!p-2 shrink-0 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                          title={t('common.delete', 'O‘chirish')}
+                          onClick={() => handleDeleteUser(row)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );
@@ -795,6 +916,136 @@ export default function UserManagement() {
           onSuccess={fetchUsers}
         />
       )}
+
+      {/* User Details (Read / View) Modal */}
+      <Modal
+        isOpen={Boolean(selectedUserForView)}
+        onClose={() => setSelectedUserForView(null)}
+        title="Foydalanuvchi ma‘lumotlari"
+        subtitle="Hisob tafsilotlari, roli va bog‘lanish ma‘lumotlari"
+        size="md"
+      >
+        {selectedUserForView && (
+          <div className="space-y-4">
+            {/* Header info */}
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-800">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+                {selectedUserForView.avatar_url ? (
+                  <img
+                    src={selectedUserForView.avatar_url}
+                    alt={selectedUserForView.fullName}
+                    className="w-full h-full object-cover rounded-2xl"
+                  />
+                ) : (
+                  selectedUserForView.fullName?.charAt(0) || selectedUserForView.first_name?.charAt(0) || 'U'
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100">
+                    {selectedUserForView.fullName || `${selectedUserForView.first_name || ''} ${selectedUserForView.last_name || ''}`.trim() || selectedUserForView.username}
+                  </h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60">
+                    {t(`roles.${selectedUserForView.role}`, selectedUserForView.role)}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono">
+                  Login / Username: @{selectedUserForView.username || selectedUserForView.id}
+                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <Badge variant={selectedUserForView.is_active ? 'success' : 'danger'} size="sm">
+                    {selectedUserForView.is_active ? 'Faol hisob' : 'Bloklangan'}
+                  </Badge>
+                  {selectedUserForView.created_at && (
+                    <span className="text-[11px] text-gray-400">
+                      Qo‘shilgan: {new Date(selectedUserForView.created_at).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Contacts card */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Bog‘lanish ma‘lumotlari:
+              </p>
+              <div className="p-3.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-surface-dark-secondary space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">Asosiy telefon raqami:</span>
+                  <span className="font-mono font-bold text-gray-900 dark:text-gray-100">
+                    {selectedUserForView.phone ? formatUzPhone(selectedUserForView.phone) : 'Kiritilmagan'}
+                  </span>
+                </div>
+
+                {selectedUserForView.father_phone && (
+                  <div className="flex items-center justify-between pt-1 border-t border-gray-200/60 dark:border-gray-700/60">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-semibold">Otasi raqami:</span>
+                    <span className="font-mono font-bold text-gray-800 dark:text-gray-200">
+                      {formatUzPhone(selectedUserForView.father_phone)}
+                    </span>
+                  </div>
+                )}
+
+                {selectedUserForView.mother_phone && (
+                  <div className="flex items-center justify-between pt-1 border-t border-gray-200/60 dark:border-gray-700/60">
+                    <span className="text-rose-600 dark:text-rose-400 font-semibold">Onasi raqami:</span>
+                    <span className="font-mono font-bold text-gray-800 dark:text-gray-200">
+                      {formatUzPhone(selectedUserForView.mother_phone)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={Edit2}
+                onClick={() => {
+                  const uid = selectedUserForView.id;
+                  setSelectedUserForView(null);
+                  navigate(`/${currentUserRole}/users/edit/${uid}`);
+                }}
+              >
+                Tahrirlash
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={KeyRound}
+                className="text-amber-600 dark:text-amber-400"
+                onClick={() => {
+                  const u = selectedUserForView;
+                  setSelectedUserForView(null);
+                  handleResetPassword(u);
+                }}
+              >
+                Parolni tiklash
+              </Button>
+              {canDeleteUser(selectedUserForView) && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                  onClick={() => handleDeleteUser(selectedUserForView)}
+                >
+                  O‘chirish
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedUserForView(null)}
+              >
+                Yopish
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

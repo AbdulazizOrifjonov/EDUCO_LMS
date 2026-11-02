@@ -96,6 +96,9 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
               }`}
               style={{
                 backgroundImage: `url('${slide.image_url || slide.image || '/educo-logo.png'}')`,
+                backgroundSize: slide.fit_mode === 'contain' ? 'contain' : 'cover',
+                backgroundPosition: slide.object_position || 'center',
+                backgroundRepeat: 'no-repeat',
               }}
             />
 

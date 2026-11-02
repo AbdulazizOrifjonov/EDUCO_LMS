@@ -45,7 +45,8 @@ export default function VideoSection({ videos = [], onSelectVideo, onPlayVideo }
                     src={video.thumbnail || video.image || '/educo-logo.png'}
                     alt={video.title}
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 opacity-90"
+                    style={{ objectFit: video.fit_mode || 'cover', objectPosition: video.object_position || 'center' }}
+                    className="w-full h-full group-hover:scale-108 transition-transform duration-500 opacity-90"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />

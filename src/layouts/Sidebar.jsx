@@ -493,7 +493,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={() => {
-              navigate('/');
+              window.open('/website', '_blank', 'noopener,noreferrer');
               onCloseMobile();
             }}
             className={`w-full flex items-center rounded-xl p-2.5 text-xs font-bold text-white transition-all group shadow-xs cursor-pointer border ${
@@ -501,7 +501,7 @@ export default function Sidebar({
                 ? 'justify-center bg-white/10 hover:bg-white/20 border-white/15'
                 : 'gap-2.5 bg-gradient-to-r from-blue-500/25 to-indigo-500/25 hover:from-blue-500/40 hover:to-indigo-500/40 dark:from-emerald-500/25 dark:to-teal-500/25 dark:hover:from-emerald-500/40 dark:hover:to-teal-500/40 border-white/20'
             }`}
-            title="Veb-saytga o‘tish (Bosh sahifa)"
+            title="Veb-saytga o‘tish (Yangi oynada ochiladi)"
           >
             <Globe className="h-4 w-4 shrink-0 text-blue-300 dark:text-emerald-300 group-hover:scale-110 transition-transform" />
             {(!collapsed || mobileOpen) && (

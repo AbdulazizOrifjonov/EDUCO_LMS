@@ -156,7 +156,10 @@ const courseSchema = z.object({
   name: z.string().min(2, 'Course name must be at least 2 characters'),
   code: z.string().min(2, 'Course code is required (e.g. FE-1.1)'),
   description: z.string().optional().or(z.literal('')),
-  monthlyFee: z.coerce.number().min(0, 'Monthly fee cannot be negative'),
+  monthlyFee: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
+    z.number().min(0, 'Monthly fee cannot be negative')
+  ).default(0),
   color: z.string().default('#123D78'),
   isActive: z.boolean().default(true),
 });
@@ -206,7 +209,7 @@ export default function CourseForm({
       name: '',
       code: '',
       description: '',
-      monthlyFee: 0,
+      monthlyFee: '',
       color: '#123D78',
       isActive: true,
     },
@@ -228,7 +231,7 @@ export default function CourseForm({
         name: course.name || '',
         code: course.code || '',
         description: course.description || '',
-        monthlyFee: course.monthly_fee !== undefined ? course.monthly_fee : 0,
+        monthlyFee: course.monthly_fee !== undefined ? course.monthly_fee : (course.monthlyFee !== undefined ? course.monthlyFee : ''),
         color: course.color || '#123D78',
         isActive: course.is_active !== undefined ? course.is_active : true,
       });
@@ -238,7 +241,7 @@ export default function CourseForm({
         name: '',
         code: '',
         description: '',
-        monthlyFee: 0,
+        monthlyFee: '',
         color: '#123D78',
         isActive: true,
       });

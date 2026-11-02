@@ -47,7 +47,8 @@ export default function TeachersSection({ teachers = [], onSelectTeacher = () =>
                     src={teacher.image_url || teacher.photo || teacher.photo_url || '/educo-logo.png'}
                     alt={teacher.full_name || teacher.name}
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                    className="w-full h-full object-cover object-top group-hover:scale-106 transition-transform duration-500"
+                    style={{ objectFit: teacher.fit_mode || 'cover', objectPosition: teacher.object_position || 'top' }}
+                    className="w-full h-full group-hover:scale-106 transition-transform duration-500"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />

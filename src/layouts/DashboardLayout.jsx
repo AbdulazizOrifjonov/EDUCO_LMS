@@ -20,6 +20,7 @@ import {
   ArrowLeft,
   X,
   Download,
+  Globe,
 } from 'lucide-react';
 import InstallAppModal from '@/components/InstallAppModal';
 import Sidebar from './Sidebar';
@@ -529,6 +530,18 @@ export default function DashboardLayout({
                     </span>
                   </button>
                 )}
+
+                {/* Go to Website Quick Header Button */}
+                <button
+                  type="button"
+                  onClick={() => window.open('/website', '_blank', 'noopener,noreferrer')}
+                  className="h-10 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-gray-100/90 hover:bg-gray-200/90 dark:bg-gray-800/80 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                  title="Rasmiy veb-saytga o‘tish (Yangi oynada ochiladi)"
+                >
+                  <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
+                  <span className="hidden xl:inline">Veb-sayt</span>
+                  <span className="hidden md:inline xl:hidden">Sayt</span>
+                </button>
 
                 {/* Install App Button */}
                 <button

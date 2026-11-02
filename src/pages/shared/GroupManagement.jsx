@@ -12,6 +12,7 @@ import {
   Edit2,
   Archive,
   RotateCcw,
+  Trash2,
   Clock,
   Sparkles,
   User,
@@ -29,6 +30,7 @@ import { toast } from '@/components/ui/Toast';
 import {
   getGroups,
   updateGroup,
+  deleteGroup,
 } from '@/services/groupService';
 import { getCourses } from '@/services/courseService';
 import { getTeachers } from '@/services/userService';
@@ -163,6 +165,25 @@ export default function GroupManagement() {
       fetchGroups();
     } catch (err) {
       toast.error(t('common.error', 'Failed to update group status'));
+    }
+  };
+
+  const handleDeleteGroup = async (group) => {
+    const ok = await confirmDelete({
+      title: 'Guruhni butunlay o‘chirish',
+      itemName: `${group.name} (${group.code || ''})`.trim(),
+      description: 'Diqqat: Ushbu guruh tizimdan butunlay o‘chiriladi. Bu amalni ortga qaytarib bo‘lmaydi!',
+      confirmButtonText: 'Ha, guruh butunlay o‘chirilsin',
+    });
+    if (!ok) return;
+
+    try {
+      await deleteGroup(group.id);
+      toast.success(t('groups.deleteSuccess', 'Guruh muvaffaqiyatli o‘chirildi!'));
+      fetchGroups();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || t('common.error', 'Guruhni o‘chirishda xatolik yuz berdi'));
     }
   };
 
@@ -321,8 +342,8 @@ export default function GroupManagement() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
-                  title={t('common.edit', 'Edit Group')}
+                  className="!p-1.5 h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg"
+                  title={t('common.edit', 'Tahrirlash')}
                   onClick={() => navigate(`/${currentUserRole}/groups/edit/${row.id}`)}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -330,12 +351,12 @@ export default function GroupManagement() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`!p-1.5 h-8 w-8 ${
+                  className={`!p-1.5 h-8 w-8 rounded-lg ${
                     row.status === 'archived'
-                      ? 'text-gray-500 hover:text-emerald-600'
-                      : 'text-gray-500 hover:text-brand-red'
+                      ? 'text-emerald-600 hover:bg-emerald-500/10'
+                      : 'text-amber-600 hover:bg-amber-500/10'
                   }`}
-                  title={row.status === 'archived' ? t('common.restore', 'Restore') : t('common.archive', 'Archive')}
+                  title={row.status === 'archived' ? t('common.restore', 'Qayta faollashtirish') : t('common.archive', 'Arxivlash')}
                   onClick={() => handleToggleArchive(row)}
                 >
                   {row.status === 'archived' ? (
@@ -343,6 +364,15 @@ export default function GroupManagement() {
                   ) : (
                     <Archive className="w-4 h-4" />
                   )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="!p-1.5 h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 rounded-lg"
+                  title={t('common.delete', 'Butunlay o‘chirish')}
+                  onClick={() => handleDeleteGroup(row)}
+                >
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </>
             )}
@@ -627,6 +657,15 @@ export default function GroupManagement() {
                             ) : (
                               <Archive className="w-4 h-4" />
                             )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="!p-2 shrink-0 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15"
+                            title={t('common.delete', 'Butunlay o‘chirish')}
+                            onClick={() => handleDeleteGroup(group)}
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </>
                       )}

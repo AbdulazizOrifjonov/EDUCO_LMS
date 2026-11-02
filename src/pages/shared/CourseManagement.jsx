@@ -6,12 +6,16 @@ import {
   Plus,
   Search,
   Edit2,
+  Eye,
+  Trash2,
   Archive,
   RotateCcw,
   Users,
   Compass,
   Layers,
   Sparkles,
+  DollarSign,
+  CheckCircle,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -25,6 +29,7 @@ import { toast } from '@/components/ui/Toast';
 import {
   getCourses,
   archiveCourse,
+  deleteCourse,
   getLearningDirections,
 } from '@/services/courseService';
 import { useSearch } from '@/context/SearchContext';
@@ -57,6 +62,7 @@ export default function CourseManagement() {
   // Modals
   const [isDirectionsModalOpen, setIsDirectionsModalOpen] = useState(false);
   const [directions, setDirections] = useState([]);
+  const [selectedCourseForView, setSelectedCourseForView] = useState(null);
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);
@@ -117,6 +123,28 @@ export default function CourseManagement() {
       fetchCourses();
     } catch (err) {
       toast.error(t('common.error', 'Failed to update course status'));
+    }
+  };
+
+  const handleDeleteCourse = async (course) => {
+    const ok = await confirmDelete({
+      title: 'Kursni butunlay o‘chirish',
+      itemName: `${course.name} (${course.code})`,
+      description: 'Diqqat: Ushbu kurs tizimdan butunlay o‘chiriladi. Bu amalni ortga qaytarib bo‘lmaydi!',
+      confirmButtonText: 'Ha, kurs butunlay o‘chirilsin',
+    });
+    if (!ok) return;
+
+    try {
+      await deleteCourse(course.id);
+      toast.success(t('courses.deleteSuccess', 'Kurs muvaffaqiyatli o‘chirildi!'));
+      if (selectedCourseForView?.id === course.id) {
+        setSelectedCourseForView(null);
+      }
+      fetchCourses();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || t('common.error', 'Kursni o‘chirishda xatolik yuz berdi'));
     }
   };
 
@@ -190,42 +218,67 @@ export default function CourseManagement() {
         </Badge>
       ),
     },
-    ...(isOwnerOrAdmin
-      ? [
-          {
-            header: t('common.actions', 'Actions'),
-            key: 'actions',
-            className: 'text-right rtl:text-left',
-            cellClassName: 'text-right rtl:text-left',
-            render: (row) => (
-              <div className="flex items-center justify-end gap-1.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="!p-1.5 h-8 w-8 text-gray-600 dark:text-gray-300 hover:text-brand-navy"
-                  title={t('common.edit', 'Edit Course')}
-                  onClick={() => navigate(`/${currentUserRole}/courses/edit/${row.id}`)}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`!p-1.5 h-8 w-8 ${
-                    row.is_active
-                      ? 'text-gray-500 hover:text-brand-red'
-                      : 'text-gray-500 hover:text-emerald-600'
-                  }`}
-                  title={row.is_active ? t('common.archive', 'Archive') : t('common.restore', 'Restore')}
-                  onClick={() => handleToggleArchive(row)}
-                >
-                  {row.is_active ? <Archive className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
-                </Button>
-              </div>
-            ),
-          },
-        ]
-      : []),
+    {
+      header: t('common.actions', 'Actions'),
+      key: 'actions',
+      className: 'text-right rtl:text-left',
+      cellClassName: 'text-right rtl:text-left',
+      render: (row) => (
+        <div className="flex items-center justify-end gap-1.5">
+          {/* Read / View Course Details */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="!p-1.5 h-8 w-8 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 rounded-lg"
+            title={t('common.view', 'Batafsil ko‘rish')}
+            onClick={() => setSelectedCourseForView(row)}
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+
+          {isOwnerOrAdmin && (
+            <>
+              {/* Update / Edit Course */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="!p-1.5 h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg"
+                title={t('common.edit', 'Tahrirlash')}
+                onClick={() => navigate(`/${currentUserRole}/courses/edit/${row.id}`)}
+              >
+                <Edit2 className="w-4 h-4" />
+              </Button>
+
+              {/* Archive / Restore Course */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`!p-1.5 h-8 w-8 rounded-lg ${
+                  row.is_active
+                    ? 'text-amber-600 hover:bg-amber-500/10'
+                    : 'text-emerald-600 hover:bg-emerald-500/10'
+                }`}
+                title={row.is_active ? t('common.archive', 'Arxivlash') : t('common.restore', 'Qayta faollashtirish')}
+                onClick={() => handleToggleArchive(row)}
+              >
+                {row.is_active ? <Archive className="w-4 h-4" /> : <RotateCcw className="w-4 h-4" />}
+              </Button>
+
+              {/* Delete Course Permanently */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="!p-1.5 h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 rounded-lg"
+                title={t('common.delete', 'Butunlay o‘chirish')}
+                onClick={() => handleDeleteCourse(row)}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </>
+          )}
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -369,36 +422,53 @@ export default function CourseManagement() {
                     </div>
                   </div>
 
-                  {/* Action Buttons (Owner & Admin only) */}
-                  {isOwnerOrAdmin && (
-                    <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        icon={Edit2}
-                        className="flex-1 justify-center text-xs py-1.5"
-                        onClick={() => {
-                          setSelectedCourse(course);
-                          setIsFormOpen(true);
-                        }}
-                      >
-                        {t('common.edit', 'Tahrirlash')}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        icon={course.is_active ? Archive : RotateCcw}
-                        className={`flex-1 justify-center text-xs py-1.5 ${
-                          course.is_active
-                            ? 'text-gray-600 hover:text-brand-red'
-                            : 'text-gray-600 hover:text-emerald-600'
-                        }`}
-                        onClick={() => handleToggleArchive(course)}
-                      >
-                        {course.is_active ? t('common.archive', 'Arxivlash') : t('common.restore', 'Tiklash')}
-                      </Button>
-                    </div>
-                  )}
+                  {/* Action Buttons */}
+                  <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={Eye}
+                      className="text-xs py-1 px-2.5 text-blue-600 dark:text-blue-400"
+                      onClick={() => setSelectedCourseForView(course)}
+                    >
+                      Batafsil
+                    </Button>
+                    {isOwnerOrAdmin && (
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={Edit2}
+                          className="text-xs py-1 px-2 text-emerald-600 dark:text-emerald-400"
+                          onClick={() => navigate(`/${currentUserRole}/courses/edit/${course.id}`)}
+                        >
+                          Tahrirlash
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={course.is_active ? Archive : RotateCcw}
+                          className={`text-xs py-1 px-2 ${
+                            course.is_active
+                              ? 'text-amber-600 hover:bg-amber-500/10'
+                              : 'text-emerald-600 hover:bg-emerald-500/10'
+                          }`}
+                          onClick={() => handleToggleArchive(course)}
+                        >
+                          {course.is_active ? 'Arxiv' : 'Tiklash'}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={Trash2}
+                          className="text-xs py-1 px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15"
+                          onClick={() => handleDeleteCourse(course)}
+                        >
+                          O‘chirish
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -437,6 +507,132 @@ export default function CourseManagement() {
             </div>
           ))}
         </div>
+      </Modal>
+
+      {/* Course Details (Read / View) Modal */}
+      <Modal
+        isOpen={Boolean(selectedCourseForView)}
+        onClose={() => setSelectedCourseForView(null)}
+        title="Kurs ma‘lumotlari"
+        subtitle="Ta‘lim yo‘nalishi, o‘quv rejasi va biriktirilgan ustozlar"
+        size="md"
+      >
+        {selectedCourseForView && (
+          <div className="space-y-4">
+            {/* Header info */}
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-800">
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shrink-0 shadow-md"
+                style={{ backgroundColor: selectedCourseForView.color || '#123D78' }}
+              >
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100">
+                    {selectedCourseForView.name}
+                  </h3>
+                  <span className="text-xs px-2 py-0.5 rounded-md font-mono bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-900/60">
+                    {selectedCourseForView.code}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant={selectedCourseForView.is_active ? 'success' : 'secondary'} size="sm">
+                    {selectedCourseForView.is_active ? 'Faol o‘quv kursi' : 'Arxivlangan'}
+                  </Badge>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {selectedCourseForView.groupsCount || 0} ta faol guruh
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pricing card */}
+            <div className="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Oylik to‘lov summasi:</span>
+              </div>
+              <span className="text-sm font-extrabold text-emerald-700 dark:text-emerald-400">
+                {Number(selectedCourseForView.monthly_fee || selectedCourseForView.monthlyFee || 0).toLocaleString()} so‘m / oy
+              </span>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Kurs tavsifi / O‘quv dasturi:
+              </p>
+              <div className="p-3 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-800 text-xs text-gray-700 dark:text-gray-300 leading-relaxed max-h-36 overflow-y-auto">
+                {selectedCourseForView.description || 'Kurs bo‘yicha qo‘shimcha tavsif kiritilmagan.'}
+              </div>
+            </div>
+
+            {/* Assigned Teachers */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Biriktirilgan ustozlar ({selectedCourseForView.teachers?.length || 0}):
+              </p>
+              {selectedCourseForView.teachers && selectedCourseForView.teachers.length > 0 ? (
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {selectedCourseForView.teachers.map((tch, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary flex items-center justify-between text-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold flex items-center justify-center text-[11px]">
+                          {tch.name?.charAt(0) || 'U'}
+                        </div>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">{tch.name}</span>
+                      </div>
+                      <span className="text-gray-500 dark:text-gray-400 font-mono text-[11px]">
+                        {tch.phone || 'Telefon yo‘q'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 italic">Hozircha ustoz biriktirilmagan.</p>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2">
+              {isOwnerOrAdmin && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={Edit2}
+                    onClick={() => {
+                      const cid = selectedCourseForView.id;
+                      setSelectedCourseForView(null);
+                      navigate(`/${currentUserRole}/courses/edit/${cid}`);
+                    }}
+                  >
+                    Tahrirlash
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
+                    onClick={() => handleDeleteCourse(selectedCourseForView)}
+                  >
+                    O‘chirish
+                  </Button>
+                </>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCourseForView(null)}
+              >
+                Yopish
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

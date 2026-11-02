@@ -126,11 +126,12 @@ const Input = forwardRef(function Input(
           onFocus={handleFocus}
           onClick={handleClick}
           placeholder={resolvedPlaceholder}
+          autoComplete={props.autoComplete !== undefined ? props.autoComplete : 'off'}
           className={`
-            w-full rounded-xl border bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 transition-colors duration-150
+            w-full rounded-xl border bg-white dark:!bg-surface-dark-secondary text-gray-900 dark:text-gray-100 transition-colors duration-150
             ${size === 'sm' ? 'h-10 text-xs px-3' : size === 'lg' ? 'h-12 text-base px-4' : 'h-11 text-sm px-3.5'}
             placeholder-gray-400 dark:placeholder-gray-500
-            focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-surface-dark
+            focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-surface-dark dark:focus:!bg-surface-dark-secondary
             disabled:bg-gray-100 dark:disabled:bg-surface-dark-tertiary disabled:cursor-not-allowed disabled:text-gray-400
             ${Icon && iconPosition === 'left' ? '!pl-9 rtl:!pl-3.5 rtl:!pr-9' : ''}
             ${Icon && iconPosition === 'right' ? '!pr-9 rtl:!pr-3.5 rtl:!pl-9' : ''}

@@ -29,7 +29,10 @@ const courseSchema = z.object({
   name: z.string().min(2, 'Kurs nomi kamida 2 ta harfdan iborat bo‘lishi kerak'),
   code: z.string().min(2, 'Kurs kodi kiritilishi shart'),
   description: z.string().optional().or(z.literal('')),
-  monthlyFee: z.coerce.number().min(0, 'To‘lov manfiy bo‘lishi mumkin emas').default(0),
+  monthlyFee: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
+    z.number().min(0, 'To‘lov manfiy bo‘lishi mumkin emas')
+  ).default(0),
   color: z.string().default('#123D78'),
   isActive: z.boolean().default(true),
 });
@@ -81,7 +84,7 @@ export default function CourseCreatePage() {
       name: '',
       code: '',
       description: '',
-      monthlyFee: 0,
+      monthlyFee: '',
       color: '#123D78',
       isActive: true,
     },
@@ -118,7 +121,7 @@ export default function CourseCreatePage() {
               name: c.name || '',
               code: c.code || '',
               description: c.description || '',
-              monthlyFee: c.monthlyFee || c.monthly_fee || 0,
+              monthlyFee: c.monthlyFee ?? c.monthly_fee ?? '',
               color: c.color || '#123D78',
               isActive: c.is_active !== undefined ? c.is_active : true,
             });
@@ -278,6 +281,7 @@ export default function CourseCreatePage() {
                 icon={BookOpen}
                 placeholder="Masalan: Frontend dasturlash, Arab tili, Python..."
                 error={errors.name?.message}
+                autoComplete="off"
                 {...register('name', {
                   onChange: (e) => handleNameChange(e.target.value),
                 })}
@@ -307,6 +311,7 @@ export default function CourseCreatePage() {
                 icon={Code}
                 placeholder="Masalan: FE-1.1"
                 error={errors.code?.message}
+                autoComplete="off"
                 {...register('code', {
                   onChange: () => setIsAutoCode(false),
                 })}
@@ -384,7 +389,8 @@ export default function CourseCreatePage() {
                 type="number"
                 step="1000"
                 icon={DollarSign}
-                placeholder="500000"
+                placeholder="Masalan: 500000"
+                autoComplete="off"
                 error={errors.monthlyFee?.message}
                 {...register('monthlyFee')}
               />

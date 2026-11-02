@@ -55,7 +55,7 @@ const SmsManagementPage = React.lazy(() => import('@/pages/owner/SmsManagementPa
 const PublicWebsite = React.lazy(() => import('@/pages/public/PublicWebsite'));
 const WebsiteManagementPage = React.lazy(() => import('@/pages/owner/website/WebsiteManagementPage'));
 
-function RootRedirect() {
+function RootIndexRoute() {
   const { user, profile, loading } = useAuth();
   if (loading) {
     return <LoadingSpinner fullPage text="EDUCO LMS yuklanmoqda..." />;
@@ -74,7 +74,7 @@ function RootRedirect() {
         return <Navigate to="/student/dashboard" replace />;
     }
   }
-  return <Navigate to="/login" replace />;
+  return <PublicWebsite />;
 }
 
 export default function App() {
@@ -101,7 +101,7 @@ export default function App() {
       <Suspense fallback={<LoadingSpinner fullPage text="Loading EDUCO LMS..." />}>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<PublicWebsite />} />
+          <Route path="/" element={<RootIndexRoute />} />
           <Route path="/home" element={<PublicWebsite />} />
           <Route path="/website" element={<PublicWebsite />} />
           <Route path="/login" element={<LoginPage />} />
@@ -212,8 +212,11 @@ export default function App() {
             <Route path="courses" element={<CourseManagement />} />
             <Route path="courses/create" element={<Navigate to="/teacher/courses" replace />} />
             <Route path="courses/edit/:id" element={<Navigate to="/teacher/courses" replace />} />
+            <Route path="users" element={<UserManagement />} />
+            <Route path="students" element={<UserManagement />} />
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
+            <Route path="users/edit/:id" element={<UserCreatePage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="groups" element={<GroupManagement />} />
             <Route path="groups/create" element={<GroupCreatePage />} />

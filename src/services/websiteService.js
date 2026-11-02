@@ -925,16 +925,21 @@ function normalizeNews(n) {
 
 function normalizeTestimonial(t) {
   if (!t) return t;
-  const av = t.avatar || t.photo || t.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
-  const nm = t.name || t.author || 'O‘quvchi';
+  const av = t.avatar || t.avatar_url || t.photo || t.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+  const nm = t.name || t.author || t.author_name || 'O‘quvchi';
+  const rl = t.role || t.author_role || 'O‘quvchi';
   const qt = t.quote || t.content || '';
   return {
     ...t,
     avatar: av,
+    avatar_url: av,
     photo: av,
     image: av,
     name: nm,
     author: nm,
+    author_name: nm,
+    role: rl,
+    author_role: rl,
     quote: qt,
     content: qt,
     is_active: t.is_active ?? t.isActive ?? true,

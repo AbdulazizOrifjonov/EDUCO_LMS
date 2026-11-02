@@ -360,25 +360,34 @@ class LocalStore {
 
   saveCourse(courseData) {
     const list = this.getCourses();
+    const targetId = courseData.id || null;
+    const existingIndex = targetId ? list.findIndex((c) => c.id === targetId) : -1;
+    const existingCourse = existingIndex >= 0 ? list[existingIndex] : null;
+
     const newCourse = {
-      id: courseData.id || `crs-${Date.now()}`,
+      id: targetId || `crs-${Date.now()}`,
       name: courseData.name,
-      code: courseData.code || `CRS-${Math.floor(1000 + Math.random() * 9000)}`,
-      description: courseData.description || '',
-      monthly_fee: Number(courseData.monthly_fee || courseData.monthlyFee || 0),
-      color: courseData.color || '#123D78',
-      is_active: courseData.is_active ?? courseData.isActive ?? true,
-      teacher_ids: courseData.teacher_ids || courseData.teacherIds || (index >= 0 ? list[index].teacher_ids : []) || [],
-      teachers: courseData.teachers || (index >= 0 ? list[index].teachers : []) || [],
-      created_at: courseData.created_at || new Date().toISOString(),
+      code: courseData.code || existingCourse?.code || `CRS-${Math.floor(1000 + Math.random() * 9000)}`,
+      description: courseData.description !== undefined ? courseData.description : (existingCourse?.description || ''),
+      monthly_fee: Number(
+        courseData.monthly_fee !== undefined
+          ? courseData.monthly_fee
+          : courseData.monthlyFee !== undefined
+          ? courseData.monthlyFee
+          : (existingCourse?.monthly_fee || 0)
+      ),
+      color: courseData.color || existingCourse?.color || '#123D78',
+      is_active: courseData.is_active ?? courseData.isActive ?? existingCourse?.is_active ?? true,
+      teacher_ids: courseData.teacher_ids || courseData.teacherIds || existingCourse?.teacher_ids || [],
+      teachers: courseData.teachers || existingCourse?.teachers || [],
+      created_at: courseData.created_at || existingCourse?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      groupsCount: 0,
-      activeGroupsCount: 0,
+      groupsCount: existingCourse?.groupsCount || 0,
+      activeGroupsCount: existingCourse?.activeGroupsCount || 0,
     };
 
-    const index = list.findIndex((c) => c.id === newCourse.id);
-    if (index >= 0) {
-      list[index] = { ...list[index], ...newCourse };
+    if (existingIndex >= 0) {
+      list[existingIndex] = { ...list[existingIndex], ...newCourse };
     } else {
       list.unshift(newCourse);
     }
@@ -389,6 +398,12 @@ class LocalStore {
   deleteCourse(id) {
     const list = this.getCourses().filter((c) => c.id !== id);
     this.setItem(STORAGE_KEYS.COURSES, list);
+    this.pushToServer({ [STORAGE_KEYS.COURSES]: list }).catch(() => {});
+    try {
+      if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.COURSES } }));
+      }
+    } catch (_) {}
     return true;
   }
 
@@ -587,6 +602,17 @@ class LocalStore {
   deleteUser(id) {
     const list = this.getUsers().filter((u) => u.id !== id);
     this.setItem(STORAGE_KEYS.USERS, list);
+    const memberships = this.getMemberships().filter((m) => m.user_id !== id);
+    this.setItem(STORAGE_KEYS.MEMBERSHIPS, memberships);
+    this.pushToServer({
+      [STORAGE_KEYS.USERS]: list,
+      [STORAGE_KEYS.MEMBERSHIPS]: memberships,
+    }).catch(() => {});
+    try {
+      if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.USERS } }));
+      }
+    } catch (_) {}
     return true;
   }
 
@@ -690,6 +716,50 @@ class LocalStore {
     return newPayment;
   }
 
+  /**
+   * Delete a single payment by ID
+   */
+  deletePayment(paymentId) {
+    const list = this.getPayments();
+    const filtered = list.filter((p) => p.id !== paymentId);
+    this.setItem(STORAGE_KEYS.PAYMENTS, filtered);
+    try {
+      if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
+      }
+    } catch (_) {}
+    return filtered;
+  }
+
+  /**
+   * Delete multiple payments by IDs
+   */
+  deletePayments(paymentIds) {
+    const idSet = new Set(paymentIds);
+    const list = this.getPayments();
+    const filtered = list.filter((p) => !idSet.has(p.id));
+    this.setItem(STORAGE_KEYS.PAYMENTS, filtered);
+    try {
+      if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
+      }
+    } catch (_) {}
+    return filtered;
+  }
+
+  /**
+   * Delete ALL payments (clear entire payment history)
+   */
+  deleteAllPayments() {
+    this.setItem(STORAGE_KEYS.PAYMENTS, []);
+    try {
+      if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
+      }
+    } catch (_) {}
+    return [];
+  }
+
   saveGroup(groupData) {
     const list = this.getGroups();
     const index = list.findIndex((g) => g.id === groupData.id);
@@ -727,6 +797,12 @@ class LocalStore {
   deleteGroup(id) {
     const list = this.getGroups().filter((g) => g.id !== id);
     this.setItem(STORAGE_KEYS.GROUPS, list);
+    this.pushToServer({ [STORAGE_KEYS.GROUPS]: list }).catch(() => {});
+    try {
+      if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.GROUPS } }));
+      }
+    } catch (_) {}
     return true;
   }
 

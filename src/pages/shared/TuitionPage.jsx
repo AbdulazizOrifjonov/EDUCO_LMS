@@ -15,6 +15,8 @@ import {
   Receipt,
   Tag,
   Percent,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { Button, Card, Badge, Modal, Input, EmptyState, LoadingSpinner } from '@/components/ui';
@@ -25,6 +27,9 @@ import {
   getTuitionPayments,
   recordPayment,
   exportTuitionCSV,
+  deletePayment,
+  deleteSelectedPayments,
+  deleteAllPayments,
 } from '@/services/tuitionService';
 import { updateStudentDiscount } from '@/services/groupService';
 import { formatCurrency, formatDate } from '@/utils/csvExport';
@@ -35,7 +40,9 @@ export default function TuitionPage() {
   const { profile } = useAuth();
   const { searchQuery: globalSearch, setSearchQuery: setGlobalSearch } = useSearch();
 
-  const isStudent = profile?.role === 'student';
+  const userRole = (profile?.role || '').toLowerCase();
+  const isStudent = userRole === 'student';
+  const canDeletePayments = userRole === 'admin' || userRole === 'owner';
 
   // Tabs
   const [activeTab, setActiveTab] = useState('summary'); // 'summary' | 'history'
@@ -45,6 +52,13 @@ export default function TuitionPage() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Delete states
+  const [selectedPayments, setSelectedPayments] = useState(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(null); // 'single' | 'selected' | 'all'
+  const [paymentToDelete, setPaymentToDelete] = useState(null);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState(globalSearch || '');
@@ -171,6 +185,73 @@ export default function TuitionPage() {
       toast.error("Chegirmani saqlashda xatolik yuz berdi");
     } finally {
       setSavingDiscount(false);
+    }
+  };
+
+  // Selection & Delete Handlers for Payment History
+  const handleSelectPayment = (id) => {
+    setSelectedPayments((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAllPayments = () => {
+    if (selectedPayments.size === filteredHistory.length && filteredHistory.length > 0) {
+      setSelectedPayments(new Set());
+    } else {
+      setSelectedPayments(new Set(filteredHistory.map((p) => p.id)));
+    }
+  };
+
+  const handleOpenDeleteSingle = (payment) => {
+    setPaymentToDelete(payment);
+    setDeleteMode('single');
+    setShowDeleteConfirm(true);
+  };
+
+  const handleOpenDeleteSelected = () => {
+    if (selectedPayments.size === 0) return;
+    setDeleteMode('selected');
+    setShowDeleteConfirm(true);
+  };
+
+  const handleOpenDeleteAll = () => {
+    if (paymentHistory.length === 0) return;
+    setDeleteMode('all');
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (isDeleting) return;
+    try {
+      setIsDeleting(true);
+      if (deleteMode === 'single' && paymentToDelete) {
+        await deletePayment(paymentToDelete.id);
+        toast.success(t('tuition.paymentDeleted', 'To‘lov muvaffaqiyatli o‘chirildi!'));
+      } else if (deleteMode === 'selected') {
+        const ids = Array.from(selectedPayments);
+        await deleteSelectedPayments(ids);
+        toast.success(t('tuition.selectedPaymentsDeleted', `${ids.length} ta to‘lov muvaffaqiyatli o‘chirildi!`));
+      } else if (deleteMode === 'all') {
+        await deleteAllPayments();
+        toast.success(t('tuition.allPaymentsDeleted', 'Barcha to‘lovlar tarixi to‘liq tozalandi!'));
+      }
+      setSelectedPayments(new Set());
+      setShowDeleteConfirm(false);
+      setPaymentToDelete(null);
+      setDeleteMode(null);
+      await loadData();
+    } catch (err) {
+      console.error('Delete payment error:', err);
+      toast.error(err.message || 'To‘lovni o‘chirishda xatolik yuz berdi');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -403,6 +484,46 @@ export default function TuitionPage() {
             </div>
           </div>
         )}
+
+        {activeTab === 'history' && canDeletePayments && (
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
+            {selectedPayments.size > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/40 rounded-xl">
+                <span className="text-xs font-semibold text-red-700 dark:text-red-400">
+                  {selectedPayments.size} ta tanlandi
+                </span>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                  onClick={handleOpenDeleteSelected}
+                  className="!py-1 !px-2.5 text-xs bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Tanlanganlarni o‘chirish
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPayments(new Set())}
+                  className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 underline ml-1 cursor-pointer"
+                >
+                  Bekor qilish
+                </button>
+              </div>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              icon={Trash2}
+              onClick={handleOpenDeleteAll}
+              disabled={paymentHistory.length === 0}
+              className="text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-900/50 dark:hover:bg-red-950/30"
+              title="To‘lovlar tarixining barchasini tozalash"
+            >
+              Tarixni tozalash
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* SUMMARY TABLE */}
@@ -612,6 +733,20 @@ export default function TuitionPage() {
             <table className="w-full text-left rtl:text-right text-sm">
               <thead className="bg-gray-50 dark:bg-surface-dark-tertiary text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                 <tr>
+                  {canDeletePayments && (
+                    <th className="px-4 py-3.5 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={
+                          filteredHistory.length > 0 &&
+                          selectedPayments.size === filteredHistory.length
+                        }
+                        onChange={handleSelectAllPayments}
+                        className="w-4 h-4 rounded text-blue-600 dark:text-emerald-500 focus:ring-blue-500 dark:focus:ring-emerald-400 border-gray-300 dark:border-gray-700 cursor-pointer"
+                        title="Barchasini tanlash"
+                      />
+                    </th>
+                  )}
                   <th className="px-6 py-3.5">{t('users.student', 'Student')}</th>
                   <th className="px-6 py-3.5">{t('tuition.amount', 'Amount')}</th>
                   <th className="px-6 py-3.5">{t('tuition.paymentMethod', 'Method')}</th>
@@ -619,19 +754,22 @@ export default function TuitionPage() {
                   <th className="px-6 py-3.5">{t('common.date', 'Date')}</th>
                   <th className="px-6 py-3.5">{t('common.status', 'Status')}</th>
                   <th className="px-6 py-3.5">{t('common.notes', 'Notes')}</th>
+                  {canDeletePayments && (
+                    <th className="px-6 py-3.5 text-right rtl:text-left">{t('common.actions', 'Amallar')}</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-surface-dark-secondary">
                 {loading ? (
                   <tr>
-                    <td colSpan="7" className="py-12 text-center text-gray-500">
+                    <td colSpan={canDeletePayments ? 9 : 7} className="py-12 text-center text-gray-500">
                       <LoadingSpinner size="md" />
                       <p className="mt-2 text-xs">{t('common.loading', 'Loading payment transactions...')}</p>
                     </td>
                   </tr>
                 ) : filteredHistory.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="py-10">
+                    <td colSpan={canDeletePayments ? 9 : 7} className="py-10">
                       <EmptyState
                         icon={Receipt}
                         title={t('tuition.noPayments', 'No payment history')}
@@ -641,7 +779,22 @@ export default function TuitionPage() {
                   </tr>
                 ) : (
                   filteredHistory.map((h) => (
-                    <tr key={h.id} className="hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/50">
+                    <tr
+                      key={h.id}
+                      className={`hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/50 transition-colors ${
+                        selectedPayments.has(h.id) ? 'bg-red-50/30 dark:bg-red-950/20' : ''
+                      }`}
+                    >
+                      {canDeletePayments && (
+                        <td className="px-4 py-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedPayments.has(h.id)}
+                            onChange={() => handleSelectPayment(h.id)}
+                            className="w-4 h-4 rounded text-blue-600 dark:text-emerald-500 focus:ring-blue-500 dark:focus:ring-emerald-400 border-gray-300 dark:border-gray-700 cursor-pointer"
+                          />
+                        </td>
+                      )}
                       <td className="px-6 py-4">
                         <div className="font-semibold text-gray-900 dark:text-gray-100">{h.studentName}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">{h.studentEmail}</div>
@@ -664,6 +817,18 @@ export default function TuitionPage() {
                       <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400 max-w-xs truncate">
                         {h.notes || '-'}
                       </td>
+                      {canDeletePayments && (
+                        <td className="px-6 py-4 text-right rtl:text-left">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDeleteSingle(h)}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                            title="To‘lovni o‘chirish"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -688,14 +853,38 @@ export default function TuitionPage() {
               filteredHistory.map((h) => (
                 <div
                   key={h.id}
-                  className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200 dark:border-gray-800 shadow-xs space-y-2.5 text-xs"
+                  className={`p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200 dark:border-gray-800 shadow-xs space-y-2.5 text-xs transition-colors ${
+                    selectedPayments.has(h.id) ? 'ring-2 ring-red-500/50 bg-red-50/20' : ''
+                  }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">{h.studentName}</h4>
-                      <p className="text-[11px] text-gray-400">{h.studentEmail}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2.5">
+                      {canDeletePayments && (
+                        <input
+                          type="checkbox"
+                          checked={selectedPayments.has(h.id)}
+                          onChange={() => handleSelectPayment(h.id)}
+                          className="mt-0.5 w-4 h-4 rounded text-blue-600 dark:text-emerald-500 focus:ring-blue-500 dark:focus:ring-emerald-400 border-gray-300 dark:border-gray-700 cursor-pointer"
+                        />
+                      )}
+                      <div>
+                        <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">{h.studentName}</h4>
+                        <p className="text-[11px] text-gray-400">{h.studentEmail}</p>
+                      </div>
                     </div>
-                    <Badge variant="success">{t('tuition.cleared', 'Cleared')}</Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant="success">{t('tuition.cleared', 'Cleared')}</Badge>
+                      {canDeletePayments && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDeleteSingle(h)}
+                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded transition-colors"
+                          title="To‘lovni o‘chirish"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between font-medium">
                     <span className="text-gray-500">Summa:</span>
@@ -892,6 +1081,90 @@ export default function TuitionPage() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          if (!isDeleting) {
+            setShowDeleteConfirm(false);
+            setPaymentToDelete(null);
+            setDeleteMode(null);
+          }
+        }}
+        title={
+          deleteMode === 'all'
+            ? "Barcha to‘lovlar tarixini tozalash"
+            : deleteMode === 'selected'
+            ? "Tanlangan to‘lovlarni o‘chirish"
+            : "To‘lovni o‘chirish"
+        }
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-800 dark:text-red-300">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+            <div className="text-xs space-y-1">
+              <p className="font-bold">
+                {deleteMode === 'all'
+                  ? "Diqqat! Barcha to‘lovlar tarixi to‘liq o‘chiriladi!"
+                  : deleteMode === 'selected'
+                  ? `Tanlangan ${selectedPayments.size} ta to‘lov o‘chiriladi!`
+                  : "Ushbu to‘lov yozuvi o‘chiriladi!"}
+              </p>
+              <p className="text-red-700/80 dark:text-red-400/80">
+                {deleteMode === 'all'
+                  ? "Barcha talabalarning to‘lov tarixi o‘chirilgach, talabalar qoldiq qarzdorligi (balansi / dummi) avtomatik ravishda qayta hisoblanadi."
+                  : "Ushbu amalni ortga qaytarib bo‘lmaydi. To‘lov summasi talabaning umumiy balansidan chiqarib tashlanadi va qoldiq qarz qayta hisoblanadi."}
+              </p>
+            </div>
+          </div>
+
+          {deleteMode === 'single' && paymentToDelete && (
+            <div className="p-3 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-200 dark:border-gray-800 text-xs space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Talaba:</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100">{paymentToDelete.studentName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Summa:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(paymentToDelete.amount)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Usul / Kvitansiya:</span>
+                <span className="text-gray-700 dark:text-gray-300">{paymentToDelete.paymentMethod} ({paymentToDelete.referenceNumber || '-'})</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Sana:</span>
+                <span className="text-gray-700 dark:text-gray-300">{formatDate(paymentToDelete.paymentDate)}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setPaymentToDelete(null);
+                setDeleteMode(null);
+              }}
+              disabled={isDeleting}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              isLoading={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? "O‘chirilmoqda..." : "Ha, o‘chirilsin"}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

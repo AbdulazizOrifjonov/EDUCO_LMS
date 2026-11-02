@@ -104,7 +104,8 @@ export default function CoursesSection({
                   src={course.image_url || course.image || '/educo-logo.png'}
                   alt={course.title}
                   onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                  className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
+                  style={{ objectFit: course.fit_mode || 'cover', objectPosition: course.object_position || 'center' }}
+                  className="w-full h-full group-hover:scale-108 transition-transform duration-500"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />

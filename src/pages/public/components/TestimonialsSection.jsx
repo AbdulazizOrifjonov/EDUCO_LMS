@@ -49,8 +49,8 @@ export default function TestimonialsSection({ testimonials = [] }) {
               {/* Author Info */}
               <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center gap-3">
                 <img
-                  src={item.avatar_url || '/educo-logo.png'}
-                  alt={item.author_name}
+                  src={item.avatar_url || item.avatar || item.image || item.photo || '/educo-logo.png'}
+                  alt={item.author_name || item.name}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
                     e.currentTarget.src = '/educo-logo.png';
@@ -59,10 +59,10 @@ export default function TestimonialsSection({ testimonials = [] }) {
                 />
                 <div className="min-w-0">
                   <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                    {item.author_name}
+                    {item.author_name || item.name}
                   </h4>
                   <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {item.author_role}
+                    {item.author_role || item.role}
                   </p>
                 </div>
               </div>

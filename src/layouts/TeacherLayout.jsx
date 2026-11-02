@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Bell,
   Settings,
+  GraduationCap,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -33,6 +34,12 @@ const TEACHER_NAV_ITEMS = [
     label: 'Guruhlarim',
     path: '/teacher/groups',
     icon: Users2,
+  },
+  {
+    labelKey: 'nav.students',
+    label: 'O‘quvchilar',
+    path: '/teacher/users',
+    icon: GraduationCap,
   },
   {
     labelKey: 'nav.passwords',

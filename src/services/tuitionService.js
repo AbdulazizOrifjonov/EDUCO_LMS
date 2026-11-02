@@ -271,9 +271,103 @@ export function exportTuitionCSV(data, filename = 'tuition_report.csv') {
   exportToCSV(columns, data, filename);
 }
 
+/**
+ * Delete a single payment by ID.
+ */
+export async function deletePayment(paymentId) {
+  try {
+    if (localStore.deletePayment) {
+      localStore.deletePayment(paymentId);
+    }
+
+    if (!isPlaceholder) {
+      try {
+        await supabase.from('tuition_payments').delete().eq('id', paymentId);
+      } catch (e) {
+        console.warn('Supabase deletePayment note:', e);
+      }
+    }
+
+    try {
+      await createAuditLog('DELETE_PAYMENT', `payment:${paymentId}`, {
+        paymentId,
+      });
+    } catch (_) {}
+
+    return { success: true };
+  } catch (err) {
+    console.error('deletePayment error:', err);
+    throw err;
+  }
+}
+
+/**
+ * Delete multiple payments by IDs (bulk/selected delete).
+ */
+export async function deleteSelectedPayments(paymentIds) {
+  try {
+    if (localStore.deletePayments) {
+      localStore.deletePayments(paymentIds);
+    }
+
+    if (!isPlaceholder) {
+      try {
+        await supabase.from('tuition_payments').delete().in('id', paymentIds);
+      } catch (e) {
+        console.warn('Supabase deleteSelectedPayments note:', e);
+      }
+    }
+
+    try {
+      await createAuditLog('DELETE_PAYMENTS_BULK', `payments:${paymentIds.length}`, {
+        count: paymentIds.length,
+        ids: paymentIds,
+      });
+    } catch (_) {}
+
+    return { success: true };
+  } catch (err) {
+    console.error('deleteSelectedPayments error:', err);
+    throw err;
+  }
+}
+
+/**
+ * Delete ALL payments (clear entire payment history).
+ */
+export async function deleteAllPayments() {
+  try {
+    if (localStore.deleteAllPayments) {
+      localStore.deleteAllPayments();
+    }
+
+    if (!isPlaceholder) {
+      try {
+        await supabase.from('tuition_payments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      } catch (e) {
+        console.warn('Supabase deleteAllPayments note:', e);
+      }
+    }
+
+    try {
+      await createAuditLog('DELETE_ALL_PAYMENTS', 'all_payments', {
+        action: 'Cleared entire payment history',
+      });
+    } catch (_) {}
+
+    return { success: true };
+  } catch (err) {
+    console.error('deleteAllPayments error:', err);
+    throw err;
+  }
+}
+
 export default {
   getTuitionSummary,
   getTuitionPayments,
   recordPayment,
   exportTuitionCSV,
+  deletePayment,
+  deleteSelectedPayments,
+  deleteAllPayments,
 };

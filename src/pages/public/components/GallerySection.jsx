@@ -74,7 +74,8 @@ export default function GallerySection({ gallery = [], onSelectImage = () => {} 
                 src={item.image_url || item.image || '/educo-logo.png'}
                 alt={item.title}
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                style={{ objectFit: item.fit_mode || 'cover', objectPosition: item.object_position || 'center' }}
+                className="w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
                 loading="lazy"
               />
 

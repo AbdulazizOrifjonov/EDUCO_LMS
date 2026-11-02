@@ -64,6 +64,8 @@ export async function getUsers({
 
         if (currentUserRole === 'admin') {
           users = users.filter((u) => u.role === 'teacher' || u.role === 'student');
+        } else if (currentUserRole === 'teacher') {
+          users = users.filter((u) => u.role === 'student');
         }
 
         if (role && role !== 'all') {
@@ -94,6 +96,8 @@ export async function getUsers({
 
   if (currentUserRole === 'admin') {
     list = list.filter((u) => u.role === 'teacher' || u.role === 'student');
+  } else if (currentUserRole === 'teacher') {
+    list = list.filter((u) => u.role === 'student');
   }
 
   if (role && role !== 'all') {
