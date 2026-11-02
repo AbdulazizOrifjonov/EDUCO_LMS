@@ -37,9 +37,11 @@ export function CourseDetailModal({ course, onClose, onRegister, onEnroll }) {
         {/* Cover Image */}
         <div className="relative h-56 sm:h-64 w-full bg-gray-900 shrink-0">
           <img
-            src={course.image_url}
+            src={course.image_url || course.image || '/educo-logo.png'}
             alt={course.title}
-            className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+            style={{ objectFit: course.fit_mode || 'cover', objectPosition: course.object_position || 'center' }}
+            className="w-full h-full"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
@@ -161,9 +163,11 @@ export function TeacherModal({ teacher, onClose }) {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <img
-              src={teacher.image_url}
-              alt={teacher.full_name}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover object-top border-2 border-emerald-500 shadow-md"
+              src={teacher.image_url || teacher.photo || teacher.photo_url || '/educo-logo.png'}
+              alt={teacher.full_name || teacher.name}
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+              style={{ objectFit: teacher.fit_mode || 'cover', objectPosition: teacher.object_position || 'top' }}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-emerald-500 shadow-md"
             />
             <div>
               <h3 className="text-xl font-black text-gray-950 dark:text-white">
@@ -240,9 +244,11 @@ export function NewsDetailModal({ newsItem, news, onClose }) {
       >
         <div className="relative h-60 w-full bg-gray-900 shrink-0">
           <img
-            src={currentNews.cover_image || currentNews.image || currentNews.image_url}
+            src={currentNews.cover_image || currentNews.image || currentNews.image_url || '/educo-logo.png'}
             alt={currentNews.title}
-            className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+            style={{ objectFit: currentNews.fit_mode || 'cover', objectPosition: currentNews.object_position || 'center' }}
+            className="w-full h-full"
           />
           <button
             type="button"
@@ -311,8 +317,9 @@ export function LightboxModal({ imageItem, image, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <img
-          src={currentImage.image_url || currentImage.image}
+          src={currentImage.image_url || currentImage.image || '/educo-logo.png'}
           alt={currentImage.title}
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
           className="max-h-[70vh] w-auto max-w-full rounded-2xl shadow-2xl object-contain border border-white/10"
         />
         <div className="text-center text-white space-y-1">

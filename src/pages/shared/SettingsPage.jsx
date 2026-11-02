@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Settings,
@@ -90,8 +91,11 @@ export default function SettingsPage() {
   const isAdmin = profile?.role === 'admin';
   const canManageCenter = isOwner || isAdmin;
 
+  const [searchParams] = useSearchParams();
+  const queryUserId = searchParams.get('userId');
+
   // Active Tab
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'appearance' | 'language' | 'center'
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile'); // 'profile' | 'appearance' | 'language' | 'center'
 
   // Center Settings State
   const [centerConfig, setCenterConfig] = useState({
@@ -260,7 +264,7 @@ export default function SettingsPage() {
       </div>
 
       {/* TAB 1: PROFILE */}
-      {activeTab === 'profile' && <ProfilePage />}
+      {activeTab === 'profile' && <ProfilePage targetUserId={queryUserId} />}
 
       {/* TAB 2: APPEARANCE */}
       {activeTab === 'appearance' && (

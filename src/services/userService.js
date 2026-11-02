@@ -162,6 +162,8 @@ export async function getUserById(id) {
 export async function createUser({
   firstName,
   lastName,
+  fullName,
+  full_name,
   username,
   phone = '',
   fatherPhone = '',
@@ -171,13 +173,23 @@ export async function createUser({
   isActive = true,
   courseId = null,
   subject = '',
+  monthly_salary = 0,
 }) {
   if (role === 'owner') {
     throw new Error('Tizimda faqat 1 ta Boshliq (Owner) bo‘lishi mumkin!');
   }
 
-  const cleanFirst = (firstName || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-  const cleanLast = (lastName || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  let resolvedFirst = firstName;
+  let resolvedLast = lastName;
+  const rawFullName = fullName || full_name;
+  if (!resolvedFirst && rawFullName) {
+    const parts = rawFullName.trim().split(/\s+/);
+    resolvedFirst = parts[0] || '';
+    resolvedLast = parts.slice(1).join(' ') || '';
+  }
+
+  const cleanFirst = (resolvedFirst || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanLast = (resolvedLast || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
   const rand = Math.floor(1000 + Math.random() * 9000);
   const resolvedUsername =
     username && username.trim()
@@ -248,8 +260,9 @@ export async function createUser({
 
   // Local creation
   const created = localStore.saveUser({
-    first_name: firstName,
-    last_name: lastName,
+    first_name: resolvedFirst,
+    last_name: resolvedLast,
+    full_name: `${resolvedFirst || ''} ${resolvedLast || ''}`.trim() || resolvedUsername,
     username: resolvedUsername,
     email,
     phone: finalPhone,
@@ -260,6 +273,7 @@ export async function createUser({
     is_active: isActive,
     course_id: courseId || null,
     subject: subject || '',
+    monthly_salary: monthly_salary || 0,
   });
   return created;
 }
@@ -318,7 +332,16 @@ export async function createStudent({
 /**
  * Update user details
  */
-export async function updateUser(id, { firstName, lastName, username, phone, fatherPhone, motherPhone, role, isActive, password, courseId, subject }) {
+export async function updateUser(id, { firstName, lastName, fullName, full_name, username, phone, fatherPhone, motherPhone, role, isActive, password, courseId, subject, status }) {
+  let resolvedFirst = firstName;
+  let resolvedLast = lastName;
+  const rawFullName = fullName || full_name;
+  if (!resolvedFirst && rawFullName) {
+    const parts = rawFullName.trim().split(/\s+/);
+    resolvedFirst = parts[0] || '';
+    resolvedLast = parts.slice(1).join(' ') || '';
+  }
+
   const normalizedPhone = phone !== undefined ? cleanUzPhone(phone) : undefined;
   const normalizedFather = fatherPhone !== undefined ? cleanUzPhone(fatherPhone) : undefined;
   const normalizedMother = motherPhone !== undefined ? cleanUzPhone(motherPhone) : undefined;
@@ -326,8 +349,8 @@ export async function updateUser(id, { firstName, lastName, username, phone, fat
   if (!isPlaceholder) {
     try {
       const profileUpdate = {
-        first_name: firstName,
-        last_name: lastName,
+        first_name: resolvedFirst,
+        last_name: resolvedLast,
         phone: normalizedPhone,
         updated_at: new Date().toISOString(),
       };
@@ -349,11 +372,16 @@ export async function updateUser(id, { firstName, lastName, username, phone, fat
   }
 
   const localUser = localStore.getUsers().find((u) => u.id === id) || {};
+  const newFirst = resolvedFirst !== undefined ? resolvedFirst : localUser.first_name;
+  const newLast = resolvedLast !== undefined ? resolvedLast : localUser.last_name;
+  const computedFullName = `${newFirst || ''} ${newLast || ''}`.trim() || localUser.full_name || localUser.username;
+
   const updated = localStore.saveUser({
     ...localUser,
     id,
-    first_name: firstName !== undefined ? firstName : localUser.first_name,
-    last_name: lastName !== undefined ? lastName : localUser.last_name,
+    first_name: newFirst,
+    last_name: newLast,
+    full_name: computedFullName,
     username: username !== undefined ? username : localUser.username,
     phone: normalizedPhone !== undefined ? normalizedPhone : localUser.phone,
     father_phone: normalizedFather !== undefined ? normalizedFather : localUser.father_phone,

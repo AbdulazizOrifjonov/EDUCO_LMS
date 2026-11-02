@@ -42,6 +42,7 @@ export async function getSmsSettings() {
 export async function updateSmsSettings(settingsData) {
   try {
     const payload = {
+      ...settingsData,
       is_enabled: Boolean(settingsData.is_enabled),
       schedule_days: settingsData.schedule_days || [1, 5, 10, 15, 20, 25],
       schedule_time: settingsData.schedule_time || '10:00',
@@ -97,11 +98,12 @@ export async function getSmsDevices() {
  */
 export async function saveSmsDevice(deviceData) {
   try {
+    const devId = deviceData.id || `dev-${deviceData.device_role || 'device'}-${Date.now()}`;
     const payload = {
-      id: deviceData.id || undefined,
-      name: deviceData.name,
+      id: devId,
+      name: deviceData.name || 'Android SMS Gateway',
       device_role: deviceData.device_role || 'primary',
-      gateway_url: deviceData.gateway_url,
+      gateway_url: deviceData.gateway_url || deviceData.url || '',
       api_token: deviceData.api_token || '',
       is_active: deviceData.is_active !== undefined ? deviceData.is_active : true,
       phone_number: deviceData.phone_number || '',
@@ -114,14 +116,20 @@ export async function saveSmsDevice(deviceData) {
       .select()
       .single();
 
-    if (error) {
-      return localStore.saveSmsDevice(payload);
-    }
-    localStore.saveSmsDevice(data || payload);
-    return data || payload;
+    const result = (error || !data) ? localStore.saveSmsDevice(payload) : data;
+    localStore.saveSmsDevice(result || payload);
+    const finalDevice = result || payload;
+    return {
+      ...finalDevice,
+      url: finalDevice.gateway_url || finalDevice.url,
+    };
   } catch (err) {
     console.warn('saveSmsDevice error, saving to localStore:', err);
-    return localStore.saveSmsDevice(deviceData);
+    const saved = localStore.saveSmsDevice(deviceData);
+    return {
+      ...saved,
+      url: saved?.gateway_url || saved?.url || deviceData?.url,
+    };
   }
 }
 

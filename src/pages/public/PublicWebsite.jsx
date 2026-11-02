@@ -168,7 +168,9 @@ export default function PublicWebsite() {
           className="group flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#229ED9] hover:bg-[#1b8bc2] text-white shadow-xl hover:shadow-[#229ED9]/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
           title="Telegram orqali savol berish (@educomarkaz36)"
         >
-          <Send className="w-4 h-4 shrink-0 text-white" />
+          <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 fill-white" aria-hidden="true">
+            <path d="m20.665 3.717-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.579.192l-8.533 7.701h-.002l-.313 4.69c.46 0 .663-.211.921-.46l2.211-2.15 4.599 3.397c.848.467 1.457.227 1.668-.785l3.019-14.228c.309-1.239-.473-1.8-1.282-1.431z" />
+          </svg>
           <span className="text-xs font-bold hidden sm:inline">Telegram: @educomarkaz36</span>
           <span className="text-xs font-bold sm:hidden">Telegram</span>
         </a>

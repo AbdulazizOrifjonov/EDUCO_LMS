@@ -257,8 +257,12 @@ export default function UserManagement() {
         };
         const grad = avatarGradients[row.role] || 'from-blue-600 to-indigo-600';
         return (
-          <div className="flex items-center gap-3 whitespace-nowrap">
-            <div className={`w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr ${grad} text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm ring-2 ring-gray-100 dark:ring-gray-800`}>
+          <div
+            onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
+            className="flex items-center gap-3 whitespace-nowrap cursor-pointer group"
+            title={t('users.viewProfile', 'Foydalanuvchi profilini ko‘rish va sozlash')}
+          >
+            <div className={`w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr ${grad} text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm ring-2 ring-gray-100 dark:ring-gray-800 group-hover:scale-110 transition-transform`}>
               {avatarSrc ? (
                 <img
                   src={avatarSrc}
@@ -269,7 +273,7 @@ export default function UserManagement() {
                 initials
               )}
             </div>
-            <p className="font-semibold text-gray-900 dark:text-gray-100">{row.fullName}</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-emerald-400 group-hover:underline transition-colors">{row.fullName}</p>
           </div>
         );
       },
@@ -287,9 +291,14 @@ export default function UserManagement() {
           [ROLES.STUDENT]: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30',
         };
         return (
-          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${roleStyles[row.role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'}`}>
+          <button
+            type="button"
+            onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
+            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer hover:scale-105 active:scale-95 transition-transform ${roleStyles[row.role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'}`}
+            title={t('users.viewProfile', 'Foydalanuvchi profilini ochish')}
+          >
             <span>{t(`roles.${row.role}`, row.role)}</span>
-          </span>
+          </button>
         );
       },
     },
@@ -412,8 +421,8 @@ export default function UserManagement() {
             variant="ghost"
             size="sm"
             className="!p-1.5 h-8 w-8 text-blue-600 dark:text-blue-400 hover:bg-blue-500/15 rounded-lg"
-            title={t('common.view', 'Batafsil ko‘rish')}
-            onClick={() => setSelectedUserForView(row)}
+            title={t('users.viewProfile', 'Profilni ko‘rish va sozlash')}
+            onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
           >
             <Eye className="w-4 h-4" />
           </Button>
@@ -687,7 +696,11 @@ export default function UserManagement() {
                   >
                     {/* Header: Avatar, Name, Role, Status */}
                     <div className="flex items-start justify-between gap-2.5">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div
+                        onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
+                        className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
+                        title={t('users.viewProfile', 'Profilni ko‘rish va sozlash')}
+                      >
                         <div className={`w-10 h-10 rounded-full bg-gradient-to-tr ${
                           row.role === ROLES.OWNER
                             ? 'from-rose-500 to-red-600'
@@ -696,7 +709,7 @@ export default function UserManagement() {
                             : row.role === ROLES.TEACHER
                             ? 'from-amber-500 to-orange-600'
                             : 'from-blue-600 to-indigo-600'
-                        } text-white font-bold flex items-center justify-center text-xs uppercase shrink-0 overflow-hidden shadow-sm ring-2 ring-gray-100 dark:ring-gray-800`}>
+                        } text-white font-bold flex items-center justify-center text-xs uppercase shrink-0 overflow-hidden shadow-sm ring-2 ring-gray-100 dark:ring-gray-800 group-hover:scale-105 transition-transform`}>
                           {avatarSrc ? (
                             <img src={avatarSrc} alt={row.fullName} className="w-full h-full object-cover" />
                           ) : (
@@ -704,7 +717,7 @@ export default function UserManagement() {
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate">
+                          <p className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate group-hover:text-blue-600 dark:group-hover:text-emerald-400 transition-colors">
                             {row.fullName}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
@@ -808,7 +821,7 @@ export default function UserManagement() {
                         size="sm"
                         icon={Eye}
                         className="flex-1 justify-center text-xs py-1.5 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40"
-                        onClick={() => setSelectedUserForView(row)}
+                        onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
                       >
                         {t('common.view', 'Batafsil')}
                       </Button>

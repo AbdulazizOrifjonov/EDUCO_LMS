@@ -48,6 +48,7 @@ const TeacherAttendance = React.lazy(() => import('@/pages/shared/TeacherAttenda
 const AttendanceReport = React.lazy(() => import('@/pages/shared/AttendanceReport'));
 const ReportsPage = React.lazy(() => import('@/pages/shared/ReportsPage'));
 const SettingsPage = React.lazy(() => import('@/pages/shared/SettingsPage'));
+const ProfilePage = React.lazy(() => import('@/pages/shared/ProfilePage'));
 const NotificationsPage = React.lazy(() => import('@/pages/shared/NotificationsPage'));
 const ChatPage = React.lazy(() => import('@/pages/shared/ChatPage'));
 const RemindersPage = React.lazy(() => import('@/pages/shared/RemindersPage'));
@@ -124,6 +125,8 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
+            <Route path="users/profile/:id" element={<ProfilePage />} />
+            <Route path="users/:id" element={<ProfilePage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="courses" element={<CourseManagement />} />
             <Route path="courses/create" element={<CourseCreatePage />} />
@@ -170,6 +173,8 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
+            <Route path="users/profile/:id" element={<ProfilePage />} />
+            <Route path="users/:id" element={<ProfilePage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="courses" element={<CourseManagement />} />
             <Route path="courses/create" element={<CourseCreatePage />} />
@@ -217,6 +222,8 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
+            <Route path="users/profile/:id" element={<ProfilePage />} />
+            <Route path="users/:id" element={<ProfilePage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="groups" element={<GroupManagement />} />
             <Route path="groups/create" element={<GroupCreatePage />} />

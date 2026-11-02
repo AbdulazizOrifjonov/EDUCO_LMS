@@ -29,6 +29,7 @@ import {
   Palette,
   Calculator,
   Cpu,
+  Code,
   Film,
   Check,
   X,
