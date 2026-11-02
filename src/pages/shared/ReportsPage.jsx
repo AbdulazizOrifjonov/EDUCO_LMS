@@ -359,7 +359,8 @@ export default function ReportsPage() {
               />
             </div>
           ) : (
-            <table className="w-full text-left rtl:text-right text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left rtl:text-right text-sm">
               {/* ATTENDANCE TABLE */}
               {reportType === 'attendance' && (
                 <>
@@ -484,6 +485,7 @@ export default function ReportsPage() {
                 </>
               )}
             </table>
+            </div>
           )}
         </div>
       </Card>

@@ -109,6 +109,7 @@ class LocalStore {
   constructor() {
     this.memoryStore = {};
     this._deletedIds = null;
+    this._pendingOutbox = new Set();
     this.ensureCleanStart();
     this.startRealtimeEngine = this.startRealtimeEngine.bind(this);
   }
@@ -186,7 +187,7 @@ class LocalStore {
     return this._deviceId;
   }
 
-  broadcastToCloud(key, value) {
+  broadcastToCloud(key, value, deletedId = null) {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
 
@@ -195,6 +196,7 @@ class LocalStore {
       type: 'STORE_UPDATE',
       key,
       val: value,
+      deletedId: deletedId || null,
       deviceId,
       ts: Date.now(),
     };
@@ -245,7 +247,7 @@ class LocalStore {
             const data = JSON.parse(raw.message);
             const myDevId = this._getDeviceId();
             if (data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
-              this.applyIncomingCloudKey(data.key, data.val);
+              this.applyIncomingCloudKey(data.key, data.val, data.deletedId || null);
             }
           }
         } catch (_) {}
@@ -257,8 +259,11 @@ class LocalStore {
     } catch (_) {}
   }
 
-  applyIncomingCloudKey(key, val) {
+  applyIncomingCloudKey(key, val, deletedId = null) {
     if (!key || val === undefined) return;
+    if (deletedId) {
+      this._recordDeletedId(deletedId);
+    }
     this.memoryStore[key] = val;
     try {
       if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
@@ -266,10 +271,11 @@ class LocalStore {
       }
     } catch (_) {}
 
-    // Pass through standard non-destructive merge and event propagation
+    // Pass through standard merge and event propagation
     this.applyIncomingData({ [key]: val });
 
     if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { [key]: val } }));
       window.dispatchEvent(new CustomEvent('educo-store-update', { detail: { key, val } }));
       if (key.startsWith('educo_db_website_')) {
         window.dispatchEvent(new CustomEvent('educo-website-update', { detail: { key, val } }));
@@ -321,7 +327,7 @@ class LocalStore {
           if (item.message) {
             const data = JSON.parse(item.message);
             if (data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
-              this.applyIncomingCloudKey(data.key, data.val);
+              this.applyIncomingCloudKey(data.key, data.val, data.deletedId || null);
               hasUpdates = true;
             }
           }
@@ -329,6 +335,7 @@ class LocalStore {
       }
 
       if (hasUpdates && typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
         window.dispatchEvent(new CustomEvent('educo-store-update'));
         window.dispatchEvent(new CustomEvent('educo-website-update'));
       }
@@ -336,6 +343,8 @@ class LocalStore {
   }
 
   setItem(key, value) {
+    if (!this._pendingOutbox) this._pendingOutbox = new Set();
+    this._pendingOutbox.add(key);
     this.memoryStore[key] = value;
     try {
       if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
@@ -385,25 +394,77 @@ class LocalStore {
       }
 
       const localVal = this.getItem(key, []);
+      const hasLocalPendingWrites = this._pendingOutbox && this._pendingOutbox.has(key);
 
-      // Smart Non-Destructive Tombstone Merge:
-      // 1. Build a map of server items, filtering out items explicitly deleted by the user
+      // If local device has NO uncommitted writes for this key, SERVER IS 100% AUTHORITATIVE!
+      // This eliminates the deletion resurrection bug across gadgets.
+      if (!hasLocalPendingWrites) {
+        const cleanServerList = serverVal.filter((sItem) => {
+          if (!sItem || typeof sItem !== 'object') return false;
+          const itemId = String(sItem.id || '');
+          return !itemId || !deletedIds.has(itemId);
+        });
+
+        const localStr = JSON.stringify(localVal);
+        const serverStr = JSON.stringify(cleanServerList);
+
+        if (localStr !== serverStr) {
+          this.memoryStore[key] = cleanServerList;
+          try {
+            if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
+              window.localStorage.setItem(key, serverStr);
+            }
+          } catch (e) {}
+
+          if (key === STORAGE_KEYS.CHAT_MESSAGES) {
+            hasChatChanges = true;
+            const enrichedAll = this.getChatMessages();
+            const localMap = new Map((localVal || []).map((m) => [m.id, m]));
+            cleanServerList.forEach((rawMsg) => {
+              if (!localMap.has(rawMsg.id)) {
+                const msg = enrichedAll.find((m) => m.id === rawMsg.id) || rawMsg;
+                if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+                  window.dispatchEvent(
+                    new CustomEvent('educo-chat-update', {
+                      detail: {
+                        event: 'INSERT',
+                        groupId: msg.group_id || msg.groupId,
+                        message: msg,
+                      },
+                    })
+                  );
+                }
+              }
+            });
+          } else if (key === STORAGE_KEYS.NOTIFICATIONS) {
+            hasNotifChanges = true;
+            if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+              window.dispatchEvent(
+                new CustomEvent('educo-notification-update', {
+                  detail: { newItems: cleanServerList },
+                })
+              );
+            }
+          } else {
+            hasGeneralChanges = true;
+            if (key.startsWith('educo_db_website_') && typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('educo-website-update'));
+            }
+          }
+        }
+        return;
+      }
+
+      // If local device DOES have in-flight pending writes (e.g. offline edits):
+      // Smart Merge keeping in-flight local items:
       const mergedMap = new Map();
       serverVal.forEach((sItem) => {
         if (!sItem || typeof sItem !== 'object') return;
         const itemId = String(sItem.id || '');
-        if (itemId && deletedIds.has(itemId)) {
-          // Explicitly deleted on client: do not resurrect
-          return;
-        }
-        if (itemId) {
-          mergedMap.set(itemId, sItem);
-        }
+        if (itemId && deletedIds.has(itemId)) return;
+        if (itemId) mergedMap.set(itemId, sItem);
       });
 
-      // 2. Merge local items:
-      // - If item was created locally and not in server, KEEP IT! (and push to server)
-      // - If item is in both, pick the one with newer updated_at timestamp
       let localHasItemsNotInServer = false;
       localVal.forEach((lItem) => {
         if (!lItem || typeof lItem !== 'object') return;
@@ -411,11 +472,9 @@ class LocalStore {
         if (!itemId || deletedIds.has(itemId)) return;
 
         if (!mergedMap.has(itemId)) {
-          // LOCALLY CREATED ENTITY! PRESERVE IT ALWAYS!
           mergedMap.set(itemId, lItem);
           localHasItemsNotInServer = true;
         } else {
-          // Exists in both: compare timestamps
           const sItem = mergedMap.get(itemId);
           const localTs = new Date(lItem.updated_at || lItem.created_at || 0).getTime();
           const serverTs = new Date(sItem.updated_at || sItem.created_at || 0).getTime();
@@ -571,6 +630,9 @@ class LocalStore {
         if (etag) {
           this._lastServerETag = etag;
         }
+        if (this._pendingOutbox && payload && typeof payload === 'object') {
+          Object.keys(payload).forEach((k) => this._pendingOutbox.delete(k));
+        }
       }
     } catch (e) {}
   }
@@ -685,6 +747,7 @@ class LocalStore {
     this._recordDeletedId(id);
     const list = this.getCourses().filter((c) => c.id !== id);
     this.setItem(STORAGE_KEYS.COURSES, list);
+    this.broadcastToCloud(STORAGE_KEYS.COURSES, list, id);
     this.pushToServer({ [STORAGE_KEYS.COURSES]: list }).catch(() => {});
     try {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
@@ -897,6 +960,7 @@ class LocalStore {
     this._recordDeletedId(id);
     const list = this.getUsers().filter((u) => u.id !== id);
     this.setItem(STORAGE_KEYS.USERS, list);
+    this.broadcastToCloud(STORAGE_KEYS.USERS, list, id);
     const memberships = this.getMemberships().filter((m) => m.user_id !== id);
     this.setItem(STORAGE_KEYS.MEMBERSHIPS, memberships);
     this.pushToServer({
@@ -906,6 +970,7 @@ class LocalStore {
     try {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
         window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.USERS } }));
+        window.dispatchEvent(new CustomEvent('educo-users-update', { detail: { users: list } }));
       }
     } catch (_) {}
     return true;
@@ -1102,6 +1167,7 @@ class LocalStore {
     this._recordDeletedId(id);
     const list = this.getGroups().filter((g) => g.id !== id);
     this.setItem(STORAGE_KEYS.GROUPS, list);
+    this.broadcastToCloud(STORAGE_KEYS.GROUPS, list, id);
     this.pushToServer({ [STORAGE_KEYS.GROUPS]: list }).catch(() => {});
     try {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
@@ -1269,6 +1335,7 @@ class LocalStore {
     this._recordDeletedId(id);
     const list = this.getItem(STORAGE_KEYS.LESSON_SCHEDULES, INITIAL_SCHEDULES).filter((s) => s.id !== id);
     this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, list);
+    this.broadcastToCloud(STORAGE_KEYS.LESSON_SCHEDULES, list, id);
     this.pushToServer({ [STORAGE_KEYS.LESSON_SCHEDULES]: list }).catch(() => {});
     try {
       if (typeof window !== 'undefined') {

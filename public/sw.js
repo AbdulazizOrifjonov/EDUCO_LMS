@@ -1,5 +1,5 @@
 // EDUCO LMS Service Worker for System Push Notifications
-const CACHE_NAME = 'educo-v12-cloud-sync';
+const CACHE_NAME = 'educo-v13-interactive-media-studio';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -45,7 +45,7 @@ export default function Sidebar({
   const scrollKey = `educo_sidebar_scroll_${role || 'user'}`;
   const isRestoringScrollRef = useRef(false);
 
-  // Restore sidebar scroll position across route navigations, sub-page changes and reloads
+  // Restore sidebar scroll position across route navigations, sub-page changes, reloads, and mobile sidebar toggle
   useEffect(() => {
     const restoreScroll = () => {
       try {
@@ -63,18 +63,22 @@ export default function Sidebar({
     // 1. Immediate restore
     restoreScroll();
 
-    // 2. Scheduled microtask and next animation frame to guarantee scroll persistence after DOM layout
+    // 2. Scheduled microtask and animation frames to guarantee scroll persistence after DOM layout & mobile drawer transition
     const rafId = requestAnimationFrame(() => {
       restoreScroll();
-      const timer = setTimeout(() => {
+      const t1 = setTimeout(restoreScroll, 60);
+      const t2 = setTimeout(() => {
         restoreScroll();
         isRestoringScrollRef.current = false;
-      }, 50);
-      return () => clearTimeout(timer);
+      }, 180);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [location.pathname, location.search, scrollKey]);
+  }, [location.pathname, location.search, scrollKey, mobileOpen]);
 
   // Persist sidebar scroll position as the user scrolls
   const handleNavScroll = (e) => {

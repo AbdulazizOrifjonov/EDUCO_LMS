@@ -50,23 +50,99 @@ function createMockTable(tableName) {
       return builder;
     },
     eq(col, val) {
-      filters.push((row) => row[col] === val);
+      filters.push((row) => {
+        if (row[col] === val) return true;
+        if (row[col] !== undefined && row[col] !== null && val !== undefined && val !== null) {
+          return String(row[col]) === String(val);
+        }
+        return false;
+      });
       return builder;
     },
     neq(col, val) {
-      filters.push((row) => row[col] !== val);
+      filters.push((row) => {
+        if (row[col] === val) return false;
+        if (row[col] !== undefined && row[col] !== null && val !== undefined && val !== null) {
+          return String(row[col]) !== String(val);
+        }
+        return true;
+      });
       return builder;
     },
     in(col, arr) {
-      filters.push((row) => Array.isArray(arr) && arr.includes(row[col]));
+      filters.push((row) => {
+        if (!Array.isArray(arr)) return false;
+        if (arr.includes(row[col])) return true;
+        const strArr = arr.map(String);
+        return strArr.includes(String(row[col]));
+      });
       return builder;
     },
-    or(cond) {
+    gte(col, val) {
+      filters.push((row) => {
+        const v = row[col];
+        if (v === undefined || v === null) return false;
+        return v >= val || String(v) >= String(val);
+      });
+      return builder;
+    },
+    gt(col, val) {
+      filters.push((row) => {
+        const v = row[col];
+        if (v === undefined || v === null) return false;
+        return v > val || String(v) > String(val);
+      });
+      return builder;
+    },
+    lte(col, val) {
+      filters.push((row) => {
+        const v = row[col];
+        if (v === undefined || v === null) return false;
+        return v <= val || String(v) <= String(val);
+      });
+      return builder;
+    },
+    lt(col, val) {
+      filters.push((row) => {
+        const v = row[col];
+        if (v === undefined || v === null) return false;
+        return v < val || String(v) < String(val);
+      });
+      return builder;
+    },
+    is(col, val) {
+      filters.push((row) => {
+        if (val === null) return row[col] === null || row[col] === undefined;
+        return row[col] === val;
+      });
+      return builder;
+    },
+    like(col, pattern) {
+      const clean = String(pattern || '').replace(/%/g, '').toLowerCase();
+      filters.push((row) => String(row[col] || '').toLowerCase().includes(clean));
       return builder;
     },
     ilike(col, pattern) {
       const clean = String(pattern || '').replace(/%/g, '').toLowerCase();
       filters.push((row) => String(row[col] || '').toLowerCase().includes(clean));
+      return builder;
+    },
+    contains(col, val) {
+      filters.push((row) => Array.isArray(row[col]) && row[col].includes(val));
+      return builder;
+    },
+    or(cond) {
+      if (typeof cond === 'string') {
+        const parts = cond.split(',').map((p) => p.trim());
+        filters.push((row) => {
+          return parts.some((p) => {
+            const [field, op, val] = p.split('.');
+            if (op === 'eq') return String(row[field]) === String(val);
+            if (op === 'is' && val === 'null') return row[field] === null || row[field] === undefined;
+            return false;
+          });
+        });
+      }
       return builder;
     },
     order(col, opts = {}) {
@@ -93,16 +169,187 @@ function createMockTable(tableName) {
     },
     async execute() {
       let rows = [];
+      const groups = localStore.getGroups();
+      const users = localStore.getUsers();
+      const courses = localStore.getCourses();
+
       if (tableName === 'lesson_schedules') {
         rows = localStore.getSchedules();
       } else if (tableName === 'courses') {
-        rows = localStore.getCourses();
+        rows = courses;
       } else if (tableName === 'profiles') {
-        rows = localStore.getUsers();
+        rows = users;
       } else if (tableName === 'user_roles') {
-        rows = localStore.getUsers().map((u) => ({ user_id: u.id, role: u.role }));
+        rows = users.map((u) => ({ user_id: u.id, role: u.role }));
       } else if (tableName === 'groups') {
-        rows = localStore.getGroups();
+        rows = groups;
+      } else if (tableName === 'group_teachers') {
+        rows = [];
+        groups.forEach((g) => {
+          const courseObj = courses.find((c) => c.id === g.course_id) || { id: g.course_id, name: g.course_name || 'Kurs', color: g.color || '#123D78' };
+          const teacherIds = new Set();
+          if (g.teacher_id) teacherIds.add(g.teacher_id);
+          if (g.teacherId) teacherIds.add(g.teacherId);
+          if (Array.isArray(g.teacher_ids)) g.teacher_ids.forEach((id) => teacherIds.add(id));
+          if (Array.isArray(g.group_teachers)) {
+            g.group_teachers.forEach((gt) => {
+              const tId = gt.teacher_id || gt.id || gt.profiles?.id;
+              if (tId) teacherIds.add(tId);
+            });
+          }
+          teacherIds.forEach((tId) => {
+            const u = users.find((usr) => usr.id === tId);
+            rows.push({
+              id: `gt-${g.id}-${tId}`,
+              group_id: g.id,
+              teacher_id: tId,
+              is_primary: tId === (g.teacher_id || g.teacherId),
+              groups: {
+                id: g.id,
+                name: g.name,
+                room: g.room || '101-xona',
+                capacity: g.capacity || 20,
+                status: g.status || 'active',
+                course_id: g.course_id,
+                courses: courseObj,
+              },
+              profiles: u ? {
+                id: u.id,
+                first_name: u.first_name || '',
+                last_name: u.last_name || '',
+                username: u.username || '',
+                avatar_url: u.avatar_url || '',
+                full_name: u.full_name || u.fullName || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username,
+              } : {
+                id: tId,
+                first_name: g.teacher_name || 'O‘qituvchi',
+                last_name: '',
+                username: 'teacher',
+                avatar_url: '',
+                full_name: g.teacher_name || 'O‘qituvchi',
+              },
+            });
+          });
+        });
+      } else if (tableName === 'group_memberships') {
+        const rawMemberships = localStore.getMemberships ? localStore.getMemberships() : localStore.getItem('educo_db_memberships', []);
+        const seen = new Set();
+        rows = [];
+
+        rawMemberships.forEach((m) => {
+          const g = groups.find((grp) => grp.id === m.group_id);
+          const c = g ? courses.find((crs) => crs.id === g.course_id) : null;
+          const u = users.find((usr) => usr.id === m.student_id);
+          const key = `${m.group_id}-${m.student_id}`;
+          seen.add(key);
+          rows.push({
+            id: m.id || `mem-${key}`,
+            group_id: m.group_id,
+            student_id: m.student_id,
+            is_active: m.is_active !== false,
+            enrolled_at: m.enrolled_at || m.created_at || new Date().toISOString(),
+            groups: g ? {
+              id: g.id,
+              name: g.name,
+              room: g.room || '101-xona',
+              status: g.status || 'active',
+              courses: c ? { id: c.id, name: c.name, code: c.code || '', color: c.color || '#123D78' } : { id: g.course_id, name: g.course_name || 'Kurs', code: '', color: '#123D78' },
+            } : null,
+            profiles: u ? {
+              id: u.id,
+              first_name: u.first_name || '',
+              last_name: u.last_name || '',
+              full_name: u.full_name || u.fullName || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username,
+              username: u.username || '',
+              phone_number: u.phone || '',
+            } : null,
+          });
+        });
+
+        // Also auto-synthesize from groups.student_ids if not already in memberships
+        groups.forEach((g) => {
+          if (Array.isArray(g.student_ids)) {
+            g.student_ids.forEach((sId) => {
+              const key = `${g.id}-${sId}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                const c = courses.find((crs) => crs.id === g.course_id);
+                const u = users.find((usr) => usr.id === sId);
+                rows.push({
+                  id: `mem-${key}`,
+                  group_id: g.id,
+                  student_id: sId,
+                  is_active: true,
+                  enrolled_at: g.created_at || new Date().toISOString(),
+                  groups: {
+                    id: g.id,
+                    name: g.name,
+                    room: g.room || '101-xona',
+                    status: g.status || 'active',
+                    courses: c ? { id: c.id, name: c.name, code: c.code || '', color: c.color || '#123D78' } : { id: g.course_id, name: g.course_name || 'Kurs', code: '', color: '#123D78' },
+                  },
+                  profiles: u ? {
+                    id: u.id,
+                    first_name: u.first_name || '',
+                    last_name: u.last_name || '',
+                    full_name: u.full_name || u.fullName || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username,
+                    username: u.username || '',
+                    phone_number: u.phone || '',
+                  } : null,
+                });
+              }
+            });
+          }
+        });
+      } else if (tableName === 'lessons') {
+        const today = new Date().toISOString().split('T')[0];
+        const schedules = localStore.getSchedules();
+        rows = [];
+
+        schedules.forEach((s) => {
+          const g = groups.find((grp) => grp.id === s.group_id);
+          const c = g ? courses.find((crs) => crs.id === g.course_id) : null;
+          rows.push({
+            id: `lsn-${s.id || s.group_id}`,
+            group_id: s.group_id,
+            title: s.title || `${g?.name || 'Guruh'} — Dars mashgʻuloti`,
+            description: s.description || 'Muntazam dars mashgʻuloti',
+            lesson_date: today,
+            start_time: s.start_time || '18:00',
+            end_time: s.end_time || '20:00',
+            status: 'scheduled',
+            groups: g ? {
+              id: g.id,
+              name: g.name,
+              room: s.room || g.room || '101-xona',
+              courses: c ? { name: c.name, color: c.color } : { name: g.course_name || 'Kurs', color: '#123D78' },
+              group_teachers: g.teacher_id ? [{ teacher_id: g.teacher_id }] : [],
+            } : null,
+          });
+        });
+
+        if (rows.length === 0) {
+          groups.filter((g) => g.status === 'active').forEach((g) => {
+            const c = courses.find((crs) => crs.id === g.course_id);
+            rows.push({
+              id: `lsn-grp-${g.id}`,
+              group_id: g.id,
+              title: `${g.name} — Dars mashgʻuloti`,
+              description: 'Rejali dars mashgʻuloti',
+              lesson_date: today,
+              start_time: '18:00',
+              end_time: '20:00',
+              status: 'scheduled',
+              groups: {
+                id: g.id,
+                name: g.name,
+                room: g.room || '101-xona',
+                courses: c ? { name: c.name, color: c.color } : { name: g.course_name || 'Kurs', color: '#123D78' },
+                group_teachers: g.teacher_id ? [{ teacher_id: g.teacher_id }] : [],
+              },
+            });
+          });
+        }
       } else if (tableName === 'grades') {
         rows = localStore.getGrades();
       } else if (tableName === 'student_attendance') {
@@ -111,6 +358,20 @@ function createMockTable(tableName) {
         rows = localStore.getAnnouncements();
       } else if (tableName === 'notifications') {
         rows = localStore.getNotifications();
+      } else if (tableName === 'homework') {
+        rows = localStore.getItem('educo_db_homework', []);
+      } else if (tableName === 'homework_submissions') {
+        rows = localStore.getItem('educo_db_submissions', []);
+      } else if (tableName === 'materials') {
+        rows = localStore.getItem('educo_db_materials', []);
+      } else if (tableName === 'tuition_fees' || tableName === 'payments') {
+        rows = localStore.getPayments();
+      } else if (tableName === 'audit_logs') {
+        rows = localStore.getItem('educo_db_audit_logs', []);
+      } else if (tableName === 'sms_logs') {
+        rows = localStore.getItem('educo_db_sms_logs', []);
+      } else if (tableName === 'sms_queue') {
+        rows = localStore.getItem('educo_db_sms_queue', []);
       } else {
         rows = [];
       }
@@ -133,8 +394,18 @@ function createMockTable(tableName) {
             saved.push(localStore.saveAttendance(item));
           } else if (tableName === 'notifications') {
             saved.push(localStore.saveNotification(item));
+          } else if (tableName === 'group_memberships') {
+            saved.push(localStore.saveMembership ? localStore.saveMembership(item) : item);
+          } else if (tableName === 'group_teachers') {
+            if (item?.group_id && item?.teacher_id) {
+              const grp = groups.find((g) => g.id === item.group_id);
+              if (grp) {
+                localStore.saveGroup({ ...grp, teacher_id: item.teacher_id });
+              }
+            }
+            saved.push(item);
           } else {
-            saved.push({ id: `mock-${Date.now()}-${Math.random()}`, ...item });
+            saved.push({ id: `mock-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...item });
           }
         }
         const result = Array.isArray(payload) ? saved : saved[0];
@@ -160,6 +431,17 @@ function createMockTable(tableName) {
       let filtered = [...rows];
       for (const f of filters) {
         filtered = filtered.filter(f);
+      }
+
+      if (orderColumn) {
+        filtered.sort((a, b) => {
+          const valA = a[orderColumn];
+          const valB = b[orderColumn];
+          if (valA === valB) return 0;
+          if (valA === undefined || valA === null) return orderAscending ? -1 : 1;
+          if (valB === undefined || valB === null) return orderAscending ? 1 : -1;
+          return orderAscending ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+        });
       }
 
       if (isSingle) {

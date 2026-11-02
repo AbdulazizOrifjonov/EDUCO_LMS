@@ -1022,12 +1022,12 @@ export default function WebsiteManagementPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto shrink-0">
           <Button
             variant="ghost"
             size="sm"
             onClick={refreshAll}
-            className="!text-white hover:!bg-white/20 !rounded-xl"
+            className="!text-white hover:!bg-white/20 !rounded-xl flex-1 sm:flex-none justify-center"
             icon={RefreshCw}
           >
             Yangilash
@@ -1036,18 +1036,18 @@ export default function WebsiteManagementPage() {
             href={`/website${activeModule.targetHash || ''}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-emerald-900 font-extrabold text-xs sm:text-sm shadow-md hover:bg-emerald-50 hover:shadow-lg transition-all active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-emerald-900 font-extrabold text-xs sm:text-sm shadow-md hover:bg-emerald-50 hover:shadow-lg transition-all active:scale-95 flex-1 sm:flex-none"
             title="Rasmiy veb-saytni yangi oynada ochish"
           >
             <Eye className="w-4 h-4 text-emerald-600" />
-            <span>Saytni yangi oynada ochish</span>
+            <span className="whitespace-nowrap">Saytni ochish</span>
             <ExternalLink className="w-3.5 h-3.5 opacity-70" />
           </a>
         </div>
       </div>
 
       {/* Sub-Navigation Tabs Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1.5 border-b border-gray-200 dark:border-gray-800 -mx-4 px-4 sm:mx-0 sm:px-0 touch-pan-x scroll-smooth">
         {SUB_MODULES.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;

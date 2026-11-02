@@ -69,7 +69,7 @@ export default function CoursesSection({
           </p>
 
           {/* Category Filter Tabs */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+          <div className="flex overflow-x-auto no-scrollbar sm:flex-wrap items-center sm:justify-center gap-2 pt-2 pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 touch-pan-x">
             {categories.map((cat) => {
               const isActive = selectedCategory === cat;
               return (
@@ -77,7 +77,7 @@ export default function CoursesSection({
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                  className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 sm:shrink ${
                     isActive
                       ? 'bg-gradient-to-r from-blue-700 to-indigo-700 dark:from-emerald-600 dark:to-teal-700 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 scale-103'
                       : 'bg-white dark:bg-[#1a2332] text-gray-700 dark:text-gray-300 border border-gray-200/80 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800'

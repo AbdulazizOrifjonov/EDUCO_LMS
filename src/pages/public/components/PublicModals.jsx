@@ -28,15 +28,15 @@ export function CourseDetailModal({ course, onClose, onRegister, onEnroll }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-white dark:bg-[#1a2332] rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]"
+        className="w-full max-w-2xl bg-white dark:bg-[#1a2332] rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-150 flex flex-col max-h-[92vh] sm:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cover Image */}
-        <div className="relative h-56 sm:h-64 w-full bg-gray-900 shrink-0">
+        <div className="relative h-48 sm:h-64 w-full bg-gray-900 shrink-0">
           <img
             src={course.image_url || course.image || '/educo-logo.png'}
             alt={course.title}
@@ -49,21 +49,21 @@ export function CourseDetailModal({ course, onClose, onRegister, onEnroll }) {
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
-          <div className="absolute bottom-4 left-5 right-5 text-white">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 dark:bg-emerald-500 text-white inline-block mb-2">
+          <div className="absolute bottom-3 left-4 right-4 sm:bottom-4 sm:left-5 sm:right-5 text-white">
+            <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-bold bg-blue-600 dark:bg-emerald-500 text-white inline-block mb-1.5 sm:mb-2">
               {course.category}
             </span>
-            <h2 className="text-xl sm:text-2xl font-black">{course.title}</h2>
+            <h2 className="text-lg sm:text-2xl font-black line-clamp-2">{course.title}</h2>
           </div>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1">
           {/* Key Info Badges */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
             <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700">
@@ -154,16 +154,16 @@ export function TeacherModal({ teacher, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-[#1a2332] rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-150 p-6 sm:p-7 space-y-6"
+        className="w-full max-w-lg bg-white dark:bg-[#1a2332] rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-150 p-4 sm:p-7 space-y-4 sm:space-y-6 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-emerald-500 shadow-md overflow-hidden shrink-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl border-2 border-emerald-500 shadow-md overflow-hidden shrink-0">
               <img
                 src={teacher.image_url || teacher.photo || teacher.photo_url || '/educo-logo.png'}
                 alt={teacher.full_name || teacher.name}
@@ -173,13 +173,13 @@ export function TeacherModal({ teacher, onClose }) {
               />
             </div>
             <div>
-              <h3 className="text-xl font-black text-gray-950 dark:text-white">
+              <h3 className="text-lg sm:text-xl font-black text-gray-950 dark:text-white">
                 {teacher.full_name}
               </h3>
               <p className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">
                 {teacher.role}
               </p>
-              <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300">
+              <span className="inline-block mt-0.5 sm:mt-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300">
                 {teacher.experience_years} tajriba
               </span>
             </div>
@@ -188,9 +188,9 @@ export function TeacherModal({ teacher, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
@@ -238,14 +238,14 @@ export function NewsDetailModal({ newsItem, news, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-white dark:bg-[#1a2332] rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]"
+        className="w-full max-w-2xl bg-white dark:bg-[#1a2332] rounded-3xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-150 flex flex-col max-h-[92vh] sm:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative h-60 w-full bg-gray-900 shrink-0">
+        <div className="relative h-48 sm:h-60 w-full bg-gray-900 shrink-0">
           <img
             src={currentNews.cover_image || currentNews.image || currentNews.image_url || '/educo-logo.png'}
             alt={currentNews.title}
@@ -256,13 +256,13 @@ export function NewsDetailModal({ newsItem, news, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto space-y-4 flex-1">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-3 sm:space-y-4 flex-1">
           <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-semibold">
             <span className="px-3 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold">
               {currentNews.category}

@@ -36,7 +36,27 @@
       "avatar_url": ""
     }
   ],
-  "educo_db_groups": [],
+  "educo_db_groups": [
+    {
+      "id": "grp-frontend-1",
+      "name": "IT Frontend",
+      "code": "IT-FE-1",
+      "course_id": "crs-1793463755078",
+      "course_name": "Frontend",
+      "teacher_id": "usr-1793463763683",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "room": "1-xona",
+      "monthly_price": 500000,
+      "monthly_fee": 500000,
+      "status": "active",
+      "is_active": true,
+      "color": "#0284c7",
+      "days_pattern": "odd",
+      "lesson_time": "18:00 - 20:00",
+      "created_at": "2026-11-02T18:05:06.697Z",
+      "updated_at": "2026-11-02T18:05:06.723Z"
+    }
+  ],
   "educo_db_courses": [
     {
       "id": "crs-1793603631220",
@@ -68,7 +88,17 @@
     }
   ],
   "educo_db_memberships": [],
-  "educo_db_lesson_schedules": [],
+  "educo_db_lesson_schedules": [
+    {
+      "id": "sch-it-frontend-mon-1793642706723",
+      "group_id": "grp-frontend-1",
+      "day_of_week": 1,
+      "start_time": "18:00:00",
+      "end_time": "20:00:00",
+      "room": "1-xona",
+      "created_at": "2026-11-02T18:05:06.723Z"
+    }
+  ],
   "educo_db_lessons": [],
   "educo_db_attendance": [
     {

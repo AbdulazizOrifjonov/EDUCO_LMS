@@ -46,6 +46,7 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
+  Link as LinkIcon,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -163,46 +164,314 @@ export default function WebsiteFullPageEditor({
   const ModuleIcon = currentConfig.icon;
   const formId = 'website-editor-form';
 
-  // Smart Auto-apply Image Upload Box with Crop and Delete controls
+    // Interactive Drag-to-Pan support on media images
+  const handleImageDragStart = (e) => {
+    e.preventDefault();
+    const startX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : undefined);
+    const startY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : undefined);
+    if (startX === undefined || startY === undefined) return;
+    const initialX = activeOffsetX;
+    const initialY = activeOffsetY;
+
+    const onMove = (moveEvent) => {
+      const curX = moveEvent.clientX || (moveEvent.touches && moveEvent.touches[0] ? moveEvent.touches[0].clientX : undefined);
+      const curY = moveEvent.clientY || (moveEvent.touches && moveEvent.touches[0] ? moveEvent.touches[0].clientY : undefined);
+      if (curX === undefined || curY === undefined) return;
+      const deltaX = Math.round((curX - startX) / 2.5);
+      const deltaY = Math.round((curY - startY) / 2.5);
+      const newX = Math.max(-50, Math.min(50, initialX + deltaX));
+      const newY = Math.max(-50, Math.min(50, initialY + deltaY));
+      setActiveOffsetX(newX);
+      setActiveOffsetY(newY);
+    };
+
+    const onEnd = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onEnd);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onMove);
+    window.addEventListener('touchend', onEnd);
+  };
+
+  // Smart Auto-apply Image Upload Box with Live Interactive Media Studio & Controls
   const renderImageUploadBox = (label = 'Fotosurat', aspectHint = '4:3 nisbat tavsiya etiladi', fieldName = 'image') => (
-    <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/80 space-y-3.5 shadow-xs">
+    <div className="p-4 sm:p-6 rounded-3xl bg-gray-50 dark:bg-gray-800/70 border-2 border-gray-200 dark:border-gray-700/80 space-y-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-black text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
-          <ImageIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        <label className="text-xs sm:text-sm font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <div className="w-7 h-7 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <ImageIcon className="w-4 h-4" />
+          </div>
           <span>{label}</span>
         </label>
         {activeImage ? (
-          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700 flex items-center gap-1">
-            <CheckCircle className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-            <span>Rasm faol</span>
+          <span className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-300 dark:border-emerald-700 flex items-center gap-1.5 shadow-2xs">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Rasm o‘rnatilgan</span>
           </span>
         ) : (
-          <span className="text-[10px] font-medium text-gray-400">
-            Rasm tanlanmagan
+          <span className="text-[11px] font-semibold text-gray-400 dark:text-gray-500">
+            Hali rasm tanlanmagan
           </span>
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-        <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] shadow-xs">
-          <Upload className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{uploadLoading ? 'Rasm yuklanmoqda...' : 'Kompyuterdan rasm tanlash (Avtomatik o‘rnatiladi)'}</span>
-          <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-        </label>
-
-        {activeImage && (
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              icon={Crop}
-              onClick={() => handleOpenCropperForExisting()}
-              className="!rounded-xl text-xs font-bold"
-              title="Kattalashtirish / Surish / Qirqish"
+      {activeImage ? (
+        <div className="space-y-4">
+          {/* 1. Live Interactive Visual Canvas (Drag-to-pan) */}
+          <div className="relative rounded-2xl overflow-hidden bg-gray-950 border-2 border-emerald-500/50 shadow-inner group">
+            <div
+              className="w-full h-56 sm:h-72 relative overflow-hidden select-none cursor-grab active:cursor-grabbing flex items-center justify-center bg-gray-900"
+              onMouseDown={handleImageDragStart}
+              onTouchStart={handleImageDragStart}
+              title="Rasmni sichqoncha yoki barmoq bilan ushlab xohlagan tomonga suring"
             >
-              To‘g‘rilash
-            </Button>
+              <img
+                src={activeImage}
+                alt="Yuklangan rasm"
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                style={{
+                  objectFit: activeFitMode,
+                  objectPosition: activePosition,
+                  transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                  transformOrigin: 'center center',
+                }}
+                className="w-full h-full pointer-events-none transition-transform duration-75"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
+
+              {/* Floating guidance badge */}
+              <div className="absolute top-3 left-3 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-2 border border-white/20 pointer-events-none shadow-md">
+                <Move className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                <span>Sichqoncha bilan suring (Drag to pan)</span>
+              </div>
+
+              {/* Live coordinates chip */}
+              <div className="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md text-emerald-400 text-[11px] font-mono font-bold border border-emerald-500/30 pointer-events-none shadow-md">
+                Zoom: {Math.round(activeScale * 100)}% | X: {activeOffsetX > 0 ? `+${activeOffsetX}` : activeOffsetX}% | Y: {activeOffsetY > 0 ? `+${activeOffsetY}` : activeOffsetY}%
+              </div>
+
+              {/* Asliga qaytarish button inside frame */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveScale(1);
+                  setActiveOffsetX(0);
+                  setActiveOffsetY(0);
+                  setActivePosition('center');
+                  setActiveFitMode('cover');
+                }}
+                className="absolute bottom-3 right-3 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-white hover:text-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 border border-white/25 cursor-pointer shadow-lg active:scale-95"
+                title="Barcha surish va masshtabni asliga qaytarish"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Asliga qaytarish</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 2. Direct Pan & Zoom Control Studio */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between pb-2.5 border-b border-gray-100 dark:border-gray-700/60">
+              <span className="text-xs sm:text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Rasmni surish va moslashtirish paneli</span>
+              </span>
+              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 px-2.5 py-0.5 rounded-lg">
+                Jonli boshqaruv
+              </span>
+            </div>
+
+            {/* A. Chapga / O'ngga Surish (Gorizontal) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <ArrowLeft className="w-3.5 h-3.5 text-blue-500" />
+                  <ArrowRight className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Chapga / O‘ngga surish (Gorizontal):</span>
+                </span>
+                <span className="font-mono text-blue-600 dark:text-blue-400 font-extrabold text-xs">
+                  {activeOffsetX === 0 ? 'Markaz (0%)' : activeOffsetX > 0 ? `+${activeOffsetX}% (O‘ngga)` : `${activeOffsetX}% (Chapga)`}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
+                  className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-800 dark:text-gray-200 hover:text-blue-600 text-xs font-extrabold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 shadow-2xs active:scale-95"
+                  title="Chapga surish (-5%)"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Chapga
+                </button>
+                <input
+                  type="range"
+                  min="-50"
+                  max="50"
+                  step="1"
+                  value={activeOffsetX}
+                  onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
+                  className="flex-1 accent-blue-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
+                  className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-800 dark:text-gray-200 hover:text-blue-600 text-xs font-extrabold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 shadow-2xs active:scale-95"
+                  title="O‘ngga surish (+5%)"
+                >
+                  O‘ngga <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* B. Tepaga / Pastga Surish (Vertikal) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <ArrowUp className="w-3.5 h-3.5 text-purple-500" />
+                  <ArrowDown className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Tepaga / Pastga surish (Vertikal):</span>
+                </span>
+                <span className="font-mono text-purple-600 dark:text-purple-400 font-extrabold text-xs">
+                  {activeOffsetY === 0 ? 'Markaz (0%)' : activeOffsetY > 0 ? `+${activeOffsetY}% (Pastga)` : `${activeOffsetY}% (Tepaga)`}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
+                  className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-800 dark:text-gray-200 hover:text-purple-600 text-xs font-extrabold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 shadow-2xs active:scale-95"
+                  title="Tepaga surish (-5%)"
+                >
+                  <ArrowUp className="w-3.5 h-3.5" /> Tepaga
+                </button>
+                <input
+                  type="range"
+                  min="-50"
+                  max="50"
+                  step="1"
+                  value={activeOffsetY}
+                  onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
+                  className="flex-1 accent-purple-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
+                  className="px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-800 dark:text-gray-200 hover:text-purple-600 text-xs font-extrabold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 shadow-2xs active:scale-95"
+                  title="Pastga surish (+5%)"
+                >
+                  Pastga <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* C. Kattalashtirish (Zoom) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <ZoomIn className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Kattalashtirish / Kichraytirish (Masshtab):</span>
+                </span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-extrabold text-xs">
+                  {Math.round(activeScale * 100)}%
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveScale(Math.max(0.5, Number((activeScale - 0.1).toFixed(2))))}
+                  className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 text-gray-800 dark:text-gray-200 hover:text-emerald-600 text-sm font-black flex items-center justify-center border border-gray-200 dark:border-gray-600 cursor-pointer shadow-2xs active:scale-95"
+                  title="Kichraytirish (-10%)"
+                >
+                  -
+                </button>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.5"
+                  step="0.05"
+                  value={activeScale}
+                  onChange={(e) => setActiveScale(parseFloat(e.target.value))}
+                  className="flex-1 accent-emerald-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => setActiveScale(Math.min(3, Number((activeScale + 0.1).toFixed(2))))}
+                  className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 text-gray-800 dark:text-gray-200 hover:text-emerald-600 text-sm font-black flex items-center justify-center border border-gray-200 dark:border-gray-600 cursor-pointer shadow-2xs active:scale-95"
+                  title="Kattalashtirish (+10%)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* D. To'ldirish & Fokus */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+              <div>
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 block mb-1">To‘ldirish usuli:</span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveFitMode('cover')}
+                    className={`py-1.5 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                      activeFitMode === 'cover'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                    }`}
+                  >
+                    Qoplash (Cover)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFitMode('contain')}
+                    className={`py-1.5 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                      activeFitMode === 'contain'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                    }`}
+                  >
+                    Sig‘dirish (Contain)
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400 block mb-1">Fokus pozitsiyasi:</span>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'top', label: 'Tepa' },
+                    { id: 'center', label: 'Markaz' },
+                    { id: 'bottom', label: 'Past' },
+                  ].map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setActivePosition(p.id)}
+                      className={`py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        activePosition === p.id
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Media Action Buttons: Change Photo & Delete */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+            <label className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-emerald-500/50 hover:border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] shadow-2xs">
+              <Upload className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{uploadLoading ? 'Yuklanmoqda...' : 'Boshqa rasm yuklash (Kompyuterdan)'}</span>
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </label>
+
             <Button
               type="button"
               variant="danger"
@@ -212,18 +481,38 @@ export default function WebsiteFullPageEditor({
               className="!rounded-xl text-xs font-bold"
               title="Rasmni butunlay o‘chirib tashlash"
             >
-              Rasmni o‘chirish
+              Rasmni butunlay o‘chirish
             </Button>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* Empty State: Big inviting upload dropzone */
+        <div className="space-y-3">
+          <label className="flex flex-col items-center justify-center gap-2 p-6 sm:p-8 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99] shadow-xs text-center">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 flex items-center justify-center text-emerald-600 mb-1">
+              <Upload className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-black text-gray-900 dark:text-white">
+              {uploadLoading ? 'Rasm yuklanmoqda...' : 'Kompyuterdan rasm tanlash'}
+            </span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">
+              Tanlangan rasm avtomatik o‘rnatiladi va surish/kattalashtirish paneli ochiladi
+            </span>
+            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+          </label>
+        </div>
+      )}
 
-      <div className="space-y-1">
+      {/* Direct URL input field */}
+      <div className="pt-2 border-t border-gray-200/60 dark:border-gray-700/60 space-y-1">
+        <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          Yoki to‘g‘ridan-to‘g‘ri rasm URL havolasi:
+        </label>
         <Input
           name={fieldName}
           value={activeImage}
           onChange={(e) => setActiveImage(e.target.value)}
-          placeholder="Yoki to‘g‘ridan-to‘g‘ri rasm URL havolasi: https://..."
+          placeholder="https://images.unsplash.com/photo-..."
           className="text-xs"
         />
         <p className="text-[10px] text-gray-500 dark:text-gray-400">{aspectHint}</p>
@@ -349,57 +638,88 @@ export default function WebsiteFullPageEditor({
           step="0.05"
           value={activeScale}
           onChange={(e) => setActiveScale(parseFloat(e.target.value))}
-          className="w-full accent-emerald-600 cursor-pointer h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg"
+          className="w-full accent-emerald-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
         />
       </div>
 
-      {/* 3. D-Pad Pan / Offset Controls */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-[11px] font-bold text-gray-600 dark:text-gray-400">
+      {/* 3. Horizontal Pan Slider & Controls */}
+      <div className="space-y-1.5 pt-1">
+        <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
           <span className="flex items-center gap-1">
-            <Move className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Rasmni surish (Gorizontal & Vertikal):</span>
+            <ArrowLeft className="w-3 h-3 text-blue-500" />
+            <ArrowRight className="w-3 h-3 text-blue-500" />
+            <span>Chapga / O‘ngga surish (Gorizontal):</span>
           </span>
-          {(activeOffsetX !== 0 || activeOffsetY !== 0) && (
-            <span className="text-[10px] font-mono text-gray-400">
-              X:{activeOffsetX}% Y:{activeOffsetY}%
-            </span>
-          )}
+          <span className="font-mono text-blue-600 dark:text-blue-400 font-extrabold text-xs">
+            {activeOffsetX === 0 ? '0%' : activeOffsetX > 0 ? `+${activeOffsetX}% (O‘ngga)` : `${activeOffsetX}% (Chapga)`}
+          </span>
         </div>
-        <div className="flex items-center justify-center gap-1.5 py-1">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
-            className="px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-            title="Chapga surish"
+            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
+            title="Chapga surish (-5%)"
           >
-            <ArrowLeft className="w-3 h-3" /> Chapga
+            <ArrowLeft className="w-3 h-3" /> Chap
           </button>
-          <div className="flex flex-col gap-1">
-            <button
-              type="button"
-              onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
-              className="px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
-              title="Tepaga surish"
-            >
-              <ArrowUp className="w-3 h-3" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
-              className="px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
-              title="Pastga surish"
-            >
-              <ArrowDown className="w-3 h-3" />
-            </button>
-          </div>
+          <input
+            type="range"
+            min="-50"
+            max="50"
+            step="1"
+            value={activeOffsetX}
+            onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
+            className="flex-1 accent-blue-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
+          />
           <button
             type="button"
             onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
-            className="px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-            title="O‘ngga surish"
+            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
+            title="O‘ngga surish (+5%)"
           >
-            O‘ngga <ArrowRight className="w-3 h-3" />
+            O‘ng <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      {/* 4. Vertical Pan Slider & Controls */}
+      <div className="space-y-1.5 pt-1">
+        <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
+          <span className="flex items-center gap-1">
+            <ArrowUp className="w-3 h-3 text-purple-500" />
+            <ArrowDown className="w-3 h-3 text-purple-500" />
+            <span>Tepaga / Pastga surish (Vertikal):</span>
+          </span>
+          <span className="font-mono text-purple-600 dark:text-purple-400 font-extrabold text-xs">
+            {activeOffsetY === 0 ? '0%' : activeOffsetY > 0 ? `+${activeOffsetY}% (Pastga)` : `${activeOffsetY}% (Tepaga)`}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
+            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
+            title="Tepaga surish (-5%)"
+          >
+            <ArrowUp className="w-3 h-3" /> Tepa
+          </button>
+          <input
+            type="range"
+            min="-50"
+            max="50"
+            step="1"
+            value={activeOffsetY}
+            onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
+            className="flex-1 accent-purple-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
+          />
+          <button
+            type="button"
+            onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
+            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
+            title="Pastga surish (+5%)"
+          >
+            Past <ArrowDown className="w-3 h-3" />
           </button>
         </div>
       </div>
@@ -480,13 +800,13 @@ export default function WebsiteFullPageEditor({
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 self-end sm:self-auto">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={closeEditor}
-              className="!rounded-2xl font-bold"
+              className="!rounded-2xl font-bold flex-1 sm:flex-initial justify-center"
             >
               Bekor qilish
             </Button>
@@ -501,7 +821,7 @@ export default function WebsiteFullPageEditor({
                   id: editingItem.id,
                   title: editingItem.title || editingItem.name || editingItem.caption || 'Ushbu element'
                 })}
-                className="!rounded-2xl font-bold"
+                className="!rounded-2xl font-bold flex-1 sm:flex-initial justify-center"
               >
                 O‘chirish
               </Button>
@@ -512,7 +832,7 @@ export default function WebsiteFullPageEditor({
               variant="primary"
               size="sm"
               icon={Save}
-              className="!rounded-2xl font-bold shadow-md shadow-emerald-600/20"
+              className="!rounded-2xl font-bold shadow-md shadow-emerald-600/20 flex-1 sm:flex-initial justify-center"
             >
               Saqlash
             </Button>

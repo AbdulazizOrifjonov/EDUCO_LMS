@@ -63,8 +63,23 @@ export default function ImageCropperModal({
   const dragStartRef = useRef({ x: 0, y: 0, initialOffsetX: 0, initialOffsetY: 0 });
   const touchPinchRef = useRef({ initialDist: 0, initialZoom: 1 });
 
-  // Canvas viewport dimensions
-  const CANVAS_SIZE = 340;
+  // Canvas viewport dimensions (Dynamic for responsive mobile devices)
+  const [canvasSize, setCanvasSize] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return Math.min(340, Math.max(260, window.innerWidth - 48));
+    }
+    return 340;
+  });
+
+  useEffect(() => {
+    const updateSize = () => {
+      setCanvasSize(Math.min(340, Math.max(260, window.innerWidth - 48)));
+    };
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
+  const scaleRatio = canvasSize / 340;
 
   // Sync aspect ratio prop
   useEffect(() => {
@@ -130,9 +145,9 @@ export default function ImageCropperModal({
       const effW = isSwapped ? imgNaturalSize.height : imgNaturalSize.width;
       const effH = isSwapped ? imgNaturalSize.width : imgNaturalSize.height;
       const cfg = ASPECT_PRESETS[ratioKey] || ASPECT_PRESETS['1:1'];
-      return Math.max(cfg.w / effW, cfg.h / effH);
+      return Math.max((cfg.w * scaleRatio) / effW, (cfg.h * scaleRatio) / effH);
     },
-    [imgNaturalSize, rotation, activeRatio]
+    [imgNaturalSize, rotation, activeRatio, scaleRatio]
   );
 
   // Clamp offset to ensure the crop box never reveals empty space outside the image
@@ -148,15 +163,15 @@ export default function ImageCropperModal({
       const totalW = effW * baseScale * currentZoom;
       const totalH = effH * baseScale * currentZoom;
 
-      const maxOffsetX = Math.max(0, (totalW - cfg.w) / 2);
-      const maxOffsetY = Math.max(0, (totalH - cfg.h) / 2);
+      const maxOffsetX = Math.max(0, (totalW - cfg.w * scaleRatio) / 2);
+      const maxOffsetY = Math.max(0, (totalH - cfg.h * scaleRatio) / 2);
 
       return {
         x: Math.max(-maxOffsetX, Math.min(maxOffsetX, x)),
         y: Math.max(-maxOffsetY, Math.min(maxOffsetY, y)),
       };
     },
-    [imgNaturalSize, zoom, rotation, activeRatio, getBaseScale]
+    [imgNaturalSize, zoom, rotation, activeRatio, getBaseScale, scaleRatio]
   );
 
   // Handle ratio switch
@@ -174,16 +189,16 @@ export default function ImageCropperModal({
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = CANVAS_SIZE * dpr;
-    canvas.height = CANVAS_SIZE * dpr;
+    canvas.width = canvasSize * dpr;
+    canvas.height = canvasSize * dpr;
     ctx.scale(dpr, dpr);
 
-    const cx = CANVAS_SIZE / 2;
-    const cy = CANVAS_SIZE / 2;
+    const cx = canvasSize / 2;
+    const cy = canvasSize / 2;
 
     // Clear background
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
 
     // Draw Transformed Image
     ctx.save();
@@ -202,16 +217,16 @@ export default function ImageCropperModal({
 
     // Draw Cutout & Outer Vignette
     const cfg = ASPECT_PRESETS[activeRatio] || ASPECT_PRESETS['1:1'];
-    const cropW = cfg.w;
-    const cropH = cfg.h;
+    const cropW = cfg.w * scaleRatio;
+    const cropH = cfg.h * scaleRatio;
     const cropLeft = cx - cropW / 2;
     const cropTop = cy - cropH / 2;
-    const squircleRadius = cfg.radius;
+    const squircleRadius = cfg.radius * scaleRatio;
 
     ctx.save();
     ctx.fillStyle = 'rgba(11, 17, 32, 0.74)';
     ctx.beginPath();
-    ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.rect(0, 0, canvasSize, canvasSize);
     // Cutout using counter-clockwise / roundRect
     if (ctx.roundRect) {
       ctx.roundRect(cropLeft, cropTop, cropW, cropH, squircleRadius);
@@ -439,7 +454,7 @@ export default function ImageCropperModal({
 
       if (!expCtx) throw new Error('Canvas context not available');
 
-      const exportRatio = exportW / cfg.w;
+      const exportRatio = exportW / (cfg.w * scaleRatio);
 
       // Clean white background
       expCtx.fillStyle = '#ffffff';
@@ -552,7 +567,7 @@ export default function ImageCropperModal({
         <div className="p-4 flex flex-col items-center bg-gray-50 dark:bg-gray-950/50">
           <div
             className="relative rounded-2xl overflow-hidden shadow-inner border border-gray-200/80 dark:border-gray-800 select-none cursor-grab active:cursor-grabbing touch-none"
-            style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
+            style={{ width: canvasSize, height: canvasSize }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -564,7 +579,7 @@ export default function ImageCropperModal({
           >
             <canvas
               ref={canvasRef}
-              style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
+              style={{ width: canvasSize, height: canvasSize }}
               className="block"
             />
 
@@ -576,7 +591,7 @@ export default function ImageCropperModal({
           </div>
 
           {/* Zoom Slider Bar */}
-          <div className="w-full max-w-[340px] mt-4 flex items-center gap-3">
+          <div className="w-full mt-4 flex items-center gap-3" style={{ maxWidth: canvasSize }}>
             <button
               type="button"
               onClick={() => {

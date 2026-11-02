@@ -53,11 +53,11 @@ export default function Modal({
       />
 
       {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+      <div className="flex min-h-full items-center justify-center p-2 sm:p-4 text-center sm:p-0">
         <div
           className={`
-            relative w-full transform rounded-2xl bg-white dark:bg-surface-dark-secondary text-left rtl:text-right shadow-2xl transition-all
-            border border-gray-100 dark:border-gray-800 my-8
+            relative w-full transform rounded-2xl sm:rounded-3xl bg-white dark:bg-surface-dark-secondary text-left rtl:text-right shadow-2xl transition-all
+            border border-gray-100 dark:border-gray-800 my-2 sm:my-8
             ${sizeClasses[size] || sizeClasses.md}
             ${className}
           `}
@@ -66,10 +66,10 @@ export default function Modal({
         >
           {/* Header */}
           {(title || showClose) && (
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 py-3 sm:px-6 sm:py-4">
               <div>
                 {title && (
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
                     {title}
                   </h3>
                 )}
@@ -93,13 +93,13 @@ export default function Modal({
           )}
 
           {/* Content Body */}
-          <div className="px-6 py-5 max-h-[calc(85vh-130px)] overflow-y-auto">
+          <div className="px-3.5 py-3 sm:px-6 sm:py-5 max-h-[calc(90vh-90px)] sm:max-h-[calc(85vh-130px)] overflow-y-auto">
             {children}
           </div>
 
           {/* Footer */}
           {footer && (
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 px-6 py-4 bg-gray-50 dark:bg-surface-dark-tertiary rounded-b-2xl">
+            <div className="flex items-center justify-end gap-2.5 sm:gap-3 border-t border-gray-100 dark:border-gray-800 px-4 py-3 sm:px-6 sm:py-4 bg-gray-50 dark:bg-surface-dark-tertiary rounded-b-2xl sm:rounded-b-3xl">
               {footer}
             </div>
           )}

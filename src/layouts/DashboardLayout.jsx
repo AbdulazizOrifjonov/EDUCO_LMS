@@ -534,11 +534,11 @@ export default function DashboardLayout({
                   </button>
                 )}
 
-                {/* Go to Website Quick Header Button */}
+                {/* Go to Website Quick Header Button (Visible on md+ screens, accessible in sidebar on mobile) */}
                 <button
                   type="button"
                   onClick={() => window.open('/website', '_blank', 'noopener,noreferrer')}
-                  className="h-10 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-gray-100/90 hover:bg-gray-200/90 dark:bg-gray-800/80 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                  className="hidden md:inline-flex h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-gray-100/90 hover:bg-gray-200/90 dark:bg-gray-800/80 dark:hover:bg-gray-700/80 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
                   title="Rasmiy veb-saytga o‘tish (Yangi oynada ochiladi)"
                 >
                   <Globe className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
@@ -546,11 +546,11 @@ export default function DashboardLayout({
                   <span className="hidden md:inline xl:hidden">Sayt</span>
                 </button>
 
-                {/* Install App Button */}
+                {/* Install App Button (Visible on md+ screens, accessible in sidebar on mobile) */}
                 <button
                   type="button"
                   onClick={() => setInstallModalOpen(true)}
-                  className="h-10 inline-flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                  className="hidden md:inline-flex h-10 items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
                   title="Ilovani kompyuter yoki telefonga o‘rnatish"
                 >
                   <Download className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
