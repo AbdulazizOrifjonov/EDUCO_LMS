@@ -882,7 +882,7 @@ function normalizeSlide(s) {
 
 function normalizeTeacher(t) {
   if (!t) return t;
-  const photo = t.photo || t.photo_url || t.image_url || t.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';
+  const photo = t.photo !== undefined ? t.photo : (t.photo_url !== undefined ? t.photo_url : (t.image_url !== undefined ? t.image_url : (t.avatar || '')));
   const name = t.name || t.full_name || 'EDUCO Mentor';
   const exp = t.experience || t.experience_years || '5+ yil';
   const subj = t.subject || t.specialization || 'Bosh mutaxassis';
@@ -1139,7 +1139,7 @@ class WebsiteService {
     if (norm.id) {
       const idx = list.findIndex((s) => s.id === norm.id);
       if (idx >= 0) {
-        list[idx] = { ...list[idx], ...norm };
+        list[idx] = { ...list[idx], ...norm, image: norm.image, image_url: norm.image_url };
         updated = list[idx];
       } else {
         const item = { ...norm, id: norm.id || `slide-${Date.now()}` };
@@ -1268,7 +1268,7 @@ class WebsiteService {
     if (norm.id) {
       const idx = list.findIndex((t) => t.id === norm.id);
       if (idx >= 0) {
-        list[idx] = { ...list[idx], ...norm };
+        list[idx] = { ...list[idx], ...norm, photo: norm.photo, photo_url: norm.photo, image_url: norm.photo };
         updated = list[idx];
       } else {
         const item = { ...norm, id: norm.id || `wt-${Date.now()}` };
