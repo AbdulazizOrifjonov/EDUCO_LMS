@@ -194,7 +194,7 @@ export default function CtaSection({ settings, courses = [], prefilledCourse = '
                 title="Telegram orqali yozish"
               >
                 <div className="w-12 h-12 rounded-xl bg-[#229ED9]/15 dark:bg-[#229ED9]/25 text-[#229ED9] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs">
-                  <Send className="w-6 h-6 -ml-0.5" />
+                  <Send className="w-6 h-6 shrink-0" />
                 </div>
                 <div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">

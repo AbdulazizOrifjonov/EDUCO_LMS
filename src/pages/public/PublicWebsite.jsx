@@ -168,7 +168,7 @@ export default function PublicWebsite() {
           className="group flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#229ED9] hover:bg-[#1b8bc2] text-white shadow-xl hover:shadow-[#229ED9]/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
           title="Telegram orqali savol berish (@educomarkaz36)"
         >
-          <Send className="w-4 h-4 -ml-0.5 animate-pulse" />
+          <Send className="w-4 h-4 shrink-0 text-white" />
           <span className="text-xs font-bold hidden sm:inline">Telegram: @educomarkaz36</span>
           <span className="text-xs font-bold sm:hidden">Telegram</span>
         </a>

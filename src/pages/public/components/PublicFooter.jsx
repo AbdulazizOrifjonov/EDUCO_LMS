@@ -71,7 +71,7 @@ export default function PublicFooter({ settings }) {
                   title="Telegram orqali yozish"
                 >
                   <div className="w-8 h-8 rounded-lg bg-[#229ED9] text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                    <Send className="w-4 h-4 -ml-0.5" />
+                    <Send className="w-4 h-4 shrink-0" />
                   </div>
                   <div className="min-w-0">
                     <span className="text-[10px] text-gray-400 block leading-tight font-medium">Telegram Admin</span>

@@ -352,7 +352,7 @@ export default function PublicNavbar({ settings }) {
               className="hidden lg:flex items-center justify-center w-9 h-9 rounded-xl text-[#229ED9] border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-[#229ED9]/15 hover:border-[#229ED9]/40 dark:bg-gray-800/80 transition-all hover:scale-105 shrink-0"
               title="Telegram Admin (@educomarkaz36)"
             >
-              <Send className="w-4 h-4 -ml-0.5" />
+              <Send className="w-4 h-4 shrink-0" />
             </a>
 
             {/* Instagram Quick Icon */}

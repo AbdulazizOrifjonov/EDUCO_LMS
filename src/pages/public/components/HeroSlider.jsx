@@ -139,9 +139,9 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                     {/* Sweeping Shimmer Light Beam */}
                     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-[-20deg] pointer-events-none animate-shimmer-sweep" />
 
-                    {/* Seamless Round Golden Sparkle Icon */}
-                    <span className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-12 transition-all">
-                      <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300/40 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] animate-pulse" />
+                    {/* Seamless Round Golden Sparkle Icon - No drop-shadow or backdrop-blur to eliminate rectangular box artifact */}
+                    <span className="w-8 h-8 rounded-full bg-white/20 dark:bg-white/15 border border-white/30 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-12 transition-all">
+                      <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300" />
                     </span>
                     <span className="relative z-10">Sinov darsiga yozilish</span>
                   </a>
