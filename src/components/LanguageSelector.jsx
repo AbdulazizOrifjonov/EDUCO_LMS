@@ -99,7 +99,7 @@ export function LanguageFlag({ code, className = 'w-5 h-3.5' }) {
   }
 }
 
-export default function LanguageSelector({ className = '' }) {
+export default function LanguageSelector({ className = '', align = 'auto' }) {
   const { i18n } = useTranslation();
   const currentLang = i18n.language?.split('-')[0] || 'uz';
 
@@ -149,7 +149,8 @@ export default function LanguageSelector({ className = '' }) {
         </button>
       }
       items={dropdownItems}
-      align="right"
+      align={align}
+      menuClassName="w-48 max-w-[calc(100vw-1.5rem)]"
     />
   );
 }

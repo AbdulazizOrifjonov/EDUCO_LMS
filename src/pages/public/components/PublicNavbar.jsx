@@ -243,16 +243,21 @@ export default function PublicNavbar({ settings }) {
   // Modern frosted glass styling based on theme and scroll position
   const headerClass = isScrolled
     ? isDark
-      ? 'public-navbar-scrolled-dark py-2.5 sm:py-3'
-      : 'public-navbar-scrolled-light py-2.5 sm:py-3'
+      ? 'public-navbar-scrolled-dark shadow-md'
+      : 'public-navbar-scrolled-light shadow-md'
     : isDark
-      ? 'public-navbar-top-dark py-3 sm:py-3.5'
-      : 'public-navbar-top-light py-3 sm:py-3.5';
+      ? 'public-navbar-top-dark shadow-xs'
+      : 'public-navbar-top-light shadow-xs';
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerClass}`}>
-      <div className="w-full max-w-[1540px] mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-2.5 lg:gap-4">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerClass}`}
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+      }}
+    >
+      <div className="w-full max-w-[1540px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2 sm:py-2.5">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 lg:gap-4">
           {/* 1. Official EDUCO Logo with Dual Theme (Light=Blue/Red, Dark=White/Green) */}
           <a
             href="#top"
@@ -333,7 +338,7 @@ export default function PublicNavbar({ settings }) {
           </nav>
 
           {/* 3. Right Action Area: Hotline, Telegram, Instagram, Languages, Kun/Tun Toggle, Kabinetga kirish */}
-          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 lg:gap-2 shrink-0">
             {/* Quick Hotline Pill */}
             <a
               href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
@@ -368,7 +373,7 @@ export default function PublicNavbar({ settings }) {
 
             {/* Language Selector Dropdown (UZ / EN / RU) */}
             <div className="shrink-0">
-              <LanguageSelector className="shrink-0" />
+              <LanguageSelector className="shrink-0" align="auto" />
             </div>
 
             {/* Kun / Tun Theme Toggle Button (Kun: Blue accent with Moon, Tun: Gold/Green with Sun) */}
@@ -413,7 +418,7 @@ export default function PublicNavbar({ settings }) {
               <div className="relative shrink-0">
                 <Link
                   to="/login"
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4.5 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 cursor-pointer ${
+                  className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 cursor-pointer ${
                     isDark
                       ? 'bg-gradient-to-r from-[#064e3b] via-emerald-600 to-teal-700 hover:from-[#053d2e] hover:to-emerald-800 shadow-emerald-950/40 ring-1 ring-emerald-400/30'
                       : 'bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-900/25 ring-1 ring-blue-300/30'
@@ -421,7 +426,7 @@ export default function PublicNavbar({ settings }) {
                 >
                   <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                   <span className="whitespace-nowrap">{tr.login}</span>
-                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 rtl:rotate-180" />
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 rtl:rotate-180 hidden sm:inline" />
                 </Link>
               </div>
             )}
@@ -440,7 +445,7 @@ export default function PublicNavbar({ settings }) {
 
         {/* Mobile Slide-down Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden pt-4 pb-6 mt-3 border-t border-gray-100 dark:border-gray-800 animate-in fade-in slide-in-from-top-4 duration-200 space-y-4">
+          <div className="lg:hidden pt-3 pb-6 mt-2 border-t border-gray-100 dark:border-gray-800 max-h-[calc(80vh-env(safe-area-inset-top,0px))] overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200 space-y-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]">
             {/* Quick 1-tap Language Switcher for Mobile */}
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700">
               {[

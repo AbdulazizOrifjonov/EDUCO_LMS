@@ -374,7 +374,7 @@ export default function DashboardLayout({
         className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out ${
           isChatPage
             ? 'h-[100dvh] max-h-[100dvh] overflow-hidden pt-0'
-            : 'min-h-screen pt-16'
+            : 'min-h-screen pt-[calc(4rem+env(safe-area-inset-top,0px))]'
         }
           ${
             collapsed
@@ -390,12 +390,15 @@ export default function DashboardLayout({
       >
         {/* Top Navigation Bar */}
         <header
+          style={{
+            paddingTop: 'env(safe-area-inset-top, 0px)',
+          }}
           className={`${
             isChatPage
-              ? `shrink-0 z-40 h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-2.5 sm:px-4 lg:px-6 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-[#101827]/95 ${
+              ? `shrink-0 z-40 h-[calc(4rem+env(safe-area-inset-top,0px))] items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-2.5 sm:px-4 lg:px-6 shadow-sm backdrop-blur-md dark:border-gray-800 dark:bg-[#101827]/95 ${
                   isMobileChatOpen ? 'hidden md:flex' : 'flex'
                 }`
-              : `fixed top-0 z-40 flex h-16 items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-2.5 sm:px-4 lg:px-6 shadow-sm backdrop-blur-md transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-[#101827]/95 ${
+              : `fixed top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top,0px))] items-center justify-between border-b border-[#D8D1C2] bg-[#F8F5EC]/95 px-2.5 sm:px-4 lg:px-6 shadow-sm backdrop-blur-md transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-[#101827]/95 ${
                   collapsed
                     ? isRtl
                       ? 'left-0 right-0 lg:right-20'

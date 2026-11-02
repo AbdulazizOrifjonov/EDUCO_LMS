@@ -1,7 +1,27 @@
 // src/services/websiteService.js
 // Central service for EDUCO LMS Public Website content & settings management
 
-import { STORAGE_KEYS } from '@/lib/localStore';
+import { localStore, STORAGE_KEYS } from '@/lib/localStore';
+
+/**
+ * Universal helper that returns CSS transform and fit properties
+ * for precise, real-time image scaling and panning across the platform.
+ */
+export function getImageTransformStyle(item, defaultPosition = 'center') {
+  if (!item) return {};
+  const fit = item.fit_mode || item.fitMode || 'cover';
+  const pos = item.object_position || item.objectPosition || defaultPosition;
+  const scale = Number(item.image_scale || item.imageScale || 1);
+  const offsetX = Number(item.image_offset_x || item.imageOffsetX || 0);
+  const offsetY = Number(item.image_offset_y || item.imageOffsetY || 0);
+
+  return {
+    objectFit: fit,
+    objectPosition: pos,
+    transform: `scale(${scale}) translate(${offsetX}%, ${offsetY}%)`,
+    transformOrigin: 'center center',
+  };
+}
 
 const WEBSITE_KEYS = {
   SETTINGS: 'educo_db_website_settings',
@@ -15,7 +35,7 @@ const WEBSITE_KEYS = {
   TESTIMONIALS: 'educo_db_website_testimonials',
 };
 
-const SYNC_VERSION = 'educo_website_v7_contact_official';
+const SYNC_VERSION = 'educo_website_v8_abdulazizbek_photo_sync';
 
 // --- DEFAULT RICH REALISTIC CONTENT ---
 
@@ -483,11 +503,16 @@ export const DEFAULT_WEBSITE_TEACHERS = [
     experience_years: '6+ yil',
     experience: '6+ yil',
     bio: 'Murakkab veb-ilovalarni optimallashtirish va keng miqyosli frontend tizimlarini qurish bo‘yicha ekspert.',
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
-    photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
-    image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
-    telegram: 'https://t.me/abdulazizbek',
+    photo: '/uploads/teacher_abdulazizbek.jpg',
+    photo_url: '/uploads/teacher_abdulazizbek.jpg',
+    image_url: '/uploads/teacher_abdulazizbek.jpg',
+    telegram: 'https://t.me/educomarkaz36',
     rating: 5,
+    fit_mode: 'cover',
+    object_position: 'center',
+    image_scale: 1,
+    image_offset_x: 0,
+    image_offset_y: 0,
     is_featured: true,
     is_active: true,
     order: 4,
@@ -814,6 +839,11 @@ function normalizeCourse(c) {
     teacherName: c.teacherName || c.teacher_name || 'EDUCO Mentor',
     lessons_count: c.lessons_count || c.lessonsCount || 48,
     lessonsCount: c.lessonsCount || c.lessons_count || 48,
+    fit_mode: c.fit_mode || c.fitMode || 'cover',
+    object_position: c.object_position || c.objectPosition || 'center',
+    image_scale: Number(c.image_scale || c.imageScale || 1),
+    image_offset_x: Number(c.image_offset_x || c.imageOffsetX || 0),
+    image_offset_y: Number(c.image_offset_y || c.imageOffsetY || 0),
     is_featured: c.is_featured ?? c.featured ?? true,
     featured: c.featured ?? c.is_featured ?? true,
     is_active: c.is_active ?? c.isActive ?? true,
@@ -839,6 +869,11 @@ function normalizeSlide(s) {
     secondary_cta_text: s.secondary_cta_text || s.secondaryBtnText || 'Biz haqimizda',
     secondaryBtnLink: s.secondaryBtnLink || s.secondary_cta_link || '#about',
     secondary_cta_link: s.secondary_cta_link || s.secondaryBtnLink || '#about',
+    fit_mode: s.fit_mode || s.fitMode || 'cover',
+    object_position: s.object_position || s.objectPosition || 'center',
+    image_scale: Number(s.image_scale || s.imageScale || 1),
+    image_offset_x: Number(s.image_offset_x || s.imageOffsetX || 0),
+    image_offset_y: Number(s.image_offset_y || s.imageOffsetY || 0),
     is_active: s.is_active ?? s.isActive ?? true,
     isActive: s.isActive ?? s.is_active ?? true,
   };
@@ -861,6 +896,11 @@ function normalizeTeacher(t) {
     experience_years: exp,
     subject: subj,
     specialization: subj,
+    fit_mode: t.fit_mode || t.fitMode || 'cover',
+    object_position: t.object_position || t.objectPosition || 'center',
+    image_scale: Number(t.image_scale || t.imageScale || 1),
+    image_offset_x: Number(t.image_offset_x || t.imageOffsetX || 0),
+    image_offset_y: Number(t.image_offset_y || t.imageOffsetY || 0),
     is_active: t.is_active ?? t.isActive ?? true,
     isActive: t.isActive ?? t.is_active ?? true,
   };
@@ -876,6 +916,11 @@ function normalizeGalleryItem(g) {
     image_url: img,
     description: desc,
     caption: desc,
+    fit_mode: g.fit_mode || g.fitMode || 'cover',
+    object_position: g.object_position || g.objectPosition || 'center',
+    image_scale: Number(g.image_scale || g.imageScale || 1),
+    image_offset_x: Number(g.image_offset_x || g.imageOffsetX || 0),
+    image_offset_y: Number(g.image_offset_y || g.imageOffsetY || 0),
     is_active: g.is_active ?? g.isActive ?? true,
     isActive: g.isActive ?? g.is_active ?? true,
   };
@@ -899,6 +944,11 @@ function normalizeVideo(v) {
     videoUrl: vUrl,
     video_url: vUrl,
     youtube_id: ytId,
+    fit_mode: v.fit_mode || v.fitMode || 'cover',
+    object_position: v.object_position || v.objectPosition || 'center',
+    image_scale: Number(v.image_scale || v.imageScale || 1),
+    image_offset_x: Number(v.image_offset_x || v.imageOffsetX || 0),
+    image_offset_y: Number(v.image_offset_y || v.imageOffsetY || 0),
     is_active: v.is_active ?? v.isActive ?? true,
     isActive: v.isActive ?? v.is_active ?? true,
   };
@@ -918,6 +968,11 @@ function normalizeNews(n) {
     excerpt: sum,
     date: dt,
     published_at: dt,
+    fit_mode: n.fit_mode || n.fitMode || 'cover',
+    object_position: n.object_position || n.objectPosition || 'center',
+    image_scale: Number(n.image_scale || n.imageScale || 1),
+    image_offset_x: Number(n.image_offset_x || n.imageOffsetX || 0),
+    image_offset_y: Number(n.image_offset_y || n.imageOffsetY || 0),
     is_published: n.is_published ?? n.isActive ?? true,
     isActive: n.isActive ?? n.is_published ?? true,
   };
@@ -942,6 +997,12 @@ function normalizeTestimonial(t) {
     author_role: rl,
     quote: qt,
     content: qt,
+    rating: Number(t.rating || 5),
+    fit_mode: t.fit_mode || t.fitMode || 'cover',
+    object_position: t.object_position || t.objectPosition || 'center',
+    image_scale: Number(t.image_scale || t.imageScale || 1),
+    image_offset_x: Number(t.image_offset_x || t.imageOffsetX || 0),
+    image_offset_y: Number(t.image_offset_y || t.imageOffsetY || 0),
     is_active: t.is_active ?? t.isActive ?? true,
     isActive: t.isActive ?? t.is_active ?? true,
   };
@@ -957,46 +1018,46 @@ class WebsiteService {
     try {
       const isSynced = localStorage.getItem(SYNC_VERSION);
       if (!isSynced) {
-        // Upgrade / sync all items with 500k courses and normalized fields
-        localStorage.setItem(WEBSITE_KEYS.COURSES, JSON.stringify(DEFAULT_WEBSITE_COURSES));
-        localStorage.setItem(WEBSITE_KEYS.SUBJECTS, JSON.stringify(DEFAULT_WEBSITE_SUBJECTS));
-        localStorage.setItem(WEBSITE_KEYS.TEACHERS, JSON.stringify(DEFAULT_WEBSITE_TEACHERS));
-        localStorage.setItem(WEBSITE_KEYS.SLIDES, JSON.stringify(DEFAULT_WEBSITE_SLIDES));
-        localStorage.setItem(WEBSITE_KEYS.GALLERY, JSON.stringify(DEFAULT_WEBSITE_GALLERY));
-        localStorage.setItem(WEBSITE_KEYS.VIDEOS, JSON.stringify(DEFAULT_WEBSITE_VIDEOS));
-        localStorage.setItem(WEBSITE_KEYS.NEWS, JSON.stringify(DEFAULT_WEBSITE_NEWS));
-        localStorage.setItem(WEBSITE_KEYS.TESTIMONIALS, JSON.stringify(DEFAULT_WEBSITE_TESTIMONIALS));
-        localStorage.setItem(WEBSITE_KEYS.SETTINGS, JSON.stringify(DEFAULT_WEBSITE_SETTINGS));
+        // Upgrade / sync all items with normalized fields and live server push
+        this._set(WEBSITE_KEYS.COURSES, DEFAULT_WEBSITE_COURSES);
+        this._set(WEBSITE_KEYS.SUBJECTS, DEFAULT_WEBSITE_SUBJECTS);
+        this._set(WEBSITE_KEYS.TEACHERS, DEFAULT_WEBSITE_TEACHERS);
+        this._set(WEBSITE_KEYS.SLIDES, DEFAULT_WEBSITE_SLIDES);
+        this._set(WEBSITE_KEYS.GALLERY, DEFAULT_WEBSITE_GALLERY);
+        this._set(WEBSITE_KEYS.VIDEOS, DEFAULT_WEBSITE_VIDEOS);
+        this._set(WEBSITE_KEYS.NEWS, DEFAULT_WEBSITE_NEWS);
+        this._set(WEBSITE_KEYS.TESTIMONIALS, DEFAULT_WEBSITE_TESTIMONIALS);
+        this._set(WEBSITE_KEYS.SETTINGS, DEFAULT_WEBSITE_SETTINGS);
         localStorage.setItem(SYNC_VERSION, 'true');
         return;
       }
 
-      if (!localStorage.getItem(WEBSITE_KEYS.SETTINGS)) {
-        localStorage.setItem(WEBSITE_KEYS.SETTINGS, JSON.stringify(DEFAULT_WEBSITE_SETTINGS));
+      if (!this._get(WEBSITE_KEYS.SETTINGS, null)) {
+        this._set(WEBSITE_KEYS.SETTINGS, DEFAULT_WEBSITE_SETTINGS);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.SLIDES)) {
-        localStorage.setItem(WEBSITE_KEYS.SLIDES, JSON.stringify(DEFAULT_WEBSITE_SLIDES));
+      if (!this._get(WEBSITE_KEYS.SLIDES, null)) {
+        this._set(WEBSITE_KEYS.SLIDES, DEFAULT_WEBSITE_SLIDES);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.COURSES)) {
-        localStorage.setItem(WEBSITE_KEYS.COURSES, JSON.stringify(DEFAULT_WEBSITE_COURSES));
+      if (!this._get(WEBSITE_KEYS.COURSES, null)) {
+        this._set(WEBSITE_KEYS.COURSES, DEFAULT_WEBSITE_COURSES);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.SUBJECTS)) {
-        localStorage.setItem(WEBSITE_KEYS.SUBJECTS, JSON.stringify(DEFAULT_WEBSITE_SUBJECTS));
+      if (!this._get(WEBSITE_KEYS.SUBJECTS, null)) {
+        this._set(WEBSITE_KEYS.SUBJECTS, DEFAULT_WEBSITE_SUBJECTS);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.TEACHERS)) {
-        localStorage.setItem(WEBSITE_KEYS.TEACHERS, JSON.stringify(DEFAULT_WEBSITE_TEACHERS));
+      if (!this._get(WEBSITE_KEYS.TEACHERS, null)) {
+        this._set(WEBSITE_KEYS.TEACHERS, DEFAULT_WEBSITE_TEACHERS);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.GALLERY)) {
-        localStorage.setItem(WEBSITE_KEYS.GALLERY, JSON.stringify(DEFAULT_WEBSITE_GALLERY));
+      if (!this._get(WEBSITE_KEYS.GALLERY, null)) {
+        this._set(WEBSITE_KEYS.GALLERY, DEFAULT_WEBSITE_GALLERY);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.VIDEOS)) {
-        localStorage.setItem(WEBSITE_KEYS.VIDEOS, JSON.stringify(DEFAULT_WEBSITE_VIDEOS));
+      if (!this._get(WEBSITE_KEYS.VIDEOS, null)) {
+        this._set(WEBSITE_KEYS.VIDEOS, DEFAULT_WEBSITE_VIDEOS);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.NEWS)) {
-        localStorage.setItem(WEBSITE_KEYS.NEWS, JSON.stringify(DEFAULT_WEBSITE_NEWS));
+      if (!this._get(WEBSITE_KEYS.NEWS, null)) {
+        this._set(WEBSITE_KEYS.NEWS, DEFAULT_WEBSITE_NEWS);
       }
-      if (!localStorage.getItem(WEBSITE_KEYS.TESTIMONIALS)) {
-        localStorage.setItem(WEBSITE_KEYS.TESTIMONIALS, JSON.stringify(DEFAULT_WEBSITE_TESTIMONIALS));
+      if (!this._get(WEBSITE_KEYS.TESTIMONIALS, null)) {
+        this._set(WEBSITE_KEYS.TESTIMONIALS, DEFAULT_WEBSITE_TESTIMONIALS);
       }
     } catch (_) {}
   }
@@ -1004,6 +1065,10 @@ class WebsiteService {
   _get(key, fallback) {
     if (typeof window === 'undefined') return fallback;
     try {
+      if (localStore && typeof localStore.getItem === 'function') {
+        const val = localStore.getItem(key, undefined);
+        if (val !== undefined && val !== null) return val;
+      }
       const raw = localStorage.getItem(key);
       if (!raw) return fallback;
       return JSON.parse(raw);
@@ -1015,7 +1080,11 @@ class WebsiteService {
   _set(key, value) {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      if (localStore && typeof localStore.setItem === 'function') {
+        localStore.setItem(key, value);
+      } else {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
       this._broadcast();
     } catch (_) {}
   }

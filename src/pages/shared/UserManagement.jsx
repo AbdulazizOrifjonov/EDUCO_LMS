@@ -820,60 +820,66 @@ export default function UserManagement() {
                       )}
                     </div>
 
-                    {/* Actions */}
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        icon={Eye}
-                        className="flex-1 justify-center text-xs py-1.5 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40"
-                        onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
-                      >
-                        {t('common.view', 'Batafsil')}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        icon={Edit2}
-                        className="flex-1 justify-center text-xs py-1.5 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                        onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
-                      >
-                        {t('common.edit', 'Tahrirlash')}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        icon={KeyRound}
-                        className="flex-1 justify-center text-xs py-1.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
-                        title={t('users.resetPassword', 'Parolni tiklash')}
-                        onClick={() => handleResetPassword(row)}
-                      >
-                        {t('auth.resetPassword', 'Parol')}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`!p-2 shrink-0 rounded-lg ${
-                          row.is_active
-                            ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40'
-                            : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
-                        }`}
-                        title={row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faollashtirish')}
-                        onClick={() => handleToggleStatus(row)}
-                      >
-                        {row.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
-                      </Button>
-                      {canDeleteUser(row) && (
+                    {/* Actions (Structured 2-row layout for mobile: never squished, no text wraps) */}
+                    <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={Eye}
+                          className="w-full justify-center text-xs py-2 font-medium text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                          onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
+                        >
+                          {t('common.view', 'Batafsil')}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={Edit2}
+                          className="w-full justify-center text-xs py-2 font-medium text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                          onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
+                        >
+                          {t('common.edit', 'Tahrirlash')}
+                        </Button>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="!p-2 shrink-0 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                          title={t('common.delete', 'O‘chirish')}
-                          onClick={() => handleDeleteUser(row)}
+                          icon={KeyRound}
+                          className="flex-1 justify-center text-xs py-1.5 font-medium whitespace-nowrap text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50"
+                          title={t('users.resetPassword', 'Parolni tiklash')}
+                          onClick={() => handleResetPassword(row)}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <span>{t('users.resetPasswordShort', 'Parol')}</span>
                         </Button>
-                      )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`flex-1 justify-center px-2 py-1.5 text-xs font-medium whitespace-nowrap rounded-lg border flex items-center gap-1.5 ${
+                            row.is_active
+                              ? 'text-rose-600 dark:text-rose-400 border-rose-200/80 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40'
+                              : 'text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                          }`}
+                          title={row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faollashtirish')}
+                          onClick={() => handleToggleStatus(row)}
+                        >
+                          {row.is_active ? <XCircle className="w-3.5 h-3.5 shrink-0" /> : <CheckCircle className="w-3.5 h-3.5 shrink-0" />}
+                          <span>{row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faol')}</span>
+                        </Button>
+                        {canDeleteUser(row) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="!p-2 shrink-0 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50"
+                            title={t('common.delete', 'O‘chirish')}
+                            onClick={() => handleDeleteUser(row)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

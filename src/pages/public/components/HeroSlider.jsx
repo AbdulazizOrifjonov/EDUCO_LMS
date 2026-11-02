@@ -73,7 +73,11 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
   return (
     <div
       id="top"
-      className="relative w-full h-[620px] sm:h-[680px] lg:h-[740px] overflow-hidden bg-gray-950 select-none pt-20"
+      className="relative w-full min-h-[620px] sm:min-h-[680px] lg:min-h-[740px] overflow-hidden bg-gray-950 select-none"
+      style={{
+        paddingTop: 'calc(max(env(safe-area-inset-top, 0px), 0px) + 5.25rem)',
+        minHeight: 'calc(620px + max(env(safe-area-inset-top, 0px), 0px))',
+      }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}

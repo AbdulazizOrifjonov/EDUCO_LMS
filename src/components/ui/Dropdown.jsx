@@ -3,12 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 export default function Dropdown({
   trigger,
   items = [],
-  align = 'right',
+  align = 'auto',
   className = '',
   menuClassName = '',
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -25,10 +26,26 @@ export default function Dropdown({
     };
   }, [isOpen]);
 
+  // Viewport safety check: prevent dropdown menu from ever clipping off screen edges on mobile
+  useEffect(() => {
+    if (isOpen && menuRef.current) {
+      const rect = menuRef.current.getBoundingClientRect();
+      const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
+      if (rect.left < 8) {
+        menuRef.current.style.left = '0px';
+        menuRef.current.style.right = 'auto';
+      } else if (rect.right > viewportWidth - 8) {
+        menuRef.current.style.right = '0px';
+        menuRef.current.style.left = 'auto';
+      }
+    }
+  }, [isOpen]);
+
   const alignClasses = {
     left: 'left-0 rtl:left-auto rtl:right-0 origin-top-left',
     right: 'right-0 rtl:right-auto rtl:left-0 origin-top-right',
-  }[align] || 'right-0 origin-top-right';
+    auto: 'left-0 sm:left-auto sm:right-0 rtl:right-0 rtl:sm:right-auto rtl:sm:left-0 origin-top-left sm:origin-top-right',
+  }[align] || align || 'left-0 sm:left-auto sm:right-0 origin-top-left sm:origin-top-right';
 
   return (
     <div ref={dropdownRef} className={`relative inline-block text-left ${className}`}>
@@ -38,8 +55,9 @@ export default function Dropdown({
 
       {isOpen && (
         <div
+          ref={menuRef}
           className={`
-            absolute z-50 mt-2 w-56 rounded-xl bg-white dark:bg-surface-dark-secondary
+            absolute z-50 mt-2 w-52 max-w-[calc(100vw-1.5rem)] rounded-xl bg-white dark:bg-surface-dark-secondary
             border border-gray-100 dark:border-gray-800 shadow-dropdown py-1.5
             animate-fade-in focus:outline-none ${alignClasses} ${menuClassName}
           `}
