@@ -660,7 +660,10 @@ export default function ChatWindow({
   const courseColor = activeGroup.course?.color || '#123D78';
 
   return (
-    <div className="flex-1 min-h-0 min-w-0 max-w-full flex flex-col h-full bg-[#F5F7FA] dark:bg-[#101827] relative overflow-hidden">
+    <div
+      style={{ height: '100%', minHeight: 0 }}
+      className="flex-1 min-h-0 min-w-0 max-w-full flex flex-col h-full bg-[#F5F7FA] dark:bg-[#101827] relative overflow-hidden"
+    >
       {/* Chat Header */}
       <div className="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-xs z-10 shrink-0">
         <div className="flex items-center space-x-2.5 sm:space-x-3 rtl:space-x-reverse min-w-0">

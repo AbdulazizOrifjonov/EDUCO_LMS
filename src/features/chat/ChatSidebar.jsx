@@ -81,7 +81,10 @@ export default function ChatSidebar({
   };
 
   return (
-    <div className="w-full md:w-80 lg:w-96 h-full flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+    <div
+      style={{ height: '100%', minHeight: 0 }}
+      className="w-full md:w-80 lg:w-96 h-full flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800"
+    >
       {/* Sidebar Header & Search */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3">
         <div className="flex items-center justify-between">

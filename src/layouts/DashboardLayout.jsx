@@ -865,11 +865,18 @@ export default function DashboardLayout({
           ref={mainRef}
           className={`flex-1 min-w-0 w-full ${
             isChatPage
-              ? 'p-0 md:p-3 overflow-hidden flex flex-col'
+              ? 'p-0 md:p-3 overflow-hidden flex flex-col h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)]'
               : 'p-3 sm:p-5 lg:p-6'
           }`}
         >
-          <div key={location.pathname} className="animate-lms-page w-full">
+          <div
+            key={location.pathname}
+            className={`w-full ${
+              isChatPage
+                ? 'h-full flex-1 min-h-0 flex flex-col overflow-hidden'
+                : 'animate-lms-page'
+            }`}
+          >
             {children || <Outlet />}
           </div>
         </main>
