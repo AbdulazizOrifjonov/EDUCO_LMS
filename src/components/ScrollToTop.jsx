@@ -24,10 +24,19 @@ export default function ScrollToTop() {
         document.body.scrollTop = 0;
       }
 
-      // 2. Reset scroll on all active scrollable containers (<main>, overflow-y-auto elements)
+      // 2. Reset scroll on all active page content containers (<main>, overflow-y-auto elements)
+      // Exclude sidebar navigation and any element marked to preserve scroll
       const scrollables = document.querySelectorAll('main, [data-scrollable="true"], .overflow-y-auto');
       scrollables.forEach((el) => {
         try {
+          if (
+            el.closest('aside') ||
+            el.closest('nav') ||
+            el.classList.contains('sidebar-scroll') ||
+            el.getAttribute('data-preserve-scroll') === 'true'
+          ) {
+            return;
+          }
           el.scrollTop = 0;
         } catch {}
       });

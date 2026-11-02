@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -40,6 +40,50 @@ export default function Sidebar({
     '/owner/website': true,
     '/admin/website': true,
   });
+
+  const navRef = useRef(null);
+  const scrollKey = `educo_sidebar_scroll_${role || 'user'}`;
+  const isRestoringScrollRef = useRef(false);
+
+  // Restore sidebar scroll position across route navigations, sub-page changes and reloads
+  useEffect(() => {
+    const restoreScroll = () => {
+      try {
+        const saved = sessionStorage.getItem(scrollKey);
+        if (saved !== null && navRef.current) {
+          const top = parseInt(saved, 10);
+          if (!isNaN(top) && top >= 0) {
+            isRestoringScrollRef.current = true;
+            navRef.current.scrollTop = top;
+          }
+        }
+      } catch {}
+    };
+
+    // 1. Immediate restore
+    restoreScroll();
+
+    // 2. Scheduled microtask and next animation frame to guarantee scroll persistence after DOM layout
+    const rafId = requestAnimationFrame(() => {
+      restoreScroll();
+      const timer = setTimeout(() => {
+        restoreScroll();
+        isRestoringScrollRef.current = false;
+      }, 50);
+      return () => clearTimeout(timer);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [location.pathname, location.search, scrollKey]);
+
+  // Persist sidebar scroll position as the user scrolls
+  const handleNavScroll = (e) => {
+    if (isRestoringScrollRef.current) return;
+    const top = e.currentTarget.scrollTop;
+    try {
+      sessionStorage.setItem(scrollKey, String(top));
+    } catch {}
+  };
 
   const toggleSubmenu = (menuPath) => {
     setExpandedSubmenus((prev) => ({
@@ -251,7 +295,12 @@ export default function Sidebar({
         </div>
 
         {/* Navigation Items (Scrollable without ugly scrollbars) */}
-        <nav className="sidebar-scroll flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden px-3 py-4">
+        <nav
+          ref={navRef}
+          onScroll={handleNavScroll}
+          data-preserve-scroll="true"
+          className="sidebar-scroll flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden px-3 py-4"
+        >
           {items.map((item, index) => {
             const Icon = item.icon || Sparkles;
             const label = getNavLabel(item);

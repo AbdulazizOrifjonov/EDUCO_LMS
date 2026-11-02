@@ -16,6 +16,10 @@ import {
   Save,
   Trash2,
   Users,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { useThemeStore } from '@/hooks/useTheme';
@@ -73,6 +77,8 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showTargetPassword, setShowTargetPassword] = useState(true);
+  const [copiedPassword, setCopiedPassword] = useState(false);
 
   // UI feedback states
   const [profileSaving, setProfileSaving] = useState(false);
@@ -248,6 +254,11 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
       if (isViewingOther && targetUser?.id) {
         // Owner/Admin directly resets target user's password without needing current password
         localStore.updateUserPassword(targetUser.id, newPassword);
+        setTargetUser((prev) => ({
+          ...prev,
+          password: newPassword.trim(),
+          password_updated_at: new Date().toISOString(),
+        }));
         setPasswordSuccess(t('auth.passwordChanged', 'Foydalanuvchi yangi paroli muvaffaqiyatli o‘rnatildi!'));
         toast.success(t('auth.passwordChanged', 'Foydalanuvchi yangi paroli muvaffaqiyatli o‘rnatildi!'));
       } else {
@@ -523,10 +534,64 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
 
       {/* Change Password Card */}
       <Card
-        title={isViewingOther ? t('auth.resetTargetPassword', 'Foydalanuvchi hisobiga yangi parol o‘rnatish') : t('auth.changePassword', 'Parolni o‘zgartirish')}
-        subtitle={isViewingOther ? 'Boshliq sifatida ushbu foydalanuvchiga to‘g‘ridan-to‘g‘ri yangi parol belgilash' : t('auth.passwordRequirements', 'Parol xavfsizligi va maxfiyligi')}
+        title={isViewingOther ? 'Foydalanuvchi parolini ko‘rish va yangilash' : t('auth.changePassword', 'Parolni o‘zgartirish')}
+        subtitle={isViewingOther ? 'Foydalanuvchining amaldagi paroli va yangi parol belgilash' : t('auth.passwordRequirements', 'Parol xavfsizligi va maxfiyligi')}
       >
-        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+        <div className="space-y-4">
+          {/* Active Password Box (Shown when viewing another user) */}
+          {isViewingOther && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/30 dark:border-amber-500/20 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-200">
+                    Foydalanuvchining amaldagi paroli:
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                  Faol kirish paroli
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <div className="flex-1 flex items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-surface-dark-secondary border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <span className="font-mono text-base sm:text-lg font-black tracking-wider text-gray-900 dark:text-gray-100 select-all">
+                    {showTargetPassword ? (targetUser?.password || 'Educo#2026!') : '••••••••••••'}
+                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setShowTargetPassword(!showTargetPassword)}
+                      className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                      title={showTargetPassword ? 'Parolni yashirish' : 'Parolni ko‘rish'}
+                    >
+                      {showTargetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pwd = targetUser?.password || 'Educo#2026!';
+                        navigator.clipboard.writeText(pwd);
+                        setCopiedPassword(true);
+                        toast.success('Parol nusxalandi!');
+                        setTimeout(() => setCopiedPassword(false), 2000);
+                      }}
+                      className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                      title="Paroldan nusxa olish"
+                    >
+                      {copiedPassword ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Foydalanuvchi tizimga <b>@{targetUser?.username || username}</b> logini va yuqoridagi parol bilan kiradi.
+              </p>
+            </div>
+          )}
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
           {passwordSuccess && (
             <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
               <CheckCircle className="w-4 h-4 shrink-0" />
@@ -586,6 +651,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
             </Button>
           </div>
         </form>
+        </div>
       </Card>
 
       {/* Local Preferences Section (Only visible when viewing own profile) */}

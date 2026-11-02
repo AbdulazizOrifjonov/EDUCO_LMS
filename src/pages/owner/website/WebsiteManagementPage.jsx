@@ -38,11 +38,13 @@ import {
   Clock,
   Send,
   HelpCircle,
+  Crop,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { toast } from '@/components/ui/Toast';
 import websiteService from '@/services/websiteService';
 
@@ -173,6 +175,10 @@ export default function WebsiteManagementPage() {
   const [mediaUploadMode, setMediaUploadMode] = useState('file'); // 'file' | 'url'
   const [videoUploadMode, setVideoUploadMode] = useState('url'); // 'file' | 'url'
 
+  // Interactive Cropper States
+  const [cropperFile, setCropperFile] = useState(null);
+  const [cropperAspectRatio, setCropperAspectRatio] = useState('4:3');
+
   // Search filter inside lists
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -207,23 +213,43 @@ export default function WebsiteManagementPage() {
     setEditingItem(null);
     setActiveImage('');
     setActiveVideoUrl('');
+    setCropperFile(null);
     setUploadLoading(false);
   };
 
-  // File Upload Handlers
-  const handleImageUpload = async (e) => {
+  // File Upload Handlers with Interactive Cropper
+  const handleImageUpload = (e, customRatio) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploadLoading(true);
-    try {
-      const dataUrl = await compressImageFile(file);
-      setActiveImage(dataUrl);
-      toast.success(`"${file.name}" muvaffaqiyatli yuklandi!`);
-    } catch (err) {
-      toast.error('Rasmni yuklashda xatolik yuz berdi');
-    } finally {
-      setUploadLoading(false);
-    }
+    const ratio = customRatio || (
+      modalType === 'teacher' ? '4:3' :
+      modalType === 'testimonial' ? '1:1' :
+      modalType === 'subject' ? '4:3' :
+      modalType === 'gallery' ? '4:3' :
+      '16:9'
+    );
+    setCropperAspectRatio(ratio);
+    setCropperFile(file);
+    e.target.value = '';
+  };
+
+  const handleOpenCropperForExisting = (customRatio) => {
+    if (!activeImage) return;
+    const ratio = customRatio || (
+      modalType === 'teacher' ? '4:3' :
+      modalType === 'testimonial' ? '1:1' :
+      modalType === 'subject' ? '4:3' :
+      modalType === 'gallery' ? '4:3' :
+      '16:9'
+    );
+    setCropperAspectRatio(ratio);
+    setCropperFile(activeImage);
+  };
+
+  const handleCropComplete = (croppedDataUrl) => {
+    setActiveImage(croppedDataUrl);
+    setCropperFile(null);
+    toast.success('Rasm muvaffaqiyatli moslashtirildi va o‘rnatildi!');
   };
 
   const handleVideoUpload = (e) => {
@@ -1756,12 +1782,22 @@ export default function WebsiteManagementPage() {
                       <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
                         {uploadLoading ? 'Yuklanmoqda...' : 'Kompyuter yoki telefondan rasm tanlang'}
                       </span>
-                      <span className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, WEBP (Avtomatik 100% optimizatsiya qilinadi)</span>
-                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                      <span className="text-[10px] text-gray-400 mt-0.5">Yuklangach kattalashtirish, surish va moslashtirish oynasi ochiladi</span>
+                      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '16:9')} className="hidden" />
                     </label>
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
                   </div>
                 ) : (
-                  <div>
+                  <div className="space-y-2">
                     <Input
                       name="image"
                       value={activeImage}
@@ -1769,6 +1805,16 @@ export default function WebsiteManagementPage() {
                       placeholder="https://images.unsplash.com/photo-..."
                       required={!activeImage}
                     />
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -1823,6 +1869,17 @@ export default function WebsiteManagementPage() {
                   )}
                   {/* Overlay elements */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
+                  {activeImage && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCropperForExisting('16:9')}
+                      className="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-xl bg-black/60 hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-white/20 transition-all cursor-pointer active:scale-95"
+                      title="Slayder rasmini surish va kattalashtirish"
+                    >
+                      <Crop className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>To‘g‘rilash</span>
+                    </button>
+                  )}
                   <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-md">
                     {editingItem?.tag || 'Darslardan lavhalar'}
                   </div>
@@ -1960,22 +2017,46 @@ export default function WebsiteManagementPage() {
                 </div>
 
                 {mediaUploadMode === 'file' ? (
-                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 rounded-xl bg-white dark:bg-gray-800 cursor-pointer transition-all">
-                    <Upload className="w-6 h-6 text-emerald-600 mb-1" />
-                    <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
-                      {uploadLoading ? 'Yuklanmoqda...' : 'Kompyuterdan rasm yuklash'}
-                    </span>
-                    <span className="text-[10px] text-gray-400 mt-0.5">Avtomatik 100% optimallashtiriladi</span>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  </label>
+                  <div className="space-y-2">
+                    <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 rounded-xl bg-white dark:bg-gray-800 cursor-pointer transition-all">
+                      <Upload className="w-6 h-6 text-emerald-600 mb-1" />
+                      <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                        {uploadLoading ? 'Yuklanmoqda...' : 'Kompyuterdan rasm yuklash'}
+                      </span>
+                      <span className="text-[10px] text-gray-400 mt-0.5">Yuklangach kattalashtirish, surish va moslashtirish oynasi ochiladi</span>
+                      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '16:9')} className="hidden" />
+                    </label>
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
+                  </div>
                 ) : (
-                  <Input
-                    name="image"
-                    value={activeImage}
-                    onChange={(e) => setActiveImage(e.target.value)}
-                    placeholder="https://..."
-                    required={!activeImage}
-                  />
+                  <div className="space-y-2">
+                    <Input
+                      name="image"
+                      value={activeImage}
+                      onChange={(e) => setActiveImage(e.target.value)}
+                      placeholder="https://..."
+                      required={!activeImage}
+                    />
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -2048,6 +2129,17 @@ export default function WebsiteManagementPage() {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-xl bg-black/60 hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-white/20 transition-all cursor-pointer active:scale-95"
+                        title="Kurs muqovasini surish va kattalashtirish"
+                      >
+                        <Crop className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>To‘g‘rilash</span>
+                      </button>
+                    )}
                     <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">
                       {editingItem?.category || 'Dasturlash'}
                     </span>
@@ -2159,16 +2251,26 @@ export default function WebsiteManagementPage() {
                     <span>Fan rasmi / banneri (ixtiyoriy)</span>
                   </label>
                   <label className="text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer">
-                    <span>Fayl tanlash</span>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    <span>Fayldan yuklash</span>
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '4:3')} className="hidden" />
                   </label>
                 </div>
                 <Input
                   name="image"
                   value={activeImage}
                   onChange={(e) => setActiveImage(e.target.value)}
-                  placeholder="URL havola yoki yuqoridagi fayl tanlash tugmasi"
+                  placeholder="URL havola yoki yuqoridagi fayldan yuklash"
                 />
+                {activeImage && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCropperForExisting('4:3')}
+                    className="w-full py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs active:scale-95"
+                  >
+                    <Crop className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Rasmni to‘g‘rilash / Kattalashtirish (Crop & Zoom)</span>
+                  </button>
+                )}
               </div>
 
               <label className="flex items-center gap-2 cursor-pointer pt-1">
@@ -2323,22 +2425,46 @@ export default function WebsiteManagementPage() {
                 </div>
 
                 {mediaUploadMode === 'file' ? (
-                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 rounded-xl bg-white dark:bg-gray-800 cursor-pointer transition-all">
-                    <Upload className="w-6 h-6 text-emerald-600 mb-1" />
-                    <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
-                      {uploadLoading ? 'Yuklanmoqda...' : 'Ustoz rasmini fayldan yuklash'}
-                    </span>
-                    <span className="text-[10px] text-gray-400 mt-0.5">Yuz qismi tepaga qarab avtomatik moslashtiriladi</span>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  </label>
+                  <div className="space-y-2">
+                    <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 rounded-xl bg-white dark:bg-gray-800 cursor-pointer transition-all">
+                      <Upload className="w-6 h-6 text-emerald-600 mb-1" />
+                      <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                        {uploadLoading ? 'Yuklanmoqda...' : 'Ustoz rasmini fayldan yuklash'}
+                      </span>
+                      <span className="text-[10px] text-gray-400 mt-0.5">Yuklangach kattalashtirish, surish va moslashtirish oynasi ochiladi</span>
+                      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '4:3')} className="hidden" />
+                    </label>
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('4:3')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
+                  </div>
                 ) : (
-                  <Input
-                    name="photo"
-                    value={activeImage}
-                    onChange={(e) => setActiveImage(e.target.value)}
-                    placeholder="https://..."
-                    required={!activeImage}
-                  />
+                  <div className="space-y-2">
+                    <Input
+                      name="photo"
+                      value={activeImage}
+                      onChange={(e) => setActiveImage(e.target.value)}
+                      placeholder="https://..."
+                      required={!activeImage}
+                    />
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('4:3')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -2401,6 +2527,17 @@ export default function WebsiteManagementPage() {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('4:3')}
+                        className="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-xl bg-black/60 hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-white/20 transition-all cursor-pointer active:scale-95"
+                        title="Ustoz rasmini surish va kattalashtirish"
+                      >
+                        <Crop className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>To‘g‘rilash</span>
+                      </button>
+                    )}
                     <span className="absolute bottom-3 left-3 px-3 py-1 rounded-full text-xs font-extrabold bg-blue-600 dark:bg-emerald-500 text-white shadow-md">
                       {editingItem?.experience || '5+ yil'} tajriba
                     </span>
@@ -2501,21 +2638,46 @@ export default function WebsiteManagementPage() {
                 </div>
 
                 {mediaUploadMode === 'file' ? (
-                  <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 rounded-xl bg-white dark:bg-gray-800 cursor-pointer transition-all">
-                    <Upload className="w-6 h-6 text-emerald-600 mb-1" />
-                    <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
-                      {uploadLoading ? 'Yuklanmoqda...' : 'Kompyuterdan yangilik rasmini tanlang'}
-                    </span>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  </label>
+                  <div className="space-y-2">
+                    <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 rounded-xl bg-white dark:bg-gray-800 cursor-pointer transition-all">
+                      <Upload className="w-6 h-6 text-emerald-600 mb-1" />
+                      <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                        {uploadLoading ? 'Yuklanmoqda...' : 'Kompyuterdan yangilik rasmini tanlang'}
+                      </span>
+                      <span className="text-[10px] text-gray-400 mt-0.5">Yuklangach kattalashtirish, surish va moslashtirish oynasi ochiladi</span>
+                      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '16:9')} className="hidden" />
+                    </label>
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
+                  </div>
                 ) : (
-                  <Input
-                    name="image"
-                    value={activeImage}
-                    onChange={(e) => setActiveImage(e.target.value)}
-                    placeholder="https://..."
-                    required={!activeImage}
-                  />
+                  <div className="space-y-2">
+                    <Input
+                      name="image"
+                      value={activeImage}
+                      onChange={(e) => setActiveImage(e.target.value)}
+                      placeholder="https://..."
+                      required={!activeImage}
+                    />
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <Crop className="w-4 h-4 text-emerald-600" />
+                        <span>Rasmni to‘g‘rilash (Kattalashtirish / Surish / Crop)</span>
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
@@ -2575,6 +2737,17 @@ export default function WebsiteManagementPage() {
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
                         <Newspaper className="w-10 h-10 opacity-40" />
                       </div>
+                    )}
+                    {activeImage && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCropperForExisting('16:9')}
+                        className="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-xl bg-black/60 hover:bg-black/85 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-white/20 transition-all cursor-pointer active:scale-95"
+                        title="Yangilik rasmini surish va kattalashtirish"
+                      >
+                        <Crop className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>To‘g‘rilash</span>
+                      </button>
                     )}
                     <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-600 text-white">
                       {editingItem?.category || 'Yangilik'}
@@ -2699,7 +2872,7 @@ export default function WebsiteManagementPage() {
                   </label>
                   <label className="text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer">
                     <span>Fayldan rasm yuklash</span>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '16:9')} className="hidden" />
                   </label>
                 </div>
                 <Input
@@ -2708,6 +2881,16 @@ export default function WebsiteManagementPage() {
                   onChange={(e) => setActiveImage(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
                 />
+                {activeImage && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCropperForExisting('16:9')}
+                    className="w-full py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs active:scale-95"
+                  >
+                    <Crop className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Rasmni to‘g‘rilash / Kattalashtirish (Crop & Zoom)</span>
+                  </button>
+                )}
               </div>
 
               <div>
@@ -2888,7 +3071,7 @@ export default function WebsiteManagementPage() {
                     <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
                       {uploadLoading ? 'Yuklanmoqda...' : 'Rasmni kompyuterdan tanlang'}
                     </span>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '4:3')} className="hidden" />
                   </label>
                 ) : (
                   <Input
@@ -2898,6 +3081,16 @@ export default function WebsiteManagementPage() {
                     placeholder="https://..."
                     required={!activeImage}
                   />
+                )}
+                {activeImage && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCropperForExisting('4:3')}
+                    className="w-full py-1.5 px-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs active:scale-95"
+                  >
+                    <Crop className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Rasmni to‘g‘rilash / Kattalashtirish (Crop & Zoom)</span>
+                  </button>
                 )}
               </div>
 
@@ -2946,6 +3139,16 @@ export default function WebsiteManagementPage() {
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                       <Camera className="w-10 h-10 opacity-40" />
                     </div>
+                  )}
+                  {activeImage && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCropperForExisting('4:3')}
+                      className="absolute top-2 right-2 px-2.5 py-1 rounded-lg bg-black/60 hover:bg-black/80 text-white text-[10px] font-bold flex items-center gap-1 backdrop-blur-xs transition-transform active:scale-95 cursor-pointer z-10"
+                    >
+                      <Crop className="w-3 h-3 text-indigo-400" />
+                      <span>To‘g‘rilash</span>
+                    </button>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
                   <div className="absolute bottom-3 inset-x-3 text-white pointer-events-none">
@@ -3041,7 +3244,7 @@ export default function WebsiteManagementPage() {
                   </label>
                   <label className="text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer">
                     <span>Fayl tanlash</span>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, '1:1')} className="hidden" />
                   </label>
                 </div>
                 <Input
@@ -3050,6 +3253,16 @@ export default function WebsiteManagementPage() {
                   onChange={(e) => setActiveImage(e.target.value)}
                   placeholder="https://..."
                 />
+                {activeImage && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenCropperForExisting('1:1')}
+                    className="w-full py-1.5 px-3 rounded-xl bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs active:scale-95"
+                  >
+                    <Crop className="w-3.5 h-3.5 text-teal-600" />
+                    <span>Rasmni to‘g‘rilash / Kattalashtirish (Crop & Zoom)</span>
+                  </button>
+                )}
               </div>
 
               <div className="flex justify-end gap-2 pt-3">
@@ -3085,12 +3298,24 @@ export default function WebsiteManagementPage() {
                     &ldquo;{editingItem?.quote || 'Markazdagi amaliy muhit va ustozlarning individual yondashuvi sabab tezda natijaga erishdim.'}&rdquo;
                   </p>
                   <div className="flex items-center gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <img
-                      src={activeImage || '/educo-logo.png'}
-                      alt="Avatar"
-                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                      className="w-10 h-10 rounded-full object-cover border border-emerald-500/40"
-                    />
+                    <div className="relative group">
+                      <img
+                        src={activeImage || '/educo-logo.png'}
+                        alt="Avatar"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                        className="w-10 h-10 rounded-full object-cover border border-emerald-500/40"
+                      />
+                      {activeImage && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCropperForExisting('1:1')}
+                          className="absolute inset-0 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          title="Rasmni to‘g‘rilash"
+                        >
+                          <Crop className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-1">{editingItem?.name || 'Oʻquvchi ismi'}</h4>
                       <p className="text-[10px] text-gray-400">{editingItem?.role || 'Frontend dasturchi'}</p>
@@ -3127,6 +3352,34 @@ export default function WebsiteManagementPage() {
           </div>
         </Modal>
       )}
+
+      {/* Universal Interactive Image Cropper Modal for Website Management */}
+      <ImageCropperModal
+        isOpen={Boolean(cropperFile)}
+        imageFile={cropperFile}
+        onClose={() => setCropperFile(null)}
+        onCrop={handleCropComplete}
+        aspectRatio={cropperAspectRatio}
+        allowAspectChange={true}
+        title={
+          modalType === 'teacher'
+            ? 'Ustoz fotosuratini moslashtirish'
+            : modalType === 'slider'
+            ? 'Slayder bannerini moslashtirish'
+            : modalType === 'course'
+            ? 'Kurs muqovasini moslashtirish'
+            : modalType === 'subject'
+            ? 'Fan muqovasini moslashtirish'
+            : modalType === 'gallery'
+            ? 'Dars lavhasini moslashtirish'
+            : modalType === 'news'
+            ? 'Yangilik rasmini moslashtirish'
+            : modalType === 'testimonial'
+            ? 'Mijoz rasmini moslashtirish'
+            : 'Rasmni moslashtirish'
+        }
+        subtitle="Rasmni suring, kattalashtiring, burang va to‘g‘ri joylashtiring"
+      />
     </div>
   );
 }

@@ -22,6 +22,9 @@ import {
   Phone,
   Trash2,
   Eye,
+  EyeOff,
+  Copy,
+  Check,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -30,6 +33,7 @@ import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import Select from '@/components/ui/Select';
+import Modal from '@/components/ui/Modal';
 import { toast } from '@/components/ui/Toast';
 import UserForm from './UserForm';
 import {
@@ -77,6 +81,8 @@ export default function UserManagement() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserForView, setSelectedUserForView] = useState(null);
+  const [showModalPassword, setShowModalPassword] = useState(true);
+  const [copiedModalPassword, setCopiedModalPassword] = useState(false);
   const [formDefaultRole, setFormDefaultRole] = useState(ROLES.STUDENT);
 
   // Sync roleFilter if URL changes
@@ -1008,6 +1014,48 @@ export default function UserManagement() {
                     </span>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Password Display Box */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>Kabinetga kirish paroli:</span>
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                  Amaldagi parol
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/5">
+                <span className="font-mono font-extrabold text-sm text-gray-900 dark:text-gray-100 select-all">
+                  {showModalPassword ? (selectedUserForView.password || 'Educo#2026!') : '••••••••••••'}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowModalPassword(!showModalPassword)}
+                    className="p-1.5 rounded-lg text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-white/80 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                    title={showModalPassword ? 'Yashirish' : 'Ko‘rish'}
+                  >
+                    {showModalPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const pwd = selectedUserForView.password || 'Educo#2026!';
+                      navigator.clipboard.writeText(pwd);
+                      setCopiedModalPassword(true);
+                      toast.success('Parol nusxalandi!');
+                      setTimeout(() => setCopiedModalPassword(false), 2000);
+                    }}
+                    className="p-1.5 rounded-lg text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-white/80 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                    title="Nusxalash"
+                  >
+                    {copiedModalPassword ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             </div>
 
