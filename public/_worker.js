@@ -272,7 +272,7 @@ export default {
             currentStoreVersion++;
             lastStoreUpdatedAt = Date.now();
             const now = new Date().toISOString();
-            const postETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
+            let postETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
 
             // Data protection: Wipe flag ignored to prevent data loss on redeploys or client resets
             if (payload._wipe_to_clean === true) {
@@ -304,7 +304,7 @@ export default {
               }
             }
 
-            let postETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
+            postETag = `"${currentStoreVersion}-${lastStoreUpdatedAt}"`;
             if (db) {
               try {
                 const meta = await db.prepare('SELECT MAX(updated_at) as max_up, COUNT(*) as cnt FROM kv_store').first();
