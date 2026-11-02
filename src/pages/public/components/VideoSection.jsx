@@ -2,6 +2,7 @@
 import React from 'react';
 import { Play, Video, Clock, ArrowRight } from 'lucide-react';
 import ScrollReveal from '@/hooks/useScrollReveal';
+import { getImageTransformStyle } from '@/services/websiteService';
 
 export default function VideoSection({ videos = [], onSelectVideo, onPlayVideo }) {
   const handlePlay = (v) => {
@@ -45,8 +46,8 @@ export default function VideoSection({ videos = [], onSelectVideo, onPlayVideo }
                     src={video.thumbnail || video.image || '/educo-logo.png'}
                     alt={video.title}
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                    style={{ objectFit: video.fit_mode || 'cover', objectPosition: video.object_position || 'center' }}
-                    className="w-full h-full group-hover:scale-108 transition-transform duration-500 opacity-90"
+                    style={getImageTransformStyle(video, 'center')}
+                    className="w-full h-full transition-transform duration-500 opacity-90"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />

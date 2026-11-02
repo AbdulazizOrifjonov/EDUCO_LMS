@@ -1,5 +1,6 @@
 // src/pages/public/components/PublicModals.jsx
 import React from 'react';
+import { getImageTransformStyle } from '@/services/websiteService';
 import {
   X,
   Clock,
@@ -40,7 +41,7 @@ export function CourseDetailModal({ course, onClose, onRegister, onEnroll }) {
             src={course.image_url || course.image || '/educo-logo.png'}
             alt={course.title}
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-            style={{ objectFit: course.fit_mode || 'cover', objectPosition: course.object_position || 'center' }}
+            style={getImageTransformStyle(course, 'center')}
             className="w-full h-full"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -162,13 +163,15 @@ export function TeacherModal({ teacher, onClose }) {
       >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <img
-              src={teacher.image_url || teacher.photo || teacher.photo_url || '/educo-logo.png'}
-              alt={teacher.full_name || teacher.name}
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-              style={{ objectFit: teacher.fit_mode || 'cover', objectPosition: teacher.object_position || 'top' }}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-emerald-500 shadow-md"
-            />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-emerald-500 shadow-md overflow-hidden shrink-0">
+              <img
+                src={teacher.image_url || teacher.photo || teacher.photo_url || '/educo-logo.png'}
+                alt={teacher.full_name || teacher.name}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                style={getImageTransformStyle(teacher, 'top')}
+                className="w-full h-full"
+              />
+            </div>
             <div>
               <h3 className="text-xl font-black text-gray-950 dark:text-white">
                 {teacher.full_name}
@@ -247,7 +250,7 @@ export function NewsDetailModal({ newsItem, news, onClose }) {
             src={currentNews.cover_image || currentNews.image || currentNews.image_url || '/educo-logo.png'}
             alt={currentNews.title}
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-            style={{ objectFit: currentNews.fit_mode || 'cover', objectPosition: currentNews.object_position || 'center' }}
+            style={getImageTransformStyle(currentNews, 'center')}
             className="w-full h-full"
           />
           <button

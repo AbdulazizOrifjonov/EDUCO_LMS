@@ -103,6 +103,8 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                 backgroundSize: slide.fit_mode === 'contain' ? 'contain' : 'cover',
                 backgroundPosition: slide.object_position || 'center',
                 backgroundRepeat: 'no-repeat',
+                transform: `scale(${Number(slide.image_scale || 1) * (isActive ? 1.05 : 1)}) translate(${Number(slide.image_offset_x || 0)}%, ${Number(slide.image_offset_y || 0)}%)`,
+                transformOrigin: 'center center',
               }}
             />
 

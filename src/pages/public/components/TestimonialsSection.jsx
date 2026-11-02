@@ -2,6 +2,7 @@
 import React from 'react';
 import { Star, MessageSquareQuote, CheckCircle2 } from 'lucide-react';
 import ScrollReveal from '@/hooks/useScrollReveal';
+import { getImageTransformStyle } from '@/services/websiteService';
 
 export default function TestimonialsSection({ testimonials = [] }) {
   return (
@@ -48,15 +49,18 @@ export default function TestimonialsSection({ testimonials = [] }) {
 
               {/* Author Info */}
               <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex items-center gap-3">
-                <img
-                  src={item.avatar_url || item.avatar || item.image || item.photo || '/educo-logo.png'}
-                  alt={item.author_name || item.name}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/educo-logo.png';
-                  }}
-                  className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500 shrink-0"
-                />
+                <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-emerald-500 shrink-0">
+                  <img
+                    src={item.avatar_url || item.avatar || item.image || item.photo || '/educo-logo.png'}
+                    alt={item.author_name || item.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/educo-logo.png';
+                    }}
+                    style={getImageTransformStyle(item, 'center')}
+                    className="w-full h-full"
+                  />
+                </div>
                 <div className="min-w-0">
                   <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">
                     {item.author_name || item.name}

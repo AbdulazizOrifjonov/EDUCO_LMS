@@ -39,6 +39,14 @@ import {
   Send,
   HelpCircle,
   Crop,
+  ZoomIn,
+  ZoomOut,
+  Move,
+  RotateCcw,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -46,7 +54,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { toast } from '@/components/ui/Toast';
-import websiteService from '@/services/websiteService';
+import websiteService, { getImageTransformStyle } from '@/services/websiteService';
 
 const SUB_MODULES = [
   { id: 'overview', label: 'Umumiy hisobot', icon: Layers, targetHash: '' },
@@ -168,6 +176,9 @@ export default function WebsiteManagementPage() {
   const [activeVideoUrl, setActiveVideoUrl] = useState('');
   const [activeFitMode, setActiveFitMode] = useState('cover'); // 'cover' | 'contain'
   const [activePosition, setActivePosition] = useState('center'); // 'center' | 'top' | 'bottom'
+  const [activeScale, setActiveScale] = useState(1); // 0.5 to 2.5 zoom
+  const [activeOffsetX, setActiveOffsetX] = useState(0); // -50% to +50% horizontal pan
+  const [activeOffsetY, setActiveOffsetY] = useState(0); // -50% to +50% vertical pan
   const [activeRating, setActiveRating] = useState(5);
   const [activeIcon, setActiveIcon] = useState('Sparkles');
   const [activeColor, setActiveColor] = useState('from-emerald-600 to-teal-700');
@@ -199,8 +210,11 @@ export default function WebsiteManagementPage() {
 
     setActiveImage(initialImg);
     setActiveVideoUrl(item?.video_url || item?.videoUrl || '');
-    setActiveFitMode(item?.fit_mode || 'cover');
-    setActivePosition(item?.object_position || (type === 'teacher' ? 'top' : 'center'));
+    setActiveFitMode(item?.fit_mode || item?.fitMode || 'cover');
+    setActivePosition(item?.object_position || item?.objectPosition || (type === 'teacher' ? 'top' : 'center'));
+    setActiveScale(Number(item?.image_scale || item?.imageScale || 1));
+    setActiveOffsetX(Number(item?.image_offset_x || item?.imageOffsetX || 0));
+    setActiveOffsetY(Number(item?.image_offset_y || item?.imageOffsetY || 0));
     setActiveRating(Number(item?.rating || 5));
     setActiveIcon(item?.icon_name || 'Sparkles');
     setActiveColor(item?.color || 'from-emerald-600 to-teal-700');
@@ -213,6 +227,9 @@ export default function WebsiteManagementPage() {
     setEditingItem(null);
     setActiveImage('');
     setActiveVideoUrl('');
+    setActiveScale(1);
+    setActiveOffsetX(0);
+    setActiveOffsetY(0);
     setCropperFile(null);
     setUploadLoading(false);
   };
@@ -281,6 +298,231 @@ export default function WebsiteManagementPage() {
     return match && match[2].length === 11 ? match[2] : '';
   };
 
+  const renderImageControls = (label = "Fotosurat masshtabi va joylashuvi:") => (
+    <div className="p-3.5 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 space-y-3.5 shadow-xs">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-black text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+          <Sliders className="w-3.5 h-3.5 text-emerald-600" />
+          <span>{label}</span>
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setActiveScale(1);
+            setActiveOffsetX(0);
+            setActiveOffsetY(0);
+            setActivePosition('center');
+            setActiveFitMode('cover');
+          }}
+          className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer flex items-center gap-1"
+          title="Barcha parametrlarni asliga qaytarish"
+        >
+          <RotateCcw className="w-2.5 h-2.5" />
+          <span>Asliga</span>
+        </button>
+      </div>
+
+      {/* 1. Fit Mode & Quick Position Presets */}
+      <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
+        <div>
+          <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-1">To‘ldirish usuli:</span>
+          <div className="grid grid-cols-2 gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveFitMode('cover')}
+              className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${
+                activeFitMode === 'cover'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+              }`}
+            >
+              Qoplash (Cover)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveFitMode('contain')}
+              className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${
+                activeFitMode === 'contain'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+              }`}
+            >
+              Sig‘dirish (Contain)
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-1">Fokus pozitsiyasi:</span>
+          <div className="grid grid-cols-3 gap-1">
+            {[
+              { id: 'top', label: 'Tepa' },
+              { id: 'center', label: 'Markaz' },
+              { id: 'bottom', label: 'Past' },
+            ].map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setActivePosition(p.id)}
+                className={`py-1.5 rounded-xl border text-center transition-all cursor-pointer ${
+                  activePosition === p.id
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Scale / Zoom Slider */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
+          <span className="flex items-center gap-1">
+            <ZoomIn className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Kattalashtirish / Kichraytirish (Zoom):</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-black">{Math.round(activeScale * 100)}%</span>
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveScale((prev) => Math.max(0.5, +(prev - 0.1).toFixed(2)))}
+              className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 flex items-center justify-center font-black text-xs cursor-pointer active:scale-90"
+              title="10% kichraytirish"
+            >
+              -
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveScale((prev) => Math.min(2.5, +(prev + 0.1).toFixed(2)))}
+              className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 flex items-center justify-center font-black text-xs cursor-pointer active:scale-90"
+              title="10% kattalashtirish"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <input
+          type="range"
+          min="0.5"
+          max="2.5"
+          step="0.05"
+          value={activeScale}
+          onChange={(e) => setActiveScale(parseFloat(e.target.value))}
+          className="w-full accent-emerald-600 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer"
+        />
+      </div>
+
+      {/* 3. Horizontal & Vertical Pan Sliders + Directional Arrow D-Pad */}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
+        {/* Sliders on left (8 cols) */}
+        <div className="sm:col-span-8 space-y-2">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
+              <span className="flex items-center gap-1">
+                <Move className="w-3 h-3 text-emerald-600" />
+                <span>Gorizontal surish (Chap / O‘ng):</span>
+              </span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-black">
+                {activeOffsetX > 0 ? `+${activeOffsetX}%` : `${activeOffsetX}%`}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="-50"
+              max="50"
+              step="1"
+              value={activeOffsetX}
+              onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
+              className="w-full accent-emerald-600 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
+              <span className="flex items-center gap-1">
+                <Move className="w-3 h-3 text-emerald-600" />
+                <span>Vertikal surish (Tepa / Past):</span>
+              </span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-black">
+                {activeOffsetY > 0 ? `+${activeOffsetY}%` : `${activeOffsetY}%`}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="-50"
+              max="50"
+              step="1"
+              value={activeOffsetY}
+              onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
+              className="w-full accent-emerald-600 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {/* D-Pad Buttons on right (4 cols) */}
+        <div className="sm:col-span-4 flex flex-col items-center justify-center p-2 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
+          <span className="text-[9px] font-extrabold uppercase tracking-wider text-gray-400 mb-1">
+            Yo‘nalishlar
+          </span>
+          <div className="grid grid-cols-3 gap-1 w-24">
+            <div />
+            <button
+              type="button"
+              onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
+              className="h-7 w-7 rounded-lg bg-white dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 flex items-center justify-center font-bold text-xs shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Yuqoriga surish"
+            >
+              <ArrowUp className="w-3.5 h-3.5" />
+            </button>
+            <div />
+
+            <button
+              type="button"
+              onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
+              className="h-7 w-7 rounded-lg bg-white dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 flex items-center justify-center font-bold text-xs shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Chapga surish"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveOffsetX(0);
+                setActiveOffsetY(0);
+              }}
+              className="h-7 w-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center justify-center font-black text-[10px] shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Markazga qaytarish"
+            >
+              •
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
+              className="h-7 w-7 rounded-lg bg-white dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 flex items-center justify-center font-bold text-xs shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="O‘ngga surish"
+            >
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+
+            <div />
+            <button
+              type="button"
+              onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
+              className="h-7 w-7 rounded-lg bg-white dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 flex items-center justify-center font-bold text-xs shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Pastga surish"
+            >
+              <ArrowDown className="w-3.5 h-3.5" />
+            </button>
+            <div />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   // ---------------------------------------------------------------------------
   // CRUD Actions
   // ---------------------------------------------------------------------------
@@ -306,9 +548,13 @@ export default function WebsiteManagementPage() {
       image_url: imgUrl,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       order: Number(fd.get('order') || 1),
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveHeroSlide(itemData);
     toast.success('Slayd muvaffaqiyatli saqlandi!');
@@ -340,11 +586,15 @@ export default function WebsiteManagementPage() {
       image_url: imgUrl,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       featured: isFeatured,
       is_featured: isFeatured,
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
       syllabus: syllabusRaw.split('\n').map((s) => s.trim()).filter(Boolean),
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveWebsiteCourse(itemData);
     toast.success('Kurs maʼlumotlari saqlandi!');
@@ -368,8 +618,12 @@ export default function WebsiteManagementPage() {
       image_url: imgUrl,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveWebsiteSubject(itemData);
     toast.success('Fan muvaffaqiyatli saqlandi!');
@@ -399,10 +653,14 @@ export default function WebsiteManagementPage() {
       image_url: photo,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       telegram: fd.get('telegram') || '',
       bio: fd.get('bio'),
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveWebsiteTeacher(itemData);
     toast.success('Ustoz maʼlumotlari saqlandi!');
@@ -424,10 +682,14 @@ export default function WebsiteManagementPage() {
       image_url: imgUrl,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       description: desc,
       caption: desc,
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveWebsiteGalleryItem(itemData);
     toast.success('Lavha saqlandi!');
@@ -454,9 +716,13 @@ export default function WebsiteManagementPage() {
       youtube_id: ytId,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       description: fd.get('description'),
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveWebsiteVideo(itemData);
     toast.success('Video lavha saqlandi!');
@@ -482,11 +748,15 @@ export default function WebsiteManagementPage() {
       image_url: imgUrl,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       summary: sum,
       excerpt: sum,
       content: fd.get('content') || sum,
       is_published: fd.get('isActive') === 'on',
       isActive: fd.get('isActive') === 'on',
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveWebsiteNews(itemData);
     toast.success('Yangilik saqlandi!');
@@ -509,8 +779,12 @@ export default function WebsiteManagementPage() {
       photo: avatar,
       fit_mode: activeFitMode,
       object_position: activePosition,
+      image_scale: activeScale,
+      image_offset_x: activeOffsetX,
+      image_offset_y: activeOffsetY,
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
+      updated_at: new Date().toISOString(),
     };
     websiteService.saveWebsiteTestimonial(itemData);
     toast.success('Fikr saqlandi!');
@@ -797,8 +1071,8 @@ export default function WebsiteManagementPage() {
                     src={slide.image || slide.image_url || '/educo-logo.png'}
                     alt={slide.title}
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                    style={{ objectFit: slide.fit_mode || 'cover', objectPosition: slide.object_position || 'center' }}
-                    className="w-full h-full opacity-85"
+                    style={getImageTransformStyle(slide, 'center')}
+                    className="w-full h-full opacity-85 transition-transform"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-[11px] font-bold bg-black/60 text-white backdrop-blur-md">
@@ -895,8 +1169,8 @@ export default function WebsiteManagementPage() {
                     src={course.image || course.image_url || '/educo-logo.png'}
                     alt={course.title}
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                    style={{ objectFit: course.fit_mode || 'cover', objectPosition: course.object_position || 'center' }}
-                    className="w-full h-full"
+                    style={getImageTransformStyle(course, 'center')}
+                    className="w-full h-full transition-transform"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                   <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">
@@ -1087,8 +1361,8 @@ export default function WebsiteManagementPage() {
                       src={teacher.photo || teacher.photo_url || teacher.image_url || '/educo-logo.png'}
                       alt={teacher.name || teacher.full_name}
                       onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                      style={{ objectFit: teacher.fit_mode || 'cover', objectPosition: teacher.object_position || 'top' }}
-                      className="w-full h-full"
+                      style={getImageTransformStyle(teacher, 'top')}
+                      className="w-full h-full transition-transform"
                     />
                   </div>
                   <div>
@@ -1181,8 +1455,8 @@ export default function WebsiteManagementPage() {
                       src={item.image || item.cover_image || item.image_url || '/educo-logo.png'}
                       alt={item.title}
                       onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                      style={{ objectFit: item.fit_mode || 'cover', objectPosition: item.object_position || 'center' }}
-                      className="w-full h-full"
+                      style={getImageTransformStyle(item, 'center')}
+                      className="w-full h-full transition-transform"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-cyan-600 text-white">
@@ -1274,7 +1548,7 @@ export default function WebsiteManagementPage() {
                       src={vid.thumbnail || vid.image || vid.thumbnail_url || '/educo-logo.png'}
                       alt={vid.title}
                       onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                      style={{ objectFit: vid.fit_mode || 'cover', objectPosition: vid.object_position || 'center' }}
+                      style={getImageTransformStyle(vid, 'center')}
                       className="w-full h-full opacity-85 group-hover:scale-105 transition-transform"
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -1369,7 +1643,7 @@ export default function WebsiteManagementPage() {
                   src={img.image || img.image_url || '/educo-logo.png'}
                   alt={img.title}
                   onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                  style={{ objectFit: img.fit_mode || 'cover', objectPosition: img.object_position || 'center' }}
+                  style={getImageTransformStyle(img, 'center')}
                   className="w-full h-full group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
@@ -1460,13 +1734,15 @@ export default function WebsiteManagementPage() {
 
                 <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-100 dark:border-gray-700/60">
                   <div className="flex items-center gap-2.5">
-                    <img
-                      src={test.avatar || test.image || test.photo || '/educo-logo.png'}
-                      alt={test.name || test.author}
-                      onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                      style={{ objectFit: test.fit_mode || 'cover', objectPosition: test.object_position || 'center' }}
-                      className="w-9 h-9 rounded-full object-cover border border-emerald-500/30"
-                    />
+                    <div className="w-9 h-9 rounded-full overflow-hidden border border-emerald-500/30 shrink-0">
+                      <img
+                        src={test.avatar || test.image || test.photo || '/educo-logo.png'}
+                        alt={test.name || test.author}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
+                        style={getImageTransformStyle(test, 'center')}
+                        className="w-full h-full transition-transform"
+                      />
+                    </div>
                     <div>
                       <h4 className="text-xs font-bold text-gray-900 dark:text-white line-clamp-1">{test.name}</h4>
                       <p className="text-[10px] text-gray-400 line-clamp-1">{test.role}</p>
@@ -1858,8 +2134,13 @@ export default function WebsiteManagementPage() {
                     <img
                       src={activeImage}
                       alt="Preview"
-                      style={{ objectFit: activeFitMode, objectPosition: activePosition }}
-                      className="w-full h-full transition-all duration-200"
+                      style={{
+                        objectFit: activeFitMode,
+                        objectPosition: activePosition,
+                        transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                        transformOrigin: 'center center',
+                      }}
+                      className="w-full h-full transition-transform duration-75"
                     />
                   ) : (
                     <div className="text-center p-4 text-gray-400">
@@ -1893,44 +2174,8 @@ export default function WebsiteManagementPage() {
                 </div>
               </div>
 
-              {/* Rasm Bo'yi va Enini Boshqarish (Fit & Position) */}
-              <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block">
-                  Rasm oʻlchami va fokusini sozlash:
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('cover')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'cover' ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    100% Toʻliq qoplash (Cover)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('contain')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'contain' ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    Toʻliq sigʻdirish (Contain)
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] font-bold pt-1">
-                  <span className="text-gray-500">Rasm markazi:</span>
-                  <div className="flex items-center gap-1">
-                    {['top', 'center', 'bottom'].map((pos) => (
-                      <button
-                        key={pos}
-                        type="button"
-                        onClick={() => setActivePosition(pos)}
-                        className={`px-2.5 py-1 rounded-lg capitalize transition-colors cursor-pointer ${activePosition === pos ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'}`}
-                      >
-                        {pos === 'top' ? 'Tepa' : pos === 'center' ? 'Markaz' : 'Past'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* Real-time Image Zoom & Pan Controls */}
+              {renderImageControls("Slayder banneri masshtabi va joylashuvi:")}
             </div>
           </form>
         </Modal>
@@ -2120,8 +2365,13 @@ export default function WebsiteManagementPage() {
                       <img
                         src={activeImage}
                         alt="Preview"
-                        style={{ objectFit: activeFitMode, objectPosition: activePosition }}
-                        className="w-full h-full transition-all duration-200"
+                        style={{
+                          objectFit: activeFitMode,
+                          objectPosition: activePosition,
+                          transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                          transformOrigin: 'center center',
+                        }}
+                        className="w-full h-full transition-transform duration-75"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -2154,28 +2404,8 @@ export default function WebsiteManagementPage() {
                 </div>
               </div>
 
-              {/* Control panel */}
-              <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block">
-                  Rasm qoplash va fokus nazorati:
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('cover')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'cover' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    100% Qoplash (Cover)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('contain')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'contain' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    Sigʻdirish (Contain)
-                  </button>
-                </div>
-              </div>
+              {/* Real-time Image Zoom & Pan Controls */}
+              {renderImageControls("Kurs muqovasi masshtabi va joylashuvi:")}
             </div>
           </form>
         </Modal>
@@ -2334,11 +2564,22 @@ export default function WebsiteManagementPage() {
               </div>
 
               {activeImage && (
-                <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                   <span className="text-[11px] font-bold text-gray-500">Rasm koʻrinishi:</span>
-                  <div className="h-28 rounded-xl overflow-hidden bg-gray-900">
-                    <img src={activeImage} alt="Preview" style={{ objectFit: activeFitMode }} className="w-full h-full" />
+                  <div className="h-32 rounded-xl overflow-hidden bg-gray-900 border border-gray-200 dark:border-gray-700">
+                    <img
+                      src={activeImage}
+                      alt="Preview"
+                      style={{
+                        objectFit: activeFitMode,
+                        objectPosition: activePosition,
+                        transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                        transformOrigin: 'center center',
+                      }}
+                      className="w-full h-full transition-transform duration-75"
+                    />
                   </div>
+                  {renderImageControls("Fan rasmi masshtabi va joylashuvi:")}
                 </div>
               )}
             </div>
@@ -2518,8 +2759,13 @@ export default function WebsiteManagementPage() {
                       <img
                         src={activeImage}
                         alt="Preview"
-                        style={{ objectFit: activeFitMode, objectPosition: activePosition }}
-                        className="w-full h-full transition-all duration-200"
+                        style={{
+                          objectFit: activeFitMode,
+                          objectPosition: activePosition,
+                          transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                          transformOrigin: 'center center',
+                        }}
+                        className="w-full h-full transition-transform duration-75"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -2550,24 +2796,8 @@ export default function WebsiteManagementPage() {
                 </div>
               </div>
 
-              {/* Fit and Position controls */}
-              <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block">
-                  Fotosurat fokus va qoplash usuli:
-                </span>
-                <div className="grid grid-cols-3 gap-1.5 text-[11px] font-bold">
-                  {['top', 'center', 'bottom'].map((pos) => (
-                    <button
-                      key={pos}
-                      type="button"
-                      onClick={() => setActivePosition(pos)}
-                      className={`py-1.5 rounded-xl border text-center transition-all cursor-pointer ${activePosition === pos ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                    >
-                      {pos === 'top' ? 'Tepa (Yuz)' : pos === 'center' ? 'Markaz' : 'Past'}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Real-time Image Zoom & Pan Controls */}
+              {renderImageControls("Ustoz fotosurati masshtabi va joylashuvi:")}
             </div>
           </form>
         </Modal>
@@ -2730,8 +2960,13 @@ export default function WebsiteManagementPage() {
                       <img
                         src={activeImage}
                         alt="Preview"
-                        style={{ objectFit: activeFitMode, objectPosition: activePosition }}
-                        className="w-full h-full transition-all duration-200"
+                        style={{
+                          objectFit: activeFitMode,
+                          objectPosition: activePosition,
+                          transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                          transformOrigin: 'center center',
+                        }}
+                        className="w-full h-full transition-transform duration-75"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -2764,27 +2999,8 @@ export default function WebsiteManagementPage() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block">
-                  Rasm oʻlchami va fokusini sozlash:
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('cover')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'cover' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    100% Qoplash (Cover)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('contain')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'contain' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    Sigʻdirish (Contain)
-                  </button>
-                </div>
-              </div>
+              {/* Real-time Image Zoom & Pan Controls */}
+              {renderImageControls("Yangilik rasmi masshtabi va joylashuvi:")}
             </div>
           </form>
         </Modal>
@@ -2964,12 +3180,17 @@ export default function WebsiteManagementPage() {
                     }
                     if (activeImage) {
                       return (
-                        <div className="relative w-full h-full">
+                        <div className="relative w-full h-full overflow-hidden">
                           <img
                             src={activeImage}
                             alt="Thumbnail"
-                            style={{ objectFit: activeFitMode }}
-                            className="w-full h-full opacity-80"
+                            style={{
+                              objectFit: activeFitMode,
+                              objectPosition: activePosition,
+                              transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                              transformOrigin: 'center center',
+                            }}
+                            className="w-full h-full opacity-80 transition-transform duration-75"
                           />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                             <div className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center shadow-lg">
@@ -2989,27 +3210,8 @@ export default function WebsiteManagementPage() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block">
-                  Muqova rasm oʻlchami nazorati:
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('cover')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'cover' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    100% Qoplash (Cover)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('contain')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'contain' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    Sigʻdirish (Contain)
-                  </button>
-                </div>
-              </div>
+              {/* Real-time Image Zoom & Pan Controls */}
+              {renderImageControls("Video muqovasi masshtabi va joylashuvi:")}
             </div>
           </form>
         </Modal>
@@ -3132,8 +3334,13 @@ export default function WebsiteManagementPage() {
                     <img
                       src={activeImage}
                       alt="Preview"
-                      style={{ objectFit: activeFitMode, objectPosition: activePosition }}
-                      className="w-full h-full transition-all duration-200"
+                      style={{
+                        objectFit: activeFitMode,
+                        objectPosition: activePosition,
+                        transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                        transformOrigin: 'center center',
+                      }}
+                      className="w-full h-full transition-transform duration-75"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -3160,27 +3367,8 @@ export default function WebsiteManagementPage() {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block">
-                  Rasm oʻlchami va fokusini sozlash:
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('cover')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'cover' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    100% Qoplash (Cover)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveFitMode('contain')}
-                    className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${activeFitMode === 'contain' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'}`}
-                  >
-                    Sigʻdirish (Contain)
-                  </button>
-                </div>
-              </div>
+              {/* Real-time Image Zoom & Pan Controls */}
+              {renderImageControls("Dars lavhasi masshtabi va joylashuvi:")}
             </div>
           </form>
         </Modal>
@@ -3298,18 +3486,24 @@ export default function WebsiteManagementPage() {
                     &ldquo;{editingItem?.quote || 'Markazdagi amaliy muhit va ustozlarning individual yondashuvi sabab tezda natijaga erishdim.'}&rdquo;
                   </p>
                   <div className="flex items-center gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <div className="relative group">
+                    <div className="relative group w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-500/40 shrink-0">
                       <img
                         src={activeImage || '/educo-logo.png'}
                         alt="Avatar"
                         onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                        className="w-10 h-10 rounded-full object-cover border border-emerald-500/40"
+                        style={{
+                          objectFit: activeFitMode,
+                          objectPosition: activePosition,
+                          transform: `scale(${activeScale}) translate(${activeOffsetX}%, ${activeOffsetY}%)`,
+                          transformOrigin: 'center center',
+                        }}
+                        className="w-full h-full transition-transform duration-75"
                       />
                       {activeImage && (
                         <button
                           type="button"
                           onClick={() => handleOpenCropperForExisting('1:1')}
-                          className="absolute inset-0 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                           title="Rasmni to‘g‘rilash"
                         >
                           <Crop className="w-4 h-4" />
@@ -3323,6 +3517,9 @@ export default function WebsiteManagementPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Real-time Image Zoom & Pan Controls */}
+              {activeImage && renderImageControls("Mijoz fotosurati masshtabi va joylashuvi:")}
             </div>
           </form>
         </Modal>

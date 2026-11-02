@@ -516,6 +516,7 @@ export const DEFAULT_WEBSITE_TEACHERS = [
     is_featured: true,
     is_active: true,
     order: 4,
+    updated_at: '2026-11-02T18:00:00.000Z',
   },
   {
     id: 'wt-5',
@@ -1132,6 +1133,7 @@ class WebsiteService {
 
   saveSlide(slideData) {
     const norm = normalizeSlide(slideData);
+    norm.updated_at = norm.updated_at || new Date().toISOString();
     const list = this.getSlides(false);
     let updated;
     if (norm.id) {
@@ -1173,6 +1175,7 @@ class WebsiteService {
 
   saveCourse(courseData) {
     const norm = normalizeCourse(courseData);
+    norm.updated_at = norm.updated_at || new Date().toISOString();
     const list = this.getCourses(false);
     let updated;
     if (norm.id) {
@@ -1217,6 +1220,7 @@ class WebsiteService {
   }
 
   saveSubject(subjectData) {
+    subjectData.updated_at = subjectData.updated_at || new Date().toISOString();
     const list = this.getSubjects(false);
     let updated;
     if (subjectData.id) {
@@ -1258,6 +1262,7 @@ class WebsiteService {
 
   saveTeacher(teacherData) {
     const norm = normalizeTeacher(teacherData);
+    norm.updated_at = norm.updated_at || new Date().toISOString();
     const list = this.getTeachers(false);
     let updated;
     if (norm.id) {
@@ -1299,6 +1304,7 @@ class WebsiteService {
 
   saveGalleryItem(itemData) {
     const norm = normalizeGalleryItem(itemData);
+    norm.updated_at = norm.updated_at || new Date().toISOString();
     const list = this.getGallery(false);
     let updated;
     if (norm.id) {
@@ -1340,6 +1346,7 @@ class WebsiteService {
 
   saveVideo(videoData) {
     const norm = normalizeVideo(videoData);
+    norm.updated_at = norm.updated_at || new Date().toISOString();
     const list = this.getVideos(false);
     let updated;
     if (norm.id) {
@@ -1381,6 +1388,7 @@ class WebsiteService {
 
   saveNews(newsData) {
     const norm = normalizeNews(newsData);
+    norm.updated_at = norm.updated_at || new Date().toISOString();
     const list = this.getNews(false);
     let updated;
     if (norm.id) {
@@ -1431,6 +1439,7 @@ class WebsiteService {
 
   saveTestimonial(testData) {
     const norm = normalizeTestimonial(testData);
+    norm.updated_at = norm.updated_at || new Date().toISOString();
     const list = this.getTestimonials(false);
     let updated;
     if (norm.id) {

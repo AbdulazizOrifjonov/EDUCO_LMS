@@ -2,6 +2,7 @@
 import React from 'react';
 import { Newspaper, Calendar, Eye, ArrowRight } from 'lucide-react';
 import ScrollReveal from '@/hooks/useScrollReveal';
+import { getImageTransformStyle } from '@/services/websiteService';
 
 export default function NewsSection({ news = [], onSelectNews = () => {} }) {
   return (
@@ -40,8 +41,8 @@ export default function NewsSection({ news = [], onSelectNews = () => {} }) {
                     src={item.cover_image || item.image || item.image_url || '/educo-logo.png'}
                     alt={item.title}
                     onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                    style={{ objectFit: item.fit_mode || 'cover', objectPosition: item.object_position || 'center' }}
-                    className="w-full h-full group-hover:scale-108 transition-transform duration-500"
+                    style={getImageTransformStyle(item, 'center')}
+                    className="w-full h-full transition-transform duration-500"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

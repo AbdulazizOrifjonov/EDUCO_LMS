@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Camera, Eye, Calendar, Sparkles } from 'lucide-react';
 import ScrollReveal from '@/hooks/useScrollReveal';
+import { getImageTransformStyle } from '@/services/websiteService';
 
 export default function GallerySection({ gallery = [], onSelectImage = () => {} }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -74,8 +75,8 @@ export default function GallerySection({ gallery = [], onSelectImage = () => {} 
                 src={item.image_url || item.image || '/educo-logo.png'}
                 alt={item.title}
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/educo-logo.png'; }}
-                style={{ objectFit: item.fit_mode || 'cover', objectPosition: item.object_position || 'center' }}
-                className="w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
+                style={getImageTransformStyle(item, 'center')}
+                className="w-full h-full transition-transform duration-700 ease-out"
                 loading="lazy"
               />
 
