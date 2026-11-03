@@ -285,32 +285,96 @@ export default function WebsiteManagementPage() {
   }, [actionParam, typeParam, idParam, slides, courses, subjects, teachers, gallery, videos, news, testimonials]);
 
   // File Upload Handlers with Automatic Apply & Clean Removal
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error('Rasm hajmi 20MB dan oshmasligi kerak');
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error('Rasm hajmi 25MB dan oshmasligi kerak');
       return;
     }
 
     setUploadLoading(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      // AUTOMATICALLY SET IMMEDIATELY! Old image is replaced cleanly without forcing crop dialog
-      setActiveImage(dataUrl);
-      setActiveScale(1);
-      setActiveOffsetX(0);
-      setActiveOffsetY(0);
+
+    // 1. Upload directly to server for fast cross-device URL sync
+    try {
+      const formData = new FormData();
+      formData.append('file', file, file.name || 'image.jpg');
+
+      const res = await fetch('/api/chat/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.url) {
+          setActiveImage(data.url);
+          setActiveScale(1);
+          setActiveOffsetX(0);
+          setActiveOffsetY(0);
+          setUploadLoading(false);
+          toast.success('Yangi rasm tanlandi va serverga yuklandi!');
+          e.target.value = '';
+          return;
+        }
+      }
+    } catch (netErr) {
+      console.warn('Direct server upload fallback to compressed image:', netErr);
+    }
+
+    // 2. Fallback: Compress image via Canvas so it never exceeds localStorage quota
+    try {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX_WIDTH = 1280;
+          const MAX_HEIGHT = 1280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(width);
+          canvas.height = Math.round(height);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+          setActiveImage(compressed);
+          setActiveScale(1);
+          setActiveOffsetX(0);
+          setActiveOffsetY(0);
+          setUploadLoading(false);
+          toast.success('Yangi rasm tanlandi va avtomatik o‘rnatildi!');
+        };
+        img.onerror = () => {
+          setActiveImage(event.target.result);
+          setUploadLoading(false);
+        };
+        img.src = event.target.result;
+      };
+      reader.onerror = () => {
+        setUploadLoading(false);
+        toast.error('Rasmni yuklashda xatolik yuz berdi');
+      };
+      reader.readAsDataURL(file);
+    } catch (_) {
       setUploadLoading(false);
-      toast.success('Yangi rasm tanlandi va avtomatik o‘rnatildi!');
-    };
-    reader.onerror = () => {
-      setUploadLoading(false);
-      toast.error('Rasmni yuklashda xatolik yuz berdi');
-    };
-    reader.readAsDataURL(file);
+    }
+
     e.target.value = '';
   };
 
@@ -338,20 +402,65 @@ export default function WebsiteManagementPage() {
     setCropperFile(activeImage);
   };
 
-  const handleCropComplete = (croppedDataUrl) => {
-    setActiveImage(croppedDataUrl);
+  const handleCropComplete = async (croppedDataUrl) => {
     setCropperFile(null);
+    if (!croppedDataUrl) return;
+
+    // Upload cropped image to server to maintain lightweight shared URL
+    try {
+      const res = await fetch(croppedDataUrl);
+      const blob = await res.blob();
+      const formData = new FormData();
+      formData.append('file', blob, `crop_${Date.now()}.jpg`);
+      const uploadRes = await fetch('/api/chat/upload', { method: 'POST', body: formData });
+      if (uploadRes.ok) {
+        const data = await uploadRes.json();
+        if (data && data.url) {
+          setActiveImage(data.url);
+          toast.success('Rasm muvaffaqiyatli moslashtirildi!');
+          return;
+        }
+      }
+    } catch (_) {}
+
+    setActiveImage(croppedDataUrl);
     toast.success('Rasm muvaffaqiyatli moslashtirildi!');
   };
 
-  const handleVideoUpload = (e) => {
+  const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 25 * 1024 * 1024) {
-      toast.error('Video hajmi 25MB dan oshmasligi kerak. Katta videolar uchun YouTube havolasidan foydalaning.');
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Video hajmi 50MB dan oshmasligi kerak. Katta videolar uchun YouTube havolasidan foydalaning.');
       return;
     }
     setUploadLoading(true);
+
+    // 1. Upload to server
+    try {
+      const formData = new FormData();
+      formData.append('file', file, file.name || 'video.mp4');
+
+      const res = await fetch('/api/chat/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.url) {
+          setActiveVideoUrl(data.url);
+          setUploadLoading(false);
+          toast.success(`"${file.name}" video muvaffaqiyatli serverga yuklandi!`);
+          e.target.value = '';
+          return;
+        }
+      }
+    } catch (netErr) {
+      console.warn('Server video upload failed, fallback to local file reader:', netErr);
+    }
+
+    // 2. Fallback
     const reader = new FileReader();
     reader.onload = () => {
       setActiveVideoUrl(reader.result);
@@ -363,6 +472,7 @@ export default function WebsiteManagementPage() {
       toast.error('Videoni yuklashda xatolik yuz berdi');
     };
     reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   // Helper to extract YouTube ID

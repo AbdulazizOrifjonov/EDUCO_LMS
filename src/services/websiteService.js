@@ -1017,49 +1017,55 @@ class WebsiteService {
   initDefaults() {
     if (typeof window === 'undefined') return;
     try {
-      const isSynced = localStorage.getItem(SYNC_VERSION);
-      if (!isSynced) {
-        // Upgrade / sync all items with normalized fields and live server push
-        this._set(WEBSITE_KEYS.COURSES, DEFAULT_WEBSITE_COURSES);
-        this._set(WEBSITE_KEYS.SUBJECTS, DEFAULT_WEBSITE_SUBJECTS);
-        this._set(WEBSITE_KEYS.TEACHERS, DEFAULT_WEBSITE_TEACHERS);
-        this._set(WEBSITE_KEYS.SLIDES, DEFAULT_WEBSITE_SLIDES);
-        this._set(WEBSITE_KEYS.GALLERY, DEFAULT_WEBSITE_GALLERY);
-        this._set(WEBSITE_KEYS.VIDEOS, DEFAULT_WEBSITE_VIDEOS);
-        this._set(WEBSITE_KEYS.NEWS, DEFAULT_WEBSITE_NEWS);
-        this._set(WEBSITE_KEYS.TESTIMONIALS, DEFAULT_WEBSITE_TESTIMONIALS);
-        this._set(WEBSITE_KEYS.SETTINGS, DEFAULT_WEBSITE_SETTINGS);
-        localStorage.setItem(SYNC_VERSION, 'true');
-        return;
-      }
+      // SAFE INITIALIZATION:
+      // Never wipe or force-overwrite server database or user custom edits with static defaults.
+      // Only supply default values if a collection is completely absent both in memory and localStorage.
+      const defaults = {
+        [WEBSITE_KEYS.SETTINGS]: DEFAULT_WEBSITE_SETTINGS,
+        [WEBSITE_KEYS.SLIDES]: DEFAULT_WEBSITE_SLIDES,
+        [WEBSITE_KEYS.COURSES]: DEFAULT_WEBSITE_COURSES,
+        [WEBSITE_KEYS.SUBJECTS]: DEFAULT_WEBSITE_SUBJECTS,
+        [WEBSITE_KEYS.TEACHERS]: DEFAULT_WEBSITE_TEACHERS,
+        [WEBSITE_KEYS.GALLERY]: DEFAULT_WEBSITE_GALLERY,
+        [WEBSITE_KEYS.VIDEOS]: DEFAULT_WEBSITE_VIDEOS,
+        [WEBSITE_KEYS.NEWS]: DEFAULT_WEBSITE_NEWS,
+        [WEBSITE_KEYS.TESTIMONIALS]: DEFAULT_WEBSITE_TESTIMONIALS,
+      };
 
-      if (!this._get(WEBSITE_KEYS.SETTINGS, null)) {
-        this._set(WEBSITE_KEYS.SETTINGS, DEFAULT_WEBSITE_SETTINGS);
-      }
-      if (!this._get(WEBSITE_KEYS.SLIDES, null)) {
-        this._set(WEBSITE_KEYS.SLIDES, DEFAULT_WEBSITE_SLIDES);
-      }
-      if (!this._get(WEBSITE_KEYS.COURSES, null)) {
-        this._set(WEBSITE_KEYS.COURSES, DEFAULT_WEBSITE_COURSES);
-      }
-      if (!this._get(WEBSITE_KEYS.SUBJECTS, null)) {
-        this._set(WEBSITE_KEYS.SUBJECTS, DEFAULT_WEBSITE_SUBJECTS);
-      }
-      if (!this._get(WEBSITE_KEYS.TEACHERS, null)) {
-        this._set(WEBSITE_KEYS.TEACHERS, DEFAULT_WEBSITE_TEACHERS);
-      }
-      if (!this._get(WEBSITE_KEYS.GALLERY, null)) {
-        this._set(WEBSITE_KEYS.GALLERY, DEFAULT_WEBSITE_GALLERY);
-      }
-      if (!this._get(WEBSITE_KEYS.VIDEOS, null)) {
-        this._set(WEBSITE_KEYS.VIDEOS, DEFAULT_WEBSITE_VIDEOS);
-      }
-      if (!this._get(WEBSITE_KEYS.NEWS, null)) {
-        this._set(WEBSITE_KEYS.NEWS, DEFAULT_WEBSITE_NEWS);
-      }
-      if (!this._get(WEBSITE_KEYS.TESTIMONIALS, null)) {
-        this._set(WEBSITE_KEYS.TESTIMONIALS, DEFAULT_WEBSITE_TESTIMONIALS);
-      }
+      Object.entries(defaults).forEach(([key, defaultVal]) => {
+        let hasData = false;
+        if (localStore && localStore.memoryStore && localStore.memoryStore[key] !== undefined && localStore.memoryStore[key] !== null) {
+          const val = localStore.memoryStore[key];
+          if (!Array.isArray(val) || val.length > 0) {
+            hasData = true;
+          }
+        }
+        if (!hasData) {
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw && raw !== 'null' && raw !== 'undefined') {
+              const parsed = JSON.parse(raw);
+              if (parsed && (!Array.isArray(parsed) || parsed.length > 0)) {
+                hasData = true;
+                if (localStore && localStore.memoryStore) {
+                  localStore.memoryStore[key] = parsed;
+                }
+              }
+            }
+          } catch (_) {}
+        }
+
+        // Only populate memory/localStorage as initial fallback if totally empty,
+        // without broadcasting or pushing to server to avoid wiping custom user data!
+        if (!hasData) {
+          if (localStore && localStore.memoryStore) {
+            localStore.memoryStore[key] = defaultVal;
+          }
+          try {
+            localStorage.setItem(key, JSON.stringify(defaultVal));
+          } catch (_) {}
+        }
+      });
     } catch (_) {}
   }
 
