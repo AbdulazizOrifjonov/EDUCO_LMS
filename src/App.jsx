@@ -125,8 +125,8 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
-            <Route path="users/profile/:id" element={<ProfilePage />} />
-            <Route path="users/:id" element={<ProfilePage />} />
+            <Route path="users/profile/:id" element={<SettingsPage />} />
+            <Route path="users/:id" element={<SettingsPage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="courses" element={<CourseManagement />} />
             <Route path="courses/create" element={<CourseCreatePage />} />
@@ -173,8 +173,8 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
-            <Route path="users/profile/:id" element={<ProfilePage />} />
-            <Route path="users/:id" element={<ProfilePage />} />
+            <Route path="users/profile/:id" element={<SettingsPage />} />
+            <Route path="users/:id" element={<SettingsPage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="courses" element={<CourseManagement />} />
             <Route path="courses/create" element={<CourseCreatePage />} />
@@ -222,8 +222,8 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
-            <Route path="users/profile/:id" element={<ProfilePage />} />
-            <Route path="users/:id" element={<ProfilePage />} />
+            <Route path="users/profile/:id" element={<SettingsPage />} />
+            <Route path="users/:id" element={<SettingsPage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="groups" element={<GroupManagement />} />
             <Route path="groups/create" element={<GroupCreatePage />} />

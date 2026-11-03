@@ -392,6 +392,23 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   will-change: transform;
 }
 
+.public-navbar-header {
+  padding-top: max(env(safe-area-inset-top, 0px), 8px);
+}
+
+/* iOS Standalone Mode / PWA Notch & Status Bar Protection */
+@supports (-webkit-touch-callout: none) {
+  .public-navbar-header {
+    padding-top: max(env(safe-area-inset-top, 0px), 12px);
+  }
+}
+
+@media all and (display-mode: standalone) {
+  .public-navbar-header {
+    padding-top: max(env(safe-area-inset-top, 44px), 44px) !important;
+  }
+}
+
 .public-navbar-top-light {
   background: rgba(255, 255, 255, 0.94) !important;
   backdrop-filter: blur(20px) !important;

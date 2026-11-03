@@ -536,7 +536,7 @@ export default function ImageCropperModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div
-        className="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col"
+        className="w-full max-w-md max-h-[92vh] bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-y-auto overscroll-contain flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -707,8 +707,8 @@ export default function ImageCropperModal({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-5 py-3.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2.5 bg-white dark:bg-gray-900">
+        {/* Footer - Sticky at bottom so buttons are never pushed outside viewport */}
+        <div className="sticky bottom-0 z-20 px-5 py-3.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-2.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
           <Button
             type="button"
             variant="ghost"

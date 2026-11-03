@@ -132,6 +132,10 @@ class LocalStore {
     return this._deletedIds;
   }
 
+  getDeletedIds() {
+    return Array.from(this._getDeletedIds());
+  }
+
   _recordDeletedId(id) {
     if (!id) return;
     const set = this._getDeletedIds();
@@ -139,6 +143,15 @@ class LocalStore {
     try {
       if (typeof window !== 'undefined' && window.localStorage?.setItem) {
         window.localStorage.setItem('educo_deleted_ids', JSON.stringify(Array.from(set)));
+      }
+    } catch (_) {}
+  }
+
+  clear() {
+    this.memoryStore = {};
+    try {
+      if (typeof window !== 'undefined' && typeof window.localStorage?.clear === 'function') {
+        window.localStorage.clear();
       }
     } catch (_) {}
   }
@@ -971,6 +984,11 @@ class LocalStore {
   }
 
   deleteUser(id) {
+    const target = this.getUsers().find((u) => u.id === id);
+    if (target && (target.username === 'abbosbek' || (target.role === 'owner' && this.getUsers().filter((u) => u.role === 'owner').length <= 1))) {
+      console.warn('[Security] Root owner account cannot be deleted.');
+      return false;
+    }
     this._recordDeletedId(id);
     const list = this.getUsers().filter((u) => u.id !== id);
     this.setItem(STORAGE_KEYS.USERS, list);

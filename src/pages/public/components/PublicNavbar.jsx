@@ -249,11 +249,20 @@ export default function PublicNavbar({ settings }) {
       ? 'public-navbar-top-dark shadow-xs'
       : 'public-navbar-top-light shadow-xs';
 
+  // Detect iOS Standalone PWA to guarantee status-bar clearance
+  const isIosStandalone =
+    typeof window !== 'undefined' &&
+    (window.navigator?.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)) &&
+    /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerClass}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 public-navbar-header ${headerClass}`}
       style={{
-        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingTop: isIosStandalone
+          ? 'max(env(safe-area-inset-top, 44px), 44px)'
+          : 'max(env(safe-area-inset-top, 0px), 8px)',
       }}
     >
       <div className="w-full max-w-[1540px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2 sm:py-2.5">

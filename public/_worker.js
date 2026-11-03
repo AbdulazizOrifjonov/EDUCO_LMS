@@ -23,6 +23,90 @@ function jsonResponse(data, status = 200, extraHeaders = {}) {
   });
 }
 
+// Universal Multi-Device Conflict-Free Merging Engine
+function mergeCollections(current, incoming) {
+  const merged = { ...current };
+  const deletedSet = new Set(Array.isArray(current._deleted_ids) ? current._deleted_ids : []);
+  if (incoming.deletedId) deletedSet.add(String(incoming.deletedId));
+  if (Array.isArray(incoming._deleted_ids)) {
+    incoming._deleted_ids.forEach((id) => deletedSet.add(String(id)));
+  }
+  merged._deleted_ids = Array.from(deletedSet);
+
+  for (const [key, val] of Object.entries(incoming)) {
+    if (key === 'deletedId' || key === '_deleted_ids') continue;
+
+    if (Array.isArray(val)) {
+      const existingList = Array.isArray(current[key]) ? current[key] : [];
+      const map = new Map();
+
+      // 1. Populate existing server records (excluding known deleted IDs)
+      existingList.forEach((item) => {
+        if (!item || typeof item !== 'object') return;
+        const id = String(item.id || item.username || '');
+        if (id && !deletedSet.has(id)) {
+          map.set(id, item);
+        }
+      });
+
+      // 2. Upsert incoming records from client
+      val.forEach((item) => {
+        if (!item || typeof item !== 'object') return;
+        const id = String(item.id || item.username || '');
+        if (!id || deletedSet.has(id)) return;
+
+        if (!map.has(id)) {
+          map.set(id, item);
+        } else {
+          const old = map.get(id);
+          const oldTs = new Date(old.updated_at || old.created_at || 0).getTime();
+          const newTs = new Date(item.updated_at || item.created_at || 0).getTime();
+          if (newTs >= oldTs) {
+            map.set(id, { ...old, ...item });
+          }
+        }
+      });
+
+      // 3. Clean list filtered against deletedSet
+      merged[key] = Array.from(map.values()).filter((item) => {
+        const id = String(item.id || item.username || '');
+        return !deletedSet.has(id);
+      });
+    } else if (val && typeof val === 'object') {
+      merged[key] = { ...(current[key] || {}), ...val };
+    } else {
+      merged[key] = val;
+    }
+  }
+
+  // Guaranteed Security: Abbosbek Owner root must NEVER be lost or demoted
+  if (Array.isArray(merged['educo_db_users'])) {
+    const hasOwner = merged['educo_db_users'].some(
+      (u) => (u.username === 'abbosbek' || u.role === 'owner') && u.is_active !== false
+    );
+    if (!hasOwner) {
+      merged['educo_db_users'].unshift({
+        id: 'usr-owner-1',
+        username: 'abbosbek',
+        first_name: 'Abbosbek',
+        last_name: 'Boshqaruvchi',
+        fullName: 'Abbosbek',
+        full_name: 'Abbosbek',
+        role: 'owner',
+        email: 'abbosbek@educo.app',
+        phone: '+998 98 800 14 15',
+        password: 'AbbosBek1415',
+        password_updated_at: '2026-10-31T05:02:37.920Z',
+        is_active: true,
+        created_at: '2026-10-31T05:02:37.920Z',
+        avatar_url: '',
+      });
+    }
+  }
+
+  return merged;
+}
+
 // Ensure D1 table exists
 async function initD1Tables(db) {
   if (!db) return;
@@ -279,7 +363,32 @@ export default {
               console.warn('[DataProtection] Client wipe request safely ignored to protect production database.');
             }
 
-            for (const [key, value] of Object.entries(payload)) {
+            // 1. Reconstruct current server store for conflict-free merging
+            const currentStore = {};
+            if (db) {
+              try {
+                const { results } = await db.prepare('SELECT key, value FROM kv_store').all();
+                if (results && results.length > 0) {
+                  for (const row of results) {
+                    try {
+                      currentStore[row.key] = JSON.parse(row.value);
+                    } catch {
+                      currentStore[row.key] = row.value;
+                    }
+                  }
+                }
+              } catch (e) {
+                console.warn('D1 read error during merge:', e);
+              }
+            }
+            for (const [k, v] of memoryKV.entries()) {
+              if (currentStore[k] === undefined) currentStore[k] = v;
+            }
+
+            // 2. Perform safe, conflict-free multi-gadget merge
+            const merged = mergeCollections(currentStore, payload);
+
+            for (const [key, value] of Object.entries(merged)) {
               if (key.startsWith('_')) continue;
               memoryKV.set(key, value);
 
@@ -378,7 +487,13 @@ export default {
           return jsonResponse({ error: 'No file data received' }, 400);
         }
 
-        const ext = fileName.includes('.') ? fileName.split('.').pop() : (mimeType.includes('video') ? 'webm' : 'jpg');
+        // Security: Restrict maximum upload size to 50MB
+        if (fileBytes && fileBytes.byteLength > 50 * 1024 * 1024) {
+          return jsonResponse({ error: 'Fayl hajmi 50MB dan oshmasligi kerak (File size exceeds 50MB limit)' }, 413);
+        }
+
+        const rawExt = fileName.includes('.') ? fileName.split('.').pop().toLowerCase() : (mimeType.includes('video') ? 'webm' : 'jpg');
+        const ext = rawExt.replace(/[^a-z0-9]/g, '').slice(0, 8) || 'bin';
         const mediaId = `media_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
         // 1. If R2 bucket is bound, put into R2

@@ -857,7 +857,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1008,7 +1008,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1178,7 +1178,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1306,7 +1306,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1451,7 +1451,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1616,7 +1616,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1709,7 +1709,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1839,7 +1839,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
