@@ -62,6 +62,24 @@ const SUBJECT_ICONS = [
   { name: 'Sparkles', icon: Sparkles, label: 'Boshqa' },
 ];
 
+// Safe price display helper that never returns 'NaN so'm'
+const formatPriceDisplay = (val, defaultVal = "650,000 soʻm") => {
+  if (val === undefined || val === null || val === '') return defaultVal;
+  if (typeof val === 'number') {
+    return isNaN(val) ? defaultVal : `${val.toLocaleString()} soʻm`;
+  }
+  const str = String(val).trim();
+  if (str.toLowerCase().includes("so'm") || str.toLowerCase().includes("soʻm") || str.toLowerCase().includes("som")) {
+    return str;
+  }
+  const digitsOnly = str.replace(/[^\d]/g, '');
+  if (digitsOnly) {
+    const num = Number(digitsOnly);
+    return isNaN(num) ? defaultVal : `${num.toLocaleString()} soʻm`;
+  }
+  return str || defaultVal;
+};
+
 export default function WebsiteFullPageEditor({
   modalType,
   editingItem,
@@ -244,15 +262,15 @@ export default function WebsiteFullPageEditor({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
 
-              {/* Floating guidance badge */}
-              <div className="absolute top-3 left-3 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md text-white text-[11px] font-bold flex items-center gap-2 border border-white/20 pointer-events-none shadow-md">
-                <Move className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                <span>Sichqoncha bilan suring (Drag to pan)</span>
-              </div>
-
-              {/* Live coordinates chip */}
-              <div className="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md text-emerald-400 text-[11px] font-mono font-bold border border-emerald-500/30 pointer-events-none shadow-md">
-                Zoom: {Math.round(activeScale * 100)}% | X: {activeOffsetX > 0 ? `+${activeOffsetX}` : activeOffsetX}% | Y: {activeOffsetY > 0 ? `+${activeOffsetY}` : activeOffsetY}%
+              {/* Floating guidance and coordinates (Single responsive flex bar that never collides) */}
+              <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
+                <span className="px-2.5 py-1 rounded-xl bg-black/80 backdrop-blur-md text-white text-[10px] font-bold flex items-center gap-1.5 border border-white/20 shadow-md">
+                  <Move className="w-3 h-3 text-emerald-400 animate-pulse" />
+                  <span className="hidden xs:inline">Surish mumkin</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-xl bg-black/80 backdrop-blur-md text-emerald-400 text-[10px] font-mono font-bold border border-emerald-500/30 shadow-md">
+                  {Math.round(activeScale * 100)}% • X:{activeOffsetX > 0 ? `+${activeOffsetX}` : activeOffsetX}% Y:{activeOffsetY > 0 ? `+${activeOffsetY}` : activeOffsetY}%
+                </span>
               </div>
 
               {/* Asliga qaytarish button inside frame */}
@@ -546,7 +564,7 @@ export default function WebsiteFullPageEditor({
       </div>
 
       {/* 1. Fit Mode & Quick Position Presets */}
-      <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] font-bold">
         <div>
           <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-1">To‘ldirish usuli:</span>
           <div className="grid grid-cols-2 gap-1">
@@ -771,10 +789,74 @@ export default function WebsiteFullPageEditor({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50/70 dark:bg-gray-950 pb-20 -m-4 sm:-m-6 lg:-m-8 p-4 sm:p-6 lg:p-8 animate-in fade-in duration-200">
+    <div className="min-h-screen bg-gray-50/70 dark:bg-gray-950 pb-36 pb-[calc(9rem+env(safe-area-inset-bottom,0px))] -m-4 sm:-m-6 lg:-m-8 p-3 sm:p-6 lg:p-8 animate-in fade-in duration-200">
       {/* Top Header Sticky Navigation Bar */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-3xl p-4 sm:p-5 mb-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 mb-5 shadow-sm">
+        {/* Mobile View: Row 1 = [Ortga] + [Bekor] [Saqlash]; Row 2 = Icon + Title */}
+        <div className="sm:hidden space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              icon={ArrowLeft}
+              onClick={closeEditor}
+              className="!rounded-xl font-bold text-xs !py-1.5 !px-3"
+            >
+              Ortga
+            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={closeEditor}
+                className="!rounded-xl font-bold text-xs !py-1.5 !px-2.5"
+              >
+                Bekor qilish
+              </Button>
+              {editingItem?.id && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  icon={Trash2}
+                  onClick={() => setDeleteConfirmItem({
+                    type: modalType,
+                    id: editingItem.id,
+                    title: editingItem.title || editingItem.name || editingItem.caption || 'Ushbu element'
+                  })}
+                  className="!rounded-xl font-bold text-xs !py-1.5 !px-2.5"
+                />
+              )}
+              <Button
+                type="submit"
+                form={formId}
+                variant="primary"
+                size="sm"
+                icon={Save}
+                className="!rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 !py-1.5 !px-3"
+              >
+                Saqlash
+              </Button>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <ModuleIcon className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 truncate">
+                {currentConfig.moduleName} / {editingItem?.id ? 'Tahrirlash' : 'Yangi qo‘shish'}
+              </div>
+              <h1 className="text-sm font-black text-gray-900 dark:text-white truncate">
+                {currentConfig.title}
+              </h1>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop View (sm+): Wide Breadcrumbs + Action Buttons */}
+        <div className="hidden sm:flex items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <Button
               variant="outline"
@@ -800,13 +882,13 @@ export default function WebsiteFullPageEditor({
             </div>
           </div>
 
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={closeEditor}
-              className="!rounded-2xl font-bold flex-1 sm:flex-initial justify-center"
+              className="!rounded-2xl font-bold"
             >
               Bekor qilish
             </Button>
@@ -821,7 +903,7 @@ export default function WebsiteFullPageEditor({
                   id: editingItem.id,
                   title: editingItem.title || editingItem.name || editingItem.caption || 'Ushbu element'
                 })}
-                className="!rounded-2xl font-bold flex-1 sm:flex-initial justify-center"
+                className="!rounded-2xl font-bold"
               >
                 O‘chirish
               </Button>
@@ -832,7 +914,7 @@ export default function WebsiteFullPageEditor({
               variant="primary"
               size="sm"
               icon={Save}
-              className="!rounded-2xl font-bold shadow-md shadow-emerald-600/20 flex-1 sm:flex-initial justify-center"
+              className="!rounded-2xl font-bold shadow-md shadow-emerald-600/20"
             >
               Saqlash
             </Button>
@@ -844,8 +926,8 @@ export default function WebsiteFullPageEditor({
       {/* 1. SLAYD FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'slide' && (
-        <form id={formId} onSubmit={handleSaveSlide} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveSlide} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Sarlavha (Katta matn)</label>
               <Input name="title" defaultValue={editingItem?.title || ''} placeholder="Masalan: Kelajak kasblarini EDUCO bilan zabt eting" required />
@@ -860,7 +942,7 @@ export default function WebsiteFullPageEditor({
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Teg (Masalan: Darslardan lavhalar)</label>
                 <Input name="tag" defaultValue={editingItem?.tag || ''} required />
@@ -871,7 +953,7 @@ export default function WebsiteFullPageEditor({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Asosiy tugma matni</label>
                 <Input name="cta_text" defaultValue={editingItem?.cta_text || 'Kurslar katalogi'} />
@@ -882,7 +964,7 @@ export default function WebsiteFullPageEditor({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Qoʻshimcha tugma matni</label>
                 <Input name="secondary_cta_text" defaultValue={editingItem?.secondary_cta_text || ''} placeholder="Masalan: Biz haqimizda" />
@@ -910,7 +992,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -976,14 +1058,14 @@ export default function WebsiteFullPageEditor({
       {/* 2. KURS FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'course' && (
-        <form id={formId} onSubmit={handleSaveCourse} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveCourse} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Kurs nomi</label>
               <Input name="title" defaultValue={editingItem?.title || ''} placeholder="Masalan: Frontend Dasturlash (React & Next.js)" required />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Kategoriya / Yoʻnalish</label>
                 <Input name="category" defaultValue={editingItem?.category || 'Dasturlash'} required />
@@ -994,7 +1076,7 @@ export default function WebsiteFullPageEditor({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Darslar soni</label>
                 <Input type="number" name="lessons_count" defaultValue={editingItem?.lessons_count || editingItem?.lessonsCount || 48} required />
@@ -1005,7 +1087,7 @@ export default function WebsiteFullPageEditor({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Narxi (Soʻm)</label>
                 <Input type="number" name="price" defaultValue={editingItem?.price || 650000} required />
@@ -1035,7 +1117,7 @@ export default function WebsiteFullPageEditor({
             {/* Smart Image Upload Box */}
             {renderImageUploadBox('Kurs muqovasi (Fotosurat)', '16:9 nisbat tavsiya etiladi (Kattalashtirish va surish mumkin)', 'image')}
 
-            <div className="grid grid-cols-2 gap-4 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -1061,7 +1143,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1115,7 +1197,7 @@ export default function WebsiteFullPageEditor({
                   <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{editingItem?.description || 'Kurs haqida qisqacha tavsif...'}</p>
                   <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs font-bold">
                     <span className="text-emerald-600 dark:text-emerald-400">
-                      {editingItem?.price ? `${Number(editingItem.price).toLocaleString()} so'm` : '650,000 soʻm'}
+                      {formatPriceDisplay(editingItem?.price)}
                     </span>
                     <span className="text-gray-500 dark:text-gray-400">
                       {editingItem?.lessons_count || 48} ta dars
@@ -1134,8 +1216,8 @@ export default function WebsiteFullPageEditor({
       {/* 3. FAN FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'subject' && (
-        <form id={formId} onSubmit={handleSaveSubject} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveSubject} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Fan nomi</label>
               <Input name="name" defaultValue={editingItem?.name || editingItem?.title || ''} placeholder="Masalan: Matematika & Mantiq" required />
@@ -1152,7 +1234,7 @@ export default function WebsiteFullPageEditor({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Oʻquvchilar soni</label>
                 <Input type="number" name="students_count" defaultValue={editingItem?.students_count || 450} required />
@@ -1163,7 +1245,7 @@ export default function WebsiteFullPageEditor({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Tartib raqami (#)</label>
                 <Input type="number" name="order" defaultValue={editingItem?.order || 1} required />
@@ -1187,7 +1269,7 @@ export default function WebsiteFullPageEditor({
 
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Rang sxemasi (Gradient)</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[
                   { id: 'from-emerald-600 to-teal-700', label: 'Zumrad (Yashil)' },
                   { id: 'from-blue-600 to-cyan-700', label: 'Moviy (Koʻk)' },
@@ -1231,7 +1313,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1286,13 +1368,13 @@ export default function WebsiteFullPageEditor({
       {/* 4. USTOZ (TEACHER) FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'teacher' && (
-        <form id={formId} onSubmit={handleSaveTeacher} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveTeacher} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Toʻliq ismi va familiyasi</label>
               <Input name="name" defaultValue={editingItem?.name || editingItem?.full_name || ''} placeholder="Masalan: Abdulazizbek Orifjonov" required />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Lavozimi / Mutaxassisligi</label>
                 <Input name="role" defaultValue={editingItem?.role || 'Bosh Dasturlash Ustozi'} required />
@@ -1302,7 +1384,7 @@ export default function WebsiteFullPageEditor({
                 <Input name="experience" defaultValue={editingItem?.experience || editingItem?.experience_years || '5+ yil'} required />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Oʻtadigan fani</label>
                 <Input name="subject" defaultValue={editingItem?.subject || editingItem?.specialization || 'Frontend Dasturlash'} required />
@@ -1359,7 +1441,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1425,14 +1507,14 @@ export default function WebsiteFullPageEditor({
       {/* 5. YANGILIK (NEWS) FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'news' && (
-        <form id={formId} onSubmit={handleSaveNews} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveNews} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Yangilik sarlavhasi</label>
               <Input name="title" defaultValue={editingItem?.title || ''} placeholder="Masalan: Yangi dasturlash kursi qabuli boshlandi!" required />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Teg / Kategoriya</label>
                 <Input name="tag" defaultValue={editingItem?.tag || editingItem?.category || 'Yangiliklar'} required />
@@ -1443,7 +1525,7 @@ export default function WebsiteFullPageEditor({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Sana</label>
                 <Input type="date" name="published_at" defaultValue={editingItem?.published_at?.split('T')[0] || new Date().toISOString().split('T')[0]} required />
@@ -1478,7 +1560,7 @@ export default function WebsiteFullPageEditor({
             {/* Smart Image Upload Box */}
             {renderImageUploadBox('Yangilik fotosurati', '16:9 nisbat tavsiya etiladi (Kattalashtirish va surish mumkin)', 'image')}
 
-            <div className="grid grid-cols-2 gap-4 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -1504,7 +1586,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1573,14 +1655,14 @@ export default function WebsiteFullPageEditor({
       {/* 6. VIDEO FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'video' && (
-        <form id={formId} onSubmit={handleSaveVideo} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveVideo} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Video lavha nomi</label>
               <Input name="title" defaultValue={editingItem?.title || ''} placeholder="Masalan: Oʻquvchilarimiz bilan master-klass" required />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Kategoriya</label>
                 <Input name="category" defaultValue={editingItem?.category || 'Dars lavhalari'} required />
@@ -1669,7 +1751,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1727,14 +1809,14 @@ export default function WebsiteFullPageEditor({
       {/* 7. GALEREYA FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'gallery' && (
-        <form id={formId} onSubmit={handleSaveGalleryItem} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveGalleryItem} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Rasm sarlavhasi (Izoh / Caption)</label>
               <Input name="caption" defaultValue={editingItem?.caption || editingItem?.title || ''} placeholder="Masalan: Robototexnika laboratoriyasida amaliy mashgʻulot" required />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Teg / Boʻlim</label>
                 <Input name="tag" defaultValue={editingItem?.tag || 'Darslar'} required />
@@ -1762,7 +1844,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1828,14 +1910,14 @@ export default function WebsiteFullPageEditor({
       {/* 8. TESTIMONIAL FULL-PAGE EDITOR */}
       {/* ===================================================================== */}
       {modalType === 'testimonial' && (
-        <form id={formId} onSubmit={handleSaveTestimonial} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-7 space-y-5 bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <form id={formId} onSubmit={handleSaveTestimonial} className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 bg-white dark:bg-gray-900 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Oʻquvchi / Bitiruvchi ismi</label>
               <Input name="name" defaultValue={editingItem?.name || editingItem?.student_name || ''} placeholder="Masalan: Sardor Alimov" required />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
                 <label className="block text-xs font-bold mb-1 text-gray-700 dark:text-gray-300">Bitirgan kursi / Hozirgi lavozimi</label>
                 <Input name="role" defaultValue={editingItem?.role || 'Frontend bitiruvchisi, hozirda EPAM muhandisi'} required />
@@ -1892,7 +1974,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 sticky top-28 space-y-4 bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1970,6 +2052,28 @@ export default function WebsiteFullPageEditor({
           </div>
         </div>
       )}
+      {/* Mobile Sticky Quick Save Bar (Floats at bottom of phone for instant 1-tap save) */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 p-3 shadow-2xl flex items-center gap-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={closeEditor}
+          className="!rounded-xl font-bold text-xs flex-1 justify-center"
+        >
+          Bekor qilish
+        </Button>
+        <Button
+          type="submit"
+          form={formId}
+          variant="primary"
+          size="sm"
+          icon={Save}
+          className="!rounded-xl font-bold text-xs flex-1 justify-center shadow-md shadow-emerald-600/20"
+        >
+          Saqlash
+        </Button>
+      </div>
     </div>
   );
 }

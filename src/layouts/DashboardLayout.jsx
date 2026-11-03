@@ -558,14 +558,16 @@ export default function DashboardLayout({
                   <span className="hidden md:inline xl:hidden">Ilova</span>
                 </button>
 
-            {/* Language Switcher */}
-            <LanguageSelector />
+            {/* Language Switcher (Visible on sm+ screens; on mobile available in sidebar & user profile) */}
+            <div className="hidden sm:block shrink-0">
+              <LanguageSelector />
+            </div>
 
-            {/* Quick Theme Toggle */}
+            {/* Quick Theme Toggle (Visible on sm+ screens; on mobile available in sidebar & user profile) */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="h-10 w-10 inline-flex items-center justify-center rounded-xl text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
+              className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-xl text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white shrink-0"
               title={
                 theme === 'dark'
                   ? t('common.lightMode', 'Light Mode')
