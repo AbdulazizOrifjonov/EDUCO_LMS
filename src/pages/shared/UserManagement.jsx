@@ -573,7 +573,7 @@ export default function UserManagement() {
                 { key: 'all', label: t('users.allMembersTab', 'Barcha foydalanuvchilar'), icon: Users },
                 { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap },
                 { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), icon: UserCheck },
-                ...(currentUserRole === ROLES.OWNER || currentUserRole === 'owner'
+                ...(currentUserRole === ROLES.OWNER || currentUserRole === 'owner' || currentUserRole === ROLES.ADMIN || currentUserRole === 'admin'
                   ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), icon: Shield }]
                   : []),
               ];

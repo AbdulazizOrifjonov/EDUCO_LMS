@@ -52,6 +52,7 @@ import {
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { toast } from '@/components/ui/Toast';
 import websiteService, { getImageTransformStyle } from '@/services/websiteService';
 
@@ -406,7 +407,18 @@ export default function WebsiteManagementPage() {
     setCropperFile(null);
     if (!croppedDataUrl) return;
 
-    // Upload cropped image to server to maintain lightweight shared URL
+    // Immediately reset offsets and scale so the newly cropped image fits perfectly 1:1
+    setActiveScale(1);
+    setActiveOffsetX(0);
+    setActiveOffsetY(0);
+    setActiveFitMode('cover');
+    setActivePosition('center');
+
+    // Immediately set active image for instant live UI update (zero latency)
+    setActiveImage(croppedDataUrl);
+    toast.success('Rasm muvaffaqiyatli moslashtirildi va saqlandi!');
+
+    // Upload cropped image to server in background for cross-device persistence
     try {
       const res = await fetch(croppedDataUrl);
       const blob = await res.blob();
@@ -417,14 +429,9 @@ export default function WebsiteManagementPage() {
         const data = await uploadRes.json();
         if (data && data.url) {
           setActiveImage(data.url);
-          toast.success('Rasm muvaffaqiyatli moslashtirildi!');
-          return;
         }
       }
     } catch (_) {}
-
-    setActiveImage(croppedDataUrl);
-    toast.success('Rasm muvaffaqiyatli moslashtirildi!');
   };
 
   const handleVideoUpload = async (e) => {
@@ -483,273 +490,7 @@ export default function WebsiteManagementPage() {
     return match && match[2].length === 11 ? match[2] : '';
   };
 
-  // Real-time Image Zoom, Joystick / D-Pad (+) Pan, Fit & Position Controls
-  const renderImageControls = (label = "Fotosurat masshtabi va joylashuvi:") => (
-    <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 space-y-4 shadow-xs">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-black text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
-          <Sliders className="w-3.5 h-3.5 text-emerald-600" />
-          <span>{label}</span>
-        </span>
-        <button
-          type="button"
-          onClick={() => {
-            setActiveScale(1);
-            setActiveOffsetX(0);
-            setActiveOffsetY(0);
-            setActivePosition('center');
-            setActiveFitMode('cover');
-          }}
-          className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer flex items-center gap-1"
-          title="Barcha parametrlarni asliga qaytarish"
-        >
-          <RotateCcw className="w-2.5 h-2.5" />
-          <span>Asliga</span>
-        </button>
-      </div>
-
-      {/* 1. Fit Mode & Quick Position Presets */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] font-bold">
-        <div>
-          <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-1">To‘ldirish usuli:</span>
-          <div className="grid grid-cols-2 gap-1.5">
-            <button
-              type="button"
-              onClick={() => setActiveFitMode('cover')}
-              className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${
-                activeFitMode === 'cover'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                  : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
-              }`}
-            >
-              Qoplash (Cover)
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFitMode('contain')}
-              className={`py-1.5 px-2 rounded-xl border text-center transition-all cursor-pointer ${
-                activeFitMode === 'contain'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                  : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
-              }`}
-            >
-              Sig‘dirish (Contain)
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-1">Fokus pozitsiyasi:</span>
-          <div className="grid grid-cols-3 gap-1.5">
-            {[
-              { id: 'top', label: 'Tepa' },
-              { id: 'center', label: 'Markaz' },
-              { id: 'bottom', label: 'Past' },
-            ].map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setActivePosition(p.id)}
-                className={`py-1.5 rounded-xl border text-center transition-all cursor-pointer ${
-                  activePosition === p.id
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                    : 'bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Interactive Zoom Slider & Controls */}
-      <div className="space-y-1.5 pt-1 border-t border-gray-100 dark:border-gray-700/60">
-        <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
-          <span className="flex items-center gap-1">
-            <ZoomIn className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Kattalashtirish / Kichraytirish (Zoom):</span>
-          </span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-emerald-600 dark:text-emerald-400 font-mono text-xs font-black">{Math.round(activeScale * 100)}%</span>
-            <div className="flex items-center gap-0.5 ml-1 bg-gray-100 dark:bg-gray-700/80 rounded-lg p-0.5">
-              <button
-                type="button"
-                onClick={() => setActiveScale((prev) => Math.max(0.5, +(prev - 0.1).toFixed(2)))}
-                className="w-6 h-6 rounded flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-black text-sm active:scale-90"
-                title="10% kichraytirish"
-              >
-                -
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveScale((prev) => Math.min(2.5, +(prev + 0.1).toFixed(2)))}
-                className="w-6 h-6 rounded flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-black text-sm active:scale-90"
-                title="10% kattalashtirish"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </div>
-        <input
-          type="range"
-          min="0.5"
-          max="2.5"
-          step="0.05"
-          value={activeScale}
-          onChange={(e) => setActiveScale(parseFloat(e.target.value))}
-          className="w-full accent-emerald-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
-        />
-      </div>
-
-      {/* 3. JOYSTICK / D-PAD (+) CONTROLLER */}
-      <div className="pt-2 border-t border-gray-100 dark:border-gray-700/60 space-y-2.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-gray-800 dark:text-gray-200">
-            <Move className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
-            <span>Joystik (+) Surish boshqaruvi:</span>
-          </div>
-          <span className="font-mono text-[11px] font-black px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
-            X: {activeOffsetX > 0 ? `+${activeOffsetX}%` : `${activeOffsetX}%`} | Y: {activeOffsetY > 0 ? `+${activeOffsetY}%` : `${activeOffsetY}%`}
-          </span>
-        </div>
-
-        {/* The Joystick Cross (+) Housing */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 py-2">
-          {/* Authentic Cross Joystick (D-Pad) */}
-          <div className="relative w-44 h-44 shrink-0 flex items-center justify-center p-3 rounded-full bg-gradient-to-b from-gray-100 via-gray-50 to-gray-200 dark:from-gray-800 dark:via-gray-850 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-inner select-none">
-            {/* Up Button */}
-            <button
-              type="button"
-              onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
-              className="absolute top-2 w-12 h-11 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
-              title="Tepaga surish (-5%)"
-            >
-              <ArrowUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-              <span className="text-[8px] uppercase tracking-wider font-black">Tepa</span>
-            </button>
-
-            {/* Left Button */}
-            <button
-              type="button"
-              onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
-              className="absolute left-2 w-11 h-12 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
-              title="Chapga surish (-5%)"
-            >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              <span className="text-[8px] uppercase tracking-wider font-black">Chap</span>
-            </button>
-
-            {/* Center (Markaz / Reset) Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveOffsetX(0);
-                setActiveOffsetY(0);
-              }}
-              className="w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg flex flex-col items-center justify-center active:scale-85 transition-all cursor-pointer border-2 border-white dark:border-gray-800 ring-4 ring-emerald-500/20 group"
-              title="Markazga qaytarish (0%, 0%)"
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-white group-hover:scale-125 transition-transform" />
-              <span className="text-[7px] uppercase tracking-widest font-black mt-0.5">Markaz</span>
-            </button>
-
-            {/* Right Button */}
-            <button
-              type="button"
-              onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
-              className="absolute right-2 w-11 h-12 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
-              title="O‘ngga surish (+5%)"
-            >
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              <span className="text-[8px] uppercase tracking-wider font-black">O‘ng</span>
-            </button>
-
-            {/* Down Button */}
-            <button
-              type="button"
-              onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
-              className="absolute bottom-2 w-12 h-11 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-purple-500 hover:text-white dark:hover:bg-purple-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
-              title="Pastga surish (+5%)"
-            >
-              <span className="text-[8px] uppercase tracking-wider font-black">Past</span>
-              <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-            </button>
-          </div>
-
-          {/* Quick preset positions & Fine Sliders */}
-          <div className="flex-1 w-full space-y-2">
-            <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold">
-              Tezkor pozitsiyalar:
-            </div>
-            <div className="grid grid-cols-2 gap-1.5 text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => { setActiveOffsetX(0); setActiveOffsetY(-25); }}
-                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
-              >
-                <ArrowUp className="w-3 h-3 text-emerald-500" /> Tepa qism
-              </button>
-              <button
-                type="button"
-                onClick={() => { setActiveOffsetX(0); setActiveOffsetY(25); }}
-                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
-              >
-                <ArrowDown className="w-3 h-3 text-purple-500" /> Pastki qism
-              </button>
-              <button
-                type="button"
-                onClick={() => { setActiveOffsetX(-25); setActiveOffsetY(0); }}
-                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
-              >
-                <ArrowLeft className="w-3 h-3 text-blue-500" /> Chap tomon
-              </button>
-              <button
-                type="button"
-                onClick={() => { setActiveOffsetX(25); setActiveOffsetY(0); }}
-                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
-              >
-                <ArrowRight className="w-3 h-3 text-blue-500" /> O‘ng tomon
-              </button>
-            </div>
-
-            {/* Fine adjustment sliders */}
-            <div className="pt-1.5 space-y-1.5">
-              <div className="flex items-center justify-between text-[10px] font-bold text-gray-500">
-                <span>Gorizontal (X):</span>
-                <span className="font-mono text-blue-600 dark:text-blue-400">{activeOffsetX}%</span>
-              </div>
-              <input
-                type="range"
-                min="-50"
-                max="50"
-                step="1"
-                value={activeOffsetX}
-                onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
-                className="w-full accent-blue-600 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer"
-              />
-
-              <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 pt-0.5">
-                <span>Vertikal (Y):</span>
-                <span className="font-mono text-purple-600 dark:text-purple-400">{activeOffsetY}%</span>
-              </div>
-              <input
-                type="range"
-                min="-50"
-                max="50"
-                step="1"
-                value={activeOffsetY}
-                onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
-                className="w-full accent-purple-600 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const renderImageControls = () => null;
 
   // ---------------------------------------------------------------------------
   // CRUD Actions
@@ -760,18 +501,18 @@ export default function WebsiteManagementPage() {
     const imgUrl = activeImage || '';
     const itemData = {
       id: editingItem?.id,
-      title: fd.get('title'),
-      subtitle: fd.get('subtitle'),
-      tag: fd.get('tag'),
-      badge: fd.get('tag'),
-      primaryBtnText: fd.get('primaryBtnText'),
-      cta_text: fd.get('primaryBtnText'),
-      primaryBtnLink: fd.get('primaryBtnLink'),
-      cta_link: fd.get('primaryBtnLink'),
-      secondaryBtnText: fd.get('secondaryBtnText'),
-      secondary_cta_text: fd.get('secondaryBtnText'),
-      secondaryBtnLink: fd.get('secondaryBtnLink'),
-      secondary_cta_link: fd.get('secondaryBtnLink'),
+      title: fd.get('title') || '',
+      subtitle: fd.get('subtitle') || '',
+      tag: fd.get('tag') || 'Darslardan lavhalar',
+      badge: fd.get('tag') || 'Darslardan lavhalar',
+      primaryBtnText: fd.get('primaryBtnText') || 'Kurslarni ko‘rish',
+      cta_text: fd.get('primaryBtnText') || 'Kurslarni ko‘rish',
+      primaryBtnLink: fd.get('primaryBtnLink') || '#courses',
+      cta_link: fd.get('primaryBtnLink') || '#courses',
+      secondaryBtnText: fd.get('secondaryBtnText') || 'Biz haqimizda',
+      secondary_cta_text: fd.get('secondaryBtnText') || 'Biz haqimizda',
+      secondaryBtnLink: fd.get('secondaryBtnLink') || '#about',
+      secondary_cta_link: fd.get('secondaryBtnLink') || '#about',
       image: imgUrl,
       image_url: imgUrl,
       fit_mode: activeFitMode,
@@ -795,9 +536,9 @@ export default function WebsiteManagementPage() {
     const fd = new FormData(e.target);
     const syllabusRaw = fd.get('syllabus') || '';
     const imgUrl = activeImage || '';
-    const teacherName = fd.get('teacherName');
-    const lessonsCount = Number(fd.get('lessonsCount') || 36);
-    const isFeatured = fd.get('featured') === 'on';
+    const teacherName = fd.get('teacherName') || fd.get('teacher_name') || 'EDUCO Mentor';
+    const lessonsCount = Number(fd.get('lessonsCount') || fd.get('lessons_count') || 36);
+    const isFeatured = fd.get('featured') === 'on' || fd.get('is_popular') === 'on';
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
@@ -834,14 +575,16 @@ export default function WebsiteManagementPage() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const imgUrl = activeImage || '';
+    const count = Number(fd.get('coursesCount') || fd.get('courses_count') || 1);
     const itemData = {
       id: editingItem?.id,
-      name: fd.get('name'),
-      coursesCount: Number(fd.get('coursesCount') || 1),
-      courses_count: Number(fd.get('coursesCount') || 1),
+      name: fd.get('name') || fd.get('title') || '',
+      title: fd.get('name') || fd.get('title') || '',
+      coursesCount: count,
+      courses_count: count,
       icon_name: activeIcon,
       color: activeColor,
-      description: fd.get('description'),
+      description: fd.get('description') || '',
       image: imgUrl,
       image_url: imgUrl,
       fit_mode: activeFitMode,
@@ -862,15 +605,15 @@ export default function WebsiteManagementPage() {
   const handleSaveTeacher = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    const name = fd.get('name');
+    const name = fd.get('name') || fd.get('full_name') || '';
     const photo = activeImage || '';
-    const exp = fd.get('experience');
-    const subj = fd.get('subject');
+    const exp = fd.get('experience') || fd.get('experience_years') || '5+ yil';
+    const subj = fd.get('subject') || fd.get('specialization') || '';
     const itemData = {
       id: editingItem?.id,
       name: name,
       full_name: name,
-      role: fd.get('role'),
+      role: fd.get('role') || 'Ustoz',
       experience: exp,
       experience_years: exp,
       subject: subj,
@@ -885,7 +628,7 @@ export default function WebsiteManagementPage() {
       image_offset_x: activeOffsetX,
       image_offset_y: activeOffsetY,
       telegram: fd.get('telegram') || '',
-      bio: fd.get('bio'),
+      bio: fd.get('bio') || '',
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
       updated_at: new Date().toISOString(),
@@ -900,11 +643,16 @@ export default function WebsiteManagementPage() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const imgUrl = activeImage || '';
-    const desc = fd.get('description');
+    const caption = fd.get('caption') || fd.get('title') || 'Dars lavhasi';
+    const tag = fd.get('tag') || fd.get('category') || 'Darslar';
+    const order = Number(fd.get('order') || 1);
     const itemData = {
       id: editingItem?.id,
-      title: fd.get('title'),
-      category: fd.get('category'),
+      title: caption,
+      caption: caption,
+      tag: tag,
+      category: tag,
+      order: order,
       date: fd.get('date') || new Date().toISOString().split('T')[0],
       image: imgUrl,
       image_url: imgUrl,
@@ -913,8 +661,7 @@ export default function WebsiteManagementPage() {
       image_scale: activeScale,
       image_offset_x: activeOffsetX,
       image_offset_y: activeOffsetY,
-      description: desc,
-      caption: desc,
+      description: caption,
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
       updated_at: new Date().toISOString(),
@@ -929,13 +676,14 @@ export default function WebsiteManagementPage() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const thumb = activeImage || '';
-    const vUrl = activeVideoUrl || fd.get('videoUrl');
+    const vUrl = activeVideoUrl || fd.get('video_url') || fd.get('videoUrl') || '';
     const ytId = getYouTubeId(vUrl);
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
-      category: fd.get('category'),
+      category: fd.get('category') || 'Dars lavhalari',
       duration: fd.get('duration') || '03:00',
+      author: fd.get('author') || 'EDUCO Media',
       thumbnail: thumb,
       image: thumb,
       thumbnail_url: thumb,
@@ -947,7 +695,7 @@ export default function WebsiteManagementPage() {
       image_scale: activeScale,
       image_offset_x: activeOffsetX,
       image_offset_y: activeOffsetY,
-      description: fd.get('description'),
+      description: fd.get('description') || '',
       isActive: fd.get('isActive') === 'on',
       is_active: fd.get('isActive') === 'on',
       updated_at: new Date().toISOString(),
@@ -962,15 +710,20 @@ export default function WebsiteManagementPage() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const imgUrl = activeImage || '';
-    const sum = fd.get('summary');
-    const dt = fd.get('date') || new Date().toISOString().split('T')[0];
+    const sum = fd.get('summary') || '';
+    const dt = fd.get('published_at') || fd.get('date') || new Date().toISOString().split('T')[0];
+    const category = fd.get('tag') || fd.get('category') || 'Yangiliklar';
+    const readTime = fd.get('read_time') || fd.get('readTime') || '3 daqiqa';
     const itemData = {
       id: editingItem?.id,
       title: fd.get('title'),
-      category: fd.get('category') || 'Yangiliklar',
+      category: category,
+      tag: category,
+      author: fd.get('author') || 'EDUCO Matbuot xizmati',
       date: dt,
       published_at: dt,
-      readTime: fd.get('readTime') || '3 daqiqa',
+      readTime: readTime,
+      read_time: readTime,
       image: imgUrl,
       cover_image: imgUrl,
       image_url: imgUrl,
@@ -996,11 +749,15 @@ export default function WebsiteManagementPage() {
     e.preventDefault();
     const fd = new FormData(e.target);
     const avatar = activeImage || '';
+    const content = fd.get('content') || fd.get('quote') || '';
     const itemData = {
       id: editingItem?.id,
-      name: fd.get('name'),
-      role: fd.get('role'),
-      quote: fd.get('quote'),
+      name: fd.get('name') || fd.get('author') || 'O‘quvchi',
+      author: fd.get('name') || fd.get('author') || 'O‘quvchi',
+      role: fd.get('role') || 'O‘quvchi',
+      quote: content,
+      content: content,
+      date: fd.get('date') || new Date().toISOString().split('T')[0],
       rating: Number(activeRating || 5),
       avatar: avatar,
       image: avatar,
@@ -1068,6 +825,9 @@ export default function WebsiteManagementPage() {
   const confirmDelete = () => {
     if (!deleteConfirmItem) return;
     const { type, id } = deleteConfirmItem;
+    if (localStore && typeof localStore._recordDeletedId === 'function' && id) {
+      localStore._recordDeletedId(id);
+    }
     const targetType = type || modalType;
     if (targetType === 'slide') websiteService.deleteHeroSlide(id);
     if (targetType === 'course') websiteService.deleteWebsiteCourse(id);
@@ -2410,27 +2170,65 @@ export default function WebsiteManagementPage() {
         </Card>
       )}
 
-      {/* Inline Delete Confirmation Banner (Zero Modals) */}
+      {/* High-Contrast Delete Confirmation Modal Overlay */}
       {deleteConfirmItem && (
-        <div className="p-4 my-6 rounded-2xl border-2 border-red-500/50 bg-red-500/10 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-200">
-          <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
-            <Trash2 className="w-6 h-6 shrink-0" />
-            <div>
-              <div className="font-bold text-base">Haqiqatan ham o‘chirmoqchimisiz?</div>
-              <div className="text-xs text-surface-600 dark:text-surface-300">
-                "{deleteConfirmItem.title || deleteConfirmItem.name || 'Ushbu element'}" saytdan butunlay o‘chiriladi. Bu amal saytdan darhol olib tashlanadi.
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-900 border border-red-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3.5 text-red-600 dark:text-red-400">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/70 flex items-center justify-center shrink-0">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-gray-900 dark:text-white">
+                  O‘chirishni tasdiqlaysizmi?
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Bu amalni qaytarib bo‘lmaydi
+                </p>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button variant="outline" size="sm" onClick={() => setDeleteConfirmItem(null)}>
-              Bekor qilish
-            </Button>
-            <Button variant="danger" size="sm" onClick={confirmDelete} icon={Trash2}>
-              Ha, butunlay o‘chirilsin
-            </Button>
+            <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800/60 p-3 rounded-2xl border border-gray-200/60 dark:border-gray-700/60">
+              <span className="font-bold text-gray-900 dark:text-white">
+                "{deleteConfirmItem.title || deleteConfirmItem.name || 'Ushbu element'}"
+              </span>{' '}
+              saytdan butunlay o‘chiriladi va darhol olib tashlanadi.
+            </p>
+            <div className="flex items-center justify-end gap-2.5 pt-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDeleteConfirmItem(null)}
+                className="!rounded-xl font-bold flex-1 sm:flex-initial"
+              >
+                Bekor qilish
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={confirmDelete}
+                icon={Trash2}
+                className="!rounded-xl font-bold flex-1 sm:flex-initial"
+              >
+                Ha, butunlay o‘chirilsin
+              </Button>
+            </div>
           </div>
         </div>
+      )}
+      {/* Universal Telegram-style Image Cropper Modal */}
+      {cropperFile && (
+        <ImageCropperModal
+          isOpen={Boolean(cropperFile)}
+          imageFile={cropperFile instanceof File ? cropperFile : null}
+          imageSrc={typeof cropperFile === 'string' ? cropperFile : null}
+          aspectRatio={cropperAspectRatio || '16:9'}
+          allowAspectChange={true}
+          onClose={() => setCropperFile(null)}
+          onCrop={handleCropComplete}
+          onCropComplete={handleCropComplete}
+          title="Fotosuratni kadrga moslashtirish"
+          subtitle="Rasmni suring, kattalashtiring va kadr nisbatini tanlang"
+        />
       )}
     </div>
   );

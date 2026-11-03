@@ -29,15 +29,29 @@ export default function Dropdown({
   // Viewport safety check: prevent dropdown menu from ever clipping off screen edges on mobile
   useEffect(() => {
     if (isOpen && menuRef.current) {
-      const rect = menuRef.current.getBoundingClientRect();
-      const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 400;
-      if (rect.left < 8) {
-        menuRef.current.style.left = '0px';
-        menuRef.current.style.right = 'auto';
-      } else if (rect.right > viewportWidth - 8) {
-        menuRef.current.style.right = '0px';
-        menuRef.current.style.left = 'auto';
-      }
+      menuRef.current.style.left = '';
+      menuRef.current.style.right = '';
+      menuRef.current.style.transform = '';
+
+      const frameId = requestAnimationFrame(() => {
+        if (!menuRef.current) return;
+        const rect = menuRef.current.getBoundingClientRect();
+        const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 360;
+        const margin = 12;
+
+        let shiftX = 0;
+        if (rect.left < margin) {
+          shiftX = margin - rect.left;
+        } else if (rect.right > viewportWidth - margin) {
+          shiftX = (viewportWidth - margin) - rect.right;
+        }
+
+        if (shiftX !== 0) {
+          menuRef.current.style.transform = `translateX(${shiftX}px)`;
+        }
+      });
+
+      return () => cancelAnimationFrame(frameId);
     }
   }, [isOpen]);
 

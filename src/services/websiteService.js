@@ -1035,17 +1035,14 @@ class WebsiteService {
       Object.entries(defaults).forEach(([key, defaultVal]) => {
         let hasData = false;
         if (localStore && localStore.memoryStore && localStore.memoryStore[key] !== undefined && localStore.memoryStore[key] !== null) {
-          const val = localStore.memoryStore[key];
-          if (!Array.isArray(val) || val.length > 0) {
-            hasData = true;
-          }
+          hasData = true;
         }
         if (!hasData) {
           try {
             const raw = localStorage.getItem(key);
             if (raw && raw !== 'null' && raw !== 'undefined') {
               const parsed = JSON.parse(raw);
-              if (parsed && (!Array.isArray(parsed) || parsed.length > 0)) {
+              if (parsed !== undefined && parsed !== null) {
                 hasData = true;
                 if (localStore && localStore.memoryStore) {
                   localStore.memoryStore[key] = parsed;
@@ -1084,11 +1081,11 @@ class WebsiteService {
     }
   }
 
-  _set(key, value) {
+  _set(key, value, deletedId = null) {
     if (typeof window === 'undefined') return;
     try {
       if (localStore && typeof localStore.setItem === 'function') {
-        localStore.setItem(key, value);
+        localStore.setItem(key, value, deletedId);
       } else {
         localStorage.setItem(key, JSON.stringify(value));
       }
@@ -1143,7 +1140,7 @@ class WebsiteService {
     const list = this.getSlides(false);
     let updated;
     if (norm.id) {
-      const idx = list.findIndex((s) => s.id === norm.id);
+      const idx = list.findIndex((s) => String(s.id) === String(norm.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...norm, image: norm.image, image_url: norm.image_url };
         updated = list[idx];
@@ -1167,8 +1164,11 @@ class WebsiteService {
   }
 
   deleteSlide(id) {
-    const list = this.getSlides(false).filter((s) => s.id !== id);
-    this._set(WEBSITE_KEYS.SLIDES, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getSlides(false).filter((s) => String(s.id) !== String(id));
+    this._set(WEBSITE_KEYS.SLIDES, list, id);
     return true;
   }
 
@@ -1185,7 +1185,7 @@ class WebsiteService {
     const list = this.getCourses(false);
     let updated;
     if (norm.id) {
-      const idx = list.findIndex((c) => c.id === norm.id);
+      const idx = list.findIndex((c) => String(c.id) === String(norm.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...norm };
         updated = list[idx];
@@ -1209,8 +1209,11 @@ class WebsiteService {
   }
 
   deleteCourse(id) {
-    const list = this.getCourses(false).filter((c) => c.id !== id);
-    this._set(WEBSITE_KEYS.COURSES, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getCourses(false).filter((c) => String(c.id) !== String(id));
+    this._set(WEBSITE_KEYS.COURSES, list, id);
     return true;
   }
 
@@ -1230,7 +1233,7 @@ class WebsiteService {
     const list = this.getSubjects(false);
     let updated;
     if (subjectData.id) {
-      const idx = list.findIndex((s) => s.id === subjectData.id);
+      const idx = list.findIndex((s) => String(s.id) === String(subjectData.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...subjectData };
         updated = list[idx];
@@ -1254,8 +1257,11 @@ class WebsiteService {
   }
 
   deleteSubject(id) {
-    const list = this.getSubjects(false).filter((s) => s.id !== id);
-    this._set(WEBSITE_KEYS.SUBJECTS, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getSubjects(false).filter((s) => String(s.id) !== String(id));
+    this._set(WEBSITE_KEYS.SUBJECTS, list, id);
     return true;
   }
 
@@ -1272,7 +1278,7 @@ class WebsiteService {
     const list = this.getTeachers(false);
     let updated;
     if (norm.id) {
-      const idx = list.findIndex((t) => t.id === norm.id);
+      const idx = list.findIndex((t) => String(t.id) === String(norm.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...norm, photo: norm.photo, photo_url: norm.photo, image_url: norm.photo };
         updated = list[idx];
@@ -1296,8 +1302,11 @@ class WebsiteService {
   }
 
   deleteTeacher(id) {
-    const list = this.getTeachers(false).filter((t) => t.id !== id);
-    this._set(WEBSITE_KEYS.TEACHERS, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getTeachers(false).filter((t) => String(t.id) !== String(id));
+    this._set(WEBSITE_KEYS.TEACHERS, list, id);
     return true;
   }
 
@@ -1314,7 +1323,7 @@ class WebsiteService {
     const list = this.getGallery(false);
     let updated;
     if (norm.id) {
-      const idx = list.findIndex((g) => g.id === norm.id);
+      const idx = list.findIndex((g) => String(g.id) === String(norm.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...norm };
         updated = list[idx];
@@ -1338,8 +1347,11 @@ class WebsiteService {
   }
 
   deleteGalleryItem(id) {
-    const list = this.getGallery(false).filter((g) => g.id !== id);
-    this._set(WEBSITE_KEYS.GALLERY, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getGallery(false).filter((g) => String(g.id) !== String(id));
+    this._set(WEBSITE_KEYS.GALLERY, list, id);
     return true;
   }
 
@@ -1356,7 +1368,7 @@ class WebsiteService {
     const list = this.getVideos(false);
     let updated;
     if (norm.id) {
-      const idx = list.findIndex((v) => v.id === norm.id);
+      const idx = list.findIndex((v) => String(v.id) === String(norm.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...norm };
         updated = list[idx];
@@ -1380,8 +1392,11 @@ class WebsiteService {
   }
 
   deleteVideo(id) {
-    const list = this.getVideos(false).filter((v) => v.id !== id);
-    this._set(WEBSITE_KEYS.VIDEOS, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getVideos(false).filter((v) => String(v.id) !== String(id));
+    this._set(WEBSITE_KEYS.VIDEOS, list, id);
     return true;
   }
 
@@ -1398,7 +1413,7 @@ class WebsiteService {
     const list = this.getNews(false);
     let updated;
     if (norm.id) {
-      const idx = list.findIndex((n) => n.id === norm.id);
+      const idx = list.findIndex((n) => String(n.id) === String(norm.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...norm };
         updated = list[idx];
@@ -1423,14 +1438,17 @@ class WebsiteService {
   }
 
   deleteNews(id) {
-    const list = this.getNews(false).filter((n) => n.id !== id);
-    this._set(WEBSITE_KEYS.NEWS, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getNews(false).filter((n) => String(n.id) !== String(id));
+    this._set(WEBSITE_KEYS.NEWS, list, id);
     return true;
   }
 
   incrementNewsViews(id) {
     const list = this.getNews(false);
-    const idx = list.findIndex((n) => n.id === id);
+    const idx = list.findIndex((n) => String(n.id) === String(id));
     if (idx >= 0) {
       list[idx].views = (list[idx].views || 0) + 1;
       this._set(WEBSITE_KEYS.NEWS, list);
@@ -1449,7 +1467,7 @@ class WebsiteService {
     const list = this.getTestimonials(false);
     let updated;
     if (norm.id) {
-      const idx = list.findIndex((t) => t.id === norm.id);
+      const idx = list.findIndex((t) => String(t.id) === String(norm.id));
       if (idx >= 0) {
         list[idx] = { ...list[idx], ...norm };
         updated = list[idx];
@@ -1473,8 +1491,11 @@ class WebsiteService {
   }
 
   deleteTestimonial(id) {
-    const list = this.getTestimonials(false).filter((t) => t.id !== id);
-    this._set(WEBSITE_KEYS.TESTIMONIALS, list);
+    if (localStore && typeof localStore._recordDeletedId === 'function') {
+      localStore._recordDeletedId(id);
+    }
+    const list = this.getTestimonials(false).filter((t) => String(t.id) !== String(id));
+    this._set(WEBSITE_KEYS.TESTIMONIALS, list, id);
     return true;
   }
 

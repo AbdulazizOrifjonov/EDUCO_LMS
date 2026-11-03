@@ -63,7 +63,7 @@ export async function getUsers({
         });
 
         if (currentUserRole === 'admin') {
-          users = users.filter((u) => u.role === 'teacher' || u.role === 'student');
+          users = users.filter((u) => u.role !== 'owner');
         } else if (currentUserRole === 'teacher') {
           users = users.filter((u) => u.role === 'student');
         }
@@ -95,7 +95,7 @@ export async function getUsers({
   }
 
   if (currentUserRole === 'admin') {
-    list = list.filter((u) => u.role === 'teacher' || u.role === 'student');
+    list = list.filter((u) => u.role !== 'owner');
   } else if (currentUserRole === 'teacher') {
     list = list.filter((u) => u.role === 'student');
   }

@@ -144,15 +144,16 @@ class LocalStore {
   }
 
   ensureCleanStart() {
-    // SAFE STARTUP: Never wipe production data!
-    // Simply ensure that if localStorage has never had any users key at all,
-    // we provide initial Abbosbek Owner fallback so root login is always guaranteed.
+    // SAFE STARTUP: Never overwrite production or server data with dummy arrays!
+    // Simply hydrate memoryStore if localStorage already has data, otherwise let incoming
+    // server data from Cloudflare D1 arrive cleanly.
     try {
       if (typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function') {
         const existingUsers = window.localStorage.getItem(STORAGE_KEYS.USERS);
-        if (!existingUsers) {
-          window.localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(INITIAL_USERS));
-          this.memoryStore[STORAGE_KEYS.USERS] = INITIAL_USERS;
+        if (existingUsers) {
+          try {
+            this.memoryStore[STORAGE_KEYS.USERS] = JSON.parse(existingUsers);
+          } catch (_) {}
         }
       }
     } catch (_) {}
@@ -342,7 +343,10 @@ class LocalStore {
     } catch (_) {}
   }
 
-  setItem(key, value) {
+  setItem(key, value, deletedId = null) {
+    if (deletedId) {
+      this._recordDeletedId(deletedId);
+    }
     if (!this._pendingOutbox) this._pendingOutbox = new Set();
     this._pendingOutbox.add(key);
     this.memoryStore[key] = value;
@@ -350,10 +354,10 @@ class LocalStore {
       if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
         window.localStorage.setItem(key, JSON.stringify(value));
       }
-      this.pushToServer({ [key]: value }).catch(() => {});
-      this.broadcastToCloud(key, value);
+      this.pushToServer({ [key]: value, deletedId: deletedId || null }).catch(() => {});
+      this.broadcastToCloud(key, value, deletedId);
       if (typeof window !== 'undefined' && window.__educoBroadcastChannel) {
-        window.__educoBroadcastChannel.postMessage({ type: 'STORE_UPDATE', key, value });
+        window.__educoBroadcastChannel.postMessage({ type: 'STORE_UPDATE', key, value, deletedId });
       }
     } catch (e) {
       // In-memory fallback is already active
@@ -551,6 +555,11 @@ class LocalStore {
             detail: serverData,
           })
         );
+        window.dispatchEvent(new CustomEvent('educo-website-update'));
+        window.dispatchEvent(new CustomEvent('educo-users-update', { detail: { users: serverData[STORAGE_KEYS.USERS] } }));
+        try {
+          window.dispatchEvent(new Event('storage'));
+        } catch (_) {}
       }
     }
   }
@@ -845,7 +854,12 @@ class LocalStore {
     });
 
     if (needsCleanup) {
-      this.setItem(STORAGE_KEYS.USERS, normalized);
+      this.memoryStore[STORAGE_KEYS.USERS] = normalized;
+      try {
+        if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
+          window.localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(normalized));
+        }
+      } catch (_) {}
     }
 
     return normalized;
@@ -2386,17 +2400,29 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
 
   // 5. Connect to SSE Realtime stream if available (dev / supported servers)
   if (typeof window !== 'undefined' && typeof EventSource !== 'undefined') {
-    try {
-      const es = new EventSource('/api/realtime');
-      es.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data?.type === 'SYNC' && data?.payload) {
-            localStore.applyIncomingData(data.payload);
-          }
-        } catch (_) {}
-      };
-    } catch (_) {}
+    let sseTimeout = null;
+    const connectSSE = () => {
+      try {
+        const es = new EventSource('/api/realtime');
+        es.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data?.type === 'SYNC' && data?.payload) {
+              if (data.deletedId) {
+                localStore._recordDeletedId(data.deletedId);
+              }
+              localStore.applyIncomingData(data.payload);
+            }
+          } catch (_) {}
+        };
+        es.onerror = () => {
+          es.close();
+          clearTimeout(sseTimeout);
+          sseTimeout = setTimeout(connectSSE, 3000);
+        };
+      } catch (_) {}
+    };
+    connectSSE();
   }
 }
 

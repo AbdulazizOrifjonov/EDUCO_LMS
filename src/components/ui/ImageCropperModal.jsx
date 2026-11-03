@@ -38,6 +38,7 @@ export default function ImageCropperModal({
   imageSrc = null,
   onClose,
   onCrop,
+  onCropComplete,
   aspectRatio = '1:1',
   allowAspectChange = true,
   title = 'Rasmni moslashtirish',
@@ -482,23 +483,51 @@ export default function ImageCropperModal({
       // Export as high quality JPEG
       const croppedDataUrl = exportCanvas.toDataURL('image/jpeg', 0.92);
 
-      exportCanvas.toBlob(
-        (blob) => {
-          let croppedFile = null;
-          if (blob) {
-            croppedFile = new File([blob], 'cropped_image.jpg', { type: 'image/jpeg' });
-          }
+      const deliverResult = (dataUrl, file) => {
+        try {
           if (onCrop) {
-            onCrop(croppedDataUrl, croppedFile);
+            onCrop(dataUrl, file);
           }
-          setIsProcessing(false);
-        },
-        'image/jpeg',
-        0.92
-      );
+          if (onCropComplete) {
+            onCropComplete(dataUrl, file);
+          }
+        } catch (callErr) {
+          console.error('ImageCropperModal: Error in onCrop callback:', callErr);
+        }
+        setIsProcessing(false);
+        if (onClose) {
+          onClose();
+        }
+      };
+
+      try {
+        exportCanvas.toBlob(
+          (blob) => {
+            let croppedFile = null;
+            if (blob) {
+              croppedFile = new File([blob], 'cropped_image.jpg', { type: 'image/jpeg' });
+            }
+            deliverResult(croppedDataUrl, croppedFile);
+          },
+          'image/jpeg',
+          0.92
+        );
+      } catch (blobErr) {
+        console.warn('ImageCropperModal: toBlob fallback to dataURL:', blobErr);
+        deliverResult(croppedDataUrl, null);
+      }
     } catch (err) {
       console.error('Failed to export cropped image:', err);
       setIsProcessing(false);
+      if (sourceUrl) {
+        try {
+          if (onCrop) onCrop(sourceUrl, null);
+          if (onCropComplete) onCropComplete(sourceUrl, null);
+        } catch (_) {}
+      }
+      if (onClose) {
+        onClose();
+      }
     }
   };
 

@@ -264,6 +264,14 @@ export const useAuthStore = create((set, get) => ({
           return true;
         }
 
+        // Full name / First name matching (case-insensitive, whitespace-trimmed, and underscore-tolerant)
+        const uFullName = (u.fullName || u.full_name || `${u.first_name || ''} ${u.last_name || ''}`).toLowerCase().trim();
+        const uFullNameClean = uFullName.replace(/\s+/g, ' ');
+        const inputClean = normalizedInput.replace(/\s+/g, ' ');
+        if (uFullNameClean && (uFullNameClean === inputClean || uFullNameClean.replace(/\s+/g, '_') === inputClean)) {
+          return true;
+        }
+
         if (phoneSubscriberDigits) {
           const getSubDigits = (p) => {
             if (!p) return '';
@@ -288,14 +296,23 @@ export const useAuthStore = create((set, get) => ({
 
       // Role Alias Fallback:
       // If user logs in with role alias (e.g. 'admin', 'teacher', 'student') from quick demo buttons or role names,
-      // automatically match to the first active user having that role!
+      // match the active user whose password matches entered password, or the primary user!
       if (!matchedUser) {
+        let candidateRole = null;
         if (normalizedInput === 'admin' || normalizedInput === 'administrator' || normalizedInput === 'admin@educo.app') {
-          matchedUser = allUsers.find((u) => (u.role === 'admin' || u.role === 'administrator') && u.is_active !== false);
+          candidateRole = 'admin';
         } else if (normalizedInput === 'teacher' || normalizedInput === 'ustoz' || normalizedInput === 'oqituvchi' || normalizedInput === 'o‘qituvchi' || normalizedInput === 'teacher@educo.app') {
-          matchedUser = allUsers.find((u) => u.role === 'teacher' && u.is_active !== false);
+          candidateRole = 'teacher';
         } else if (normalizedInput === 'student' || normalizedInput === 'oquvchi' || normalizedInput === 'o‘quvchi' || normalizedInput === 'student@educo.app') {
-          matchedUser = allUsers.find((u) => u.role === 'student' && u.is_active !== false);
+          candidateRole = 'student';
+        }
+
+        if (candidateRole) {
+          const candidates = allUsers.filter((u) => {
+            if (candidateRole === 'admin') return (u.role === 'admin' || u.role === 'administrator') && u.is_active !== false;
+            return u.role === candidateRole && u.is_active !== false;
+          });
+          matchedUser = candidates.find((u) => String(u.password || '').trim() === enteredPwd) || candidates[0];
         }
       }
 
@@ -456,12 +473,6 @@ export const useAuthStore = create((set, get) => ({
             // Clean up any strip like "(Owner)" in full_name
             if (parsed.profile.full_name) {
               parsed.profile.full_name = parsed.profile.full_name.replace(/\s*\(Owner\)\s*/i, '').trim();
-            }
-            if (parsed.profile.avatar_url) {
-              localStore.saveUser({
-                id: normId,
-                avatar_url: parsed.profile.avatar_url,
-              });
             }
             const dbUsers = localStore.getUsers();
             const dbUser = dbUsers.find((u) => u.id === normId);

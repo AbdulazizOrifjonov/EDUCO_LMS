@@ -29,6 +29,65 @@ function syncStoragePlugin() {
     }
   };
 
+  // Smart multi-client collection merge: unions by ID, preserves newest edits, enforces deletes
+  const mergeCollections = (current = {}, incoming = {}) => {
+    const merged = { ...current };
+    const deletedSet = new Set(Array.isArray(current._deleted_ids) ? current._deleted_ids : []);
+    if (incoming.deletedId) deletedSet.add(String(incoming.deletedId));
+    if (incoming._deleted_ids && Array.isArray(incoming._deleted_ids)) {
+      incoming._deleted_ids.forEach((id) => deletedSet.add(String(id)));
+    }
+    merged._deleted_ids = Array.from(deletedSet);
+
+    for (const [key, val] of Object.entries(incoming)) {
+      if (key === 'deletedId' || key === '_deleted_ids') continue;
+
+      if (Array.isArray(val)) {
+        const existingList = Array.isArray(current[key]) ? current[key] : [];
+        const map = new Map();
+
+        // 1. Populate existing server records (excluding known deleted IDs)
+        existingList.forEach((item) => {
+          if (!item || typeof item !== 'object') return;
+          const id = String(item.id || item.username || '');
+          if (id && !deletedSet.has(id)) {
+            map.set(id, item);
+          }
+        });
+
+        // 2. Upsert incoming records from client
+        val.forEach((item) => {
+          if (!item || typeof item !== 'object') return;
+          const id = String(item.id || item.username || '');
+          if (!id || deletedSet.has(id)) return;
+
+          if (!map.has(id)) {
+            map.set(id, item);
+          } else {
+            const old = map.get(id);
+            const oldTs = new Date(old.updated_at || old.created_at || 0).getTime();
+            const newTs = new Date(item.updated_at || item.created_at || 0).getTime();
+            if (newTs >= oldTs) {
+              map.set(id, { ...old, ...item });
+            }
+          }
+        });
+
+        // 3. Clean list filtered against deletedSet
+        merged[key] = Array.from(map.values()).filter((item) => {
+          const id = String(item.id || item.username || '');
+          return !deletedSet.has(id);
+        });
+      } else if (val && typeof val === 'object') {
+        merged[key] = { ...(current[key] || {}), ...val };
+      } else {
+        merged[key] = val;
+      }
+    }
+
+    return merged;
+  };
+
   const broadcastRealtime = (payload) => {
     const msg = `data: ${JSON.stringify(payload)}\n\n`;
     sseClients.forEach((client) => {
@@ -43,8 +102,8 @@ function syncStoragePlugin() {
   return {
     name: 'sync-storage-plugin',
     configureServer(server) {
-      // 1. Realtime Server-Sent Events (SSE) Stream
-      server.middlewares.use('/api/realtime-stream', (req, res, next) => {
+      // 1. Realtime Server-Sent Events (SSE) Stream (handles both /api/realtime and /api/realtime-stream)
+      const handleRealtimeSSE = (req, res, next) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache, no-transform');
         res.setHeader('Connection', 'keep-alive');
@@ -70,7 +129,9 @@ function syncStoragePlugin() {
           clearInterval(keepAlive);
           sseClients.delete(res);
         });
-      });
+      };
+      server.middlewares.use('/api/realtime', handleRealtimeSSE);
+      server.middlewares.use('/api/realtime-stream', handleRealtimeSSE);
 
       // 2. Chat / Media Upload Endpoint
       server.middlewares.use('/api/chat/upload', (req, res, next) => {
@@ -221,16 +282,24 @@ function syncStoragePlugin() {
         }
 
         if (req.method === 'GET') {
-          const db = getDb();
+          const db = getDb() || {};
+          const bodyStr = JSON.stringify(db);
+          // Simple hash-based ETag for HTTP 304 speed
+          let hash = 0;
+          for (let i = 0; i < Math.min(bodyStr.length, 2000); i++) {
+            hash = ((hash << 5) - hash) + bodyStr.charCodeAt(i);
+            hash |= 0;
+          }
+          const etag = `W/"${Math.abs(hash)}-${bodyStr.length}"`;
+          if (req.headers['if-none-match'] === etag) {
+            res.statusCode = 304;
+            res.end();
+            return;
+          }
+          res.setHeader('ETag', etag);
+          res.setHeader('Cache-Control', 'no-cache');
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(db || {}));
-          return;
-        }
-
-        if (req.method === 'GET') {
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ status: 'online', service: 'EDUCO SMS Gateway Proxy' }));
+          res.end(bodyStr);
           return;
         }
 
@@ -243,9 +312,9 @@ function syncStoragePlugin() {
             try {
               const incoming = JSON.parse(body || '{}');
               const current = getDb() || {};
-              const merged = { ...current, ...incoming };
+              const merged = mergeCollections(current, incoming);
               saveDb(merged);
-              broadcastRealtime({ type: 'SYNC', payload: incoming, timestamp: Date.now() });
+              broadcastRealtime({ type: 'SYNC', payload: merged, timestamp: Date.now() });
               res.setHeader('Content-Type', 'application/json');
               res.end(JSON.stringify({ success: true, data: merged }));
             } catch (err) {
