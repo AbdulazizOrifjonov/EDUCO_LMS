@@ -33,51 +33,56 @@ export default function PublicAnimatedBackground() {
         }`}
       />
 
-      {/* 2. Interactive Animated Gradient Ambient Orbs (GPU Accelerated) */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* 2. Interactive Animated Gradient Ambient Orbs (GPU Accelerated with Lightweight Composite) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ contain: 'paint' }}>
         {/* Orb 1: Top-Left (Tun: Emerald Glow, Kun: Royal Blue Glow) */}
         <div
-          className={`absolute -top-32 -left-32 w-[34rem] sm:w-[48rem] h-[34rem] sm:h-[48rem] rounded-full blur-[110px] sm:blur-[140px] opacity-75 animate-bg-orb-1 transition-colors duration-700 ${
+          className={`absolute -top-32 -left-32 w-[30rem] sm:w-[42rem] h-[30rem] sm:h-[42rem] rounded-full blur-[65px] sm:blur-[85px] opacity-75 animate-bg-orb-1 transition-colors duration-700 ${
             isDark
               ? 'bg-gradient-to-br from-emerald-600/35 via-teal-600/20 to-transparent'
               : 'bg-gradient-to-br from-blue-600/22 via-indigo-500/15 to-transparent'
           }`}
+          style={{ transform: 'translate3d(0, 0, 0)' }}
         />
 
         {/* Orb 2: Top-Right (Tun: Cyan/Sky Neon, Kun: Fresh Emerald/Teal) */}
         <div
-          className={`absolute -top-24 -right-28 w-[32rem] sm:w-[46rem] h-[32rem] sm:h-[46rem] rounded-full blur-[110px] sm:blur-[140px] opacity-70 animate-bg-orb-2 transition-colors duration-700 ${
+          className={`absolute -top-24 -right-28 w-[28rem] sm:w-[40rem] h-[28rem] sm:h-[40rem] rounded-full blur-[65px] sm:blur-[85px] opacity-70 animate-bg-orb-2 transition-colors duration-700 ${
             isDark
               ? 'bg-gradient-to-bl from-cyan-500/30 via-emerald-500/18 to-transparent'
               : 'bg-gradient-to-bl from-emerald-500/20 via-teal-400/12 to-transparent'
           }`}
+          style={{ transform: 'translate3d(0, 0, 0)' }}
         />
 
         {/* Orb 3: Center-Mid (Tun: Deep Indigo/Electric Purple, Kun: Soft Sky Blue) */}
         <div
-          className={`absolute top-1/3 left-1/2 -translate-x-1/2 w-[36rem] sm:w-[52rem] h-[36rem] sm:h-[52rem] rounded-full blur-[130px] sm:blur-[160px] opacity-60 animate-bg-orb-3 transition-colors duration-700 ${
+          className={`absolute top-1/3 left-1/2 -translate-x-1/2 w-[32rem] sm:w-[46rem] h-[32rem] sm:h-[46rem] rounded-full blur-[70px] sm:blur-[90px] opacity-60 animate-bg-orb-3 transition-colors duration-700 ${
             isDark
               ? 'bg-gradient-to-tr from-indigo-600/25 via-blue-700/18 to-transparent'
               : 'bg-gradient-to-tr from-blue-400/18 via-sky-300/12 to-transparent'
           }`}
+          style={{ transform: 'translate3d(0, 0, 0)' }}
         />
 
         {/* Orb 4: Bottom-Left (Tun: Dark Emerald Accent, Kun: Warm Amber/Rose Hint) */}
         <div
-          className={`absolute -bottom-36 -left-20 w-[30rem] sm:w-[44rem] h-[30rem] sm:h-[44rem] rounded-full blur-[120px] sm:blur-[150px] opacity-65 animate-bg-orb-2 transition-colors duration-700 ${
+          className={`absolute -bottom-36 -left-20 w-[28rem] sm:w-[38rem] h-[28rem] sm:h-[38rem] rounded-full blur-[65px] sm:blur-[85px] opacity-65 animate-bg-orb-2 transition-colors duration-700 ${
             isDark
               ? 'bg-gradient-to-tr from-emerald-700/25 via-teal-800/15 to-transparent'
               : 'bg-gradient-to-tr from-amber-400/14 via-emerald-400/10 to-transparent'
           }`}
+          style={{ transform: 'translate3d(0, 0, 0)' }}
         />
 
         {/* Orb 5: Bottom-Right (Tun: Sapphire Deep Blue, Kun: Royal Indigo Accent) */}
         <div
-          className={`absolute -bottom-32 -right-24 w-[32rem] sm:w-[46rem] h-[32rem] sm:h-[46rem] rounded-full blur-[120px] sm:blur-[150px] opacity-60 animate-bg-orb-1 transition-colors duration-700 ${
+          className={`absolute -bottom-32 -right-24 w-[28rem] sm:w-[40rem] h-[28rem] sm:h-[40rem] rounded-full blur-[65px] sm:blur-[85px] opacity-60 animate-bg-orb-1 transition-colors duration-700 ${
             isDark
               ? 'bg-gradient-to-tl from-blue-600/22 via-indigo-700/15 to-transparent'
               : 'bg-gradient-to-tl from-indigo-500/16 via-blue-500/10 to-transparent'
           }`}
+          style={{ transform: 'translate3d(0, 0, 0)' }}
         />
       </div>
 

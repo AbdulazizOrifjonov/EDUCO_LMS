@@ -12,7 +12,7 @@ import { initPushNotifications } from './services/pushNotificationService';
 initPushNotifications();
 
 // Version-based cache buster to force browsers and PWAs to purge old cached chunks
-const APP_RELEASE_VERSION = 'EDUCO_RELEASE_V14_FULL_SYSTEM_AUDIT';
+const APP_RELEASE_VERSION = 'EDUCO_RELEASE_V15_FAST_SCROLL_ANIMATION_ENGINE';
 if (typeof window !== 'undefined' && window.localStorage) {
   try {
     const installed = window.localStorage.getItem('educo_release_version');
