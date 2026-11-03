@@ -397,10 +397,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   padding-top: max(env(safe-area-inset-top, 0px), 8px);
 }
 
-/* iOS Standalone Mode / PWA Notch & Status Bar Protection */
+/* iOS WebKit Notch & Status Bar Protection (Safari, Chrome iOS, in-app webviews, PWA) */
 @supports (-webkit-touch-callout: none) {
   .public-navbar-header {
-    padding-top: max(env(safe-area-inset-top, 0px), 12px);
+    padding-top: max(env(safe-area-inset-top, 44px), 44px) !important;
   }
 }
 

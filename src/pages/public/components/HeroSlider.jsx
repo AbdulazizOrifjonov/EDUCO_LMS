@@ -70,13 +70,22 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
     }
   };
 
+  const isIos =
+    typeof window !== 'undefined' &&
+    (/iPhone|iPad|iPod/.test(navigator.userAgent || '') ||
+      (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent || '')));
+
   return (
     <div
       id="top"
       className="relative w-full min-h-[560px] sm:min-h-[640px] lg:min-h-[740px] overflow-hidden bg-gray-950 select-none"
       style={{
-        paddingTop: 'calc(max(env(safe-area-inset-top, 0px), 0px) + 5.25rem)',
-        minHeight: 'calc(560px + max(env(safe-area-inset-top, 0px), 0px))',
+        paddingTop: isIos
+          ? 'calc(max(env(safe-area-inset-top, 44px), 44px) + 4.5rem)'
+          : 'calc(max(env(safe-area-inset-top, 0px), 0px) + 5.25rem)',
+        minHeight: isIos
+          ? 'calc(580px + max(env(safe-area-inset-top, 44px), 44px))'
+          : 'calc(560px + max(env(safe-area-inset-top, 0px), 0px))',
       }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -128,12 +137,12 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                 )}
 
                 {/* Main Headline */}
-                <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-md animate-in fade-in slide-in-from-left-4 duration-700">
+                <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-md animate-in fade-in slide-in-from-left-4 duration-700 break-words">
                   {slide.title}
                 </h1>
 
                 {/* Subtitle / Description */}
-                <p className="text-xs sm:text-base lg:text-xl text-gray-200/90 font-normal leading-relaxed max-w-2xl drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-700 delay-150 line-clamp-3 sm:line-clamp-none">
+                <p className="text-xs sm:text-base lg:text-xl text-gray-200/90 font-normal leading-relaxed max-w-2xl drop-shadow-sm animate-in fade-in slide-in-from-left-6 duration-700 delay-150 line-clamp-3 sm:line-clamp-none break-words">
                   {slide.subtitle}
                 </p>
 
@@ -143,7 +152,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                   <a
                     href="#contact"
                     onClick={(e) => scrollToTarget(e, '#contact')}
-                    className="relative overflow-hidden inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-5 sm:px-7 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 dark:from-emerald-600 dark:via-teal-600 dark:to-emerald-700 dark:hover:from-emerald-500 dark:hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-blue-900/30 dark:shadow-emerald-950/40 border border-white/20 transition-all hover:scale-102 active:scale-98 cursor-pointer whitespace-nowrap group shrink-0"
+                    className="relative overflow-hidden inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-5 sm:px-7 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 dark:from-emerald-600 dark:via-teal-600 dark:to-emerald-700 dark:hover:from-emerald-500 dark:hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-blue-900/30 dark:shadow-emerald-950/40 border border-white/20 transition-all hover:scale-102 active:scale-98 cursor-pointer whitespace-nowrap group w-full xs:w-auto shrink-0"
                   >
                     {/* Sweeping Shimmer Light Beam */}
                     <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-[-20deg] pointer-events-none animate-shimmer-sweep" />
@@ -160,7 +169,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                     <a
                       href={slide.cta_link || '#courses'}
                       onClick={(e) => scrollToTarget(e, slide.cta_link || '#courses')}
-                      className="inline-flex items-center justify-center gap-2 h-12 sm:h-13 px-5 sm:px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98 shadow-lg shadow-black/20 whitespace-nowrap shrink-0 group"
+                      className="inline-flex items-center justify-center gap-2 h-12 sm:h-13 px-4 sm:px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98 shadow-lg shadow-black/20 whitespace-nowrap flex-1 xs:flex-none shrink-0 group"
                     >
                       <span>{slide.cta_text}</span>
                       <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 transition-transform duration-300 text-blue-300 dark:text-emerald-300" />
@@ -172,7 +181,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                     <a
                       href={slide.secondary_cta_link || '#about'}
                       onClick={(e) => scrollToTarget(e, slide.secondary_cta_link || '#about')}
-                      className="inline-flex items-center justify-center gap-2 h-12 sm:h-13 px-5 sm:px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98 shadow-lg shadow-black/20 whitespace-nowrap shrink-0"
+                      className="inline-flex items-center justify-center gap-2 h-12 sm:h-13 px-4 sm:px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98 shadow-lg shadow-black/20 whitespace-nowrap flex-1 xs:flex-none shrink-0"
                     >
                       <span>{slide.secondary_cta_text}</span>
                     </a>

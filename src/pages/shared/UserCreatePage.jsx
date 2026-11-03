@@ -455,7 +455,8 @@ export default function UserCreatePage() {
 
         <div className="flex items-center gap-2.5 shrink-0">
           <Button variant="ghost" onClick={handleBack} disabled={isSubmitting}>
-            Bekor qilish
+            <span className="hidden xs:inline">Bekor qilish</span>
+            <span className="xs:hidden">Bekor</span>
           </Button>
           <Button
             type="button"
@@ -465,7 +466,8 @@ export default function UserCreatePage() {
             onClick={handleSubmit(onSubmit)}
             className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 ring-1 ring-blue-400/40 dark:ring-emerald-400/40"
           >
-            {isEditing ? "O'zgarishlarni saqlash" : "Ro'yxatdan o'tkazish"}
+            <span className="hidden xs:inline">{isEditing ? "O'zgarishlarni saqlash" : "Ro'yxatdan o'tkazish"}</span>
+            <span className="xs:hidden">{isEditing ? "Saqlash" : "Ro'yxatga olish"}</span>
           </Button>
         </div>
       </div>

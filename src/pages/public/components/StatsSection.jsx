@@ -36,11 +36,12 @@ export default function StatsSection({ settings }) {
       icon: Award,
       color: 'from-amber-600 to-orange-600',
       badge: 'Xalqaro sertifikat',
+      badgeShort: 'Sertifikat',
     },
   ];
 
   return (
-    <section id="stats" className="relative z-20 pt-10 sm:pt-14 pb-4 sm:pb-6 max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="stats" className="relative z-20 pt-10 sm:pt-14 pb-6 sm:pb-8 max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
@@ -49,24 +50,28 @@ export default function StatsSection({ settings }) {
               key={stat.id}
               animation="up"
               delay={idx * 100}
-              className="bg-white/95 dark:bg-[#1a2332]/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/50 dark:shadow-none hover:-translate-y-1 transition-all group"
+              className="bg-white/95 dark:bg-[#1a2332]/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 border border-gray-100 dark:border-gray-800 shadow-xl shadow-gray-200/50 dark:shadow-none hover:-translate-y-1 transition-all group"
             >
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-3 gap-1.5">
                 <div
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr ${stat.color} flex items-center justify-center text-white shadow-md shadow-emerald-950/20 group-hover:scale-110 transition-transform`}
+                  className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr ${stat.color} flex items-center justify-center text-white shadow-md shadow-emerald-950/20 group-hover:scale-110 transition-transform shrink-0`}
                 >
-                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-emerald-950/60 text-blue-700 dark:text-emerald-300 border border-blue-200/60 dark:border-emerald-800/60">
-                  {stat.badge}
+                <span
+                  className="text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-50 dark:bg-emerald-950/60 text-blue-700 dark:text-emerald-300 border border-blue-200/60 dark:border-emerald-800/60 max-w-[80px] xs:max-w-none truncate"
+                  title={stat.badge}
+                >
+                  <span className="hidden xs:inline">{stat.badge}</span>
+                  <span className="xs:hidden">{stat.badgeShort || stat.badge}</span>
                 </span>
               </div>
 
               <div className="space-y-0.5">
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-950 dark:text-white tracking-tight">
+                <h3 className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl font-black text-gray-950 dark:text-white tracking-tight">
                   {stat.value}
                 </h3>
-                <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">
+                <p className="text-[11px] xs:text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 break-words">
                   {stat.label}
                 </p>
               </div>

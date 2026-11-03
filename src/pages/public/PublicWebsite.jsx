@@ -159,13 +159,13 @@ export default function PublicWebsite() {
       </main>
 
       {/* Floating Quick Contact Dock (Telegram & Phone Call - Sleek & Compact for Mobile) */}
-      <div className="fixed bottom-4 right-3.5 sm:bottom-6 sm:right-7 z-40 flex flex-col items-end gap-2 select-none pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="fixed bottom-3.5 right-3 sm:bottom-6 sm:right-7 z-40 flex flex-col items-end gap-2 select-none pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-300 pb-[env(safe-area-inset-bottom,0px)]">
         {/* Telegram Direct Floating Button */}
         <a
           href={settings?.telegram || "https://t.me/educomarkaz36"}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center justify-center w-11 h-11 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2.5 rounded-full bg-[#229ED9] hover:bg-[#1b8bc2] text-white shadow-xl hover:shadow-[#229ED9]/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
+          className="group flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2.5 rounded-full bg-[#229ED9] hover:bg-[#1b8bc2] text-white shadow-xl hover:shadow-[#229ED9]/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
           title="Telegram orqali savol berish (@educomarkaz36)"
         >
           <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 fill-white" aria-hidden="true">
@@ -177,10 +177,10 @@ export default function PublicWebsite() {
         {/* Phone Call Floating Button */}
         <a
           href={`tel:${settings?.phone?.replace(/\D/g, '') || '998995418989'}`}
-          className="group flex items-center justify-center w-11 h-11 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl hover:shadow-emerald-600/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
+          className="group flex items-center justify-center w-10 h-10 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl hover:shadow-emerald-600/40 transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-white/30"
           title="Tezkor qo‘ng‘iroq: +998 (99) 541-89-89"
         >
-          <Phone className="w-5 h-5 sm:w-4 sm:h-4" />
+          <Phone className="w-4 h-4" />
           <span className="text-xs font-bold hidden sm:inline">{settings?.phone || '+998 (99) 541-89-89'}</span>
         </a>
       </div>

@@ -1,5 +1,5 @@
 // EDUCO LMS Service Worker for System Push Notifications
-const CACHE_NAME = 'educo-v15-fast-scroll-animation-engine';
+const CACHE_NAME = 'educo-v16-microscopic-responsive-polish';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

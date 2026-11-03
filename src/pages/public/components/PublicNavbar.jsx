@@ -249,18 +249,17 @@ export default function PublicNavbar({ settings }) {
       ? 'public-navbar-top-dark shadow-xs'
       : 'public-navbar-top-light shadow-xs';
 
-  // Detect iOS Standalone PWA to guarantee status-bar clearance
-  const isIosStandalone =
+  // Detect iOS (Safari, Chrome iOS, In-App webviews, and standalone PWA) to guarantee notch/status-bar clearance
+  const isIos =
     typeof window !== 'undefined' &&
-    (window.navigator?.standalone === true ||
-      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)) &&
-    /iPhone|iPad|iPod/.test(navigator.userAgent || '');
+    (/iPhone|iPad|iPod/.test(navigator.userAgent || '') ||
+      (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent || '')));
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 public-navbar-header ${headerClass}`}
       style={{
-        paddingTop: isIosStandalone
+        paddingTop: isIos
           ? 'max(env(safe-area-inset-top, 44px), 44px)'
           : 'max(env(safe-area-inset-top, 0px), 8px)',
       }}
@@ -419,7 +418,9 @@ export default function PublicNavbar({ settings }) {
                     {(profile?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                   </div>
                   <span className="hidden sm:inline whitespace-nowrap">{tr.dashboard}</span>
-                  <span className="sm:hidden">Kabinet</span>
+                  <span className="sm:hidden font-bold whitespace-nowrap">
+                    {currentLang === 'ru' ? 'Кабинет' : currentLang === 'en' ? 'Portal' : 'Kabinet'}
+                  </span>
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 rtl:rotate-180" />
                 </Link>
               </div>
@@ -434,7 +435,10 @@ export default function PublicNavbar({ settings }) {
                   }`}
                 >
                   <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                  <span className="whitespace-nowrap">{tr.login}</span>
+                  <span className="hidden sm:inline whitespace-nowrap">{tr.login}</span>
+                  <span className="sm:hidden font-bold whitespace-nowrap">
+                    {currentLang === 'ru' ? 'Войти' : currentLang === 'en' ? 'Login' : 'Kirish'}
+                  </span>
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 rtl:rotate-180 hidden sm:inline" />
                 </Link>
               </div>

@@ -265,7 +265,7 @@ export default function CtaSection({ settings, courses = [], prefilledCourse = '
           {/* Right Column: Quick Registration Form Card (Enters from Right) */}
           <ScrollReveal
             animation="right"
-            className="lg:col-span-7 bg-white dark:bg-[#1a2332] rounded-3xl p-6 sm:p-10 border border-gray-200/90 dark:border-gray-800 shadow-2xl relative"
+            className="lg:col-span-7 bg-white dark:bg-[#1a2332] rounded-3xl p-4 sm:p-8 lg:p-10 border border-gray-200/90 dark:border-gray-800 shadow-2xl relative"
           >
             {submitted ? (
               <div className="py-12 text-center space-y-4 animate-in fade-in zoom-in-95 duration-500">

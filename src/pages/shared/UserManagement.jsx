@@ -499,14 +499,16 @@ export default function UserManagement() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
           <Button
             variant="outline"
             size="md"
             icon={Download}
             onClick={handleExportCSV}
+            className="flex-1 sm:flex-initial justify-center"
           >
-            {t('common.export', 'Export CSV')}
+            <span className="hidden sm:inline">{t('common.export', 'Export CSV')}</span>
+            <span className="sm:hidden">CSV</span>
           </Button>
 
           {!isTeacher && (
@@ -514,10 +516,11 @@ export default function UserManagement() {
               variant="outline"
               size="md"
               icon={UserCheck}
-              className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold"
+              className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold flex-1 sm:flex-initial justify-center"
               onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.TEACHER}`)}
             >
-              {t('users.createTeacher', "O'qituvchi qo'shish")}
+              <span className="hidden sm:inline">{t('users.createTeacher', "O'qituvchi qo'shish")}</span>
+              <span className="sm:hidden">O'qituvchi</span>
             </Button>
           )}
 
@@ -525,10 +528,11 @@ export default function UserManagement() {
             variant="primary"
             size="md"
             icon={GraduationCap}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold flex-1 sm:flex-initial justify-center"
             onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.STUDENT}`)}
           >
-            {t('users.createStudent', "Yangi o'quvchi qo'shish")}
+            <span className="hidden sm:inline">{t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
+            <span className="sm:hidden">O'quvchi</span>
           </Button>
 
           {currentUserRole === ROLES.OWNER && (
@@ -536,10 +540,11 @@ export default function UserManagement() {
               variant="ghost"
               size="md"
               icon={Shield}
-              className="text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-300/60 dark:border-purple-800/50 font-semibold"
+              className="text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-300/60 dark:border-purple-800/50 font-semibold flex-1 sm:flex-initial justify-center"
               onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.ADMIN}`)}
             >
-              {t('users.createAdmin', "Admin qo'shish")}
+              <span className="hidden sm:inline">{t('users.createAdmin', "Admin qo'shish")}</span>
+              <span className="sm:hidden">Admin</span>
             </Button>
           )}
         </div>

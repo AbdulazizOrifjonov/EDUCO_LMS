@@ -376,29 +376,29 @@ export default function WebsiteFullPageEditor({
                 onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
                 className="w-full accent-blue-600 cursor-pointer h-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
               />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 15))}
-                  className="py-1.5 px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-300 hover:text-blue-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
+                  className="py-1.5 px-1.5 sm:px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-300 hover:text-blue-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
                 >
-                  <ArrowLeft className="w-3 h-3 text-blue-500" />
-                  <span>Chapga (-15%)</span>
+                  <ArrowLeft className="w-3 h-3 text-blue-500 shrink-0" />
+                  <span className="truncate"><span className="hidden xs:inline">Chapga</span><span className="xs:hidden">Chap</span> (-15%)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveOffsetX(0)}
-                  className="py-1.5 px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-300 hover:text-emerald-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
+                  className="py-1.5 px-1.5 sm:px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-300 hover:text-emerald-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
                 >
-                  <span>Markaz (0%)</span>
+                  <span className="truncate"><span className="hidden xs:inline">Markaz (0%)</span><span className="xs:hidden">Markaz</span></span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 15))}
-                  className="py-1.5 px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-300 hover:text-blue-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
+                  className="py-1.5 px-1.5 sm:px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-300 hover:text-blue-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
                 >
-                  <span>O‘ngga (+15%)</span>
-                  <ArrowRight className="w-3 h-3 text-blue-500" />
+                  <span className="truncate"><span className="hidden xs:inline">O‘ngga</span><span className="xs:hidden">O‘ng</span> (+15%)</span>
+                  <ArrowRight className="w-3 h-3 text-blue-500 shrink-0" />
                 </button>
               </div>
             </div>
@@ -423,29 +423,29 @@ export default function WebsiteFullPageEditor({
                 onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
                 className="w-full accent-purple-600 cursor-pointer h-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
               />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 15))}
-                  className="py-1.5 px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
+                  className="py-1.5 px-1.5 sm:px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
                 >
-                  <ArrowUp className="w-3 h-3 text-purple-500" />
-                  <span>Tepaga (-15%)</span>
+                  <ArrowUp className="w-3 h-3 text-purple-500 shrink-0" />
+                  <span className="truncate"><span className="hidden xs:inline">Tepaga</span><span className="xs:hidden">Tepa</span> (-15%)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveOffsetY(0)}
-                  className="py-1.5 px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-300 hover:text-emerald-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
+                  className="py-1.5 px-1.5 sm:px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-300 hover:text-emerald-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
                 >
-                  <span>Markaz (0%)</span>
+                  <span className="truncate"><span className="hidden xs:inline">Markaz (0%)</span><span className="xs:hidden">Markaz</span></span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 15))}
-                  className="py-1.5 px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
+                  className="py-1.5 px-1.5 sm:px-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-600 text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
                 >
-                  <span>Pastga (+15%)</span>
-                  <ArrowDown className="w-3 h-3 text-purple-500" />
+                  <span className="truncate"><span className="hidden xs:inline">Pastga</span><span className="xs:hidden">Past</span> (+15%)</span>
+                  <ArrowDown className="w-3 h-3 text-purple-500 shrink-0" />
                 </button>
               </div>
             </div>
@@ -652,7 +652,7 @@ export default function WebsiteFullPageEditor({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50/70 dark:bg-gray-950 pb-36 pb-[calc(9rem+env(safe-area-inset-bottom,0px))] -m-4 sm:-m-6 lg:-m-8 p-3 sm:p-6 lg:p-8 animate-in fade-in duration-200">
+    <div className="min-h-screen bg-gray-50/70 dark:bg-gray-950 pb-44 pb-[calc(11rem+env(safe-area-inset-bottom,0px))] -m-4 sm:-m-6 lg:-m-8 p-3 sm:p-6 lg:p-8 animate-in fade-in duration-200">
       {/* Top Header Sticky Navigation Bar */}
       <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 mb-5 shadow-sm">
         {/* Mobile View: Row 1 = [Ortga] + [Bekor] [Saqlash]; Row 2 = Icon + Title */}
@@ -675,7 +675,8 @@ export default function WebsiteFullPageEditor({
                 onClick={closeEditor}
                 className="!rounded-xl font-bold text-xs !py-1.5 !px-2.5"
               >
-                Bekor qilish
+                <span className="hidden xs:inline">Bekor qilish</span>
+                <span className="xs:hidden">Bekor</span>
               </Button>
               {editingItem?.id && (
                 <Button
