@@ -538,9 +538,10 @@ export default function WebsiteFullPageEditor({
     </div>
   );
 
-  // Real-time Image Zoom, Pan, D-pad, Fit & Position Controls
+  // Real-time Image Zoom, Joystick / D-Pad (+) Pan, Fit & Position Controls
   const renderImageControls = (label = "Fotosurat masshtabi va joylashuvi:") => (
-    <div className="p-3.5 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 space-y-3.5 shadow-xs">
+    <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700/80 space-y-4 shadow-xs">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-black text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
           <Sliders className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -563,11 +564,11 @@ export default function WebsiteFullPageEditor({
         </button>
       </div>
 
-      {/* 1. Fit Mode & Quick Position Presets */}
+      {/* 1. Fit Mode (Cover / Contain) & Focus Position Presets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] font-bold">
         <div>
           <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-1">To‘ldirish usuli:</span>
-          <div className="grid grid-cols-2 gap-1">
+          <div className="grid grid-cols-2 gap-1.5">
             <button
               type="button"
               onClick={() => setActiveFitMode('cover')}
@@ -595,7 +596,7 @@ export default function WebsiteFullPageEditor({
 
         <div>
           <span className="text-[10px] text-gray-500 dark:text-gray-400 block mb-1">Fokus pozitsiyasi:</span>
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-3 gap-1.5">
             {[
               { id: 'top', label: 'Tepa' },
               { id: 'center', label: 'Markaz' },
@@ -619,21 +620,21 @@ export default function WebsiteFullPageEditor({
       </div>
 
       {/* 2. Interactive Zoom Slider & Controls */}
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 pt-1 border-t border-gray-100 dark:border-gray-700/60">
         <div className="flex items-center justify-between text-[11px] font-bold">
           <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
             <ZoomIn className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Kattalashtirish / Kichraytirish (Zoom):</span>
           </span>
           <div className="flex items-center gap-1.5">
-            <span className="text-emerald-700 dark:text-emerald-400 font-mono text-xs">
+            <span className="text-emerald-700 dark:text-emerald-400 font-mono text-xs font-black">
               {Math.round(activeScale * 100)}%
             </span>
             <div className="flex items-center gap-0.5 ml-1 bg-gray-100 dark:bg-gray-700/80 rounded-lg p-0.5">
               <button
                 type="button"
                 onClick={() => setActiveScale(Math.max(0.5, Number((activeScale - 0.1).toFixed(2))))}
-                className="w-5 h-5 rounded flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold text-xs"
+                className="w-6 h-6 rounded flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-black text-sm active:scale-90"
                 title="Kichraytirish (-10%)"
               >
                 -
@@ -641,7 +642,7 @@ export default function WebsiteFullPageEditor({
               <button
                 type="button"
                 onClick={() => setActiveScale(Math.min(3, Number((activeScale + 0.1).toFixed(2))))}
-                className="w-5 h-5 rounded flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold text-xs"
+                className="w-6 h-6 rounded flex items-center justify-center hover:bg-white dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-black text-sm active:scale-90"
                 title="Kattalashtirish (+10%)"
               >
                 +
@@ -660,85 +661,149 @@ export default function WebsiteFullPageEditor({
         />
       </div>
 
-      {/* 3. Horizontal Pan Slider & Controls */}
-      <div className="space-y-1.5 pt-1">
-        <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
-          <span className="flex items-center gap-1">
-            <ArrowLeft className="w-3 h-3 text-blue-500" />
-            <ArrowRight className="w-3 h-3 text-blue-500" />
-            <span>Chapga / O‘ngga surish (Gorizontal):</span>
-          </span>
-          <span className="font-mono text-blue-600 dark:text-blue-400 font-extrabold text-xs">
-            {activeOffsetX === 0 ? '0%' : activeOffsetX > 0 ? `+${activeOffsetX}% (O‘ngga)` : `${activeOffsetX}% (Chapga)`}
+      {/* 3. JOYSTICK / D-PAD (+) CONTROLLER */}
+      <div className="pt-2 border-t border-gray-100 dark:border-gray-700/60 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-gray-800 dark:text-gray-200">
+            <Move className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
+            <span>Joystik (+) Surish boshqaruvi:</span>
+          </div>
+          {/* Live coordinates chip */}
+          <span className="font-mono text-[11px] font-black px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600">
+            X: {activeOffsetX > 0 ? `+${activeOffsetX}%` : `${activeOffsetX}%`} | Y: {activeOffsetY > 0 ? `+${activeOffsetY}%` : `${activeOffsetY}%`}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
-            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
-            title="Chapga surish (-5%)"
-          >
-            <ArrowLeft className="w-3 h-3" /> Chap
-          </button>
-          <input
-            type="range"
-            min="-50"
-            max="50"
-            step="1"
-            value={activeOffsetX}
-            onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
-            className="flex-1 accent-blue-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
-          />
-          <button
-            type="button"
-            onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
-            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
-            title="O‘ngga surish (+5%)"
-          >
-            O‘ng <ArrowRight className="w-3 h-3" />
-          </button>
-        </div>
-      </div>
 
-      {/* 4. Vertical Pan Slider & Controls */}
-      <div className="space-y-1.5 pt-1">
-        <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
-          <span className="flex items-center gap-1">
-            <ArrowUp className="w-3 h-3 text-purple-500" />
-            <ArrowDown className="w-3 h-3 text-purple-500" />
-            <span>Tepaga / Pastga surish (Vertikal):</span>
-          </span>
-          <span className="font-mono text-purple-600 dark:text-purple-400 font-extrabold text-xs">
-            {activeOffsetY === 0 ? '0%' : activeOffsetY > 0 ? `+${activeOffsetY}% (Pastga)` : `${activeOffsetY}% (Tepaga)`}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
-            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
-            title="Tepaga surish (-5%)"
-          >
-            <ArrowUp className="w-3 h-3" /> Tepa
-          </button>
-          <input
-            type="range"
-            min="-50"
-            max="50"
-            step="1"
-            value={activeOffsetY}
-            onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
-            className="flex-1 accent-purple-600 cursor-pointer h-2 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
-          />
-          <button
-            type="button"
-            onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
-            className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-purple-50 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 border border-gray-200 dark:border-gray-600 active:scale-95"
-            title="Pastga surish (+5%)"
-          >
-            Past <ArrowDown className="w-3 h-3" />
-          </button>
+        {/* The Joystick Cross (+) Housing */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 py-2">
+          {/* Authentic Cross Joystick (D-Pad) */}
+          <div className="relative w-44 h-44 shrink-0 flex items-center justify-center p-3 rounded-full bg-gradient-to-b from-gray-100 via-gray-50 to-gray-200 dark:from-gray-800 dark:via-gray-850 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-inner select-none">
+            {/* Up Button */}
+            <button
+              type="button"
+              onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
+              className="absolute top-2 w-12 h-11 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
+              title="Tepaga surish (-5%)"
+            >
+              <ArrowUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+              <span className="text-[8px] uppercase tracking-wider font-black">Tepa</span>
+            </button>
+
+            {/* Left Button */}
+            <button
+              type="button"
+              onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
+              className="absolute left-2 w-11 h-12 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
+              title="Chapga surish (-5%)"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              <span className="text-[8px] uppercase tracking-wider font-black">Chap</span>
+            </button>
+
+            {/* Center (Markaz / Reset) Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveOffsetX(0);
+                setActiveOffsetY(0);
+              }}
+              className="w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg flex flex-col items-center justify-center active:scale-85 transition-all cursor-pointer border-2 border-white dark:border-gray-800 ring-4 ring-emerald-500/20 group"
+              title="Markazga qaytarish (0%, 0%)"
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-white group-hover:scale-125 transition-transform" />
+              <span className="text-[7px] uppercase tracking-widest font-black mt-0.5">Markaz</span>
+            </button>
+
+            {/* Right Button */}
+            <button
+              type="button"
+              onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
+              className="absolute right-2 w-11 h-12 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
+              title="O‘ngga surish (+5%)"
+            >
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              <span className="text-[8px] uppercase tracking-wider font-black">O‘ng</span>
+            </button>
+
+            {/* Down Button */}
+            <button
+              type="button"
+              onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
+              className="absolute bottom-2 w-12 h-11 rounded-2xl bg-white dark:bg-gray-700/90 hover:bg-purple-500 hover:text-white dark:hover:bg-purple-600 text-gray-700 dark:text-gray-200 font-extrabold text-xs shadow-md border border-gray-200/90 dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-all cursor-pointer group"
+              title="Pastga surish (+5%)"
+            >
+              <span className="text-[8px] uppercase tracking-wider font-black">Past</span>
+              <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+            </button>
+          </div>
+
+          {/* Quick preset positions & Fine Sliders */}
+          <div className="flex-1 w-full space-y-2">
+            <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold">
+              Tezkor pozitsiyalar:
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => { setActiveOffsetX(0); setActiveOffsetY(-25); }}
+                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
+              >
+                <ArrowUp className="w-3 h-3 text-emerald-500" /> Tepa qism
+              </button>
+              <button
+                type="button"
+                onClick={() => { setActiveOffsetX(0); setActiveOffsetY(25); }}
+                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
+              >
+                <ArrowDown className="w-3 h-3 text-purple-500" /> Pastki qism
+              </button>
+              <button
+                type="button"
+                onClick={() => { setActiveOffsetX(-25); setActiveOffsetY(0); }}
+                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
+              >
+                <ArrowLeft className="w-3 h-3 text-blue-500" /> Chap tomon
+              </button>
+              <button
+                type="button"
+                onClick={() => { setActiveOffsetX(25); setActiveOffsetY(0); }}
+                className="py-1.5 px-2 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 text-center transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95"
+              >
+                <ArrowRight className="w-3 h-3 text-blue-500" /> O‘ng tomon
+              </button>
+            </div>
+
+            {/* Fine adjustment sliders */}
+            <div className="pt-1.5 space-y-1.5">
+              <div className="flex items-center justify-between text-[10px] font-bold text-gray-500">
+                <span>Gorizontal (X):</span>
+                <span className="font-mono text-blue-600 dark:text-blue-400">{activeOffsetX}%</span>
+              </div>
+              <input
+                type="range"
+                min="-50"
+                max="50"
+                step="1"
+                value={activeOffsetX}
+                onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
+                className="w-full accent-blue-600 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer"
+              />
+
+              <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 pt-0.5">
+                <span>Vertikal (Y):</span>
+                <span className="font-mono text-purple-600 dark:text-purple-400">{activeOffsetY}%</span>
+              </div>
+              <input
+                type="range"
+                min="-50"
+                max="50"
+                step="1"
+                value={activeOffsetY}
+                onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
+                className="w-full accent-purple-600 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg cursor-pointer"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
