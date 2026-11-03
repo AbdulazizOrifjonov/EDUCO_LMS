@@ -197,19 +197,19 @@ export default function WebsiteFullPageEditor({
     }
   };
 
-  // Interactive Touch & Drag Pan support with 0 scroll lag
+  // Interactive Mouse Drag Pan for desktop; fluid native touch scrolling on mobile
   const handleImageDragStart = (e) => {
-    const isTouch = Boolean(e.touches);
-    const startX = isTouch ? e.touches[0].clientX : e.clientX;
-    const startY = isTouch ? e.touches[0].clientY : e.clientY;
+    // Only capture mouse drag on desktop; on touch screens avoid intercepting native scroll
+    if (e.type?.startsWith('touch') || e.touches) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
     if (startX === undefined || startY === undefined) return;
     const initialX = activeOffsetX;
     const initialY = activeOffsetY;
 
     const onMove = (moveEvent) => {
-      if (moveEvent.cancelable) moveEvent.preventDefault();
-      const curX = moveEvent.touches && moveEvent.touches[0] ? moveEvent.touches[0].clientX : moveEvent.clientX;
-      const curY = moveEvent.touches && moveEvent.touches[0] ? moveEvent.touches[0].clientY : moveEvent.clientY;
+      const curX = moveEvent.clientX;
+      const curY = moveEvent.clientY;
       if (curX === undefined || curY === undefined) return;
       const deltaX = Math.round((curX - startX) / 2.2);
       const deltaY = Math.round((curY - startY) / 2.2);
@@ -222,14 +222,10 @@ export default function WebsiteFullPageEditor({
     const onEnd = () => {
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onEnd);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onEnd);
     };
 
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onEnd);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onEnd);
   };
 
   // Smart Auto-apply Image Upload Box with Live Interactive Media Studio & Controls
@@ -259,11 +255,9 @@ export default function WebsiteFullPageEditor({
           {/* 1. Live Interactive Visual Canvas (Drag-to-pan & Viewfinder Grid) */}
           <div className="relative rounded-2xl overflow-hidden bg-gray-950 border-2 border-emerald-500/50 shadow-inner group">
             <div
-              className="w-full h-56 sm:h-72 relative overflow-hidden select-none cursor-grab active:cursor-grabbing flex items-center justify-center bg-gray-900"
-              style={{ touchAction: 'none' }}
+              className="w-full h-56 sm:h-72 relative overflow-hidden select-none cursor-grab active:cursor-grabbing flex items-center justify-center bg-gray-900 touch-pan-y"
               onMouseDown={handleImageDragStart}
-              onTouchStart={handleImageDragStart}
-              title="Rasmni sichqoncha yoki barmoq bilan ushlab xohlagan tomonga suring"
+              title="Rasmni sichqoncha bilan ushlab xohlagan tomonga suring"
             >
               <img
                 src={activeImage}
@@ -652,9 +646,9 @@ export default function WebsiteFullPageEditor({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50/70 dark:bg-gray-950 pb-44 pb-[calc(11rem+env(safe-area-inset-bottom,0px))] -m-4 sm:-m-6 lg:-m-8 p-3 sm:p-6 lg:p-8 animate-in fade-in duration-200">
-      {/* Top Header Sticky Navigation Bar */}
-      <div className="sticky top-0 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 mb-5 shadow-sm">
+    <div className="min-h-screen bg-gray-50/70 dark:bg-gray-950 pb-44 pb-[calc(11rem+env(safe-area-inset-bottom,0px))] -m-3 sm:-m-5 lg:-m-6 p-3 sm:p-5 lg:p-6 w-full max-w-full overflow-x-hidden animate-in fade-in duration-200">
+      {/* Top Header Navigation Bar (Relative on phone so it doesn't crowd screen, Sticky on desktop) */}
+      <div className="relative sm:sticky sm:top-20 z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 mb-5 shadow-sm">
         {/* Mobile View: Row 1 = [Ortga] + [Bekor] [Saqlash]; Row 2 = Icon + Title */}
         <div className="sm:hidden space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -858,7 +852,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1009,7 +1003,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1179,7 +1173,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1307,7 +1301,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1452,7 +1446,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1617,7 +1611,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1710,7 +1704,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
@@ -1840,7 +1834,7 @@ export default function WebsiteFullPageEditor({
           </div>
 
           {/* Live Preview Box */}
-          <div className="lg:col-span-5 sticky top-28 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="lg:col-span-5 relative lg:sticky lg:top-28 space-y-4 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain bg-gray-50 dark:bg-gray-900/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">

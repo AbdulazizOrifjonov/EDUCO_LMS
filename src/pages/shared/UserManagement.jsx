@@ -25,8 +25,10 @@ import {
   EyeOff,
   Copy,
   Check,
+  FileSpreadsheet,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
+import OwnerMasterLiveSheet from '@/components/owner/OwnerMasterLiveSheet';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -57,6 +59,7 @@ export default function UserManagement() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlRole = searchParams.get('role');
   const { searchQuery, setSearchQuery } = useSearch();
+  const [viewMode, setViewMode] = useState('list'); // 'list' | 'live-sheet'
 
   const isTeacher = String(currentUserRole).toLowerCase() === 'teacher';
   const [users, setUsers] = useState([]);
@@ -550,8 +553,47 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* Role Navigation Tabs */}
-      <div className="flex items-center gap-1.5 sm:gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 flex-wrap">
+      {/* Owner Mode Switcher: Standard List vs Live Master Excel Sheet */}
+      {currentUserRole === ROLES.OWNER && (
+        <div className="flex items-center justify-between gap-3 p-1.5 rounded-2xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs'
+                  : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Standart Ro‘yxat</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('live-sheet')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
+                viewMode === 'live-sheet'
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/30 ring-1 ring-emerald-400/40'
+                  : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>Jonli Master Excel Jadvali</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white">
+                LIVE
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {currentUserRole === ROLES.OWNER && viewMode === 'live-sheet' ? (
+        <OwnerMasterLiveSheet />
+      ) : (
+        <>
+          {/* Role Navigation Tabs */}
+          <div className="flex items-center gap-1.5 sm:gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 flex-wrap">
         {(() => {
           const tabColorMap = {
             all: {
@@ -931,6 +973,8 @@ export default function UserManagement() {
           </div>
         </div>
       </Card>
+        </>
+      )}
 
       {/* User Create/Edit Modal */}
       {isFormOpen && (

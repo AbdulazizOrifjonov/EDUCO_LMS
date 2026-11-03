@@ -254,13 +254,23 @@ class LocalStore {
       const es = new EventSource('https://ntfy.sh/educo_lms_sync_bus_8899/sse');
       this._cloudEventSource = es;
 
-      es.onmessage = (event) => {
+      es.onmessage = async (event) => {
         try {
           const raw = JSON.parse(event.data);
-          if (raw.event === 'message' && raw.message) {
-            const data = JSON.parse(raw.message);
+          if (raw.event === 'message') {
+            let data = null;
+            if (raw.attachment?.url) {
+              try {
+                const res = await fetch(raw.attachment.url);
+                data = await res.json();
+              } catch (_) {}
+            } else if (raw.message) {
+              try {
+                data = JSON.parse(raw.message);
+              } catch (_) {}
+            }
             const myDevId = this._getDeviceId();
-            if (data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
+            if (data && data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
               this.applyIncomingCloudKey(data.key, data.val, data.deletedId || null);
             }
           }
@@ -338,12 +348,20 @@ class LocalStore {
       for (const line of lines) {
         try {
           const item = JSON.parse(line);
-          if (item.message) {
-            const data = JSON.parse(item.message);
-            if (data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
-              this.applyIncomingCloudKey(data.key, data.val, data.deletedId || null);
-              hasUpdates = true;
-            }
+          let data = null;
+          if (item.attachment?.url) {
+            try {
+              const fetchRes = await fetch(item.attachment.url);
+              data = await fetchRes.json();
+            } catch (_) {}
+          } else if (item.message) {
+            try {
+              data = JSON.parse(item.message);
+            } catch (_) {}
+          }
+          if (data && data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
+            this.applyIncomingCloudKey(data.key, data.val, data.deletedId || null);
+            hasUpdates = true;
           }
         } catch (_) {}
       }
@@ -2382,7 +2400,7 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
       window.__educoBroadcastChannel = channel;
       channel.onmessage = (event) => {
         if (event.data && event.data.type === 'STORE_UPDATE') {
-          localStore.applyIncomingData({ [event.data.key]: event.data.value });
+          localStore.applyIncomingCloudKey(event.data.key, event.data.value, event.data.deletedId || null);
         }
       };
     }

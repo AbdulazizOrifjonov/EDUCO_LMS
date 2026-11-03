@@ -26,6 +26,16 @@ export function exportDatabaseBackup(centerName = 'EDUCO LMS') {
         [STORAGE_KEYS.CHAT_MESSAGES]: localStore.getChatMessages(),
         [STORAGE_KEYS.NOTIFICATIONS]: localStore.getItem(STORAGE_KEYS.NOTIFICATIONS, []),
         [STORAGE_KEYS.SMS_DEVICES]: localStore.getSmsDevices(),
+        // Official Website Content & Media
+        'educo_db_website_settings': localStore.getItem('educo_db_website_settings', null),
+        'educo_db_website_slides': localStore.getItem('educo_db_website_slides', []),
+        'educo_db_website_courses': localStore.getItem('educo_db_website_courses', []),
+        'educo_db_website_subjects': localStore.getItem('educo_db_website_subjects', []),
+        'educo_db_website_teachers': localStore.getItem('educo_db_website_teachers', []),
+        'educo_db_website_gallery': localStore.getItem('educo_db_website_gallery', []),
+        'educo_db_website_videos': localStore.getItem('educo_db_website_videos', []),
+        'educo_db_website_news': localStore.getItem('educo_db_website_news', []),
+        'educo_db_website_testimonials': localStore.getItem('educo_db_website_testimonials', []),
       },
     };
 
@@ -57,11 +67,11 @@ export async function restoreDatabaseBackup(backupJson) {
     }
 
     const payloadToPush = {};
-    Object.values(STORAGE_KEYS).forEach((key) => {
-      const items = parsed.data[key];
-      if (items !== undefined && Array.isArray(items)) {
-        localStore.setItem(key, items);
-        payloadToPush[key] = items;
+    Object.keys(parsed.data).forEach((key) => {
+      const val = parsed.data[key];
+      if (val !== undefined && val !== null) {
+        localStore.setItem(key, val);
+        payloadToPush[key] = val;
       }
     });
 
