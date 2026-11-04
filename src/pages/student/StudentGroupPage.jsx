@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,6 +17,7 @@ import {
   Sparkles,
   AlertCircle,
   ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { localStore } from '@/lib/localStore';
@@ -32,64 +33,102 @@ export default function StudentGroupPage() {
 
   const normalizedUserId = localStore.normalizeUserId(user?.id || profile?.id);
 
-  // Find student's enrolled group and classmates
-  const { studentGroup, classmates, teacherUser } = useMemo(() => {
+  // 1. Find all groups the student is enrolled in
+  const enrolledGroups = useMemo(() => {
     const allGroups = localStore.getGroups();
-    const allUsers = localStore.getUsers();
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    const currentUser =
+      allUsers.find((u) => localStore.normalizeUserId(u.id) === normalizedUserId) ||
+      profile ||
+      user;
+
+    const userGroupIds = Array.isArray(currentUser?.group_ids)
+      ? currentUser.group_ids
+      : currentUser?.group_id
+      ? [currentUser.group_id]
+      : [];
+
     const memberships = localStore.getMemberships
       ? localStore.getMemberships()
       : localStore.getItem('educo_db_memberships', []);
 
-    const studentMembership = memberships.find(
-      (m) =>
-        localStore.normalizeUserId(m.student_id) === normalizedUserId &&
-        m.is_active !== false
-    );
+    const memberGroupIds = memberships
+      .filter(
+        (m) =>
+          localStore.normalizeUserId(m.student_id) === normalizedUserId &&
+          m.is_active !== false
+      )
+      .map((m) => m.group_id);
 
-    const group = studentMembership
-      ? allGroups.find((g) => g.id === studentMembership.group_id)
-      : allGroups.find(
-          (g) =>
-            Array.isArray(g.student_ids) &&
-            g.student_ids
-              .map((id) => localStore.normalizeUserId(id))
-              .includes(normalizedUserId)
-        );
+    const inGroupStudentIds = allGroups
+      .filter(
+        (g) =>
+          Array.isArray(g.student_ids) &&
+          g.student_ids.map((id) => localStore.normalizeUserId(id)).includes(normalizedUserId)
+      )
+      .map((g) => g.id);
 
-    if (!group) {
-      return { studentGroup: null, classmates: [], teacherUser: null };
+    const allMyGroupIds = [
+      ...new Set([...userGroupIds, ...memberGroupIds, ...inGroupStudentIds]),
+    ];
+
+    return allGroups.filter((g) => allMyGroupIds.includes(g.id));
+  }, [normalizedUserId, profile, user]);
+
+  // Selected Group Tab State
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
+
+  // Active group is either selected or first enrolled group
+  const activeGroup = useMemo(() => {
+    if (!enrolledGroups || enrolledGroups.length === 0) return null;
+    if (selectedGroupId) {
+      const found = enrolledGroups.find((g) => g.id === selectedGroupId);
+      if (found) return found;
     }
+    return enrolledGroups[0];
+  }, [enrolledGroups, selectedGroupId]);
 
-    // Get group member IDs from memberships and student_ids
+  // Find classmates & teacher for the active group
+  const { classmates, teacherUser } = useMemo(() => {
+    if (!activeGroup) return { classmates: [], teacherUser: null };
+
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    const memberships = localStore.getMemberships
+      ? localStore.getMemberships()
+      : localStore.getItem('educo_db_memberships', []);
+
     const groupMemberIds = memberships
-      .filter((m) => m.group_id === group.id && m.is_active !== false)
+      .filter((m) => m.group_id === activeGroup.id && m.is_active !== false)
       .map((m) => localStore.normalizeUserId(m.student_id));
 
     const enrolledStudents = allUsers.filter(
       (u) =>
         u.role === 'student' &&
-        ((Array.isArray(group.student_ids) &&
-          group.student_ids.map((id) => localStore.normalizeUserId(id)).includes(u.id)) ||
-          groupMemberIds.includes(localStore.normalizeUserId(u.id)))
+        ((Array.isArray(activeGroup.student_ids) &&
+          activeGroup.student_ids
+            .map((id) => localStore.normalizeUserId(id))
+            .includes(localStore.normalizeUserId(u.id))) ||
+          groupMemberIds.includes(localStore.normalizeUserId(u.id)) ||
+          (Array.isArray(u.group_ids) && u.group_ids.includes(activeGroup.id)) ||
+          u.group_id === activeGroup.id)
     );
 
     const teacher = allUsers.find(
-      (u) => u.id === group.teacher_id || u.fullName === group.teacher_name
+      (u) => u.id === activeGroup.teacher_id || u.fullName === activeGroup.teacher_name
     );
 
     return {
-      studentGroup: group,
       classmates: enrolledStudents,
       teacherUser: teacher || {
-        first_name: group.teacher_name || 'Ustoz',
+        first_name: activeGroup.teacher_name || 'Ustoz',
         last_name: '',
-        fullName: group.teacher_name || 'Ustoz',
+        fullName: activeGroup.teacher_name || 'Ustoz',
         phone: '+998 90 333 44 55',
       },
     };
-  }, [normalizedUserId]);
+  }, [activeGroup]);
 
-  if (!studentGroup) {
+  if (!activeGroup) {
     return (
       <div className="space-y-6 animate-fade-in p-4 sm:p-6">
         <div className="flex items-center justify-between">
@@ -128,8 +167,44 @@ export default function StudentGroupPage() {
     );
   }
 
+  const studentGroup = activeGroup;
+
   return (
     <div className="space-y-6 animate-fade-in p-4 sm:p-6">
+      {/* Multi-Group Switcher Tabs (If student is enrolled in 2+ groups) */}
+      {enrolledGroups.length > 1 && (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-3 sm:p-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-[#123D78] dark:text-blue-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Sizning o‘quv guruhlaringiz ({enrolledGroups.length} ta):
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {enrolledGroups.map((g) => {
+                const isActive = g.id === activeGroup.id;
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setSelectedGroupId(g.id)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isActive
+                        ? 'bg-[#123D78] text-white shadow-sm ring-2 ring-blue-500/30'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <span>{g.name}</span>
+                    <span className="opacity-75 text-[10px]">({g.course_name || g.courseName || 'Kurs'})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Group Hero Banner */}
       <div className="bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-emerald-600 dark:via-emerald-700 dark:to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
         <div className="absolute right-0 top-0 -mt-6 -mr-6 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none" />

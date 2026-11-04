@@ -33,38 +33,71 @@ export default function StudentSchedulePage() {
 
   const normalizedUserId = localStore.normalizeUserId(user?.id || profile?.id);
 
-  // Find student's enrolled group
-  const { studentGroup, groupSchedules } = useMemo(() => {
+  // 1. Find all groups the student belongs to
+  const enrolledGroups = useMemo(() => {
     const allGroups = localStore.getGroups();
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    const currentUser =
+      allUsers.find((u) => localStore.normalizeUserId(u.id) === normalizedUserId) ||
+      profile ||
+      user;
+
+    const userGroupIds = Array.isArray(currentUser?.group_ids)
+      ? currentUser.group_ids
+      : currentUser?.group_id
+      ? [currentUser.group_id]
+      : [];
+
     const memberships = localStore.getMemberships
       ? localStore.getMemberships()
       : localStore.getItem('educo_db_memberships', []);
 
-    const studentMembership = memberships.find(
-      (m) =>
-        localStore.normalizeUserId(m.student_id) === normalizedUserId &&
-        m.is_active !== false
-    );
+    const memberGroupIds = memberships
+      .filter(
+        (m) =>
+          localStore.normalizeUserId(m.student_id) === normalizedUserId &&
+          m.is_active !== false
+      )
+      .map((m) => m.group_id);
 
-    const group = studentMembership
-      ? allGroups.find((g) => g.id === studentMembership.group_id)
-      : allGroups.find(
-          (g) =>
-            Array.isArray(g.student_ids) &&
-            g.student_ids
-              .map((id) => localStore.normalizeUserId(id))
-              .includes(normalizedUserId)
-        );
+    const inGroupStudentIds = allGroups
+      .filter(
+        (g) =>
+          Array.isArray(g.student_ids) &&
+          g.student_ids.map((id) => localStore.normalizeUserId(id)).includes(normalizedUserId)
+      )
+      .map((g) => g.id);
 
-    if (!group) {
+    const allMyGroupIds = [
+      ...new Set([...userGroupIds, ...memberGroupIds, ...inGroupStudentIds]),
+    ];
+
+    return allGroups.filter((g) => allMyGroupIds.includes(g.id));
+  }, [normalizedUserId, profile, user]);
+
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState('ALL');
+
+  // Find active group and schedules
+  const { studentGroup, groupSchedules } = useMemo(() => {
+    if (!enrolledGroups || enrolledGroups.length === 0) {
       return { studentGroup: null, groupSchedules: [] };
     }
 
     const allSchedules = localStore.getSchedules();
-    const scheds = allSchedules.filter((s) => s.group_id === group.id);
+    const activeG =
+      selectedGroupFilter !== 'ALL'
+        ? enrolledGroups.find((g) => g.id === selectedGroupFilter) || enrolledGroups[0]
+        : enrolledGroups[0];
 
-    return { studentGroup: group, groupSchedules: scheds };
-  }, [normalizedUserId]);
+    const targetGroupIds =
+      selectedGroupFilter === 'ALL'
+        ? enrolledGroups.map((g) => g.id)
+        : [activeG.id];
+
+    const scheds = allSchedules.filter((s) => targetGroupIds.includes(s.group_id));
+
+    return { studentGroup: activeG, groupSchedules: scheds };
+  }, [enrolledGroups, selectedGroupFilter]);
 
   const weekDays = [
     { day: 1, name: 'Dushanba', short: 'Dush', isOdd: true },
@@ -179,6 +212,50 @@ export default function StudentSchedulePage() {
 
   return (
     <div className="space-y-6 animate-fade-in p-4 sm:p-6">
+      {/* Multi-Group Filter (If student is enrolled in 2+ groups) */}
+      {enrolledGroups.length > 1 && (
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-3 sm:p-4 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-[#123D78] dark:text-blue-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Guruh bo‘yicha filtr:
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedGroupFilter('ALL')}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  selectedGroupFilter === 'ALL'
+                    ? 'bg-[#123D78] text-white shadow-sm ring-2 ring-blue-500/30'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                Barcha guruhlar ({enrolledGroups.length})
+              </button>
+              {enrolledGroups.map((g) => {
+                const isActive = selectedGroupFilter === g.id;
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => setSelectedGroupFilter(g.id)}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isActive
+                        ? 'bg-[#123D78] text-white shadow-sm ring-2 ring-blue-500/30'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <span>{g.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-emerald-600 dark:via-emerald-700 dark:to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
         <div className="absolute right-0 top-0 -mt-6 -mr-6 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />

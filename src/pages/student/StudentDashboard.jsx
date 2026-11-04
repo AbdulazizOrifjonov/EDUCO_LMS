@@ -109,7 +109,7 @@ export default function StudentDashboard() {
     );
   }
 
-  const { currentGroup, grades, attendanceSummary, homeworkDeadlines, announcements } = studentData;
+  const { currentGroup, enrolledGroups, grades, attendanceSummary, homeworkDeadlines, announcements } = studentData;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -198,6 +198,29 @@ export default function StudentDashboard() {
                     {currentGroup.room ? `${currentGroup.room}-xona` : '101-xona'}
                   </span>
                 </p>
+
+                {enrolledGroups && enrolledGroups.length > 1 && (
+                  <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-800">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-1">
+                      Barcha guruhlaringiz ({enrolledGroups.length}):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {enrolledGroups.map((eg) => (
+                        <span
+                          key={eg.id}
+                          onClick={() => navigate('/student/group')}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold border cursor-pointer transition-colors ${
+                            eg.id === currentGroup.id
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-100'
+                          }`}
+                        >
+                          {eg.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <div className="py-2">

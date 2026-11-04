@@ -97,6 +97,60 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   const [passwordError, setPasswordError] = useState('');
   const [cropModalFile, setCropModalFile] = useState(null);
 
+  // Student group & transfer state
+  const [studentGroup, setStudentGroup] = useState(null);
+  const [studentGroups, setStudentGroups] = useState([]);
+  const [allGroups, setAllGroups] = useState([]);
+  const [selectedNewGroupId, setSelectedNewGroupId] = useState('');
+  const [isTransferringGroup, setIsTransferringGroup] = useState(false);
+  const [groupTransferSuccess, setGroupTransferSuccess] = useState('');
+
+  const effectiveRole = String(userRole || (isViewingOther ? targetUser?.role : profile?.role) || 'student').toLowerCase();
+
+  const loadStudentGroupInfo = React.useCallback(async () => {
+    const studentId = resolvedTargetId || targetUser?.id || profile?.id;
+    if (!studentId) return;
+
+    try {
+      const res = await getGroups({ status: 'all', limit: 200 });
+      const list = res.groups || [];
+      setAllGroups(list);
+
+      // Find all groups this student belongs to
+      const targetGroupIds = [];
+      const directGid = targetUser?.group_id || profile?.group_id;
+      if (directGid) targetGroupIds.push(directGid);
+      if (Array.isArray(targetUser?.group_ids)) {
+        targetUser.group_ids.forEach((gid) => {
+          if (gid && !targetGroupIds.includes(gid)) targetGroupIds.push(gid);
+        });
+      }
+
+      try {
+        const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+        const normId = localStore.normalizeUserId ? localStore.normalizeUserId(studentId) : String(studentId);
+        memberships
+          .filter((m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false)
+          .forEach((m) => {
+            if (m.group_id && !targetGroupIds.includes(m.group_id)) targetGroupIds.push(m.group_id);
+          });
+      } catch (_) {}
+
+      list.forEach((g) => {
+        if (Array.isArray(g.student_ids) && (g.student_ids.includes(studentId) || g.student_ids.map(String).includes(String(studentId)))) {
+          if (!targetGroupIds.includes(g.id)) targetGroupIds.push(g.id);
+        }
+      });
+
+      const matchedGroups = targetGroupIds.map((gid) => list.find((g) => g.id === gid)).filter(Boolean);
+      setStudentGroups(matchedGroups);
+      setStudentGroup(matchedGroups[0] || null);
+      setSelectedNewGroupId(matchedGroups[0] ? matchedGroups[0].id : '');
+    } catch (err) {
+      console.warn('Error loading student group in ProfilePage:', err);
+    }
+  }, [resolvedTargetId, targetUser, profile]);
+
   // Synchronize state with target user or own profile
   useEffect(() => {
     if (isViewingOther && resolvedTargetId) {
@@ -322,59 +376,6 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
 
   const displayAvatar = avatarUrl || (isViewingOther ? targetUser?.avatar_url : profile?.avatar_url) || '';
   const currentDisplayName = fullName || (isViewingOther ? targetUser?.fullName : profile?.full_name) || 'User';
-  const effectiveRole = String(userRole || (isViewingOther ? targetUser?.role : profile?.role) || 'student').toLowerCase();
-
-  // Student group & transfer state
-  const [studentGroup, setStudentGroup] = useState(null);
-  const [studentGroups, setStudentGroups] = useState([]);
-  const [allGroups, setAllGroups] = useState([]);
-  const [selectedNewGroupId, setSelectedNewGroupId] = useState('');
-  const [isTransferringGroup, setIsTransferringGroup] = useState(false);
-  const [groupTransferSuccess, setGroupTransferSuccess] = useState('');
-
-  const loadStudentGroupInfo = React.useCallback(async () => {
-    const studentId = resolvedTargetId || targetUser?.id || profile?.id;
-    if (!studentId) return;
-
-    try {
-      const res = await getGroups({ status: 'all', limit: 200 });
-      const list = res.groups || [];
-      setAllGroups(list);
-
-      // Find all groups this student belongs to
-      const targetGroupIds = [];
-      const directGid = targetUser?.group_id || profile?.group_id;
-      if (directGid) targetGroupIds.push(directGid);
-      if (Array.isArray(targetUser?.group_ids)) {
-        targetUser.group_ids.forEach((gid) => {
-          if (gid && !targetGroupIds.includes(gid)) targetGroupIds.push(gid);
-        });
-      }
-
-      try {
-        const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
-        const normId = localStore.normalizeUserId ? localStore.normalizeUserId(studentId) : String(studentId);
-        memberships
-          .filter((m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false)
-          .forEach((m) => {
-            if (m.group_id && !targetGroupIds.includes(m.group_id)) targetGroupIds.push(m.group_id);
-          });
-      } catch (_) {}
-
-      list.forEach((g) => {
-        if (Array.isArray(g.student_ids) && (g.student_ids.includes(studentId) || g.student_ids.map(String).includes(String(studentId)))) {
-          if (!targetGroupIds.includes(g.id)) targetGroupIds.push(g.id);
-        }
-      });
-
-      const matchedGroups = targetGroupIds.map((gid) => list.find((g) => g.id === gid)).filter(Boolean);
-      setStudentGroups(matchedGroups);
-      setStudentGroup(matchedGroups[0] || null);
-      setSelectedNewGroupId(matchedGroups[0] ? matchedGroups[0].id : '');
-    } catch (err) {
-      console.warn('Error loading student group in ProfilePage:', err);
-    }
-  }, [resolvedTargetId, targetUser, profile]);
 
   useEffect(() => {
     if (effectiveRole === 'student') {

@@ -432,26 +432,61 @@ export const dashboardService = {
     } catch (error) {
       console.warn('Supabase getStudentStats failed, fallback to localStore:', error);
       const groups = localStore.getGroups();
-      const memberships = localStore.getMemberships ? localStore.getMemberships() : localStore.getItem('educo_db_memberships', []);
+      const allUsers = localStore.getUsers ? localStore.getUsers() : [];
       const normalizedStudentId = localStore.normalizeUserId(studentId);
-      const studentMembership = memberships.find(
-        (m) => localStore.normalizeUserId(m.student_id) === normalizedStudentId && m.is_active !== false
+      const userObj = allUsers.find(
+        (u) => localStore.normalizeUserId(u.id) === normalizedStudentId || u.id === studentId
       );
-      const matchedGroup = studentMembership
-        ? groups.find((g) => g.id === studentMembership.group_id)
-        : (groups.find((g) => Array.isArray(g.student_ids) && g.student_ids.map((id) => localStore.normalizeUserId(id)).includes(normalizedStudentId)) || groups[0]);
 
-      const currentGroup = matchedGroup
-        ? {
-            id: matchedGroup.id,
-            name: matchedGroup.name,
-            room: matchedGroup.room || '101-xona',
-            courseName: matchedGroup.course_name || matchedGroup.courseName || 'Kurs',
-            courseColor: matchedGroup.courseColor || '#123D78',
-          }
-        : null;
+      const userGroupIds = Array.isArray(userObj?.group_ids)
+        ? userObj.group_ids
+        : userObj?.group_id
+        ? [userObj.group_id]
+        : [];
 
-      const localGrades = localStore.getGrades().filter((g) => g.student_id === studentId || !g.student_id);
+      const memberships = localStore.getMemberships
+        ? localStore.getMemberships()
+        : localStore.getItem('educo_db_memberships', []);
+
+      const memberGroupIds = memberships
+        .filter(
+          (m) =>
+            localStore.normalizeUserId(m.student_id) === normalizedStudentId &&
+            m.is_active !== false
+        )
+        .map((m) => m.group_id);
+
+      const inStudentIds = groups
+        .filter(
+          (g) =>
+            Array.isArray(g.student_ids) &&
+            g.student_ids
+              .map((id) => localStore.normalizeUserId(id))
+              .includes(normalizedStudentId)
+        )
+        .map((g) => g.id);
+
+      const allEnrolledGroupIds = [
+        ...new Set([...userGroupIds, ...memberGroupIds, ...inStudentIds]),
+      ];
+
+      const enrolledGroups = groups
+        .filter((g) => allEnrolledGroupIds.includes(g.id))
+        .map((g) => ({
+          id: g.id,
+          name: g.name,
+          room: g.room || '101-xona',
+          courseName: g.course_name || g.courseName || 'Kurs',
+          courseColor: g.courseColor || '#123D78',
+        }));
+
+      const currentGroup = enrolledGroups.length > 0 ? enrolledGroups[0] : null;
+
+      const localGrades = (localStore.getGrades ? localStore.getGrades() : []).filter(
+        (g) =>
+          localStore.normalizeUserId(g.student_id) === normalizedStudentId ||
+          g.student_id === studentId
+      );
       const grades = localGrades.map((g) => ({
         id: g.id,
         score: Number(g.grade_value || g.grade || 5),
@@ -461,22 +496,59 @@ export const dashboardService = {
         lessonDate: g.created_at ? g.created_at.split('T')[0] : 'Bugun',
       }));
 
+      // Calculate real attendance stats
+      const allAtt = localStore.getAttendance ? localStore.getAttendance() : [];
+      const studentAtt = allAtt.filter(
+        (a) => localStore.normalizeUserId(a.student_id) === normalizedStudentId
+      );
+      const totalAtt = studentAtt.length;
+      const presentCount = studentAtt.filter((a) => a.status === 'present').length;
+      const lateCount = studentAtt.filter((a) => a.status === 'late').length;
+      const absentCount = studentAtt.filter((a) => a.status === 'absent').length;
+      const excusedCount = studentAtt.filter((a) => a.status === 'excused').length;
+
+      const attendanceSummary = {
+        total: totalAtt,
+        present: presentCount,
+        late: lateCount,
+        absent: absentCount,
+        excused: excusedCount,
+        presentPercent: totalAtt > 0 ? Math.round((presentCount / totalAtt) * 100) : 100,
+        latePercent: totalAtt > 0 ? Math.round((lateCount / totalAtt) * 100) : 0,
+        absentPercent: totalAtt > 0 ? Math.round((absentCount / totalAtt) * 100) : 0,
+        rate:
+          totalAtt > 0
+            ? Math.round(((presentCount + lateCount * 0.5) / totalAtt) * 100)
+            : 100,
+      };
+
+      // Get homework for enrolled groups
+      const allHw = localStore.getItem ? localStore.getItem('educo_db_homework', []) : [];
+      const homeworkDeadlines = allHw
+        .filter((h) => allEnrolledGroupIds.includes(h.group_id))
+        .slice(0, 5);
+
+      // Get announcements
+      const allAnn = localStore.getItem ? localStore.getItem('educo_db_announcements', []) : [];
+      const announcements = allAnn
+        .filter((a) => !a.target_role || a.target_role === 'all' || a.target_role === 'student')
+        .slice(0, 5)
+        .map((a) => ({
+          id: a.id,
+          title: a.title,
+          content: a.content,
+          isPinned: a.is_pinned,
+          date: a.created_at,
+          author: a.author_name || 'EDUCO Team',
+        }));
+
       return {
         currentGroup,
+        enrolledGroups,
         grades,
-        attendanceSummary: {
-          total: 10,
-          present: 9,
-          late: 1,
-          absent: 0,
-          excused: 0,
-          presentPercent: 90,
-          latePercent: 10,
-          absentPercent: 0,
-          rate: 95,
-        },
-        homeworkDeadlines: [],
-        announcements: [],
+        attendanceSummary,
+        homeworkDeadlines,
+        announcements,
       };
     }
   },
@@ -566,25 +638,70 @@ export const dashboardService = {
 
       let allowedGroupIds = [];
       if (role === 'student') {
-        const memberships = localStore.getMemberships ? localStore.getMemberships() : localStore.getItem('educo_db_memberships', []);
-        const enrolled = memberships.filter((m) => localStore.normalizeUserId(m.student_id) === normalizedUserId && m.is_active !== false).map((m) => m.group_id);
-        const inStudentIds = groups.filter((g) => Array.isArray(g.student_ids) && g.student_ids.map(id => localStore.normalizeUserId(id)).includes(normalizedUserId)).map(g => g.id);
-        allowedGroupIds = [...new Set([...enrolled, ...inStudentIds])];
+        const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+        const userObj = allUsers.find(
+          (u) => localStore.normalizeUserId(u.id) === normalizedUserId || u.id === userId
+        );
+        const userGroupIds = Array.isArray(userObj?.group_ids)
+          ? userObj.group_ids
+          : userObj?.group_id
+          ? [userObj.group_id]
+          : [];
+
+        const memberships = localStore.getMemberships
+          ? localStore.getMemberships()
+          : localStore.getItem('educo_db_memberships', []);
+        const enrolled = memberships
+          .filter(
+            (m) =>
+              localStore.normalizeUserId(m.student_id) === normalizedUserId &&
+              m.is_active !== false
+          )
+          .map((m) => m.group_id);
+        const inStudentIds = groups
+          .filter(
+            (g) =>
+              Array.isArray(g.student_ids) &&
+              g.student_ids.map((id) => localStore.normalizeUserId(id)).includes(normalizedUserId)
+          )
+          .map((g) => g.id);
+
+        allowedGroupIds = [...new Set([...enrolled, ...inStudentIds, ...userGroupIds])];
+
+        // If student has no groups assigned, they have no lessons scheduled!
+        if (allowedGroupIds.length === 0) {
+          return [];
+        }
       } else if (role === 'teacher') {
-        const u = localStore.getUsers ? localStore.getUsers().find(x => x.id === normalizedUserId || x.id === userId) : null;
-        const uName = (u?.fullName || `${u?.first_name || ''} ${u?.last_name || ''}`).trim().toLowerCase();
-        allowedGroupIds = groups.filter((g) => {
-          const matchId = g.teacher_id === normalizedUserId || g.teacher_id === userId;
-          const matchName = uName && g.teacher_name && (g.teacher_name.toLowerCase().includes(uName) || uName.includes(g.teacher_name.toLowerCase()));
-          return matchId || matchName;
-        }).map((g) => g.id);
+        const u = localStore.getUsers
+          ? localStore.getUsers().find((x) => x.id === normalizedUserId || x.id === userId)
+          : null;
+        const uName = (u?.fullName || `${u?.first_name || ''} ${u?.last_name || ''}`)
+          .trim()
+          .toLowerCase();
+        allowedGroupIds = groups
+          .filter((g) => {
+            const matchId = g.teacher_id === normalizedUserId || g.teacher_id === userId;
+            const matchName =
+              uName &&
+              g.teacher_name &&
+              (g.teacher_name.toLowerCase().includes(uName) ||
+                uName.includes(g.teacher_name.toLowerCase()));
+            return matchId || matchName;
+          })
+          .map((g) => g.id);
       } else {
         allowedGroupIds = groups.map((g) => g.id);
       }
 
-      const todayScheds = allSchedules.filter(
-        (s) => Number(s.day_of_week) === currentDayOfWeek && (allowedGroupIds.length === 0 || allowedGroupIds.includes(s.group_id))
-      );
+      const todayScheds = allSchedules.filter((s) => {
+        const matchesDay = Number(s.day_of_week) === currentDayOfWeek;
+        if (!matchesDay) return false;
+        if (role === 'student' || role === 'teacher') {
+          return allowedGroupIds.includes(s.group_id);
+        }
+        return allowedGroupIds.length === 0 || allowedGroupIds.includes(s.group_id);
+      });
 
       return todayScheds.map((s) => {
         const g = groups.find((grp) => grp.id === s.group_id);
