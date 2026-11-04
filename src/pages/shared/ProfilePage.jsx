@@ -121,6 +121,31 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
     }
   }, [resolvedTargetId, isViewingOther, profile, user]);
 
+  // Realtime cross-device sync: auto-update profile & group info when another device makes changes
+  useEffect(() => {
+    const handleSync = () => {
+      if (isViewingOther && resolvedTargetId) {
+        const all = localStore.getUsers();
+        const found = all.find((u) => u.id === resolvedTargetId || u.username === resolvedTargetId);
+        if (found) {
+          setTargetUser(found);
+          setFullName(found.fullName || found.full_name || `${found.first_name || ''} ${found.last_name || ''}`.trim() || found.name || '');
+          setPhoneNumber(found.phone || found.phone_number || '');
+          setUsername(found.username || found.email || '');
+          setUserRole(found.role || ROLES.STUDENT);
+          setAvatarUrl(found.avatar_url || '');
+          setFatherPhone(found.father_phone || '');
+          setMotherPhone(found.mother_phone || '');
+        }
+      }
+      if (effectiveRole === 'student' && typeof loadStudentGroupInfo === 'function') {
+        loadStudentGroupInfo();
+      }
+    };
+    window.addEventListener('educo-data-sync', handleSync);
+    return () => window.removeEventListener('educo-data-sync', handleSync);
+  }, [isViewingOther, resolvedTargetId, effectiveRole, loadStudentGroupInfo]);
+
   // Handle Profile Update (Works for both own profile and target user)
   const handleProfileSubmit = async (e) => {
     e.preventDefault();

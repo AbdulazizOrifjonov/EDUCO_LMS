@@ -786,7 +786,7 @@ class LocalStore {
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
 
     if (!force && this._isSyncing) {
-      if (Date.now() - (this._syncStartTime || 0) > 4000) {
+      if (Date.now() - (this._syncStartTime || 0) > 1500) {
         this._isSyncing = false;
       } else {
         return;
@@ -904,16 +904,8 @@ class LocalStore {
     // Run initial sync right away
     this.syncWithServer().catch(() => {});
 
-    // High frequency 1000ms heartbeat (checks every 1s)
+    // High frequency 1000ms heartbeat (checks every 1s across all opened devices)
     this._realtimeTimer = setInterval(() => {
-      // In background or locked screen, slow to 2.5s to preserve battery
-      if (typeof document !== 'undefined' && document.hidden) {
-        if (!this._lastHiddenSync || Date.now() - this._lastHiddenSync > 2500) {
-          this._lastHiddenSync = Date.now();
-          this.syncWithServer().catch(() => {});
-        }
-        return;
-      }
       this.syncWithServer().catch(() => {});
     }, intervalMs);
 
@@ -2795,11 +2787,9 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
     localStore.syncWithServer().catch(() => {});
   });
 
-  // 4. Realtime periodic sync (har 1 sekundda / every 1000ms)
+  // 4. Realtime periodic sync (har 1 sekundda / every 1000ms uninterrupted)
   setInterval(() => {
-    if (typeof document !== 'undefined' && !document.hidden && navigator.onLine) {
-      localStore.syncWithServer().catch(() => {});
-    }
+    localStore.syncWithServer().catch(() => {});
   }, 1000);
 
   // 5. Connect to SSE Realtime stream if available (dev / supported servers)

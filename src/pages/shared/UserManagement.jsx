@@ -723,12 +723,18 @@ export default function UserManagement() {
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
                 viewMode === 'live-sheet'
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/30 ring-1 ring-emerald-400/40'
-                  : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                  : 'text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white'
               }`}
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Jonli Master Excel Jadvali</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white">
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-colors ${
+                  viewMode === 'live-sheet'
+                    ? 'bg-white text-emerald-950 shadow-xs'
+                    : 'bg-black/10 text-gray-950 border border-black/10 dark:bg-white/20 dark:text-white dark:border-white/20'
+                }`}
+              >
                 LIVE
               </span>
             </button>

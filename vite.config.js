@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 
 function syncStoragePlugin() {
   const dataDir = path.resolve(__dirname, './.data');
@@ -23,6 +24,8 @@ function syncStoragePlugin() {
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
       }
+      data._sync_version = (data._sync_version || 0) + 1;
+      data._updated_at = Date.now();
       fs.writeFileSync(dbFile, JSON.stringify(data, null, 2), 'utf-8');
     } catch (e) {
       console.error('Error saving db:', e);
@@ -284,20 +287,17 @@ function syncStoragePlugin() {
         if (req.method === 'GET') {
           const db = getDb() || {};
           const bodyStr = JSON.stringify(db);
-          // Simple hash-based ETag for HTTP 304 speed
-          let hash = 0;
-          for (let i = 0; i < Math.min(bodyStr.length, 2000); i++) {
-            hash = ((hash << 5) - hash) + bodyStr.charCodeAt(i);
-            hash |= 0;
-          }
-          const etag = `W/"${Math.abs(hash)}-${bodyStr.length}"`;
+          // High-precision cryptographic MD5 hash of entire database payload
+          const hash = crypto.createHash('md5').update(bodyStr).digest('hex');
+          const etag = `"${hash}"`;
           if (req.headers['if-none-match'] === etag) {
             res.statusCode = 304;
             res.end();
             return;
           }
           res.setHeader('ETag', etag);
-          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
           res.setHeader('Content-Type', 'application/json');
           res.end(bodyStr);
           return;
