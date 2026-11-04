@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
@@ -132,6 +132,22 @@ export default function UserManagement() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  const userStats = useMemo(() => {
+    let all = localStore.getUsers ? localStore.getUsers() : [];
+    if (currentUserRole === 'admin') {
+      all = all.filter((u) => u.role !== 'owner');
+    } else if (currentUserRole === 'teacher') {
+      all = all.filter((u) => u.role === 'student');
+    }
+    const total = all.length;
+    const students = all.filter((u) => u.role === 'student').length;
+    const teachers = all.filter((u) => u.role === 'teacher').length;
+    const admins = all.filter((u) => u.role === 'admin' || u.role === 'owner').length;
+    const active = all.filter((u) => u.is_active !== false).length;
+    const inactive = all.filter((u) => u.is_active === false).length;
+    return { total, students, teachers, admins, active, inactive };
+  }, [currentUserRole, users]);
 
   const [groupsMap, setGroupsMap] = useState(() => {
     try {
@@ -621,12 +637,15 @@ export default function UserManagement() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2.5 flex-wrap">
             <Users className="w-7 h-7 text-brand-navy dark:text-blue-400" />
-            {t('nav.users', 'User Management')}
+            <span>{t('nav.users', 'User Management')}</span>
+            <span className="px-3 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 shadow-2xs">
+              Jami: {userStats.total} ta odam
+            </span>
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {t('users.pageSubtitle', 'Manage system accounts, credentials, and access roles')}
+            {t('users.pageSubtitle', 'Manage system accounts, credentials, and access roles')} • <span className="font-semibold text-emerald-600 dark:text-emerald-400">{userStats.active} faol</span> / <span className="font-semibold text-gray-400">{userStats.inactive} nofaol</span>
           </p>
         </div>
 
@@ -721,6 +740,146 @@ export default function UserManagement() {
         <OwnerMasterLiveSheet />
       ) : (
         <>
+          {/* Quick Role & Population Stats Bar */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Total Users */}
+            <button
+              type="button"
+              onClick={() => {
+                setRoleFilter('all');
+                setSearchParams({});
+                setPage(1);
+              }}
+              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                roleFilter === 'all'
+                  ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 shadow-sm ring-2 ring-blue-500/20'
+                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-800/60 shadow-2xs'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Jami foydalanuvchilar
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+                  {userStats.total}
+                </span>
+                <span className="text-xs font-semibold text-gray-400">odam</span>
+              </div>
+              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>{userStats.active} faol hisob</span>
+              </div>
+            </button>
+
+            {/* Students */}
+            <button
+              type="button"
+              onClick={() => {
+                setRoleFilter(ROLES.STUDENT);
+                setSearchParams({ role: ROLES.STUDENT });
+                setPage(1);
+              }}
+              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                roleFilter === ROLES.STUDENT
+                  ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 shadow-sm ring-2 ring-emerald-500/20'
+                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-800/60 shadow-2xs'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  O‘quvchilar
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
+                  {userStats.students}
+                </span>
+                <span className="text-xs font-semibold text-gray-400">o‘quvchi</span>
+              </div>
+              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                Markaz talabalari
+              </div>
+            </button>
+
+            {/* Teachers */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isTeacher) return;
+                setRoleFilter(ROLES.TEACHER);
+                setSearchParams({ role: ROLES.TEACHER });
+                setPage(1);
+              }}
+              disabled={isTeacher}
+              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                roleFilter === ROLES.TEACHER
+                  ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm ring-2 ring-amber-500/20'
+                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-amber-300 dark:hover:border-amber-800/60 shadow-2xs'
+              } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Ustozlar (O‘qituvchi)
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <UserCheck className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-300">
+                  {userStats.teachers}
+                </span>
+                <span className="text-xs font-semibold text-gray-400">ustoz</span>
+              </div>
+              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                Dars beruvchi xodimlar
+              </div>
+            </button>
+
+            {/* Admins & Owner */}
+            <button
+              type="button"
+              onClick={() => {
+                if (isTeacher) return;
+                setRoleFilter(ROLES.ADMIN);
+                setSearchParams({ role: ROLES.ADMIN });
+                setPage(1);
+              }}
+              disabled={isTeacher}
+              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                roleFilter === ROLES.ADMIN
+                  ? 'bg-purple-50/80 dark:bg-purple-950/40 border-purple-300 dark:border-purple-700 shadow-sm ring-2 ring-purple-500/20'
+                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-800/60 shadow-2xs'
+              } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Rahbar & Adminlar
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                  <Shield className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-300">
+                  {userStats.admins}
+                </span>
+                <span className="text-xs font-semibold text-gray-400">xodim</span>
+              </div>
+              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                Boshqaruv ma’murlari
+              </div>
+            </button>
+          </div>
+
           {/* Role Navigation Tabs */}
           <div className="flex items-center gap-1.5 sm:gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 flex-wrap">
         {(() => {
@@ -744,13 +903,13 @@ export default function UserManagement() {
           };
 
           const tabs = isTeacher
-            ? [{ key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap }]
+            ? [{ key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), count: userStats.students, icon: GraduationCap }]
             : [
-                { key: 'all', label: t('users.allMembersTab', 'Barcha foydalanuvchilar'), icon: Users },
-                { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), icon: GraduationCap },
-                { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), icon: UserCheck },
+                { key: 'all', label: t('users.allMembersTab', 'Barcha foydalanuvchilar'), count: userStats.total, icon: Users },
+                { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), count: userStats.students, icon: GraduationCap },
+                { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), count: userStats.teachers, icon: UserCheck },
                 ...(currentUserRole === ROLES.OWNER || currentUserRole === 'owner' || currentUserRole === ROLES.ADMIN || currentUserRole === 'admin'
-                  ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), icon: Shield }]
+                  ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), count: userStats.admins, icon: Shield }]
                   : []),
               ];
 
@@ -768,12 +927,21 @@ export default function UserManagement() {
                   setPage(1);
                 }}
                 className={`
-                  flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shrink-0 cursor-pointer
+                  flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer
                   ${isActive ? cfg.active : cfg.inactive}
                 `}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4 shrink-0" />
                 <span>{tab.label}</span>
+                <span
+                  className={`ml-1 text-[11px] font-black px-2 py-0.5 rounded-full ${
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-gray-200/80 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {tab.count}
+                </span>
               </button>
             );
           });
@@ -839,6 +1007,23 @@ export default function UserManagement() {
               { value: 'inactive', label: t('common.inactive', 'Nofaol / Bloklangan'), color: '#ef4444', subtitle: 'Kirish cheklangan' },
             ]}
           />
+        </div>
+
+        {/* Population & Result Summary Bar */}
+        <div className="px-4 py-2.5 bg-gray-50/80 dark:bg-surface-dark-tertiary border-t border-b border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-gray-900 dark:text-gray-100">
+              {totalCount} ta foydalanuvchi ko‘rsatilmoqda
+            </span>
+            {search && (
+              <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                («{search}» bo‘yicha)
+              </span>
+            )}
+          </div>
+          <span className="text-[11px] text-gray-500 dark:text-gray-400">
+            Jami tizimda: <strong className="text-gray-800 dark:text-gray-200">{userStats.total} ta</strong> ({userStats.students} o‘quvchi, {userStats.teachers} ustoz, {userStats.admins} ma’mur)
+          </span>
         </div>
 
         {/* Desktop User Table */}
