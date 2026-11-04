@@ -1084,6 +1084,26 @@ class LocalStore {
         ? new Date().toISOString()
         : (existing?.password_updated_at || new Date().toISOString()),
       is_active: userData.is_active ?? userData.isActive ?? existing?.is_active ?? true,
+      custom_price:
+        userData.custom_price !== undefined
+          ? userData.custom_price
+          : (existing?.custom_price ?? null),
+      discount_percent:
+        userData.discount_percent !== undefined
+          ? Number(userData.discount_percent || 0)
+          : Number(existing?.discount_percent || 0),
+      discount_amount:
+        userData.discount_amount !== undefined
+          ? Number(userData.discount_amount || 0)
+          : Number(existing?.discount_amount || 0),
+      discount_type:
+        userData.discount_type !== undefined
+          ? userData.discount_type
+          : (existing?.discount_type || null),
+      discount_reason:
+        userData.discount_reason !== undefined
+          ? userData.discount_reason
+          : (existing?.discount_reason || ''),
       created_at: userData.created_at || existing?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

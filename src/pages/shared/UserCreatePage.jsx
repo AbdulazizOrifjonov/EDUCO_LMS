@@ -1128,7 +1128,266 @@ export default function UserCreatePage() {
           </Card>
         )}
 
-        {/* Section 5: ⏰ Dars kuni / Qayta bog'lanish eslatmasi (Owner & Admin only) */}
+        {/* Section 5: Oylik to'lov narxi va individual chegirma (Faqat Owner va Admin uchun!) */}
+        {selectedRole === ROLES.STUDENT && isOwnerOrAdmin && (
+          <Card className="p-5 border-2 border-emerald-500/40 dark:border-emerald-600/40 bg-gradient-to-br from-emerald-50/40 via-white to-teal-50/30 dark:from-emerald-950/20 dark:via-gray-900 dark:to-teal-950/20 shadow-sm">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-emerald-100 dark:border-emerald-900/50 flex-wrap gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Wallet className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">
+                      {isEditing ? "Oylik to‘lov summasi va Chegirma" : "5. Oylik to‘lov summasi va Chegirma"}
+                    </h2>
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                      Faqat Owner & Admin
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Ushbu o‘quvchi uchun individual to‘lov miqdorini yoki chegirmasini belgilang
+                  </p>
+                </div>
+              </div>
+
+              {/* Selected Group Base Price Pill */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xs text-xs">
+                <span className="text-gray-500 dark:text-gray-400">Guruh rasmiy narxi:</span>
+                <span className="font-black text-gray-900 dark:text-gray-100">
+                  {baseFee.toLocaleString()} so‘m / oy
+                </span>
+              </div>
+            </div>
+
+            {/* Pricing Mode Selector */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2 block">
+                  To‘lov usulini tanlang:
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {[
+                    { id: 'standard', label: 'Standart narx', desc: 'To‘liq guruh narxi', icon: Coins },
+                    { id: 'custom', label: 'Maxsus narx', desc: 'Kelishilgan summa', icon: Wallet },
+                    { id: 'percent', label: 'Foizli chegirma', desc: '% miqdorda', icon: Percent },
+                    { id: 'amount', label: 'Summali chegirma', desc: '-so‘m chegirma', icon: Tag },
+                    { id: 'free', label: 'Bepul (Grant)', desc: '0 so‘m (100% grant)', icon: BadgeCheck },
+                  ].map((mode) => {
+                    const IconComp = mode.icon;
+                    const isSelected = tuitionPricingMode === mode.id;
+                    return (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        onClick={() => setTuitionPricingMode(mode.id)}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-400/30'
+                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <IconComp className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'}`} />
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <div className="text-xs font-bold leading-tight">{mode.label}</div>
+                        <div className={`text-[10px] mt-0.5 ${isSelected ? 'text-emerald-100' : 'text-gray-400'}`}>
+                          {mode.desc}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Inputs according to selected mode */}
+              {tuitionPricingMode === 'custom' && (
+                <div className="p-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 space-y-2.5">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 block">
+                    Kelishilgan maxsus oylik to‘lov summasini kiriting (so‘m):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={customTuitionPrice}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, '');
+                          setCustomTuitionPrice(raw ? Number(raw).toLocaleString() : '');
+                        }}
+                        placeholder="Masalan: 400,000"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                        so‘m / oy
+                      </span>
+                    </div>
+                  </div>
+                  {/* Quick price pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] text-gray-400 font-medium">Tezkor tanlov:</span>
+                    {[250000, 300000, 350000, 400000, 450000].map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setCustomTuitionPrice(amt.toLocaleString())}
+                        className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-emerald-100 dark:hover:bg-emerald-950 text-[11px] font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                      >
+                        {amt.toLocaleString()} so‘m
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tuitionPricingMode === 'percent' && (
+                <div className="p-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 space-y-2.5">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 block">
+                    Chegirma foizini kiriting (%):
+                  </label>
+                  <div className="relative flex-1 max-w-xs">
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={discountPercent}
+                      onChange={(e) => setDiscountPercent(e.target.value)}
+                      placeholder="Masalan: 20"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                      %
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] text-gray-400 font-medium">Tezkor foizlar:</span>
+                    {[10, 15, 20, 25, 30, 50].map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => setDiscountPercent(String(pct))}
+                        className="px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-emerald-100 dark:hover:bg-emerald-950 text-[11px] font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tuitionPricingMode === 'amount' && (
+                <div className="p-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 space-y-2.5">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 block">
+                    Chegirma summasini kiriting (-so‘m):
+                  </label>
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={discountAmount}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, '');
+                        setDiscountAmount(raw ? Number(raw).toLocaleString() : '');
+                      }}
+                      placeholder="Masalan: 100,000"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                      so‘m chegirma
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] text-gray-400 font-medium">Tezkor chegirmalar:</span>
+                    {[50000, 100000, 150000, 200000].map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setDiscountAmount(amt.toLocaleString())}
+                        className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-emerald-100 dark:hover:bg-emerald-950 text-[11px] font-semibold text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                      >
+                        -{amt.toLocaleString()} so‘m
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tuitionPricingMode === 'free' && (
+                <div className="p-4 rounded-2xl bg-emerald-100/70 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs font-semibold text-emerald-900 dark:text-emerald-200 flex items-center gap-3">
+                  <BadgeCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div>
+                    <div className="font-bold">100% Bepul Grant asosida o‘qish</div>
+                    <div className="text-[11px] text-emerald-700 dark:text-emerald-300 mt-0.5">
+                      O‘quvchi ushbu guruhda to‘lovsiz tahsil oladi. Tizimda oylik to‘lov summasi 0 so‘m qilib saqlanadi.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Calculation Banner */}
+              <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">
+                    Yakuniy Oylik To‘lov Miqdori
+                  </span>
+                  <div className="text-xl sm:text-2xl font-black text-emerald-900 dark:text-emerald-100">
+                    {calculatedEffectivePrice.toLocaleString()} so‘m{' '}
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">/ oy</span>
+                  </div>
+                </div>
+
+                {tuitionPricingMode !== 'standard' && (
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
+                      Guruh narxidan farqi:
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-600 dark:text-amber-400">
+                      <Tag className="w-3.5 h-3.5" />
+                      -{(Math.max(0, baseFee - calculatedEffectivePrice)).toLocaleString()} so‘m chegirma
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Discount / Pricing Reason Input */}
+              {tuitionPricingMode !== 'standard' && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block">
+                    Chegirma yoki narx o‘zgarishi sababi (Ixtiyoriy izoh):
+                  </label>
+                  <input
+                    type="text"
+                    value={discountReason}
+                    onChange={(e) => setDiscountReason(e.target.value)}
+                    placeholder="Masalan: Ikkinchi farzand chegirmasi, Olimpiada g‘olibi, Kam ta‘minlangan oila..."
+                    className="w-full px-3.5 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  {/* Quick reason tag buttons */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    {[
+                      "2-farzand chegirmasi",
+                      "Olimpiada sovrindori",
+                      "Kam ta‘minlangan oila",
+                      "100% Grant",
+                      "Erta to‘lov bonusi",
+                    ].map((reason) => (
+                      <button
+                        key={reason}
+                        type="button"
+                        onClick={() => setDiscountReason(reason)}
+                        className="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-emerald-100 dark:hover:bg-emerald-950 text-[11px] font-medium text-gray-600 dark:text-gray-300 hover:text-emerald-700 transition-colors"
+                      >
+                        + {reason}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* Section 6: ⏰ Dars kuni / Qayta bog'lanish eslatmasi (Owner & Admin only) */}
         {selectedRole === ROLES.STUDENT && !isEditing && isOwnerOrAdmin && (
           <Card className="p-5 border-2 border-amber-300 dark:border-amber-900/50 bg-amber-50/20 dark:bg-amber-950/10">
             <div className="flex items-center justify-between mb-3 pb-3 border-b border-amber-200/80 dark:border-amber-900/50 flex-wrap gap-2">
@@ -1136,7 +1395,7 @@ export default function UserCreatePage() {
                 <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
                 <div>
                   <h2 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">
-                    5. ⏰ Dars kuni va Qayta bog‘lanish eslatmasi (Admin uchun)
+                    6. ⏰ Dars kuni va Qayta bog‘lanish eslatmasi (Admin uchun)
                   </h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     O‘quvchiga dars boshlanish sanasini aytish yoki sinov darsini eslatish bildirishnomasi

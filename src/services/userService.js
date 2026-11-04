@@ -254,6 +254,11 @@ export async function createUser({
           is_active: isActive,
           course_id: courseId || null,
           subject: subject || '',
+          custom_price: custom_price !== undefined ? custom_price : null,
+          discount_percent: discount_percent !== undefined ? Number(discount_percent || 0) : 0,
+          discount_amount: discount_amount !== undefined ? Number(discount_amount || 0) : 0,
+          discount_type: discount_type || null,
+          discount_reason: discount_reason || '',
         };
         localStore.saveUser(created);
         return created;
