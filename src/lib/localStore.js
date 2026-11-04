@@ -249,19 +249,20 @@ class LocalStore {
 
   _getDeletedIds() {
     if (this._deletedIds) return this._deletedIds;
+    const baseBlacklist = ['usr-test-sync-1', 'test_sync_user', 'usr-1793596191113'];
     try {
       if (typeof window !== 'undefined' && window.localStorage?.getItem) {
         const raw = window.localStorage.getItem('educo_deleted_ids');
         if (raw) {
           const arr = JSON.parse(raw);
           if (Array.isArray(arr)) {
-            this._deletedIds = new Set(arr);
+            this._deletedIds = new Set([...arr, ...baseBlacklist]);
             return this._deletedIds;
           }
         }
       }
     } catch (_) {}
-    this._deletedIds = new Set();
+    this._deletedIds = new Set(baseBlacklist);
     return this._deletedIds;
   }
 
@@ -1040,8 +1041,11 @@ class LocalStore {
     let raw = this.getItem(STORAGE_KEYS.USERS, INITIAL_USERS);
     let needsCleanup = false;
 
-    // Purge legacy demo accounts that user requested to delete
+    // Purge legacy demo accounts and test accounts that user requested to delete
     const legacyDemoIds = new Set([
+      'usr-test-sync-1',
+      'test_sync_user',
+      'usr-1793596191113',
       'usr-owner-2',
       'usr-admin-1',
       'usr-teacher-1',
@@ -1080,17 +1084,34 @@ class LocalStore {
       return true;
     });
 
-    // Ensure all seed INITIAL_USERS exist in raw (Abbosbek)
+    // Ensure all seed INITIAL_USERS exist in raw (Abbosbek, Zilola, Teachers)
     INITIAL_USERS.forEach((initUser) => {
       const initPhoneClean = (initUser.phone || '').replace(/\D/g, '').slice(-9);
       const exists = raw.some(
         (u) =>
           u.id === initUser.id ||
-          (initPhoneClean && (u.phone || '').replace(/\D/g, '').slice(-9) === initPhoneClean)
+          (initPhoneClean && (u.phone || '').replace(/\D/g, '').slice(-9) === initPhoneClean && u.role === initUser.role)
       );
       if (!exists) {
         raw.push(initUser);
         needsCleanup = true;
+      }
+    });
+
+    // Enforce canonical roles for core staff (Erkinova Zilola is ALWAYS admin)
+    raw.forEach((u) => {
+      if (u.id === 'usr-admin-erkinova') {
+        if (u.role !== 'admin') {
+          u.role = 'admin';
+          u.specialty = 'Administrator';
+          needsCleanup = true;
+        }
+      }
+      if (u.id === 'usr-owner-1' || (u.phone || '').replace(/\D/g, '').slice(-9) === '988001415') {
+        if (u.role !== 'owner') {
+          u.role = 'owner';
+          needsCleanup = true;
+        }
       }
     });
 
@@ -1104,7 +1125,8 @@ class LocalStore {
         (init) =>
           init.id === u.id ||
           init.username === u.username ||
-          ((init.phone || '').replace(/\D/g, '').slice(-9) &&
+          (init.role === u.role &&
+            (init.phone || '').replace(/\D/g, '').slice(-9) &&
             (init.phone || '').replace(/\D/g, '').slice(-9) === (u.phone || '').replace(/\D/g, '').slice(-9))
       );
       return {

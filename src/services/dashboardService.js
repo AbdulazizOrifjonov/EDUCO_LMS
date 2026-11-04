@@ -25,7 +25,7 @@ export const dashboardService = {
         ] = await Promise.all([
           supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'student'),
           supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'teacher'),
-          supabase.from('user_roles').select('*', { count: 'exact', head: true }).in('role', ['admin', 'owner']),
+          supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'admin'),
           supabase.from('groups').select('*', { count: 'exact', head: true }),
           supabase.from('groups').select('*', { count: 'exact', head: true }).eq('status', 'active'),
           supabase.from('courses').select('*', { count: 'exact', head: true }),
@@ -48,9 +48,9 @@ export const dashboardService = {
     const users = localStore.getUsers();
     const groups = localStore.getGroups();
     return {
-      totalStudents: users.filter((u) => u.role === 'student').length,
-      totalTeachers: users.filter((u) => u.role === 'teacher').length,
-      totalAdmins: users.filter((u) => u.role === 'admin' || u.role === 'owner').length,
+      totalStudents: users.filter((u) => u.role === 'student' && u.is_active !== false).length,
+      totalTeachers: users.filter((u) => u.role === 'teacher' && u.is_active !== false).length,
+      totalAdmins: users.filter((u) => u.role === 'admin' && u.is_active !== false).length,
       totalGroups: groups.length,
       activeGroups: groups.filter((g) => g.status === 'active').length,
       totalCourses: courses.length,
@@ -94,8 +94,8 @@ export const dashboardService = {
     const users = localStore.getUsers();
     const groups = localStore.getGroups();
     return {
-      totalStudents: users.filter((u) => u.role === 'student').length,
-      totalTeachers: users.filter((u) => u.role === 'teacher').length,
+      totalStudents: users.filter((u) => u.role === 'student' && u.is_active !== false).length,
+      totalTeachers: users.filter((u) => u.role === 'teacher' && u.is_active !== false).length,
       totalGroups: groups.length,
       activeGroups: groups.filter((g) => g.status === 'active').length,
       totalCourses: courses.length,
