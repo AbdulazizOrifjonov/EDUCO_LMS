@@ -1,4 +1,4 @@
-import { exportToExcel } from './excelExport';
+import { exportToExcel, exportUsersMasterExcel } from './excelExport';
 
 /**
  * Formats a date value locale-sensitively.
@@ -117,11 +117,12 @@ export function exportToCSV(columns = [], rows = [], filename = 'export.csv') {
   return blob;
 }
 
-export { exportToExcel };
+export { exportToExcel, exportUsersMasterExcel };
 
 export default {
   exportToCSV,
   exportToExcel,
+  exportUsersMasterExcel,
   formatDate,
   formatCurrency,
 };

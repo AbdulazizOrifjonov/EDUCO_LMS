@@ -444,6 +444,15 @@ export async function getStudents() {
   return res.users || [];
 }
 
+import { exportUsersMasterExcel, exportToExcel } from '@/utils/excelExport';
+
+/**
+ * Export users to full professional Excel workbook with dashboard & formulas
+ */
+export function exportUsersToExcel(users) {
+  return exportUsersMasterExcel(users);
+}
+
 /**
  * Export users to CSV string
  */

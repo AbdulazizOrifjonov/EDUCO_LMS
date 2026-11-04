@@ -18,7 +18,13 @@
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
       "updated_at": "2026-11-04T03:15:47.296Z",
-      "subject": "Mental Arifmetika"
+      "subject": "Mental Arifmetika",
+      "course_ids": [
+        "crs-mental"
+      ],
+      "group_ids": [
+        "grp-mental"
+      ]
     },
     {
       "id": "usr-1793622233829",
@@ -38,7 +44,13 @@
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
       "updated_at": "2026-11-04T03:15:47.296Z",
-      "subject": "Rus tili"
+      "subject": "Rus tili",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ]
     },
     {
       "id": "usr-1793603060709",
@@ -58,45 +70,69 @@
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
       "updated_at": "2026-11-04T03:15:47.296Z",
-      "subject": "Matematika"
+      "subject": "Matematika",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ]
     },
     {
       "id": "usr-1793599332662",
-      "username": "amirbek_inayatov",
+      "username": "amirbek_inayatov_2906",
       "first_name": "Amirbek",
       "last_name": "Inayatov",
-      "fullName": "Amirbek Inayatov",
-      "full_name": "Amirbek Inayatov",
+      "fullName": "Inayatov Amirbek",
+      "full_name": "Inayatov Amirbek",
       "avatar_url": "",
       "role": "student",
-      "email": "amirbek_inayatov@educo.app",
+      "email": "amirbek_inayatov_2906@educo.app",
       "phone": "+998 94 788 29 06",
       "father_phone": "+998 94 788 29 06",
       "mother_phone": "+998 94 788 29 06",
-      "password": "Dkre&23T2",
+      "password": "Amirbek#2906",
       "password_updated_at": "2026-11-02T15:43:28.047Z",
       "is_active": true,
-      "created_at": "2026-11-02T06:02:12.662Z",
-      "updated_at": "2026-11-02T15:43:28.047Z"
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "course_ids": [
+        "crs-it",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-it",
+        "grp-ingliz-tili"
+      ],
+      "has_temp_phone": false
     },
     {
       "id": "usr-1793596191113",
-      "username": "zilola_erkinova",
+      "username": "zilola_erkinova_5615",
       "first_name": "Zilola",
       "last_name": "Erkinova",
       "fullName": "Erkinova Zilola",
       "full_name": "Erkinova Zilola",
       "avatar_url": "",
-      "role": "admin",
-      "email": "zilola_erkinova@educo.app",
+      "role": "student",
+      "email": "zilola_erkinova_5615@educo.app",
       "phone": "+998 99 900 56 15",
       "father_phone": "",
       "mother_phone": "",
       "password": "Zilola#5615",
       "password_updated_at": "2026-11-04T03:15:47.296Z",
       "is_active": true,
-      "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "course_ids": [
+        "crs-arab-tili",
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili",
+        "grp-rus-tili"
+      ],
+      "has_temp_phone": false
     },
     {
       "id": "usr-1793466843425",
@@ -115,7 +151,14 @@
       "password_updated_at": "2026-10-31T17:14:03.425Z",
       "is_active": true,
       "created_at": "2026-10-31T17:14:03.425Z",
-      "updated_at": "2026-11-01T18:01:27.748Z"
+      "updated_at": "2026-11-01T18:01:27.748Z",
+      "course_ids": [
+        "crs-it"
+      ],
+      "group_ids": [
+        "grp-it"
+      ],
+      "subject": "IT va Dasturlash"
     },
     {
       "id": "usr-owner-1",
@@ -198,7 +241,13 @@
       "password_updated_at": "2026-11-04T03:15:47.296Z",
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "updated_at": "2026-11-04T03:15:47.296Z",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ]
     },
     {
       "id": "usr-teacher-toshtemirova",
@@ -215,28 +264,2842 @@
       "password_updated_at": "2026-11-04T03:15:47.296Z",
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "updated_at": "2026-11-04T03:15:47.296Z",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ]
+    },
+    {
+      "id": "usr-teacher-qosimov",
+      "username": "rustam_qosimov",
+      "first_name": "Rustam",
+      "last_name": "Qosimov",
+      "fullName": "Rustam Qosimov",
+      "full_name": "Rustam Qosimov",
+      "role": "teacher",
+      "subject": "Shaxmat",
+      "phone": "+998 90 123 45 67",
+      "email": "rustam_qosimov@educo.app",
+      "password": "Rustam#4567",
+      "is_active": true,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "course_ids": [
+        "crs-shaxmat"
+      ],
+      "group_ids": [
+        "grp-shaxmat"
+      ]
+    },
+    {
+      "id": "usr-student-930098339",
+      "username": "ismoil_arslonov_8339",
+      "first_name": "Ismoil",
+      "last_name": "Arslonov",
+      "fullName": "Arslonov Ismoil",
+      "full_name": "Arslonov Ismoil",
+      "role": "student",
+      "phone": "+998 93 009 83 39",
+      "email": "ismoil_arslonov_8339@educo.app",
+      "password": "Ismoil#8339",
+      "course_ids": [
+        "crs-matematika",
+        "crs-it",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-matematika",
+        "grp-it",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-997249967",
+      "username": "mubina_botirova_9967",
+      "first_name": "Mubina",
+      "last_name": "Botirova",
+      "fullName": "Botirova Mubina",
+      "full_name": "Botirova Mubina",
+      "role": "student",
+      "phone": "+998 99 724 99 67",
+      "email": "mubina_botirova_9967@educo.app",
+      "password": "Mubina#9967",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-994886110",
+      "username": "parizoda_xurshidova_6110",
+      "first_name": "Parizoda",
+      "last_name": "Xurshidova",
+      "fullName": "Xurshidova Parizoda",
+      "full_name": "Xurshidova Parizoda",
+      "role": "student",
+      "phone": "+998 99 488 61 10",
+      "email": "parizoda_xurshidova_6110@educo.app",
+      "password": "Parizoda#6110",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-973445313",
+      "username": "firdavs_raimanberdiyev_5313",
+      "first_name": "Firdavs",
+      "last_name": "Raimanberdiyev",
+      "fullName": "Raimanberdiyev Firdavs",
+      "full_name": "Raimanberdiyev Firdavs",
+      "role": "student",
+      "phone": "+998 97 344 53 13",
+      "email": "firdavs_raimanberdiyev_5313@educo.app",
+      "password": "Firdavs#5313",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-943852253",
+      "username": "qudratilla_negmatov_2253",
+      "first_name": "Qudratilla",
+      "last_name": "Negmatov",
+      "fullName": "Negmatov Qudratilla",
+      "full_name": "Negmatov Qudratilla",
+      "role": "student",
+      "phone": "+998 94 385 22 53",
+      "email": "qudratilla_negmatov_2253@educo.app",
+      "password": "Qudratilla#2253",
+      "course_ids": [
+        "crs-it"
+      ],
+      "group_ids": [
+        "grp-it"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-909901059",
+      "username": "rustambek_yoldoshev_1059",
+      "first_name": "Rustambek",
+      "last_name": "Yo'ldoshev",
+      "fullName": "Yo'ldoshev Rustambek",
+      "full_name": "Yo'ldoshev Rustambek",
+      "role": "student",
+      "phone": "+998 90 990 10 59",
+      "email": "rustambek_yoldoshev_1059@educo.app",
+      "password": "Rustambek#1059",
+      "course_ids": [
+        "crs-mental",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-mental",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-909474123",
+      "username": "azizjon_raxmatjonov_4123",
+      "first_name": "Azizjon",
+      "last_name": "Raxmatjonov",
+      "fullName": "Raxmatjonov Azizjon",
+      "full_name": "Raxmatjonov Azizjon",
+      "role": "student",
+      "phone": "+998 90 947 41 23",
+      "email": "azizjon_raxmatjonov_4123@educo.app",
+      "password": "Azizjon#4123",
+      "course_ids": [
+        "crs-shaxmat",
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-shaxmat",
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-901236463",
+      "username": "zafir_mamadjonov_6463",
+      "first_name": "Zafir",
+      "last_name": "Mamadjonov",
+      "fullName": "Mamadjonov Zafir",
+      "full_name": "Mamadjonov Zafir",
+      "role": "student",
+      "phone": "+998 90 123 64 63",
+      "email": "zafir_mamadjonov_6463@educo.app",
+      "password": "Zafir#6463",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-936105518",
+      "username": "samira_ermatova_5518",
+      "first_name": "Samira",
+      "last_name": "Ermatova",
+      "fullName": "Ermatova Samira",
+      "full_name": "Ermatova Samira",
+      "role": "student",
+      "phone": "+998 93 610 55 18",
+      "email": "samira_ermatova_5518@educo.app",
+      "password": "Samira#5518",
+      "course_ids": [
+        "crs-ingliz-tili",
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili",
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998093456",
+      "username": "soliha_oybekova_3456",
+      "first_name": "Soliha",
+      "last_name": "Oybekova",
+      "fullName": "Oybekova Soliha",
+      "full_name": "Oybekova Soliha",
+      "role": "student",
+      "phone": "+998 99 809 34 56",
+      "email": "soliha_oybekova_3456@educo.app",
+      "password": "Soliha#3456",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-933921552",
+      "username": "saminaxon_abubakirxojayeva_1552",
+      "first_name": "Saminaxon",
+      "last_name": "Abubakirxo'jayeva",
+      "fullName": "Abubakirxo'jayeva Saminaxon",
+      "full_name": "Abubakirxo'jayeva Saminaxon",
+      "role": "student",
+      "phone": "+998 93 392 15 52",
+      "email": "saminaxon_abubakirxojayeva_1552@educo.app",
+      "password": "Saminaxon#1552",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-992223052",
+      "username": "baxora_roziqulova_3052",
+      "first_name": "Baxora",
+      "last_name": "Ro'ziqulova",
+      "fullName": "Ro'ziqulova Baxora",
+      "full_name": "Ro'ziqulova Baxora",
+      "role": "student",
+      "phone": "+998 99 222 30 52",
+      "email": "baxora_roziqulova_3052@educo.app",
+      "password": "Baxora#3052",
+      "course_ids": [
+        "crs-mental",
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-mental",
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-946019500",
+      "username": "ibrohim_axatov_9500",
+      "first_name": "Ibrohim",
+      "last_name": "Axatov",
+      "fullName": "Axatov Ibrohim",
+      "full_name": "Axatov Ibrohim",
+      "role": "student",
+      "phone": "+998 94 601 95 00",
+      "email": "ibrohim_axatov_9500@educo.app",
+      "password": "Ibrohim#9500",
+      "course_ids": [
+        "crs-shaxmat",
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-shaxmat",
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998580121",
+      "username": "muslima_abdurahmonova_0121",
+      "first_name": "Muslima",
+      "last_name": "Abdurahmonova",
+      "fullName": "Abdurahmonova Muslima",
+      "full_name": "Abdurahmonova Muslima",
+      "role": "student",
+      "phone": "+998 99 858 01 21",
+      "email": "muslima_abdurahmonova_0121@educo.app",
+      "password": "Muslima#0121",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998559245",
+      "username": "zarinabonu_muxammedova_9245",
+      "first_name": "Zarinabonu",
+      "last_name": "Muxammedova",
+      "fullName": "Muxammedova Zarinabonu",
+      "full_name": "Muxammedova Zarinabonu",
+      "role": "student",
+      "phone": "+998 99 855 92 45",
+      "email": "zarinabonu_muxammedova_9245@educo.app",
+      "password": "Zarinabonu#9245",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-935286718",
+      "username": "osiyo_abduraxmonova_6718",
+      "first_name": "Osiyo",
+      "last_name": "Abduraxmonova",
+      "fullName": "Abduraxmonova Osiyo",
+      "full_name": "Abduraxmonova Osiyo",
+      "role": "student",
+      "phone": "+998 93 528 67 18",
+      "email": "osiyo_abduraxmonova_6718@educo.app",
+      "password": "Osiyo#6718",
+      "course_ids": [
+        "crs-mental"
+      ],
+      "group_ids": [
+        "grp-mental"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-935755104",
+      "username": "nodira_qoraboyeva_5104",
+      "first_name": "Nodira",
+      "last_name": "Qoraboyeva",
+      "fullName": "Qoraboyeva Nodira",
+      "full_name": "Qoraboyeva Nodira",
+      "role": "student",
+      "phone": "+998 93 575 51 04",
+      "email": "nodira_qoraboyeva_5104@educo.app",
+      "password": "Nodira#5104",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-994340077",
+      "username": "abdulloh_shaxobiddinov_0077",
+      "first_name": "Abdulloh",
+      "last_name": "Shaxobiddinov",
+      "fullName": "Shaxobiddinov Abdulloh",
+      "full_name": "Shaxobiddinov Abdulloh",
+      "role": "student",
+      "phone": "+998 99 434 00 77",
+      "email": "abdulloh_shaxobiddinov_0077@educo.app",
+      "password": "Abdulloh#0077",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998352122",
+      "username": "abubakir_tillayev_2122",
+      "first_name": "Abubakir",
+      "last_name": "Tillayev",
+      "fullName": "Tillayev Abubakir",
+      "full_name": "Tillayev Abubakir",
+      "role": "student",
+      "phone": "+998 99 835 21 22",
+      "email": "abubakir_tillayev_2122@educo.app",
+      "password": "Abubakir#2122",
+      "course_ids": [
+        "crs-rus-tili",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998822309",
+      "username": "shoxbek_shuxratov_2309",
+      "first_name": "Shoxbek",
+      "last_name": "Shuxratov",
+      "fullName": "Shuxratov Shoxbek",
+      "full_name": "Shuxratov Shoxbek",
+      "role": "student",
+      "phone": "+998 99 882 23 09",
+      "email": "shoxbek_shuxratov_2309@educo.app",
+      "password": "Shoxbek#2309",
+      "course_ids": [
+        "crs-matematika",
+        "crs-arab-tili",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-matematika",
+        "grp-arab-tili",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-944288894",
+      "username": "soliha_yusupova_8894",
+      "first_name": "Soliha",
+      "last_name": "Yusupova",
+      "fullName": "Yusupova Soliha",
+      "full_name": "Yusupova Soliha",
+      "role": "student",
+      "phone": "+998 94 428 88 94",
+      "email": "soliha_yusupova_8894@educo.app",
+      "password": "Soliha#8894",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-958106969",
+      "username": "muslima_fazliddinova_6969",
+      "first_name": "Muslima",
+      "last_name": "Fazliddinova",
+      "fullName": "Fazliddinova Muslima",
+      "full_name": "Fazliddinova Muslima",
+      "role": "student",
+      "phone": "+998 95 810 69 69",
+      "email": "muslima_fazliddinova_6969@educo.app",
+      "password": "Muslima#6969",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-940508780",
+      "username": "farangiz_xaydarova_8780",
+      "first_name": "Farangiz",
+      "last_name": "Xaydarova",
+      "fullName": "Xaydarova Farangiz",
+      "full_name": "Xaydarova Farangiz",
+      "role": "student",
+      "phone": "+998 94 050 87 80",
+      "email": "farangiz_xaydarova_8780@educo.app",
+      "password": "Farangiz#8780",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-977608589",
+      "username": "amirxon_baxavaddinov_8589",
+      "first_name": "Amirxon",
+      "last_name": "Baxavaddinov",
+      "fullName": "Baxavaddinov Amirxon",
+      "full_name": "Baxavaddinov Amirxon",
+      "role": "student",
+      "phone": "+998 97 760 85 89",
+      "email": "amirxon_baxavaddinov_8589@educo.app",
+      "password": "Amirxon#8589",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990019382",
+      "username": "farzona_ikromova_9382",
+      "first_name": "Farzona",
+      "last_name": "Ikromova",
+      "fullName": "Ikromova Farzona",
+      "full_name": "Ikromova Farzona",
+      "role": "student",
+      "phone": "+998 99 001 93 82",
+      "email": "farzona_ikromova_9382@educo.app",
+      "password": "Farzona#9382",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-947387535",
+      "username": "saidaxmad_murodullayev_7535",
+      "first_name": "Saidaxmad",
+      "last_name": "Murodullayev",
+      "fullName": "Murodullayev Saidaxmad",
+      "full_name": "Murodullayev Saidaxmad",
+      "role": "student",
+      "phone": "+998 94 738 75 35",
+      "email": "saidaxmad_murodullayev_7535@educo.app",
+      "password": "Saidaxmad#7535",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-903494929",
+      "username": "madina_boltayeva_4929",
+      "first_name": "Madina",
+      "last_name": "Boltayeva",
+      "fullName": "Boltayeva Madina",
+      "full_name": "Boltayeva Madina",
+      "role": "student",
+      "phone": "+998 90 349 49 29",
+      "email": "madina_boltayeva_4929@educo.app",
+      "password": "Madina#4929",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998161774",
+      "username": "samina_abduvaxobova_1774",
+      "first_name": "Samina",
+      "last_name": "Abduvaxobova",
+      "fullName": "Abduvaxobova Samina",
+      "full_name": "Abduvaxobova Samina",
+      "role": "student",
+      "phone": "+998 99 816 17 74",
+      "email": "samina_abduvaxobova_1774@educo.app",
+      "password": "Samina#1774",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-908189959",
+      "username": "umar_tolaganov_9959",
+      "first_name": "Umar",
+      "last_name": "To'laganov",
+      "fullName": "To'laganov Umar",
+      "full_name": "To'laganov Umar",
+      "role": "student",
+      "phone": "+998 90 818 99 59",
+      "email": "umar_tolaganov_9959@educo.app",
+      "password": "Umar#9959",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-995488490",
+      "username": "nigina_baxodirova_8490",
+      "first_name": "Nigina",
+      "last_name": "Baxodirova",
+      "fullName": "Baxodirova Nigina",
+      "full_name": "Baxodirova Nigina",
+      "role": "student",
+      "phone": "+998 99 548 84 90",
+      "email": "nigina_baxodirova_8490@educo.app",
+      "password": "Nigina#8490",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-946007181",
+      "username": "munisa_shohakimova_7181",
+      "first_name": "Munisa",
+      "last_name": "Shohakimova",
+      "fullName": "Shohakimova Munisa",
+      "full_name": "Shohakimova Munisa",
+      "role": "student",
+      "phone": "+998 94 600 71 81",
+      "email": "munisa_shohakimova_7181@educo.app",
+      "password": "Munisa#7181",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-930054773",
+      "username": "sumaya_alimardonova_4773",
+      "first_name": "Sumaya",
+      "last_name": "Alimardonova",
+      "fullName": "Alimardonova Sumaya",
+      "full_name": "Alimardonova Sumaya",
+      "role": "student",
+      "phone": "+998 93 005 47 73",
+      "email": "sumaya_alimardonova_4773@educo.app",
+      "password": "Sumaya#4773",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-935436617",
+      "username": "faxriddin_kamolov_6617",
+      "first_name": "Faxriddin",
+      "last_name": "Kamolov",
+      "fullName": "Kamolov Faxriddin",
+      "full_name": "Kamolov Faxriddin",
+      "role": "student",
+      "phone": "+998 93 543 66 17",
+      "email": "faxriddin_kamolov_6617@educo.app",
+      "password": "Faxriddin#6617",
+      "course_ids": [
+        "crs-matematika",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-matematika",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990000001",
+      "username": "ruxsora_arslonova_0001",
+      "first_name": "Ruxsora",
+      "last_name": "Arslonova",
+      "fullName": "Arslonova Ruxsora",
+      "full_name": "Arslonova Ruxsora",
+      "role": "student",
+      "phone": "+998 99 000 00 01",
+      "email": "ruxsora_arslonova_0001@educo.app",
+      "password": "Ruxsora#0001",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": true,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-777771201",
+      "username": "mumina_jumanazarova_1201",
+      "first_name": "Mumina",
+      "last_name": "Jumanazarova",
+      "fullName": "Jumanazarova Mumina",
+      "full_name": "Jumanazarova Mumina",
+      "role": "student",
+      "phone": "+998 77 777 12 01",
+      "email": "mumina_jumanazarova_1201@educo.app",
+      "password": "Mumina#1201",
+      "course_ids": [
+        "crs-arab-tili",
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili",
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-952228534",
+      "username": "kiril_vladimirovich_mun_8534",
+      "first_name": "Kiril Vladimirovich",
+      "last_name": "Mun",
+      "fullName": "Mun Kiril Vladimirovich",
+      "full_name": "Mun Kiril Vladimirovich",
+      "role": "student",
+      "phone": "+998 95 222 85 34",
+      "email": "kiril_vladimirovich_mun_8534@educo.app",
+      "password": "KirilVladimirovich#8534",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-903333554",
+      "username": "iskandar_nuraliyev_3554",
+      "first_name": "Iskandar",
+      "last_name": "Nuraliyev",
+      "fullName": "Nuraliyev Iskandar",
+      "full_name": "Nuraliyev Iskandar",
+      "role": "student",
+      "phone": "+998 90 333 35 54",
+      "email": "iskandar_nuraliyev_3554@educo.app",
+      "password": "Iskandar#3554",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998250711",
+      "username": "anvar_sobirjonov_0711",
+      "first_name": "Anvar",
+      "last_name": "Sobirjonov",
+      "fullName": "Sobirjonov Anvar",
+      "full_name": "Sobirjonov Anvar",
+      "role": "student",
+      "phone": "+998 99 825 07 11",
+      "email": "anvar_sobirjonov_0711@educo.app",
+      "password": "Anvar#0711",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990000002",
+      "username": "soliha_islomova_0002",
+      "first_name": "Soliha",
+      "last_name": "Islomova",
+      "fullName": "Islomova Soliha",
+      "full_name": "Islomova Soliha",
+      "role": "student",
+      "phone": "+998 99 000 00 02",
+      "email": "soliha_islomova_0002@educo.app",
+      "password": "Soliha#0002",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": true,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-909709995",
+      "username": "xadicha_alovuddinova_9995",
+      "first_name": "Xadicha",
+      "last_name": "Alovuddinova",
+      "fullName": "Alovuddinova Xadicha",
+      "full_name": "Alovuddinova Xadicha",
+      "role": "student",
+      "phone": "+998 90 970 99 95",
+      "email": "xadicha_alovuddinova_9995@educo.app",
+      "password": "Xadicha#9995",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-939069588",
+      "username": "shodiyona_togaynazarova_9588",
+      "first_name": "Shodiyona",
+      "last_name": "Tog'aynazarova",
+      "fullName": "Tog'aynazarova Shodiyona",
+      "full_name": "Tog'aynazarova Shodiyona",
+      "role": "student",
+      "phone": "+998 93 906 95 88",
+      "email": "shodiyona_togaynazarova_9588@educo.app",
+      "password": "Shodiyona#9588",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-975190011",
+      "username": "jaxongir_baratov_0011",
+      "first_name": "Jaxongir",
+      "last_name": "Baratov",
+      "fullName": "Baratov Jaxongir",
+      "full_name": "Baratov Jaxongir",
+      "role": "student",
+      "phone": "+998 97 519 00 11",
+      "email": "jaxongir_baratov_0011@educo.app",
+      "password": "Jaxongir#0011",
+      "course_ids": [
+        "crs-rus-tili",
+        "crs-matematika",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili",
+        "grp-matematika",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-933938338",
+      "username": "xadicha_abdukarimova_8338",
+      "first_name": "Xadicha",
+      "last_name": "Abdukarimova",
+      "fullName": "Abdukarimova Xadicha",
+      "full_name": "Abdukarimova Xadicha",
+      "role": "student",
+      "phone": "+998 93 393 83 38",
+      "email": "xadicha_abdukarimova_8338@educo.app",
+      "password": "Xadicha#8338",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-950462692",
+      "username": "erxan_obidjonov_2692",
+      "first_name": "Erxan",
+      "last_name": "Obidjonov",
+      "fullName": "Obidjonov Erxan",
+      "full_name": "Obidjonov Erxan",
+      "role": "student",
+      "phone": "+998 95 046 26 92",
+      "email": "erxan_obidjonov_2692@educo.app",
+      "password": "Erxan#2692",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-770225879",
+      "username": "javlon_shokirov_5879",
+      "first_name": "Javlon",
+      "last_name": "Shokirov",
+      "fullName": "Shokirov Javlon",
+      "full_name": "Shokirov Javlon",
+      "role": "student",
+      "phone": "+998 77 022 58 79",
+      "email": "javlon_shokirov_5879@educo.app",
+      "password": "Javlon#5879",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998646396",
+      "username": "abduqodir_murodov_6396",
+      "first_name": "Abduqodir",
+      "last_name": "Murodov",
+      "fullName": "Murodov Abduqodir",
+      "full_name": "Murodov Abduqodir",
+      "role": "student",
+      "phone": "+998 99 864 63 96",
+      "email": "abduqodir_murodov_6396@educo.app",
+      "password": "Abduqodir#6396",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-902521414",
+      "username": "mironshoh_shamsiddinov_1414",
+      "first_name": "Mironshoh",
+      "last_name": "Shamsiddinov",
+      "fullName": "Shamsiddinov Mironshoh",
+      "full_name": "Shamsiddinov Mironshoh",
+      "role": "student",
+      "phone": "+998 90 252 14 14",
+      "email": "mironshoh_shamsiddinov_1414@educo.app",
+      "password": "Mironshoh#1414",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-939019588",
+      "username": "shodiyona_togaynazarova_9588",
+      "first_name": "Shodiyona",
+      "last_name": "Tog'aynazarova",
+      "fullName": "Tog'aynazarova Shodiyona",
+      "full_name": "Tog'aynazarova Shodiyona",
+      "role": "student",
+      "phone": "+998 93 901 95 88",
+      "email": "shodiyona_togaynazarova_9588@educo.app",
+      "password": "Shodiyona#9588",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-946891331",
+      "username": "sabrina_baxtiyorova_1331",
+      "first_name": "Sabrina",
+      "last_name": "Baxtiyorova",
+      "fullName": "Baxtiyorova Sabrina",
+      "full_name": "Baxtiyorova Sabrina",
+      "role": "student",
+      "phone": "+998 94 689 13 31",
+      "email": "sabrina_baxtiyorova_1331@educo.app",
+      "password": "Sabrina#1331",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-949214280",
+      "username": "shoxruz_shavkatov_4280",
+      "first_name": "Shoxruz",
+      "last_name": "Shavkatov",
+      "fullName": "Shavkatov Shoxruz",
+      "full_name": "Shavkatov Shoxruz",
+      "role": "student",
+      "phone": "+998 94 921 42 80",
+      "email": "shoxruz_shavkatov_4280@educo.app",
+      "password": "Shoxruz#4280",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-977221252",
+      "username": "saidibrohim_nuriddinov_1252",
+      "first_name": "Saidibrohim",
+      "last_name": "Nuriddinov",
+      "fullName": "Nuriddinov Saidibrohim",
+      "full_name": "Nuriddinov Saidibrohim",
+      "role": "student",
+      "phone": "+998 97 722 12 52",
+      "email": "saidibrohim_nuriddinov_1252@educo.app",
+      "password": "Saidibrohim#1252",
+      "course_ids": [
+        "crs-matematika",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-matematika",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-944307035",
+      "username": "sevara_karimjonova_7035",
+      "first_name": "Sevara",
+      "last_name": "Karimjonova",
+      "fullName": "Karimjonova Sevara",
+      "full_name": "Karimjonova Sevara",
+      "role": "student",
+      "phone": "+998 94 430 70 35",
+      "email": "sevara_karimjonova_7035@educo.app",
+      "password": "Sevara#7035",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990000003",
+      "username": "yanga_uygun_aka_madina_0003",
+      "first_name": "yanga Uyg'un aka",
+      "last_name": "Madina",
+      "fullName": "Madina yanga Uyg'un aka",
+      "full_name": "Madina yanga Uyg'un aka",
+      "role": "student",
+      "phone": "+998 99 000 00 03",
+      "email": "yanga_uygun_aka_madina_0003@educo.app",
+      "password": "YangaUygunaka#0003",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": true,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-935061991",
+      "username": "imronbek_adhamjonov_1991",
+      "first_name": "Imronbek",
+      "last_name": "Adhamjonov",
+      "fullName": "Adhamjonov Imronbek",
+      "full_name": "Adhamjonov Imronbek",
+      "role": "student",
+      "phone": "+998 93 506 19 91",
+      "email": "imronbek_adhamjonov_1991@educo.app",
+      "password": "Imronbek#1991",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990887845",
+      "username": "dilnura_alijonova_7845",
+      "first_name": "Dilnura",
+      "last_name": "Alijonova",
+      "fullName": "Alijonova Dilnura",
+      "full_name": "Alijonova Dilnura",
+      "role": "student",
+      "phone": "+998 99 088 78 45",
+      "email": "dilnura_alijonova_7845@educo.app",
+      "password": "Dilnura#7845",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-932901750",
+      "username": "muhammad_jahongirov_1750",
+      "first_name": "Muhammad",
+      "last_name": "Jahongirov",
+      "fullName": "Jahongirov Muhammad",
+      "full_name": "Jahongirov Muhammad",
+      "role": "student",
+      "phone": "+998 93 290 17 50",
+      "email": "muhammad_jahongirov_1750@educo.app",
+      "password": "Muhammad#1750",
+      "course_ids": [
+        "crs-rus-tili",
+        "crs-matematika",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili",
+        "grp-matematika",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-883669392",
+      "username": "mexrinso_olimjonova_9392",
+      "first_name": "Mexrinso",
+      "last_name": "Olimjonova",
+      "fullName": "Olimjonova Mexrinso",
+      "full_name": "Olimjonova Mexrinso",
+      "role": "student",
+      "phone": "+998 88 366 93 92",
+      "email": "mexrinso_olimjonova_9392@educo.app",
+      "password": "Mexrinso#9392",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990000004",
+      "username": "aslbek_abdumutalibov_0004",
+      "first_name": "Aslbek",
+      "last_name": "Abdumutalibov",
+      "fullName": "Abdumutalibov Aslbek",
+      "full_name": "Abdumutalibov Aslbek",
+      "role": "student",
+      "phone": "+998 99 000 00 04",
+      "email": "aslbek_abdumutalibov_0004@educo.app",
+      "password": "Aslbek#0004",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": true,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-948434905",
+      "username": "kamola_tolipova_4905",
+      "first_name": "Kamola",
+      "last_name": "Tolipova",
+      "fullName": "Tolipova Kamola",
+      "full_name": "Tolipova Kamola",
+      "role": "student",
+      "phone": "+998 94 843 49 05",
+      "email": "kamola_tolipova_4905@educo.app",
+      "password": "Kamola#4905",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-903565345",
+      "username": "nigora_xalimova_5345",
+      "first_name": "Nigora",
+      "last_name": "Xalimova",
+      "fullName": "Xalimova Nigora",
+      "full_name": "Xalimova Nigora",
+      "role": "student",
+      "phone": "+998 90 356 53 45",
+      "email": "nigora_xalimova_5345@educo.app",
+      "password": "Nigora#5345",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-900095755",
+      "username": "diyora_ilhomjonova_5755",
+      "first_name": "Diyora",
+      "last_name": "Ilhomjonova",
+      "fullName": "Ilhomjonova Diyora",
+      "full_name": "Ilhomjonova Diyora",
+      "role": "student",
+      "phone": "+998 90 009 57 55",
+      "email": "diyora_ilhomjonova_5755@educo.app",
+      "password": "Diyora#5755",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-950211252",
+      "username": "baxora_xalimova_1252",
+      "first_name": "Baxora",
+      "last_name": "Xalimova",
+      "fullName": "Xalimova Baxora",
+      "full_name": "Xalimova Baxora",
+      "role": "student",
+      "phone": "+998 95 021 12 52",
+      "email": "baxora_xalimova_1252@educo.app",
+      "password": "Baxora#1252",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-930096441",
+      "username": "fotima_saidova_6441",
+      "first_name": "Fotima",
+      "last_name": "Saidova",
+      "fullName": "Saidova Fotima",
+      "full_name": "Saidova Fotima",
+      "role": "student",
+      "phone": "+998 93 009 64 41",
+      "email": "fotima_saidova_6441@educo.app",
+      "password": "Fotima#6441",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-999163660",
+      "username": "komila_rustamova_3660",
+      "first_name": "Komila",
+      "last_name": "Rustamova",
+      "fullName": "Rustamova Komila",
+      "full_name": "Rustamova Komila",
+      "role": "student",
+      "phone": "+998 99 916 36 60",
+      "email": "komila_rustamova_3660@educo.app",
+      "password": "Komila#3660",
+      "course_ids": [
+        "crs-matematika",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-matematika",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-915600077",
+      "username": "muhammadali_adhamov_0077",
+      "first_name": "Muhammadali",
+      "last_name": "Adhamov",
+      "fullName": "Adhamov Muhammadali",
+      "full_name": "Adhamov Muhammadali",
+      "role": "student",
+      "phone": "+998 91 560 00 77",
+      "email": "muhammadali_adhamov_0077@educo.app",
+      "password": "Muhammadali#0077",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-957737392",
+      "username": "nuriya_abdumurodova_7392",
+      "first_name": "Nuriya",
+      "last_name": "Abdumurodova",
+      "fullName": "Abdumurodova Nuriya",
+      "full_name": "Abdumurodova Nuriya",
+      "role": "student",
+      "phone": "+998 95 773 73 92",
+      "email": "nuriya_abdumurodova_7392@educo.app",
+      "password": "Nuriya#7392",
+      "course_ids": [
+        "crs-matematika",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-matematika",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-930678890",
+      "username": "kumushbibi_xursanova_8890",
+      "first_name": "Kumushbibi",
+      "last_name": "Xursanova",
+      "fullName": "Xursanova Kumushbibi",
+      "full_name": "Xursanova Kumushbibi",
+      "role": "student",
+      "phone": "+998 93 067 88 90",
+      "email": "kumushbibi_xursanova_8890@educo.app",
+      "password": "Kumushbibi#8890",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-945463836",
+      "username": "temur_baxodirov_3836",
+      "first_name": "Temur",
+      "last_name": "Baxodirov",
+      "fullName": "Baxodirov Temur",
+      "full_name": "Baxodirov Temur",
+      "role": "student",
+      "phone": "+998 94 546 38 36",
+      "email": "temur_baxodirov_3836@educo.app",
+      "password": "Temur#3836",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-975479606",
+      "username": "muhammad_hayitov_9606",
+      "first_name": "Muhammad",
+      "last_name": "Hayitov",
+      "fullName": "Hayitov Muhammad",
+      "full_name": "Hayitov Muhammad",
+      "role": "student",
+      "phone": "+998 97 547 96 06",
+      "email": "muhammad_hayitov_9606@educo.app",
+      "password": "Muhammad#9606",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-992778855",
+      "username": "otabek_anvarjonov_8855",
+      "first_name": "Otabek",
+      "last_name": "Anvarjonov",
+      "fullName": "Anvarjonov Otabek",
+      "full_name": "Anvarjonov Otabek",
+      "role": "student",
+      "phone": "+998 99 277 88 55",
+      "email": "otabek_anvarjonov_8855@educo.app",
+      "password": "Otabek#8855",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-909588859",
+      "username": "humoyun_fazliddinov_8859",
+      "first_name": "Humoyun",
+      "last_name": "Fazliddinov",
+      "fullName": "Fazliddinov Humoyun",
+      "full_name": "Fazliddinov Humoyun",
+      "role": "student",
+      "phone": "+998 90 958 88 59",
+      "email": "humoyun_fazliddinov_8859@educo.app",
+      "password": "Humoyun#8859",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-887749485",
+      "username": "ozodbek_toraxonov_9485",
+      "first_name": "Ozodbek",
+      "last_name": "To'raxonov",
+      "fullName": "To'raxonov Ozodbek",
+      "full_name": "To'raxonov Ozodbek",
+      "role": "student",
+      "phone": "+998 88 774 94 85",
+      "email": "ozodbek_toraxonov_9485@educo.app",
+      "password": "Ozodbek#9485",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-930789384",
+      "username": "lola_qochqorova_9384",
+      "first_name": "Lola",
+      "last_name": "Qo'chqorova",
+      "fullName": "Qo'chqorova Lola",
+      "full_name": "Qo'chqorova Lola",
+      "role": "student",
+      "phone": "+998 93 078 93 84",
+      "email": "lola_qochqorova_9384@educo.app",
+      "password": "Lola#9384",
+      "course_ids": [
+        "crs-arab-tili",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-956161508",
+      "username": "jafar_uchqunov_1508",
+      "first_name": "Jafar",
+      "last_name": "Uchqunov",
+      "fullName": "Uchqunov Jafar",
+      "full_name": "Uchqunov Jafar",
+      "role": "student",
+      "phone": "+998 95 616 15 08",
+      "email": "jafar_uchqunov_1508@educo.app",
+      "password": "Jafar#1508",
+      "course_ids": [
+        "crs-rus-tili",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-946142213",
+      "username": "lazizaxon_hamidova_2213",
+      "first_name": "Lazizaxon",
+      "last_name": "Hamidova",
+      "fullName": "Hamidova Lazizaxon",
+      "full_name": "Hamidova Lazizaxon",
+      "role": "student",
+      "phone": "+998 94 614 22 13",
+      "email": "lazizaxon_hamidova_2213@educo.app",
+      "password": "Lazizaxon#2213",
+      "course_ids": [
+        "crs-matematika",
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-matematika",
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-946275090",
+      "username": "muhammadsodiq_baxodirov_5090",
+      "first_name": "Muhammadsodiq",
+      "last_name": "Baxodirov",
+      "fullName": "Baxodirov Muhammadsodiq",
+      "full_name": "Baxodirov Muhammadsodiq",
+      "role": "student",
+      "phone": "+998 94 627 50 90",
+      "email": "muhammadsodiq_baxodirov_5090@educo.app",
+      "password": "Muhammadsodiq#5090",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-995387215",
+      "username": "muhammadamin_tanirberganov_7215",
+      "first_name": "Muhammadamin",
+      "last_name": "Tanirberganov",
+      "fullName": "Tanirberganov Muhammadamin",
+      "full_name": "Tanirberganov Muhammadamin",
+      "role": "student",
+      "phone": "+998 99 538 72 15",
+      "email": "muhammadamin_tanirberganov_7215@educo.app",
+      "password": "Muhammadamin#7215",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-935278822",
+      "username": "otabek_baxtiyorov_8822",
+      "first_name": "Otabek",
+      "last_name": "Baxtiyorov",
+      "fullName": "Baxtiyorov Otabek",
+      "full_name": "Baxtiyorov Otabek",
+      "role": "student",
+      "phone": "+998 93 527 88 22",
+      "email": "otabek_baxtiyorov_8822@educo.app",
+      "password": "Otabek#8822",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-933020997",
+      "username": "nozima_eldorova_0997",
+      "first_name": "Nozima",
+      "last_name": "Eldorova",
+      "fullName": "Eldorova Nozima",
+      "full_name": "Eldorova Nozima",
+      "role": "student",
+      "phone": "+998 93 302 09 97",
+      "email": "nozima_eldorova_0997@educo.app",
+      "password": "Nozima#0997",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-991091574",
+      "username": "marjan_moldasheva_1574",
+      "first_name": "Marjan",
+      "last_name": "Mo'ldasheva",
+      "fullName": "Mo'ldasheva Marjan",
+      "full_name": "Mo'ldasheva Marjan",
+      "role": "student",
+      "phone": "+998 99 109 15 74",
+      "email": "marjan_moldasheva_1574@educo.app",
+      "password": "Marjan#1574",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-901594495",
+      "username": "muhammadnur_nematov_4495",
+      "first_name": "Muhammadnur",
+      "last_name": "Nematov",
+      "fullName": "Nematov Muhammadnur",
+      "full_name": "Nematov Muhammadnur",
+      "role": "student",
+      "phone": "+998 90 159 44 95",
+      "email": "muhammadnur_nematov_4495@educo.app",
+      "password": "Muhammadnur#4495",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998198187",
+      "username": "muhammadamir_botirov_8187",
+      "first_name": "Muhammadamir",
+      "last_name": "Botirov",
+      "fullName": "Botirov Muhammadamir",
+      "full_name": "Botirov Muhammadamir",
+      "role": "student",
+      "phone": "+998 99 819 81 87",
+      "email": "muhammadamir_botirov_8187@educo.app",
+      "password": "Muhammadamir#8187",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-773431899",
+      "username": "usmonxon_ulugbekov_1899",
+      "first_name": "Usmonxon",
+      "last_name": "Ulug'bekov",
+      "fullName": "Ulug'bekov Usmonxon",
+      "full_name": "Ulug'bekov Usmonxon",
+      "role": "student",
+      "phone": "+998 77 343 18 99",
+      "email": "usmonxon_ulugbekov_1899@educo.app",
+      "password": "Usmonxon#1899",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-909332088",
+      "username": "akbarbek_baxodirov_2088",
+      "first_name": "Akbarbek",
+      "last_name": "Baxodirov",
+      "fullName": "Baxodirov Akbarbek",
+      "full_name": "Baxodirov Akbarbek",
+      "role": "student",
+      "phone": "+998 90 933 20 88",
+      "email": "akbarbek_baxodirov_2088@educo.app",
+      "password": "Akbarbek#2088",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-951908080",
+      "username": "abduraxmon_abdujalilov_8080",
+      "first_name": "Abduraxmon",
+      "last_name": "Abdujalilov",
+      "fullName": "Abdujalilov Abduraxmon",
+      "full_name": "Abdujalilov Abduraxmon",
+      "role": "student",
+      "phone": "+998 95 190 80 80",
+      "email": "abduraxmon_abdujalilov_8080@educo.app",
+      "password": "Abduraxmon#8080",
+      "course_ids": [
+        "crs-ingliz-tili",
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili",
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-996389687",
+      "username": "muhabbat_yoldashev_9687",
+      "first_name": "Muhabbat",
+      "last_name": "Yoldashev",
+      "fullName": "Yoldashev Muhabbat",
+      "full_name": "Yoldashev Muhabbat",
+      "role": "student",
+      "phone": "+998 99 638 96 87",
+      "email": "muhabbat_yoldashev_9687@educo.app",
+      "password": "Muhabbat#9687",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-943501407",
+      "username": "shukrona_xayrullayeva_1407",
+      "first_name": "Shukrona",
+      "last_name": "Xayrullayeva",
+      "fullName": "Xayrullayeva Shukrona",
+      "full_name": "Xayrullayeva Shukrona",
+      "role": "student",
+      "phone": "+998 94 350 14 07",
+      "email": "shukrona_xayrullayeva_1407@educo.app",
+      "password": "Shukrona#1407",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-935066822",
+      "username": "jasurbek_gofurov_6822",
+      "first_name": "Jasurbek",
+      "last_name": "G'ofurov",
+      "fullName": "G'ofurov Jasurbek",
+      "full_name": "G'ofurov Jasurbek",
+      "role": "student",
+      "phone": "+998 93 506 68 22",
+      "email": "jasurbek_gofurov_6822@educo.app",
+      "password": "Jasurbek#6822",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-935399393",
+      "username": "omina_raximbekova_9393",
+      "first_name": "Omina",
+      "last_name": "Raximbekova",
+      "fullName": "Raximbekova Omina",
+      "full_name": "Raximbekova Omina",
+      "role": "student",
+      "phone": "+998 93 539 93 93",
+      "email": "omina_raximbekova_9393@educo.app",
+      "password": "Omina#9393",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-945373716",
+      "username": "nilufar_nurmuxammadova_3716",
+      "first_name": "Nilufar",
+      "last_name": "Nurmuxammadova",
+      "fullName": "Nurmuxammadova Nilufar",
+      "full_name": "Nurmuxammadova Nilufar",
+      "role": "student",
+      "phone": "+998 94 537 37 16",
+      "email": "nilufar_nurmuxammadova_3716@educo.app",
+      "password": "Nilufar#3716",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998528047",
+      "username": "xojakbar_abduqayumov_8047",
+      "first_name": "Xojakbar",
+      "last_name": "Abduqayumov",
+      "fullName": "Abduqayumov Xojakbar",
+      "full_name": "Abduqayumov Xojakbar",
+      "role": "student",
+      "phone": "+998 99 852 80 47",
+      "email": "xojakbar_abduqayumov_8047@educo.app",
+      "password": "Xojakbar#8047",
+      "course_ids": [
+        "crs-matematika"
+      ],
+      "group_ids": [
+        "grp-matematika"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-997640094",
+      "username": "shukrona_shaxbozbekova_0094",
+      "first_name": "Shukrona",
+      "last_name": "Shaxbozbekova",
+      "fullName": "Shaxbozbekova Shukrona",
+      "full_name": "Shaxbozbekova Shukrona",
+      "role": "student",
+      "phone": "+998 99 764 00 94",
+      "email": "shukrona_shaxbozbekova_0094@educo.app",
+      "password": "Shukrona#0094",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-971089595",
+      "username": "ali_jumanazarov_9595",
+      "first_name": "Ali",
+      "last_name": "Jumanazarov",
+      "fullName": "Jumanazarov Ali",
+      "full_name": "Jumanazarov Ali",
+      "role": "student",
+      "phone": "+998 97 108 95 95",
+      "email": "ali_jumanazarov_9595@educo.app",
+      "password": "Ali#9595",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998492912",
+      "username": "sardorbek_samadov_2912",
+      "first_name": "Sardorbek",
+      "last_name": "Samadov",
+      "fullName": "Samadov Sardorbek",
+      "full_name": "Samadov Sardorbek",
+      "role": "student",
+      "phone": "+998 99 849 29 12",
+      "email": "sardorbek_samadov_2912@educo.app",
+      "password": "Sardorbek#2912",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990000005",
+      "username": "muhammadamin_muhammadamin_0005",
+      "first_name": "Muhammadamin",
+      "last_name": "Muhammadamin",
+      "fullName": "Muhammadamin Muhammadamin",
+      "full_name": "Muhammadamin Muhammadamin",
+      "role": "student",
+      "phone": "+998 99 000 00 05",
+      "email": "muhammadamin_muhammadamin_0005@educo.app",
+      "password": "Muhammadamin#0005",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": true,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-998272687",
+      "username": "farangiz_jumanova_2687",
+      "first_name": "Farangiz",
+      "last_name": "Jumanova",
+      "fullName": "Jumanova Farangiz",
+      "full_name": "Jumanova Farangiz",
+      "role": "student",
+      "phone": "+998 99 827 26 87",
+      "email": "farangiz_jumanova_2687@educo.app",
+      "password": "Farangiz#2687",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-984074950",
+      "username": "sardora_tillaxojayeva_4950",
+      "first_name": "Sardora",
+      "last_name": "Tillaxojayeva",
+      "fullName": "Tillaxojayeva Sardora",
+      "full_name": "Tillaxojayeva Sardora",
+      "role": "student",
+      "phone": "+998 98 407 49 50",
+      "email": "sardora_tillaxojayeva_4950@educo.app",
+      "password": "Sardora#4950",
+      "course_ids": [
+        "crs-arab-tili"
+      ],
+      "group_ids": [
+        "grp-arab-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-771564545",
+      "username": "yusuf_shuxratov_4545",
+      "first_name": "Yusuf",
+      "last_name": "Shuxratov",
+      "fullName": "Shuxratov Yusuf",
+      "full_name": "Shuxratov Yusuf",
+      "role": "student",
+      "phone": "+998 77 156 45 45",
+      "email": "yusuf_shuxratov_4545@educo.app",
+      "password": "Yusuf#4545",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990202676",
+      "username": "abuzar_qaxramonov_2676",
+      "first_name": "Abuzar",
+      "last_name": "Qaxramonov",
+      "fullName": "Qaxramonov Abuzar",
+      "full_name": "Qaxramonov Abuzar",
+      "role": "student",
+      "phone": "+998 99 020 26 76",
+      "email": "abuzar_qaxramonov_2676@educo.app",
+      "password": "Abuzar#2676",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-999009996",
+      "username": "islombek_abdihakimov_9996",
+      "first_name": "Islombek",
+      "last_name": "Abdihakimov",
+      "fullName": "Abdihakimov Islombek",
+      "full_name": "Abdihakimov Islombek",
+      "role": "student",
+      "phone": "+998 99 900 99 96",
+      "email": "islombek_abdihakimov_9996@educo.app",
+      "password": "Islombek#9996",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-999226616",
+      "username": "dilnora_xojamqulova_6616",
+      "first_name": "Dilnora",
+      "last_name": "Xojamqulova",
+      "fullName": "Xojamqulova Dilnora",
+      "full_name": "Xojamqulova Dilnora",
+      "role": "student",
+      "phone": "+998 99 922 66 16",
+      "email": "dilnora_xojamqulova_6616@educo.app",
+      "password": "Dilnora#6616",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-999220076",
+      "username": "soliha_komiljonova_0076",
+      "first_name": "Soliha",
+      "last_name": "Komiljonova",
+      "fullName": "Komiljonova Soliha",
+      "full_name": "Komiljonova Soliha",
+      "role": "student",
+      "phone": "+998 99 922 00 76",
+      "email": "soliha_komiljonova_0076@educo.app",
+      "password": "Soliha#0076",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-977848807",
+      "username": "mubina_shavqiddinova_8807",
+      "first_name": "Mubina",
+      "last_name": "Shavqiddinova",
+      "fullName": "Shavqiddinova Mubina",
+      "full_name": "Shavqiddinova Mubina",
+      "role": "student",
+      "phone": "+998 97 784 88 07",
+      "email": "mubina_shavqiddinova_8807@educo.app",
+      "password": "Mubina#8807",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990394868",
+      "username": "madina_nematova_4868",
+      "first_name": "Madina",
+      "last_name": "Nematova",
+      "fullName": "Nematova Madina",
+      "full_name": "Nematova Madina",
+      "role": "student",
+      "phone": "+998 99 039 48 68",
+      "email": "madina_nematova_4868@educo.app",
+      "password": "Madina#4868",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990000006",
+      "username": "anvar_sobirov_0006",
+      "first_name": "Anvar",
+      "last_name": "Sobirov",
+      "fullName": "Sobirov Anvar",
+      "full_name": "Sobirov Anvar",
+      "role": "student",
+      "phone": "+998 99 000 00 06",
+      "email": "anvar_sobirov_0006@educo.app",
+      "password": "Anvar#0006",
+      "course_ids": [
+        "crs-rus-tili"
+      ],
+      "group_ids": [
+        "grp-rus-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": true,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-997948421",
+      "username": "azizbek_tolqinov_8421",
+      "first_name": "Azizbek",
+      "last_name": "To`lqinov",
+      "fullName": "To`lqinov Azizbek",
+      "full_name": "To`lqinov Azizbek",
+      "role": "student",
+      "phone": "+998 99 794 84 21",
+      "email": "azizbek_tolqinov_8421@educo.app",
+      "password": "Azizbek#8421",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-946914031",
+      "username": "nozafari_kamariddinova_4031",
+      "first_name": "Nozafari",
+      "last_name": "Kamariddinova",
+      "fullName": "Kamariddinova Nozafari",
+      "full_name": "Kamariddinova Nozafari",
+      "role": "student",
+      "phone": "+998 94 691 40 31",
+      "email": "nozafari_kamariddinova_4031@educo.app",
+      "password": "Nozafari#4031",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-501959806",
+      "username": "behruz_abduxakimov_9806",
+      "first_name": "Behruz",
+      "last_name": "Abduxakimov",
+      "fullName": "Abduxakimov Behruz",
+      "full_name": "Abduxakimov Behruz",
+      "role": "student",
+      "phone": "+998 50 195 98 06",
+      "email": "behruz_abduxakimov_9806@educo.app",
+      "password": "Behruz#9806",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-990577366",
+      "username": "yusufbek_zafarov_7366",
+      "first_name": "Yusufbek",
+      "last_name": "Zafarov",
+      "fullName": "Zafarov Yusufbek",
+      "full_name": "Zafarov Yusufbek",
+      "role": "student",
+      "phone": "+998 99 057 73 66",
+      "email": "yusufbek_zafarov_7366@educo.app",
+      "password": "Yusufbek#7366",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "usr-student-770074732",
+      "username": "mumina_jumanazarova_4732",
+      "first_name": "Mumina",
+      "last_name": "Jumanazarova",
+      "fullName": "Jumanazarova Mumina",
+      "full_name": "Jumanazarova Mumina",
+      "role": "student",
+      "phone": "+998 77 007 47 32",
+      "email": "mumina_jumanazarova_4732@educo.app",
+      "password": "Mumina#4732",
+      "course_ids": [
+        "crs-ingliz-tili"
+      ],
+      "group_ids": [
+        "grp-ingliz-tili"
+      ],
+      "is_active": true,
+      "has_temp_phone": false,
+      "created_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
     }
   ],
   "educo_db_groups": [
     {
-      "id": "grp-frontend-1",
-      "name": "IT Frontend",
-      "code": "IT-FE-1",
-      "course_id": "crs-1793463755078",
-      "course_name": "Frontend",
-      "teacher_id": "usr-1793463763683",
-      "teacher_name": "Abdulazizbek Orifjonov",
-      "room": "1-xona",
-      "monthly_price": 500000,
-      "monthly_fee": 500000,
+      "id": "grp-1793623583736",
+      "name": "Mental Arifmetika",
+      "code": "GRP-1861",
+      "course_id": "crs-1793623377912",
+      "course_name": "Mental Arifmetika",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiiyeva",
+      "room": "3",
+      "capacity": 20,
+      "enrolled_count": 0,
       "status": "active",
-      "is_active": true,
-      "color": "#0284c7",
-      "days_pattern": "odd",
-      "lesson_time": "18:00 - 20:00",
-      "created_at": "2026-11-02T18:05:06.697Z",
-      "updated_at": "2026-11-02T18:05:06.723Z"
+      "monthly_price": 500000,
+      "schedule": "Dush-Chor-Jum, 16:00 - 17:30",
+      "avatar_url": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:46:23.736Z",
+      "updated_at": "2026-11-02T12:52:57.467Z"
+    },
+    {
+      "id": "grp-1793622453272",
+      "name": "Рус тили ",
+      "code": "GRP-1650",
+      "course_id": "crs-1793622350270",
+      "course_name": "Рус тили",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "room": "3",
+      "capacity": 20,
+      "enrolled_count": 0,
+      "status": "active",
+      "monthly_price": 496000,
+      "schedule": "Sesh-Pay-Shan, 17:30 - 19:00",
+      "avatar_url": null,
+      "image_url": null,
+      "created_at": "2026-11-02T12:27:33.272Z",
+      "updated_at": "2026-11-02T12:29:23.979Z"
+    },
+    {
+      "id": "grp-1793615416295",
+      "name": "Matematika",
+      "code": "GRP-1260",
+      "course_id": "crs-1793615340332",
+      "course_name": "matematika",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Behruz Beknazarov",
+      "room": "2",
+      "capacity": 15,
+      "enrolled_count": 0,
+      "status": "active",
+      "monthly_price": 500000,
+      "schedule": "Sesh-Pay-Shan, 14:00 - 15:30",
+      "avatar_url": null,
+      "image_url": null,
+      "created_at": "2026-11-02T10:30:16.295Z",
+      "updated_at": "2026-11-02T10:33:49.490Z"
+    },
+    {
+      "id": "grp-1793468593324",
+      "name": "Frontend",
+      "code": "GRP-7879",
+      "course_id": "crs-1793466841391",
+      "course_name": "Frontend",
+      "teacher_id": "usr-1793466843425",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "room": "2",
+      "capacity": 20,
+      "enrolled_count": 1,
+      "status": "active",
+      "monthly_price": 500000,
+      "schedule": "Dush-Chor-Jum, 18:00 - 19:30",
+      "avatar_url": "data:image/jpeg;base64,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",
+      "image_url": "data:image/jpeg;base64,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",
+      "created_at": "2026-10-31T17:43:13.324Z",
+      "updated_at": "2026-11-02T10:35:45.984Z"
+    },
+    {
+      "id": "grp-matematika",
+      "name": "Matematika guruhi",
+      "course_id": "crs-matematika",
+      "course_name": "Matematika",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "room": "Xona 101",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "student_ids": [
+        "usr-student-930098339",
+        "usr-student-909474123",
+        "usr-student-901236463",
+        "usr-student-992223052",
+        "usr-student-998580121",
+        "usr-student-998822309",
+        "usr-student-977608589",
+        "usr-student-903494929",
+        "usr-student-908189959",
+        "usr-student-935436617",
+        "usr-student-903333554",
+        "usr-student-939069588",
+        "usr-student-975190011",
+        "usr-student-977221252",
+        "usr-student-932901750",
+        "usr-student-948434905",
+        "usr-student-999163660",
+        "usr-student-957737392",
+        "usr-student-992778855",
+        "usr-student-946142213",
+        "usr-student-991091574",
+        "usr-student-909332088",
+        "usr-student-935066822",
+        "usr-student-998528047"
+      ],
+      "enrolled_count": 24,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "grp-ingliz-tili",
+      "name": "Ingliz tili guruhi",
+      "course_id": "crs-ingliz-tili",
+      "course_name": "Ingliz tili",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "room": "Xona 102",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "student_ids": [
+        "usr-student-930098339",
+        "usr-student-997249967",
+        "usr-student-909901059",
+        "usr-student-936105518",
+        "usr-student-998559245",
+        "usr-student-947882906",
+        "usr-student-935755104",
+        "usr-student-998352122",
+        "usr-student-998822309",
+        "usr-student-944288894",
+        "usr-student-995488490",
+        "usr-student-935436617",
+        "usr-student-990000001",
+        "usr-student-998250711",
+        "usr-student-975190011",
+        "usr-student-770225879",
+        "usr-student-939019588",
+        "usr-student-977221252",
+        "usr-student-944307035",
+        "usr-student-990887845",
+        "usr-student-932901750",
+        "usr-student-999163660",
+        "usr-student-915600077",
+        "usr-student-957737392",
+        "usr-student-887749485",
+        "usr-student-930789384",
+        "usr-student-956161508",
+        "usr-student-946142213",
+        "usr-student-935278822",
+        "usr-student-951908080",
+        "usr-student-935399393",
+        "usr-student-998492912",
+        "usr-student-998272687",
+        "usr-student-990394868",
+        "usr-student-997948421",
+        "usr-student-946914031",
+        "usr-student-501959806",
+        "usr-student-990577366",
+        "usr-student-770074732"
+      ],
+      "enrolled_count": 39,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "grp-arab-tili",
+      "name": "Arab tili guruhi",
+      "course_id": "crs-arab-tili",
+      "course_name": "Arab tili",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "room": "Xona 103",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "student_ids": [
+        "usr-student-994886110",
+        "usr-student-936105518",
+        "usr-student-998093456",
+        "usr-student-994340077",
+        "usr-student-998822309",
+        "usr-student-958106969",
+        "usr-student-990019382",
+        "usr-student-946007181",
+        "usr-student-777771201",
+        "usr-student-990000002",
+        "usr-student-933938338",
+        "usr-student-998646396",
+        "usr-student-946891331",
+        "usr-student-990000003",
+        "usr-student-883669392",
+        "usr-student-903565345",
+        "usr-student-950211252",
+        "usr-student-945463836",
+        "usr-student-909588859",
+        "usr-student-930789384",
+        "usr-student-946275090",
+        "usr-student-933020997",
+        "usr-student-999005615",
+        "usr-student-998198187",
+        "usr-student-951908080",
+        "usr-student-996389687",
+        "usr-student-997640094",
+        "usr-student-984074950"
+      ],
+      "enrolled_count": 28,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "grp-rus-tili",
+      "name": "Rus tili guruhi",
+      "course_id": "crs-rus-tili",
+      "course_name": "Rus tili",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Ismatova Shaxnoza",
+      "room": "Xona 104",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "student_ids": [
+        "usr-student-973445313",
+        "usr-student-933921552",
+        "usr-student-946019500",
+        "usr-student-998352122",
+        "usr-student-940508780",
+        "usr-student-947387535",
+        "usr-student-998161774",
+        "usr-student-930054773",
+        "usr-student-777771201",
+        "usr-student-952228534",
+        "usr-student-909709995",
+        "usr-student-975190011",
+        "usr-student-950462692",
+        "usr-student-902521414",
+        "usr-student-949214280",
+        "usr-student-935061991",
+        "usr-student-932901750",
+        "usr-student-990000004",
+        "usr-student-900095755",
+        "usr-student-930096441",
+        "usr-student-930678890",
+        "usr-student-975479606",
+        "usr-student-956161508",
+        "usr-student-995387215",
+        "usr-student-999005615",
+        "usr-student-901594495",
+        "usr-student-773431899",
+        "usr-student-943501407",
+        "usr-student-945373716",
+        "usr-student-971089595",
+        "usr-student-990000005",
+        "usr-student-771564545",
+        "usr-student-990202676",
+        "usr-student-999009996",
+        "usr-student-999226616",
+        "usr-student-999220076",
+        "usr-student-977848807",
+        "usr-student-990000006"
+      ],
+      "enrolled_count": 38,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "grp-it",
+      "name": "IT & Dasturlash guruhi",
+      "course_id": "crs-it",
+      "course_name": "IT va Dasturlash",
+      "teacher_id": "usr-1793466843425",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "room": "Xona 201 (IT Lab)",
+      "capacity": 35,
+      "monthly_price": 600000,
+      "student_ids": [
+        "usr-student-930098339",
+        "usr-student-943852253",
+        "usr-student-947882906"
+      ],
+      "enrolled_count": 3,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "grp-mental",
+      "name": "Mental Arifmetika guruhi",
+      "course_id": "crs-mental",
+      "course_name": "Mental Arifmetika",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "room": "Xona 202",
+      "capacity": 35,
+      "monthly_price": 450000,
+      "student_ids": [
+        "usr-student-909901059",
+        "usr-student-992223052",
+        "usr-student-935286718"
+      ],
+      "enrolled_count": 3,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "grp-shaxmat",
+      "name": "Shaxmat guruhi",
+      "course_id": "crs-shaxmat",
+      "course_name": "Shaxmat",
+      "teacher_id": "usr-teacher-qosimov",
+      "teacher_name": "Rustam Qosimov",
+      "room": "Xona 203",
+      "capacity": 35,
+      "monthly_price": 400000,
+      "student_ids": [
+        "usr-student-909474123",
+        "usr-student-946019500"
+      ],
+      "enrolled_count": 2,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
     }
   ],
   "educo_db_courses": [
@@ -310,13 +3173,13 @@
       "code": "CRS-ARB1",
       "price": 500000,
       "color": "#10b981",
-      "description": "Arab tili va tajvid asoslari",
+      "description": "Arab tili bo‘yicha professional o‘quv kursi",
       "teacher_ids": [
         "usr-teacher-yusupjonova"
       ],
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "crs-ingliz-tili",
@@ -324,13 +3187,13 @@
       "code": "CRS-ENG1",
       "price": 500000,
       "color": "#8b5cf6",
-      "description": "General English, Grammar and Speaking",
+      "description": "Ingliz tili bo‘yicha professional o‘quv kursi",
       "teacher_ids": [
         "usr-teacher-toshtemirova"
       ],
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "crs-rus-tili",
@@ -338,13 +3201,13 @@
       "code": "CRS-RUS1",
       "price": 500000,
       "color": "#f59e0b",
-      "description": "Rus tili grammatikasi va so‘zlashuv",
+      "description": "Rus tili bo‘yicha professional o‘quv kursi",
       "teacher_ids": [
-        "usr-teacher-ismatova"
+        "usr-1793622233829"
       ],
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "crs-it",
@@ -352,13 +3215,13 @@
       "code": "CRS-IT1",
       "price": 600000,
       "color": "#06b6d4",
-      "description": "Zamonaviy dasturlash va kompyuter savodxonligi",
+      "description": "IT va Dasturlash bo‘yicha professional o‘quv kursi",
       "teacher_ids": [
         "usr-1793466843425"
       ],
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "crs-shaxmat",
@@ -366,14 +3229,69 @@
       "code": "CRS-CHESS1",
       "price": 400000,
       "color": "#64748b",
-      "description": "Professional shaxmat mahorati",
-      "teacher_ids": [],
+      "description": "Shaxmat bo‘yicha professional o‘quv kursi",
+      "teacher_ids": [
+        "usr-teacher-qosimov"
+      ],
       "is_active": true,
       "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z"
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "crs-matematika",
+      "name": "Matematika",
+      "code": "CRS-MAT1",
+      "price": 500000,
+      "color": "#3b82f6",
+      "description": "Matematika bo‘yicha professional o‘quv kursi",
+      "teacher_ids": [
+        "usr-1793603060709"
+      ],
+      "is_active": true,
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
+    },
+    {
+      "id": "crs-mental",
+      "name": "Mental Arifmetika",
+      "code": "CRS-MNT1",
+      "price": 450000,
+      "color": "#ec4899",
+      "description": "Mental Arifmetika bo‘yicha professional o‘quv kursi",
+      "teacher_ids": [
+        "usr-1793622773288"
+      ],
+      "is_active": true,
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T03:48:37.304Z"
     }
   ],
-  "educo_db_memberships": [],
+  "educo_db_memberships": [
+    {
+      "id": "mem-grp-1793468593324-usr-1793468630979",
+      "group_id": "grp-1793468593324",
+      "student_id": "usr-1793468630979",
+      "is_active": true,
+      "custom_price": null,
+      "discount_type": null,
+      "discount_percent": 0,
+      "discount_amount": 0,
+      "discount_reason": "",
+      "enrolled_at": "2026-10-31T17:43:50.992Z"
+    },
+    {
+      "id": "mem-grp-1793468593324-usr-1793599332662",
+      "group_id": "grp-1793468593324",
+      "student_id": "usr-1793599332662",
+      "is_active": true,
+      "custom_price": null,
+      "discount_type": null,
+      "discount_percent": 0,
+      "discount_amount": 0,
+      "discount_reason": "",
+      "enrolled_at": "2026-11-02T06:02:12.687Z"
+    }
+  ],
   "educo_db_lesson_schedules": [],
   "educo_db_lessons": [],
   "educo_db_attendance": [
@@ -1402,5 +4320,1103 @@
       "isActive": true
     }
   ],
-  "_deleted_ids": []
+  "_deleted_ids": [],
+  "educo_db_group_memberships": [
+    {
+      "id": "mem-grp-matematika-usr-student-930098339",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-930098339",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-909474123",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-909474123",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-901236463",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-901236463",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-992223052",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-992223052",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-998580121",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-998580121",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-998822309",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-998822309",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-977608589",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-977608589",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-903494929",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-903494929",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-908189959",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-908189959",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-935436617",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-935436617",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-903333554",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-903333554",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-939069588",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-939069588",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-975190011",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-975190011",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-977221252",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-977221252",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-932901750",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-932901750",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-948434905",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-948434905",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-999163660",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-999163660",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-957737392",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-957737392",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-992778855",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-992778855",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-946142213",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-946142213",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-991091574",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-991091574",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-909332088",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-909332088",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-935066822",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-935066822",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-matematika-usr-student-998528047",
+      "group_id": "grp-matematika",
+      "student_id": "usr-student-998528047",
+      "course_id": "crs-matematika",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-930098339",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-930098339",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-997249967",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-997249967",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-909901059",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-909901059",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-936105518",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-936105518",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-998559245",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-998559245",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-947882906",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-947882906",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-935755104",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-935755104",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-998352122",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-998352122",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-998822309",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-998822309",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-944288894",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-944288894",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-995488490",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-995488490",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-935436617",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-935436617",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-990000001",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-990000001",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-998250711",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-998250711",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-975190011",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-975190011",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-770225879",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-770225879",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-939019588",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-939019588",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-977221252",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-977221252",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-944307035",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-944307035",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-990887845",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-990887845",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-932901750",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-932901750",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-999163660",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-999163660",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-915600077",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-915600077",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-957737392",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-957737392",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-887749485",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-887749485",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-930789384",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-930789384",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-956161508",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-956161508",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-946142213",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-946142213",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-935278822",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-935278822",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-951908080",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-951908080",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-935399393",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-935399393",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-998492912",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-998492912",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-998272687",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-998272687",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-990394868",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-990394868",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-997948421",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-997948421",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-946914031",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-946914031",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-501959806",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-501959806",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-990577366",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-990577366",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-ingliz-tili-usr-student-770074732",
+      "group_id": "grp-ingliz-tili",
+      "student_id": "usr-student-770074732",
+      "course_id": "crs-ingliz-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-994886110",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-994886110",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-936105518",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-936105518",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-998093456",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-998093456",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-994340077",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-994340077",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-998822309",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-998822309",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-958106969",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-958106969",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-990019382",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-990019382",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-946007181",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-946007181",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-777771201",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-777771201",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-990000002",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-990000002",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-933938338",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-933938338",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-998646396",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-998646396",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-946891331",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-946891331",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-990000003",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-990000003",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-883669392",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-883669392",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-903565345",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-903565345",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-950211252",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-950211252",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-945463836",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-945463836",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-909588859",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-909588859",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-930789384",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-930789384",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-946275090",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-946275090",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-933020997",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-933020997",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-999005615",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-999005615",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-998198187",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-998198187",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-951908080",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-951908080",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-996389687",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-996389687",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-997640094",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-997640094",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-arab-tili-usr-student-984074950",
+      "group_id": "grp-arab-tili",
+      "student_id": "usr-student-984074950",
+      "course_id": "crs-arab-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-973445313",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-973445313",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-933921552",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-933921552",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-946019500",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-946019500",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-998352122",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-998352122",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-940508780",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-940508780",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-947387535",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-947387535",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-998161774",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-998161774",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-930054773",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-930054773",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-777771201",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-777771201",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-952228534",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-952228534",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-909709995",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-909709995",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-975190011",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-975190011",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-950462692",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-950462692",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-902521414",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-902521414",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-949214280",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-949214280",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-935061991",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-935061991",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-932901750",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-932901750",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-990000004",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-990000004",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-900095755",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-900095755",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-930096441",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-930096441",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-930678890",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-930678890",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-975479606",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-975479606",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-956161508",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-956161508",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-995387215",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-995387215",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-999005615",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-999005615",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-901594495",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-901594495",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-773431899",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-773431899",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-943501407",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-943501407",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-945373716",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-945373716",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-971089595",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-971089595",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-990000005",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-990000005",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-771564545",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-771564545",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-990202676",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-990202676",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-999009996",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-999009996",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-999226616",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-999226616",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-999220076",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-999220076",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-977848807",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-977848807",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-rus-tili-usr-student-990000006",
+      "group_id": "grp-rus-tili",
+      "student_id": "usr-student-990000006",
+      "course_id": "crs-rus-tili",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-it-usr-student-930098339",
+      "group_id": "grp-it",
+      "student_id": "usr-student-930098339",
+      "course_id": "crs-it",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-it-usr-student-943852253",
+      "group_id": "grp-it",
+      "student_id": "usr-student-943852253",
+      "course_id": "crs-it",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-it-usr-student-947882906",
+      "group_id": "grp-it",
+      "student_id": "usr-student-947882906",
+      "course_id": "crs-it",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-mental-usr-student-909901059",
+      "group_id": "grp-mental",
+      "student_id": "usr-student-909901059",
+      "course_id": "crs-mental",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-mental-usr-student-992223052",
+      "group_id": "grp-mental",
+      "student_id": "usr-student-992223052",
+      "course_id": "crs-mental",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-mental-usr-student-935286718",
+      "group_id": "grp-mental",
+      "student_id": "usr-student-935286718",
+      "course_id": "crs-mental",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-shaxmat-usr-student-909474123",
+      "group_id": "grp-shaxmat",
+      "student_id": "usr-student-909474123",
+      "course_id": "crs-shaxmat",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    },
+    {
+      "id": "mem-grp-shaxmat-usr-student-946019500",
+      "group_id": "grp-shaxmat",
+      "student_id": "usr-student-946019500",
+      "course_id": "crs-shaxmat",
+      "joined_at": "2026-11-04T03:48:37.304Z",
+      "is_active": true
+    }
+  ]
 }
