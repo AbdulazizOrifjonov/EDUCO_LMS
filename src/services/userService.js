@@ -174,6 +174,11 @@ export async function createUser({
   courseId = null,
   subject = '',
   monthly_salary = 0,
+  custom_price = null,
+  discount_percent = 0,
+  discount_amount = 0,
+  discount_type = null,
+  discount_reason = '',
 }) {
   if (role === 'owner') {
     throw new Error('Tizimda faqat 1 ta Boshliq (Owner) bo‘lishi mumkin!');
@@ -274,6 +279,11 @@ export async function createUser({
     course_id: courseId || null,
     subject: subject || '',
     monthly_salary: monthly_salary || 0,
+    custom_price: custom_price !== undefined ? custom_price : null,
+    discount_percent: discount_percent !== undefined ? Number(discount_percent || 0) : 0,
+    discount_amount: discount_amount !== undefined ? Number(discount_amount || 0) : 0,
+    discount_type: discount_type || null,
+    discount_reason: discount_reason || '',
   });
   return created;
 }
@@ -332,7 +342,7 @@ export async function createStudent({
 /**
  * Update user details
  */
-export async function updateUser(id, { firstName, lastName, fullName, full_name, username, phone, fatherPhone, motherPhone, role, isActive, password, courseId, subject, status }) {
+export async function updateUser(id, { firstName, lastName, fullName, full_name, username, phone, fatherPhone, motherPhone, role, isActive, password, courseId, subject, status, custom_price, discount_percent, discount_amount, discount_type, discount_reason, group_id }) {
   let resolvedFirst = firstName;
   let resolvedLast = lastName;
   const rawFullName = fullName || full_name;
@@ -391,6 +401,13 @@ export async function updateUser(id, { firstName, lastName, fullName, full_name,
     is_active: isActive !== undefined ? isActive : localUser.is_active,
     course_id: courseId !== undefined ? courseId : localUser.course_id,
     subject: subject !== undefined ? subject : localUser.subject,
+    group_id: group_id !== undefined ? group_id : localUser.group_id,
+    group_ids: group_id ? Array.from(new Set([...(localUser.group_ids || []), group_id])) : localUser.group_ids,
+    custom_price: custom_price !== undefined ? custom_price : localUser.custom_price,
+    discount_percent: discount_percent !== undefined ? Number(discount_percent || 0) : localUser.discount_percent,
+    discount_amount: discount_amount !== undefined ? Number(discount_amount || 0) : localUser.discount_amount,
+    discount_type: discount_type !== undefined ? discount_type : localUser.discount_type,
+    discount_reason: discount_reason !== undefined ? discount_reason : localUser.discount_reason,
   });
   return updated;
 }

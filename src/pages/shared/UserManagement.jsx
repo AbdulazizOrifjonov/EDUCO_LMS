@@ -36,6 +36,7 @@ import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import Select from '@/components/ui/Select';
 import Modal from '@/components/ui/Modal';
+import RoleBadge from '@/components/ui/RoleBadge';
 import { toast } from '@/components/ui/Toast';
 import UserForm from './UserForm';
 import {
@@ -43,6 +44,7 @@ import {
   toggleUserStatus,
   resetUserPassword,
   exportUsersToCSV,
+  exportUsersToExcel,
   deleteUser,
 } from '@/services/userService';
 import { ROLES } from '@/lib/constants';
@@ -229,6 +231,15 @@ export default function UserManagement() {
     }
   };
 
+  const handleExportExcel = () => {
+    if (!users.length) {
+      toast.warning(t('common.noData', 'Yuklab olish uchun foydalanuvchilar mavjud emas'));
+      return;
+    }
+    exportUsersToExcel(users);
+    toast.success('Barcha foydalanuvchilar va xodimlar bazasi Excel formatida (dashboard va formulalar bilan) yuklab olindi!');
+  };
+
   const handleExportCSV = () => {
     if (!users.length) {
       toast.warning(t('common.noData', 'No users to export'));
@@ -293,24 +304,14 @@ export default function UserManagement() {
       key: 'role',
       className: 'whitespace-nowrap',
       cellClassName: 'whitespace-nowrap',
-      render: (row) => {
-        const roleStyles = {
-          [ROLES.OWNER]: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30',
-          [ROLES.ADMIN]: 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30',
-          [ROLES.TEACHER]: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30',
-          [ROLES.STUDENT]: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30',
-        };
-        return (
-          <button
-            type="button"
-            onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
-            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider cursor-pointer hover:scale-105 active:scale-95 transition-transform ${roleStyles[row.role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'}`}
-            title={t('users.viewProfile', 'Foydalanuvchi profilini ochish')}
-          >
-            <span>{t(`roles.${row.role}`, row.role)}</span>
-          </button>
-        );
-      },
+      render: (row) => (
+        <RoleBadge
+          role={row.role}
+          size="md"
+          onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
+          title={t('users.viewProfile', 'Foydalanuvchi profilini ochish')}
+        />
+      ),
     },
     {
       header: t('common.phone', 'Phone'),
@@ -508,11 +509,12 @@ export default function UserManagement() {
             variant="outline"
             size="md"
             icon={Download}
-            onClick={handleExportCSV}
-            className="flex-1 sm:flex-initial justify-center"
+            onClick={handleExportExcel}
+            className="flex-1 sm:flex-initial justify-center font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-xs"
+            title="Barcha foydalanuvchilar va xodimlar bazasini Excel formatida (dashboard va formulalar bilan) yuklab olish"
           >
-            <span className="hidden sm:inline">{t('common.export', 'Export CSV')}</span>
-            <span className="sm:hidden">CSV</span>
+            <span className="hidden sm:inline">Excel Baza yuklab olish</span>
+            <span className="sm:hidden">Excel</span>
           </Button>
 
           {!isTeacher && (
@@ -775,17 +777,7 @@ export default function UserManagement() {
                             {row.fullName}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              row.role === ROLES.OWNER
-                                ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30'
-                                : row.role === ROLES.ADMIN
-                                ? 'bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30'
-                                : row.role === ROLES.TEACHER
-                                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
-                                : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
-                            }`}>
-                              {t(`roles.${row.role}`, row.role)}
-                            </span>
+                            <RoleBadge role={row.role} size="sm" />
                           </div>
                         </div>
                       </div>
@@ -1020,9 +1012,7 @@ export default function UserManagement() {
                   <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100">
                     {selectedUserForView.fullName || `${selectedUserForView.first_name || ''} ${selectedUserForView.last_name || ''}`.trim() || selectedUserForView.username}
                   </h3>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60">
-                    {t(`roles.${selectedUserForView.role}`, selectedUserForView.role)}
-                  </span>
+                  <RoleBadge role={selectedUserForView.role} size="sm" />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono">
                   Login / Username: @{selectedUserForView.username || selectedUserForView.id}

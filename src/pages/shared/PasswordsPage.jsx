@@ -19,18 +19,21 @@ import {
   Clock,
   X,
   ChevronDown,
+  Download,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Select from '@/components/ui/Select';
 import Badge from '@/components/ui/Badge';
+import RoleBadge from '@/components/ui/RoleBadge';
 import Table from '@/components/ui/Table';
 import Avatar from '@/components/ui/Avatar';
 import Modal from '@/components/ui/Modal';
 import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
 import { toast } from '@/components/ui/Toast';
 import { getUsers, adminSetUserPassword } from '@/services/userService';
+import { exportUsersMasterExcel } from '@/utils/excelExport';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone } from '@/utils/phoneFormat';
 import { useSearch } from '@/context/SearchContext';
@@ -313,9 +316,7 @@ export default function PasswordsPage() {
       className: '!px-2 whitespace-nowrap',
       cellClassName: '!px-2 !py-2.5 whitespace-nowrap',
       render: (row) => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ROLE_BADGE_STYLES[row.role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'}`}>
-          {t(`roles.${row.role}`, row.role)}
-        </span>
+        <RoleBadge role={row.role} size="sm" />
       ),
     },
     {
@@ -676,6 +677,24 @@ export default function PasswordsPage() {
               : t('passwords.showAll', 'Parollarni ko‘rsatish')}
           </Button>
           <Button
+            variant="outline"
+            size="md"
+            icon={Download}
+            onClick={() => {
+              if (!users.length) {
+                toast.warning('Yuklab olish uchun foydalanuvchilar mavjud emas');
+                return;
+              }
+              exportUsersMasterExcel(users);
+              toast.success('Barcha xodimlar va o‘quvchilar parollar bazasi Excel formatida (dashboard va formulalari bilan) yuklab olindi!');
+            }}
+            className="h-10 !rounded-xl font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-xs sm:text-sm shadow-xs"
+            title="Parollar va xodimlar bazasini Excel formatida yuklab olish"
+          >
+            <span className="hidden sm:inline">Excel Baza</span>
+            <span className="sm:hidden">Excel</span>
+          </Button>
+          <Button
             variant="ghost"
             size="md"
             icon={RefreshCw}
@@ -801,9 +820,7 @@ export default function PasswordsPage() {
                           </p>
                         </div>
                       </div>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${ROLE_BADGE_STYLES[user.role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'}`}>
-                        {t(`roles.${user.role}`, user.role)}
-                      </span>
+                      <RoleBadge role={user.role} size="sm" />
                     </div>
 
                     {/* Middle Row 1: Login / Phone */}
@@ -991,9 +1008,7 @@ export default function PasswordsPage() {
                   )}
                 </p>
               </div>
-              <Badge variant={roleBadgeVariants[selectedUser.role] || 'secondary'}>
-                {t(`roles.${selectedUser.role}`, selectedUser.role)}
-              </Badge>
+              <RoleBadge role={selectedUser.role} size="sm" />
             </div>
 
             <PasswordStrengthInput

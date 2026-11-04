@@ -21,6 +21,11 @@ import {
   BookOpen,
   Save,
   X,
+  Wallet,
+  Coins,
+  Percent,
+  Tag,
+  BadgeCheck,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -32,7 +37,7 @@ import TimePicker from '@/components/ui/TimePicker';
 import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
 import { toast } from '@/components/ui/Toast';
 import { createUser, updateUser, getUserById } from '@/services/userService';
-import { getGroups, enrollStudent } from '@/services/groupService';
+import { getGroups, enrollStudent, updateStudentDiscount } from '@/services/groupService';
 import { createStudentReminder } from '@/services/reminderService';
 import { getCourses, createCourse } from '@/services/courseService';
 import { ROLES } from '@/lib/constants';
@@ -79,6 +84,40 @@ export default function UserCreatePage() {
   const [newCourseFee, setNewCourseFee] = useState('');
   const [newCourseDesc, setNewCourseDesc] = useState('');
   const [isSavingCourse, setIsSavingCourse] = useState(false);
+
+  // Student Tuition & Discount Pricing State (Owner & Admin only)
+  const [tuitionPricingMode, setTuitionPricingMode] = useState('standard'); // 'standard' | 'custom' | 'percent' | 'amount' | 'free'
+  const [customTuitionPrice, setCustomTuitionPrice] = useState('');
+  const [discountPercent, setDiscountPercent] = useState('');
+  const [discountAmount, setDiscountAmount] = useState('');
+  const [discountReason, setDiscountReason] = useState('');
+
+  // Selected group object and base monthly fee
+  const selectedGroupObj = groupsList.find((g) => g.id === selectedGroupId);
+  const baseFee = Number(selectedGroupObj?.monthly_price || selectedGroupObj?.price || 500000);
+
+  const calculatedEffectivePrice = React.useMemo(() => {
+    if (tuitionPricingMode === 'standard') {
+      return baseFee;
+    }
+    if (tuitionPricingMode === 'free') {
+      return 0;
+    }
+    if (tuitionPricingMode === 'custom') {
+      const cleanNum = Number(String(customTuitionPrice).replace(/\D/g, ''));
+      return isNaN(cleanNum) || customTuitionPrice === '' ? baseFee : cleanNum;
+    }
+    if (tuitionPricingMode === 'percent') {
+      const pct = Math.min(100, Math.max(0, Number(discountPercent) || 0));
+      const discountVal = Math.round(baseFee * (pct / 100));
+      return Math.max(0, baseFee - discountVal);
+    }
+    if (tuitionPricingMode === 'amount') {
+      const amt = Number(String(discountAmount).replace(/\D/g, '')) || 0;
+      return Math.max(0, baseFee - amt);
+    }
+    return baseFee;
+  }, [tuitionPricingMode, customTuitionPrice, discountPercent, discountAmount, baseFee]);
 
   // Set default reminder date to 3 days from now
   const getDefaultReminderDate = (daysAhead = 3) => {
@@ -201,11 +240,58 @@ export default function UserCreatePage() {
   useEffect(() => {
     if (isEditing && id) {
       getUserById(id)
-        .then((u) => {
+        .then(async (u) => {
           if (u) {
             if (u.course_id || u.courseId) {
               setSelectedCourseId(u.course_id || u.courseId);
             }
+
+            // Load membership info for student
+            let targetMem = null;
+            try {
+              const { localStore } = await import('@/lib/localStore');
+              const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+              const normId = localStore.normalizeUserId(id);
+              targetMem = memberships.find((m) => localStore.normalizeUserId(m.student_id) === normId);
+            } catch (_) {}
+
+            const effectiveGroupId =
+              targetMem?.group_id ||
+              (Array.isArray(u.group_ids) && u.group_ids[0]) ||
+              u.groupId ||
+              u.group_id ||
+              '';
+            if (effectiveGroupId) {
+              setSelectedGroupId(effectiveGroupId);
+            }
+
+            // Set pricing & discount state
+            const targetCustomPrice = targetMem?.custom_price !== undefined ? targetMem.custom_price : u.custom_price;
+            const targetPercent = targetMem?.discount_percent !== undefined ? targetMem.discount_percent : u.discount_percent;
+            const targetAmount = targetMem?.discount_amount !== undefined ? targetMem.discount_amount : u.discount_amount;
+            const targetReason = targetMem?.discount_reason || u.discount_reason || '';
+
+            if (targetCustomPrice !== null && targetCustomPrice !== undefined && targetCustomPrice !== '') {
+              if (Number(targetCustomPrice) === 0) {
+                setTuitionPricingMode('free');
+              } else {
+                setTuitionPricingMode('custom');
+                setCustomTuitionPrice(String(targetCustomPrice));
+              }
+            } else if (Number(targetPercent) > 0) {
+              setTuitionPricingMode('percent');
+              setDiscountPercent(String(targetPercent));
+            } else if (Number(targetAmount) > 0) {
+              setTuitionPricingMode('amount');
+              setDiscountAmount(String(targetAmount));
+            } else {
+              setTuitionPricingMode('standard');
+            }
+
+            if (targetReason) {
+              setDiscountReason(targetReason);
+            }
+
             reset({
               firstName: u.first_name || '',
               lastName: u.last_name || '',
@@ -277,6 +363,40 @@ export default function UserCreatePage() {
 
     setIsSubmitting(true);
     try {
+      // Tuition & Discount calculation for student (Owner & Admin only)
+      let customPriceVal = null;
+      let discountTypeVal = null;
+      let discountPercentVal = 0;
+      let discountAmountVal = 0;
+
+      if (isOwnerOrAdmin && data.role === ROLES.STUDENT) {
+        if (tuitionPricingMode === 'custom') {
+          const cleanNum = Number(String(customTuitionPrice).replace(/\D/g, ''));
+          customPriceVal = isNaN(cleanNum) ? null : cleanNum;
+          discountTypeVal = 'custom';
+        } else if (tuitionPricingMode === 'free') {
+          customPriceVal = 0;
+          discountTypeVal = 'free';
+        } else if (tuitionPricingMode === 'percent') {
+          discountPercentVal = Math.min(100, Math.max(0, Number(discountPercent) || 0));
+          discountTypeVal = 'percent';
+          const calcVal = Math.round(baseFee * (discountPercentVal / 100));
+          customPriceVal = Math.max(0, baseFee - calcVal);
+        } else if (tuitionPricingMode === 'amount') {
+          discountAmountVal = Number(String(discountAmount).replace(/\D/g, '')) || 0;
+          discountTypeVal = 'amount';
+          customPriceVal = Math.max(0, baseFee - discountAmountVal);
+        }
+      }
+
+      const enrollmentOptions = {
+        custom_price: customPriceVal,
+        discount_type: discountTypeVal,
+        discount_percent: discountPercentVal,
+        discount_amount: discountAmountVal,
+        discount_reason: discountReason.trim(),
+      };
+
       if (isEditing) {
         const selectedCourseObj = coursesList.find((c) => c.id === selectedCourseId);
         await updateUser(id, {
@@ -290,8 +410,25 @@ export default function UserCreatePage() {
           password: trimmedPwd || undefined,
           courseId: selectedCourseId || undefined,
           subject: selectedCourseObj?.name || undefined,
+          group_id: selectedGroupId || undefined,
+          custom_price: isOwnerOrAdmin && data.role === ROLES.STUDENT ? customPriceVal : undefined,
+          discount_percent: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountPercentVal : undefined,
+          discount_amount: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountAmountVal : undefined,
+          discount_type: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountTypeVal : undefined,
+          discount_reason: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountReason.trim() : undefined,
         });
-        toast.success('Foydalanuvchi ma‘lumotlari muvaffaqiyatli yangilandi!');
+
+        if (data.role === ROLES.STUDENT && selectedGroupId) {
+          try {
+            await enrollStudent(selectedGroupId, id, enrollmentOptions);
+            if (isOwnerOrAdmin) {
+              await updateStudentDiscount(selectedGroupId, id, enrollmentOptions);
+            }
+          } catch (e) {
+            console.warn('Group update note:', e);
+          }
+        }
+        toast.success('Foydalanuvchi ma‘lumotlari va to‘lov summasi muvaffaqiyatli saqlandi!');
       } else {
         // If teacher role and an inline course was drafted, auto-create it
         let finalCourseId = selectedCourseId;
@@ -325,12 +462,20 @@ export default function UserCreatePage() {
           password: trimmedPwd,
           courseId: finalCourseId || null,
           subject: finalSubject || '',
+          custom_price: isOwnerOrAdmin && data.role === ROLES.STUDENT ? customPriceVal : null,
+          discount_percent: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountPercentVal : 0,
+          discount_amount: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountAmountVal : 0,
+          discount_type: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountTypeVal : null,
+          discount_reason: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountReason.trim() : '',
         });
 
         // 1. Group enrollment if selected
         if (data.role === ROLES.STUDENT && selectedGroupId && createdUser?.id) {
           try {
-            await enrollStudent(selectedGroupId, createdUser.id);
+            await enrollStudent(selectedGroupId, createdUser.id, enrollmentOptions);
+            if (isOwnerOrAdmin && (customPriceVal !== null || discountPercentVal > 0 || discountAmountVal > 0)) {
+              await updateStudentDiscount(selectedGroupId, createdUser.id, enrollmentOptions);
+            }
           } catch (e) {
             console.warn('Enrollment note:', e);
           }

@@ -24,6 +24,7 @@ import {
 import useAuth from '@/hooks/useAuth';
 import { useThemeStore } from '@/hooks/useTheme';
 import { Button, Card, Badge, Input, PasswordStrengthInput, ImageCropperModal } from '@/components/ui';
+import RoleBadge from '@/components/ui/RoleBadge';
 import Select from '@/components/ui/Select';
 import { LanguageFlag } from '@/components/LanguageSelector';
 import { updateProfile, changePassword, uploadAvatar } from '@/services/settingsService';
@@ -360,23 +361,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               <h2 className="text-xl font-extrabold text-gray-900 dark:text-gray-100">
                 {currentDisplayName}
               </h2>
-              {effectiveRole === 'teacher' ? (
-                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
-                  {t('roles.teacher', 'O‘QITUVCHI')}
-                </span>
-              ) : effectiveRole === 'admin' ? (
-                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
-                  {t('roles.admin', 'ADMINISTRATOR')}
-                </span>
-              ) : effectiveRole === 'owner' ? (
-                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
-                  {t('roles.owner', 'BOSHLIQ')}
-                </span>
-              ) : (
-                <span className="inline-flex items-center font-bold rounded-full px-2.5 py-0.5 text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 uppercase tracking-wider w-fit mx-auto sm:mx-0">
-                  {t('roles.student', 'O‘QUVCHI')}
-                </span>
-              )}
+              <RoleBadge role={effectiveRole} size="md" className="w-fit mx-auto sm:mx-0" />
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">
               {phoneNumber ? formatUzPhone(phoneNumber) : (isViewingOther ? targetUser?.phone : profile?.phone) || 'Telefon raqam kiritilmagan'}

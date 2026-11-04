@@ -461,12 +461,12 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Quick Demo Login Section (As requested by user: Boshliq va boshqa rollar) */}
+            {/* Quick Demo Login Section (Faqat Boshliq) */}
             <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800">
               <div className="flex items-center justify-between mb-2.5">
                 <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  Tezkor Demo kirish:
+                  Boshliq (Owner) uchun tezkor kirish:
                 </span>
                 <span className="text-[10px] text-gray-400 font-medium">1-bosishda kirish</span>
               </div>
@@ -476,7 +476,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => handleQuickDemoLogin('abbosbek', 'AbbosBek1415')}
                 disabled={isSubmitting || authLoading}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 hover:from-amber-500/25 hover:to-orange-500/20 border-2 border-amber-400 dark:border-amber-600/60 text-amber-950 dark:text-amber-200 font-bold text-sm shadow-xs transition-all active:scale-[0.98] cursor-pointer mb-2.5"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 hover:from-amber-500/25 hover:to-orange-500/20 border-2 border-amber-400 dark:border-amber-600/60 text-amber-950 dark:text-amber-200 font-bold text-sm shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                 title="Boshliq kabinetiga 1 bosishda kirish"
               >
                 <div className="flex items-center gap-2.5">
@@ -497,42 +497,6 @@ export default function LoginPage() {
                   Kirish &rarr;
                 </span>
               </button>
-
-              {/* Other demo roles in a row */}
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin('admin', 'Admin123!')}
-                  disabled={isSubmitting || authLoading}
-                  className="flex flex-col items-center p-2 rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-100/70 transition-colors cursor-pointer text-center"
-                >
-                  <span className="text-base mb-0.5">👨‍💼</span>
-                  <span className="text-xs font-bold text-blue-900 dark:text-blue-300">Admin</span>
-                  <span className="text-[9px] text-gray-500 dark:text-gray-400">admin</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin('teacher', 'Teacher123!')}
-                  disabled={isSubmitting || authLoading}
-                  className="flex flex-col items-center p-2 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/50 dark:bg-purple-950/30 hover:bg-purple-100/70 transition-colors cursor-pointer text-center"
-                >
-                  <span className="text-base mb-0.5">👨‍🏫</span>
-                  <span className="text-xs font-bold text-purple-900 dark:text-purple-300">O‘qituvchi</span>
-                  <span className="text-[9px] text-gray-500 dark:text-gray-400">teacher</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin('student', 'Student123!')}
-                  disabled={isSubmitting || authLoading}
-                  className="flex flex-col items-center p-2 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/30 hover:bg-emerald-100/70 transition-colors cursor-pointer text-center"
-                >
-                  <span className="text-base mb-0.5">🎓</span>
-                  <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">O‘quvchi</span>
-                  <span className="text-[9px] text-gray-500 dark:text-gray-400">student</span>
-                </button>
-              </div>
             </div>
 
             {/* Quick Demo Switcher Tip */}

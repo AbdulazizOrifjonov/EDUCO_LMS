@@ -60,6 +60,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
   const { profile } = useAuth();
   const currentUserRole = profile?.role || 'owner';
   const isTeacher = currentUserRole === 'teacher';
+  const isOwnerOrAdmin = currentUserRole === 'owner' || currentUserRole === 'admin';
   const groupId = propGroupId || paramGroupId;
 
   const [group, setGroup] = useState(null);
@@ -770,14 +771,16 @@ export default function GroupDetail({ groupId: propGroupId }) {
                           </span>
                         )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleOpenDiscountModal(row)}
-                        className="p-1 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors cursor-pointer"
-                        title="Chegirma yoki individual narx belgilash"
-                      >
-                        <Percent className="w-3.5 h-3.5" />
-                      </button>
+                      {isOwnerOrAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenDiscountModal(row)}
+                          className="p-1 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors cursor-pointer"
+                          title="Chegirma yoki individual narx belgilash"
+                        >
+                          <Percent className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   );
                 },
@@ -798,15 +801,17 @@ export default function GroupDetail({ groupId: propGroupId }) {
                 cellClassName: 'text-right rtl:text-left',
                 render: (row) => (
                   <div className="flex items-center justify-end gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                      title="Chegirma va to‘lovni sozlash"
-                      onClick={() => handleOpenDiscountModal(row)}
-                    >
-                      <Percent className="w-4 h-4" />
-                    </Button>
+                    {isOwnerOrAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                        title="Chegirma va to‘lovni sozlash"
+                        onClick={() => handleOpenDiscountModal(row)}
+                      >
+                        <Percent className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
