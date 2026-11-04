@@ -197,8 +197,59 @@ export const dashboardService = {
         myGroups: enrichedGroups,
       };
     } catch (error) {
-      console.error('Error fetching teacher stats:', error);
-      throw error;
+      console.warn('Error fetching teacher stats from Supabase, fallback to localStore:', error);
+      const groups = localStore.getGroups();
+      const users = localStore.getUsers();
+      const courses = localStore.getCourses();
+      const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+      const normalizedTeacherId = localStore.normalizeUserId(teacherId);
+      const teacherObj = users.find((u) => u.id === normalizedTeacherId || u.id === teacherId);
+      const teacherName = (teacherObj?.fullName || `${teacherObj?.first_name || ''} ${teacherObj?.last_name || ''}`).trim().toLowerCase();
+
+      const myGroups = groups.filter((g) => {
+        const gTeacherId = g.teacherId || g.teacher_id;
+        const gTeacherName = (g.teacherName || g.teacher_name || '').toLowerCase();
+        return (
+          gTeacherId === normalizedTeacherId ||
+          gTeacherId === teacherId ||
+          (teacherName && gTeacherName && (gTeacherName.includes(teacherName) || teacherName.includes(gTeacherName))) ||
+          (teacherObj?.specialty && g.name?.toLowerCase().includes(teacherObj.specialty.toLowerCase()))
+        );
+      });
+
+      const myGroupIds = new Set(myGroups.map((g) => g.id));
+      const myStudents = new Set();
+      myGroups.forEach((g) => {
+        (g.student_ids || []).forEach((sId) => myStudents.add(sId));
+      });
+      memberships.forEach((m) => {
+        if (myGroupIds.has(m.group_id) && m.is_active !== false) {
+          myStudents.add(m.student_id);
+        }
+      });
+
+      const enrichedGroups = myGroups.map((g) => {
+        const c = courses.find((x) => x.id === (g.courseId || g.course_id));
+        const count = (g.student_ids || []).length || memberships.filter((m) => m.group_id === g.id && m.is_active !== false).length;
+        return {
+          id: g.id,
+          name: g.name,
+          room: g.room || 'Xona 101',
+          capacity: g.capacity || 25,
+          status: g.status || 'active',
+          courseName: c?.name || g.courseName || 'Kurs',
+          courseColor: c?.color || '#3b82f6',
+          isPrimary: true,
+          studentCount: count,
+        };
+      });
+
+      return {
+        myGroupsCount: enrichedGroups.length,
+        totalStudentsCount: myStudents.size,
+        pendingHomework: 0,
+        myGroups: enrichedGroups,
+      };
     }
   },
 
