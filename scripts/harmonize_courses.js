@@ -395,6 +395,7 @@ async function main() {
   console.log('Pushing harmonized store to https://educo-lms.pages.dev/api/sync-store...');
   try {
     const postRes = await postJson('https://educo-lms.pages.dev/api/sync-store', {
+      _deleted_ids: ['crs-mental', 'crs-1793615340332', 'crs-1793622350270'],
       educo_db_courses: courses,
       educo_db_groups: groups,
       educo_db_users: users,

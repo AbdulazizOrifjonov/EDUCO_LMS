@@ -760,7 +760,7 @@ export default function GroupCreatePage() {
                           <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
                             <button
                               type="button"
-                              onClick={() => navigate(`/${currentUserRole}/groups/${cg.id}/edit`)}
+                              onClick={() => navigate(`/${currentUserRole}/groups/edit/${cg.id}`)}
                               className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors cursor-pointer"
                               title="Ushbu guruhni tahrirlashga o‘tish"
                             >

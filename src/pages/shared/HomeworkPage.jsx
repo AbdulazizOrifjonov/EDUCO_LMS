@@ -35,6 +35,7 @@ export default function HomeworkPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const isStudent = profile?.role === ROLES.STUDENT;
+  const currentRole = (profile?.role || 'owner').toLowerCase();
 
   const [homeworkList, setHomeworkList] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -168,7 +169,7 @@ export default function HomeworkPage() {
             size="sm"
             className="!p-1.5 h-8 w-8 text-gray-600 hover:text-brand-navy"
             title={t('common.view', 'View Details')}
-            onClick={() => navigate(`/owner/homework/${row.id}`)}
+            onClick={() => navigate(`/${currentRole}/homework/${row.id}`)}
           >
             <Eye className="w-4 h-4" />
           </Button>

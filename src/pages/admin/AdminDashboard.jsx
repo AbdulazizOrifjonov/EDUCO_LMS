@@ -285,7 +285,7 @@ export default function AdminDashboard() {
             subtitle={t('dashboard.todayTimelineSubtitle', 'Real-time timeline of lessons occurring today')}
             headerAction={
               <Button
-                onClick={() => navigate('/schedule')}
+                onClick={() => navigate('/admin/schedule')}
                 variant="ghost"
                 size="sm"
                 className="text-xs text-blue-600 dark:text-emerald-400 hover:text-blue-700 dark:hover:text-emerald-300 font-semibold"
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
                 title={t('dashboard.noLessonsToday', 'No lessons scheduled today')}
                 description={t('dashboard.noLessonsFoundDesc', "No active lesson blocks were found for today's date.")}
                 actionText={t('schedule.addLesson', 'Schedule a Lesson')}
-                onAction={() => navigate('/schedule')}
+                onAction={() => navigate('/admin/schedule')}
               />
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800 -mx-5 -my-5">
