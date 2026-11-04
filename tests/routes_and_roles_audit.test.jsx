@@ -12,6 +12,17 @@ beforeEach(() => {
   window.scrollTo = vi.fn();
   localStore.clear();
   localStore.ensureCleanStart();
+  localStore.saveUser({
+    id: 'usr-student-1',
+    role: 'student',
+    full_name: 'Test Student',
+    first_name: 'Test',
+    last_name: 'Student',
+    phone: '+998901234567',
+    is_active: true,
+  });
+  localStore.saveCourse({ id: 'crs-1', name: 'Test Course', code: 'CRS-1', price: 500000 });
+  localStore.saveGroup({ id: 'grp-1', name: 'Test Group', course_id: 'crs-1', room: '101' });
 });
 
 function setUserRole(role, id = `usr-${role}-1`, name = `Test ${role}`) {
@@ -51,11 +62,16 @@ describe('Universal LMS Routes & Roles Audit', () => {
       '/owner/dashboard',
       '/owner/users',
       '/owner/users/create',
+      '/owner/users/edit/usr-student-1',
+      '/owner/users/profile/usr-student-1',
       '/owner/passwords',
       '/owner/courses',
       '/owner/courses/create',
+      '/owner/courses/edit/crs-1',
       '/owner/groups',
       '/owner/groups/create',
+      '/owner/groups/edit/grp-1',
+      '/owner/groups/grp-1',
       '/owner/schedule',
       '/owner/reminders',
       '/owner/attendance',
@@ -69,6 +85,17 @@ describe('Universal LMS Routes & Roles Audit', () => {
       '/owner/audit',
       '/owner/tuition',
       '/owner/website',
+      '/owner/website?tab=overview',
+      '/owner/website?tab=slider',
+      '/owner/website?tab=courses',
+      '/owner/website?tab=subjects',
+      '/owner/website?tab=teachers',
+      '/owner/website?tab=news',
+      '/owner/website?tab=videos',
+      '/owner/website?tab=gallery',
+      '/owner/website?tab=testimonials',
+      '/owner/website?tab=about',
+      '/owner/website?tab=settings',
       '/owner/sms',
       '/owner/reports',
       '/owner/settings',
@@ -97,11 +124,16 @@ describe('Universal LMS Routes & Roles Audit', () => {
       '/admin/dashboard',
       '/admin/users',
       '/admin/users/create',
+      '/admin/users/edit/usr-student-1',
+      '/admin/users/profile/usr-student-1',
       '/admin/passwords',
       '/admin/courses',
       '/admin/courses/create',
+      '/admin/courses/edit/crs-1',
       '/admin/groups',
       '/admin/groups/create',
+      '/admin/groups/edit/grp-1',
+      '/admin/groups/grp-1',
       '/admin/schedule',
       '/admin/reminders',
       '/admin/attendance',
@@ -142,7 +174,14 @@ describe('Universal LMS Routes & Roles Audit', () => {
       '/teacher/courses',
       '/teacher/users',
       '/teacher/students',
+      '/teacher/users/create',
+      '/teacher/users/edit/usr-student-1',
+      '/teacher/users/profile/usr-student-1',
+      '/teacher/passwords',
       '/teacher/groups',
+      '/teacher/groups/create',
+      '/teacher/groups/edit/grp-1',
+      '/teacher/groups/grp-1',
       '/teacher/schedule',
       '/teacher/attendance',
       '/teacher/grades',
@@ -197,7 +236,42 @@ describe('Universal LMS Routes & Roles Audit', () => {
     }
   });
 
-  describe('5. Security & Role Boundaries (Access Control)', () => {
+  describe('5. Public Routes - Accessible to Guests without Login', () => {
+    beforeEach(() => {
+      useAuthStore.setState({
+        user: null,
+        profile: null,
+        session: null,
+        loading: false,
+        error: null,
+      });
+    });
+
+    const publicRoutes = [
+      '/',
+      '/home',
+      '/website',
+      '/login',
+      '/invite',
+      '/invite/token-123',
+      '/reset-password',
+      '/unauthorized',
+      '/non-existent-page-404',
+    ];
+
+    for (const route of publicRoutes) {
+      it(`renders Public route: ${route} without crashing`, async () => {
+        const { container } = render(
+          <MemoryRouter initialEntries={[route]}>
+            <App />
+          </MemoryRouter>
+        );
+        expect(container).toBeTruthy();
+      });
+    }
+  });
+
+  describe('6. Security & Role Boundaries (Access Control)', () => {
     it('Student cannot access /owner/dashboard and is redirected or blocked', () => {
       setUserRole('student', 'usr-student-1', 'Talaba');
       const { container } = render(
