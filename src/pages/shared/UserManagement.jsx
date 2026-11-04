@@ -143,10 +143,11 @@ export default function UserManagement() {
     const total = all.length;
     const students = all.filter((u) => u.role === 'student').length;
     const teachers = all.filter((u) => u.role === 'teacher').length;
-    const admins = all.filter((u) => u.role === 'admin' || u.role === 'owner').length;
+    const admins = all.filter((u) => u.role === 'admin').length;
+    const owners = all.filter((u) => u.role === 'owner').length;
     const active = all.filter((u) => u.is_active !== false).length;
     const inactive = all.filter((u) => u.is_active === false).length;
-    return { total, students, teachers, admins, active, inactive };
+    return { total, students, teachers, admins, owners, active, inactive };
   }, [currentUserRole, users]);
 
   const [groupsMap, setGroupsMap] = useState(() => {
@@ -867,7 +868,7 @@ export default function UserManagement() {
               </div>
             </button>
 
-            {/* Admins & Owner */}
+            {/* Administrator */}
             <button
               type="button"
               onClick={() => {
@@ -885,7 +886,7 @@ export default function UserManagement() {
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Rahbar & Adminlar
+                  Administrator
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
                   <Shield className="w-4 h-4" />
@@ -895,10 +896,10 @@ export default function UserManagement() {
                 <span className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-300">
                   {userStats.admins}
                 </span>
-                <span className="text-xs font-semibold text-gray-400">xodim</span>
+                <span className="text-xs font-semibold text-gray-400">admin</span>
               </div>
               <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                Boshqaruv ma’murlari
+                Erkinova Zilola
               </div>
             </button>
           </div>
@@ -923,6 +924,10 @@ export default function UserManagement() {
               active: 'bg-purple-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-300/60',
               inactive: 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border border-purple-300/80 dark:border-purple-800/60 hover:bg-purple-100 dark:hover:bg-purple-900/40',
             },
+            [ROLES.OWNER]: {
+              active: 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-400/60',
+              inactive: 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border border-rose-300/80 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/40',
+            },
           };
 
           const tabs = isTeacher
@@ -932,7 +937,10 @@ export default function UserManagement() {
                 { key: ROLES.STUDENT, label: t('users.studentsTab', "O'quvchilar"), count: userStats.students, icon: GraduationCap },
                 { key: ROLES.TEACHER, label: t('users.teachersTab', "O'qituvchilar"), count: userStats.teachers, icon: UserCheck },
                 ...(currentUserRole === ROLES.OWNER || currentUserRole === 'owner' || currentUserRole === ROLES.ADMIN || currentUserRole === 'admin'
-                  ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', t('users.admin', 'Administratorlar')), count: userStats.admins, icon: Shield }]
+                  ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', 'Administrator'), count: userStats.admins, icon: Shield }]
+                  : []),
+                ...(currentUserRole === ROLES.OWNER || currentUserRole === 'owner'
+                  ? [{ key: ROLES.OWNER, label: 'Rahbar (Owner)', count: userStats.owners, icon: Shield }]
                   : []),
               ];
 
@@ -1045,7 +1053,7 @@ export default function UserManagement() {
             )}
           </div>
           <span className="text-[11px] text-gray-500 dark:text-gray-400">
-            Jami tizimda: <strong className="text-gray-800 dark:text-gray-200">{userStats.total} ta</strong> ({userStats.students} o‘quvchi, {userStats.teachers} ustoz, {userStats.admins} ma’mur)
+            Jami tizimda: <strong className="text-gray-800 dark:text-gray-200">{userStats.total} ta</strong> ({userStats.students} o‘quvchi, {userStats.teachers} ustoz, {userStats.admins} admin{userStats.owners > 0 ? `, ${userStats.owners} rahbar` : ''})
           </span>
         </div>
 
