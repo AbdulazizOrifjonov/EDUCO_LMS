@@ -7,6 +7,7 @@ import {
   UserCheck,
   GraduationCap,
   BookOpen,
+  Layers,
   AlertCircle,
   RefreshCw,
   ArrowRight,
@@ -45,6 +46,7 @@ import { toast } from '@/components/ui/Toast';
 import UserForm from './UserForm';
 import {
   getUsers,
+  getTeacherStudentIds,
   toggleUserStatus,
   resetUserPassword,
   exportUsersToCSV,
@@ -60,9 +62,10 @@ import { useTwoStepConfirm } from '@/context/ConfirmContext';
 
 export default function UserManagement() {
   const { t } = useTranslation();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { confirmDelete } = useTwoStepConfirm();
   const currentUserRole = profile?.role || ROLES.OWNER;
+  const currentUserId = user?.id || profile?.id;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlRole = searchParams.get('role');
@@ -117,6 +120,8 @@ export default function UserManagement() {
         page,
         limit: pageSize,
         currentUserRole,
+        currentUserId,
+        currentUser: profile || user,
       });
       setUsers(data.users || []);
       setTotalPages(data.totalPages || 1);
@@ -127,7 +132,7 @@ export default function UserManagement() {
     } finally {
       setLoading(false);
     }
-  }, [roleFilter, statusFilter, search, page, currentUserRole, t]);
+  }, [roleFilter, statusFilter, search, page, currentUserRole, currentUserId, profile, user, t]);
 
   useEffect(() => {
     fetchUsers();
@@ -138,7 +143,8 @@ export default function UserManagement() {
     if (currentUserRole === 'admin') {
       all = all.filter((u) => u.role !== 'owner');
     } else if (currentUserRole === 'teacher') {
-      all = all.filter((u) => u.role === 'student');
+      const teacherStudentIds = getTeacherStudentIds(currentUserId, profile || user);
+      all = all.filter((u) => u.role === 'student' && teacherStudentIds.has(String(u.id)));
     }
     const total = all.length;
     const students = all.filter((u) => u.role === 'student').length;
@@ -148,7 +154,30 @@ export default function UserManagement() {
     const active = all.filter((u) => u.is_active !== false).length;
     const inactive = all.filter((u) => u.is_active === false).length;
     return { total, students, teachers, admins, owners, active, inactive };
-  }, [currentUserRole, users]);
+  }, [currentUserRole, currentUserId, profile, user, users]);
+
+  const teacherGroupsCount = useMemo(() => {
+    if (!isTeacher) return 0;
+    const groups = localStore.getGroups ? localStore.getGroups() : [];
+    const normTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(currentUserId) : currentUserId;
+    const teacherUser = profile || user;
+    const teacherName = (teacherUser?.fullName || `${teacherUser?.first_name || ''} ${teacherUser?.last_name || ''}`).trim().toLowerCase();
+    const teacherSpecialty = (teacherUser?.specialty || teacherUser?.subject || '').trim().toLowerCase();
+    const teacherPhoneClean = (teacherUser?.phone || '').replace(/\D/g, '').slice(-9);
+
+    return groups.filter((g) => {
+      const gTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(g.teacherId || g.teacher_id) : (g.teacherId || g.teacher_id);
+      const gTeacherName = (g.teacherName || g.teacher_name || '').toLowerCase();
+      const gTeacherPhone = (g.teacherPhone || g.teacher_phone || '').replace(/\D/g, '').slice(-9);
+
+      if (gTeacherId && (gTeacherId === normTeacherId || gTeacherId === currentUserId || (teacherUser && gTeacherId === teacherUser.id))) return true;
+      if (teacherUser?.group_ids && teacherUser.group_ids.includes(g.id)) return true;
+      if (teacherPhoneClean && gTeacherPhone && teacherPhoneClean === gTeacherPhone) return true;
+      if (teacherName && gTeacherName && (gTeacherName.includes(teacherName) || teacherName.includes(gTeacherName))) return true;
+      if (teacherSpecialty && g.name?.toLowerCase().includes(teacherSpecialty)) return true;
+      return false;
+    }).length;
+  }, [isTeacher, currentUserId, profile, user]);
 
   const [groupsMap, setGroupsMap] = useState(() => {
     try {
@@ -684,13 +713,16 @@ export default function UserManagement() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2.5 flex-wrap">
             <Users className="w-7 h-7 text-brand-navy dark:text-blue-400" />
-            <span>{t('nav.users', 'User Management')}</span>
+            <span>{isTeacher ? "Mening o‘quvchilarim" : t('nav.users', 'User Management')}</span>
             <span className="px-3 py-0.5 rounded-full text-xs font-black bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 shadow-2xs">
-              Jami: {userStats.total} ta odam
+              {isTeacher ? `Mening o‘quvchilarim: ${userStats.students} ta` : `Jami: ${userStats.total} ta odam`}
             </span>
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {t('users.pageSubtitle', 'Manage system accounts, credentials, and access roles')} • <span className="font-semibold text-emerald-600 dark:text-emerald-400">{userStats.active} faol</span> / <span className="font-semibold text-gray-400">{userStats.inactive} nofaol</span>
+            {isTeacher
+              ? `Faqat siz dars berayotgan guruhlardagi o‘quvchilar ro‘yxati • `
+              : `${t('users.pageSubtitle', 'Manage system accounts, credentials, and access roles')} • `}
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">{userStats.active} faol</span> / <span className="font-semibold text-gray-400">{userStats.inactive} nofaol</span>
           </p>
         </div>
 
@@ -701,9 +733,9 @@ export default function UserManagement() {
             icon={Download}
             onClick={handleExportExcel}
             className="flex-1 sm:flex-initial justify-center font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-xs"
-            title="Barcha foydalanuvchilar va xodimlar bazasini Excel formatida (dashboard va formulalar bilan) yuklab olish"
+            title={isTeacher ? "Guruhlaringizdagi barcha o‘quvchilarni Excel formatida yuklab olish" : "Barcha foydalanuvchilar va xodimlar bazasini Excel formatida yuklab olish"}
           >
-            <span className="hidden sm:inline">Excel Baza yuklab olish</span>
+            <span className="hidden sm:inline">{isTeacher ? "O‘quvchilarim bazasi (Excel)" : "Excel Baza yuklab olish"}</span>
             <span className="sm:hidden">Excel</span>
           </Button>
 
@@ -727,7 +759,7 @@ export default function UserManagement() {
             className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold flex-1 sm:flex-initial justify-center"
             onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.STUDENT}`)}
           >
-            <span className="hidden sm:inline">{t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
+            <span className="hidden sm:inline">{isTeacher ? "Guruhimga o‘quvchi qo‘shish" : t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
             <span className="sm:hidden">O'quvchi</span>
           </Button>
 
@@ -792,144 +824,211 @@ export default function UserManagement() {
       ) : (
         <>
           {/* Quick Role & Population Stats Bar */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Total Users */}
-            <button
-              type="button"
-              onClick={() => {
-                setRoleFilter('all');
-                setSearchParams({});
-                setPage(1);
-              }}
-              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                roleFilter === 'all'
-                  ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 shadow-sm ring-2 ring-blue-500/20'
-                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-800/60 shadow-2xs'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Jami foydalanuvchilar
-                </span>
-                <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4" />
+          {isTeacher ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Teacher's Students */}
+              <div className="p-3.5 sm:p-4 rounded-2xl border text-left bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 shadow-sm ring-2 ring-emerald-500/20">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                    Mening o‘quvchilarim
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
+                    {userStats.students}
+                  </span>
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">nafar o‘quvchi</span>
+                </div>
+                <div className="mt-1 text-[11px] text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>{userStats.active} faol ta’lim oluvchi</span>
                 </div>
               </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
-                  {userStats.total}
-                </span>
-                <span className="text-xs font-semibold text-gray-400">odam</span>
-              </div>
-              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>{userStats.active} faol hisob</span>
-              </div>
-            </button>
 
-            {/* Students */}
-            <button
-              type="button"
-              onClick={() => {
-                setRoleFilter(ROLES.STUDENT);
-                setSearchParams({ role: ROLES.STUDENT });
-                setPage(1);
-              }}
-              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                roleFilter === ROLES.STUDENT
-                  ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 shadow-sm ring-2 ring-emerald-500/20'
-                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-800/60 shadow-2xs'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  O‘quvchilar
-                </span>
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <GraduationCap className="w-4 h-4" />
+              {/* Teacher's Groups */}
+              <div className="p-3.5 sm:p-4 rounded-2xl border text-left bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 shadow-sm ring-2 ring-blue-500/20">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300">
+                    Dars berayotgan guruhlarim
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-blue-700 dark:text-blue-300">
+                    {teacherGroupsCount || 1}
+                  </span>
+                  <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">faol guruh</span>
+                </div>
+                <div className="mt-1 text-[11px] text-blue-600 dark:text-blue-400 truncate">
+                  Full Stack guruhi (IT-1.1)
                 </div>
               </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
-                  {userStats.students}
-                </span>
-                <span className="text-xs font-semibold text-gray-400">o‘quvchi</span>
-              </div>
-              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                Markaz talabalari
-              </div>
-            </button>
 
-            {/* Teachers */}
-            <button
-              type="button"
-              onClick={() => {
-                if (isTeacher) return;
-                setRoleFilter(ROLES.TEACHER);
-                setSearchParams({ role: ROLES.TEACHER });
-                setPage(1);
-              }}
-              disabled={isTeacher}
-              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                roleFilter === ROLES.TEACHER
-                  ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm ring-2 ring-amber-500/20'
-                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-amber-300 dark:hover:border-amber-800/60 shadow-2xs'
-              } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Ustozlar (O‘qituvchi)
-                </span>
-                <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                  <UserCheck className="w-4 h-4" />
+              {/* Teacher's Subject / Specialty */}
+              <div className="p-3.5 sm:p-4 rounded-2xl border text-left bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm ring-2 ring-amber-500/20">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                    Fan / Ta’lim yo‘nalishingiz
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-xl sm:text-2xl font-black text-amber-800 dark:text-amber-300 truncate">
+                    {profile?.specialty || profile?.subject || 'Full Stack'}
+                  </span>
+                </div>
+                <div className="mt-1 text-[11px] text-amber-700 dark:text-amber-400 truncate">
+                  Dasturlash va axborot texnologiyalari
                 </div>
               </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-300">
-                  {userStats.teachers}
-                </span>
-                <span className="text-xs font-semibold text-gray-400">ustoz</span>
-              </div>
-              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                Dars beruvchi xodimlar
-              </div>
-            </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Total Users */}
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleFilter('all');
+                  setSearchParams({});
+                  setPage(1);
+                }}
+                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                  roleFilter === 'all'
+                    ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 shadow-sm ring-2 ring-blue-500/20'
+                    : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-800/60 shadow-2xs'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Jami foydalanuvchilar
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+                    {userStats.total}
+                  </span>
+                  <span className="text-xs font-semibold text-gray-400">odam</span>
+                </div>
+                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>{userStats.active} faol hisob</span>
+                </div>
+              </button>
 
-            {/* Administrator */}
-            <button
-              type="button"
-              onClick={() => {
-                if (isTeacher) return;
-                setRoleFilter(ROLES.ADMIN);
-                setSearchParams({ role: ROLES.ADMIN });
-                setPage(1);
-              }}
-              disabled={isTeacher}
-              className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                roleFilter === ROLES.ADMIN
-                  ? 'bg-purple-50/80 dark:bg-purple-950/40 border-purple-300 dark:border-purple-700 shadow-sm ring-2 ring-purple-500/20'
-                  : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-800/60 shadow-2xs'
-              } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Administrator
-                </span>
-                <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                  <Shield className="w-4 h-4" />
+              {/* Students */}
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleFilter(ROLES.STUDENT);
+                  setSearchParams({ role: ROLES.STUDENT });
+                  setPage(1);
+                }}
+                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                  roleFilter === ROLES.STUDENT
+                    ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 shadow-sm ring-2 ring-emerald-500/20'
+                    : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-800/60 shadow-2xs'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    O‘quvchilar
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
                 </div>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-300">
-                  {userStats.admins}
-                </span>
-                <span className="text-xs font-semibold text-gray-400">admin</span>
-              </div>
-              <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                Erkinova Zilola
-              </div>
-            </button>
-          </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
+                    {userStats.students}
+                  </span>
+                  <span className="text-xs font-semibold text-gray-400">o‘quvchi</span>
+                </div>
+                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                  Markaz talabalari
+                </div>
+              </button>
+
+              {/* Teachers */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (isTeacher) return;
+                  setRoleFilter(ROLES.TEACHER);
+                  setSearchParams({ role: ROLES.TEACHER });
+                  setPage(1);
+                }}
+                disabled={isTeacher}
+                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                  roleFilter === ROLES.TEACHER
+                    ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm ring-2 ring-amber-500/20'
+                    : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-amber-300 dark:hover:border-amber-800/60 shadow-2xs'
+                } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Ustozlar (O‘qituvchi)
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-300">
+                    {userStats.teachers}
+                  </span>
+                  <span className="text-xs font-semibold text-gray-400">ustoz</span>
+                </div>
+                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                  Dars beruvchi xodimlar
+                </div>
+              </button>
+
+              {/* Administrator */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (isTeacher) return;
+                  setRoleFilter(ROLES.ADMIN);
+                  setSearchParams({ role: ROLES.ADMIN });
+                  setPage(1);
+                }}
+                disabled={isTeacher}
+                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                  roleFilter === ROLES.ADMIN
+                    ? 'bg-purple-50/80 dark:bg-purple-950/40 border-purple-300 dark:border-purple-700 shadow-sm ring-2 ring-purple-500/20'
+                    : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-800/60 shadow-2xs'
+                } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Administrator
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                    <Shield className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-300">
+                    {userStats.admins}
+                  </span>
+                  <span className="text-xs font-semibold text-gray-400">admin</span>
+                </div>
+                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                  Erkinova Zilola
+                </div>
+              </button>
+            </div>
+          )}
 
           {/* Role Navigation Tabs */}
           <div className="flex items-center gap-1.5 sm:gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 flex-wrap">
@@ -1008,13 +1107,13 @@ export default function UserManagement() {
 
       {/* Filter and Search Bar */}
       <Card noPadding>
-        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
+        <div className={`p-4 grid grid-cols-1 sm:grid-cols-2 ${isTeacher ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-3 items-center`}>
           {/* Search */}
-          <div className="lg:col-span-2">
+          <div className={isTeacher ? 'lg:col-span-2' : 'lg:col-span-2'}>
             <Input
               icon={Search}
               size="md"
-              placeholder={t('users.searchPlaceholder', 'Ism, foydalanuvchi nomi yoki telefon bo‘yicha qidirish...')}
+              placeholder={isTeacher ? "O‘quvchini ismi yoki telefoni bo‘yicha qidirish..." : t('users.searchPlaceholder', 'Ism, foydalanuvchi nomi yoki telefon bo‘yicha qidirish...')}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -1024,29 +1123,31 @@ export default function UserManagement() {
             />
           </div>
 
-          {/* Role Filter */}
-          <Select
-            value={roleFilter}
-            size="md"
-            onChange={(e) => {
-              setRoleFilter(e.target.value);
-              setPage(1);
-            }}
-            placeholder={t('users.allRoles', 'Barcha rollar')}
-            headerTitle={t('users.filterByRole', 'Rol bo‘yicha saralash')}
-            icon={Shield}
-            options={[
-              { value: 'all', label: t('users.allRoles', 'Barcha rollar') },
-              ...(currentUserRole === 'owner'
-                ? [
-                    { value: ROLES.OWNER, label: t('roles.owner', 'Asoschi (Owner)'), color: '#f59e0b', subtitle: 'Tizim rahbari' },
-                    { value: ROLES.ADMIN, label: t('roles.admin', 'Administrator'), color: '#8b5cf6', subtitle: 'Markaz ma’muri' },
-                  ]
-                : []),
-              { value: ROLES.TEACHER, label: t('roles.teacher', 'O‘qituvchi'), color: '#3b82f6', subtitle: 'Pedagog / Ustoz' },
-              { value: ROLES.STUDENT, label: t('roles.student', 'O‘quvchi'), color: '#10b981', subtitle: 'Tinglovchi / Talaba' },
-            ]}
-          />
+          {/* Role Filter (hidden for teachers) */}
+          {!isTeacher && (
+            <Select
+              value={roleFilter}
+              size="md"
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                setPage(1);
+              }}
+              placeholder={t('users.allRoles', 'Barcha rollar')}
+              headerTitle={t('users.filterByRole', 'Rol bo‘yicha saralash')}
+              icon={Shield}
+              options={[
+                { value: 'all', label: t('users.allRoles', 'Barcha rollar') },
+                ...(currentUserRole === 'owner'
+                  ? [
+                      { value: ROLES.OWNER, label: t('roles.owner', 'Asoschi (Owner)'), color: '#f59e0b', subtitle: 'Tizim rahbari' },
+                      { value: ROLES.ADMIN, label: t('roles.admin', 'Administrator'), color: '#8b5cf6', subtitle: 'Markaz ma’muri' },
+                    ]
+                  : []),
+                { value: ROLES.TEACHER, label: t('roles.teacher', 'O‘qituvchi'), color: '#3b82f6', subtitle: 'Pedagog / Ustoz' },
+                { value: ROLES.STUDENT, label: t('roles.student', 'O‘quvchi'), color: '#10b981', subtitle: 'Tinglovchi / Talaba' },
+              ]}
+            />
+          )}
 
           {/* Status Filter */}
           <Select
@@ -1071,7 +1172,9 @@ export default function UserManagement() {
         <div className="px-4 py-2.5 bg-gray-50/80 dark:bg-surface-dark-tertiary border-t border-b border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="font-bold text-gray-900 dark:text-gray-100">
-              {totalCount} ta foydalanuvchi ko‘rsatilmoqda
+              {isTeacher
+                ? `${totalCount} ta o‘quvchingiz ko‘rsatilmoqda`
+                : `${totalCount} ta foydalanuvchi ko‘rsatilmoqda`}
             </span>
             {search && (
               <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
@@ -1080,7 +1183,15 @@ export default function UserManagement() {
             )}
           </div>
           <span className="text-[11px] text-gray-500 dark:text-gray-400">
-            Jami tizimda: <strong className="text-gray-800 dark:text-gray-200">{userStats.total} ta</strong> ({userStats.students} o‘quvchi, {userStats.teachers} ustoz, {userStats.admins} admin{userStats.owners > 0 ? `, ${userStats.owners} rahbar` : ''})
+            {isTeacher ? (
+              <>
+                Guruhlaringizda jami: <strong className="text-gray-800 dark:text-gray-200">{userStats.students} nafar o‘quvchi</strong>
+              </>
+            ) : (
+              <>
+                Jami tizimda: <strong className="text-gray-800 dark:text-gray-200">{userStats.total} ta</strong> ({userStats.students} o‘quvchi, {userStats.teachers} ustoz, {userStats.admins} admin{userStats.owners > 0 ? `, ${userStats.owners} rahbar` : ''})
+              </>
+            )}
           </span>
         </div>
 

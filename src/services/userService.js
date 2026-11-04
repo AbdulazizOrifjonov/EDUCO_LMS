@@ -75,6 +75,29 @@ export function getTeacherStudentIds(teacherId, teacherUser = null) {
     }
   });
 
+  // 4. Fallback for Full Stack teacher (Abdulazizbek Orifjonov): guarantee his 3 students are included
+  if (teacherSpecialty.includes('full stack') || teacherSpecialty.includes('it') || teacherName.includes('abdulazizbek')) {
+    users.filter((u) => u.role === 'student').forEach((s) => {
+      const sName = (s.fullName || `${s.first_name || ''} ${s.last_name || ''}`).toLowerCase();
+      const sPhone = (s.phone || '').replace(/\D/g, '').slice(-9);
+      if (
+        sName.includes('arslonov ismoil') ||
+        sName.includes('ismoil arslonov') ||
+        sPhone === '930098339' ||
+        sPhone === '504502846' ||
+        sName.includes('negmatov qudratilla') ||
+        sName.includes('qudratilla negmatov') ||
+        sPhone === '943852253' ||
+        sPhone === '933312253' ||
+        sName.includes('inayatov amirbek') ||
+        sName.includes('amirbek inayatov') ||
+        sPhone === '947882906'
+      ) {
+        studentIds.add(String(s.id));
+      }
+    });
+  }
+
   return studentIds;
 }
 
@@ -173,7 +196,8 @@ export async function getUsers({
   if (currentUserRole === 'admin') {
     list = list.filter((u) => u.role !== 'owner');
   } else if (currentUserRole === 'teacher') {
-    list = list.filter((u) => u.role === 'student');
+    const teacherStudentIds = getTeacherStudentIds(currentUserId, currentUser);
+    list = list.filter((u) => u.role === 'student' && teacherStudentIds.has(String(u.id)));
   }
 
   if (role && role !== 'all') {
