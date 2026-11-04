@@ -150,6 +150,7 @@ describe('Universal LMS Routes & Roles Audit', () => {
       '/admin/website',
       '/admin/notifications',
       '/admin/chat',
+      '/admin/sms',
     ];
 
     for (const route of adminRoutes) {

@@ -26,6 +26,7 @@ import {
   FileCheck,
   Megaphone,
   ShieldAlert,
+  Smartphone,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -110,6 +111,12 @@ const ADMIN_NAV_ITEMS = [
     label: 'Tuition',
     path: '/admin/tuition',
     icon: Receipt,
+  },
+  {
+    labelKey: 'nav.sms',
+    label: 'SMS Xabarnomalar',
+    path: '/admin/sms',
+    icon: Smartphone,
   },
   {
     labelKey: 'nav.reports',

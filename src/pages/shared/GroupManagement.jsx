@@ -122,12 +122,22 @@ export default function GroupManagement() {
       if (isTeacher) {
         const myName = teacherFullName.trim().toLowerCase();
         const myId = profile?.id;
+        const normMyId = localStore?.normalizeUserId ? localStore.normalizeUserId(myId) : myId;
+        const myPhone = (profile?.phone || '').replace(/\D/g, '');
+        const mySpecialty = (profile?.specialty || '').trim().toLowerCase();
+
         fetchedGroups = fetchedGroups.filter((g) => {
-          const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId || g.primaryTeacher?.id === myId));
-          const matchGt = Array.isArray(g.group_teachers) && g.group_teachers.some(t => (t.teacher_id || t.id || t.profiles?.id) === myId);
+          const gTid = g.teacher_id || g.teacherId;
+          const matchId = (myId && (gTid === myId || (localStore?.normalizeUserId && localStore.normalizeUserId(gTid) === normMyId) || g.primaryTeacher?.id === myId));
+          const matchGt = Array.isArray(g.group_teachers) && g.group_teachers.some(t => {
+            const tid = t.teacher_id || t.id || t.profiles?.id;
+            return tid === myId || (localStore?.normalizeUserId && localStore.normalizeUserId(tid) === normMyId);
+          });
           const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
           const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
-          return matchId || matchGt || matchName;
+          const matchPhone = myPhone && g.teacherPhone && g.teacherPhone.replace(/\D/g, '') === myPhone;
+          const matchSpec = mySpecialty && ((g.name || '').toLowerCase().includes(mySpecialty) || (g.subject || '').toLowerCase().includes(mySpecialty));
+          return matchId || matchGt || matchName || matchPhone || matchSpec;
         });
       }
 

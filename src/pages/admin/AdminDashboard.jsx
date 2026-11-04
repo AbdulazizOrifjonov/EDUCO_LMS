@@ -170,7 +170,7 @@ export default function AdminDashboard() {
             </span>
           </button>
           <Button
-            onClick={() => navigate('/admin/groups')}
+            onClick={() => navigate('/admin/groups/create')}
             variant="danger"
             size="md"
             icon={PlusCircle}
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
         </span>
         <button
           type="button"
-          onClick={() => navigate('/admin/users?role=student')}
+          onClick={() => navigate('/admin/users/create?role=student')}
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-500/15 text-blue-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-blue-500/30 dark:border-emerald-500/30 hover:bg-blue-500/25 dark:hover:bg-emerald-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
           <UserPlus className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400" />
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
         </button>
         <button
           type="button"
-          onClick={() => navigate('/admin/users?role=teacher')}
+          onClick={() => navigate('/admin/users/create?role=teacher')}
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs shrink-0 cursor-pointer"
         >
           <UserPlus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />

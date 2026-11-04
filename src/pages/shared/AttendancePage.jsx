@@ -169,12 +169,24 @@ export default function AttendancePage() {
   // If logged in as teacher, auto-set drillTeacher to own profile
   useEffect(() => {
     if (isTeacher && analyticsData?.teachers?.length > 0 && !drillTeacher) {
-      const myProfile = analyticsData.teachers.find((t) => t.id === profile?.id);
+      const myNormId = localStore.normalizeUserId ? localStore.normalizeUserId(profile?.id) : profile?.id;
+      const myPhone = (profile?.phone || '').replace(/\D/g, '');
+      const myUsername = (profile?.username || '').trim().toLowerCase();
+      const myFullName = (profile?.full_name || profile?.name || `${profile?.first_name || ''} ${profile?.last_name || ''}`).trim().toLowerCase();
+
+      const myProfile = analyticsData.teachers.find((t) => {
+        if (t.id === profile?.id) return true;
+        if (localStore.normalizeUserId && localStore.normalizeUserId(t.id) === myNormId) return true;
+        if (myPhone && (t.phone || '').replace(/\D/g, '') === myPhone) return true;
+        if (myUsername && (t.username || '').trim().toLowerCase() === myUsername) return true;
+        if (myFullName && (t.fullName || '').trim().toLowerCase() === myFullName) return true;
+        return false;
+      });
       if (myProfile) {
         setDrillTeacher(myProfile);
       }
     }
-  }, [isTeacher, analyticsData, profile?.id, drillTeacher]);
+  }, [isTeacher, analyticsData, profile, drillTeacher]);
 
   // Synchronize URL search params with progressive drill-down levels (Support Google Chrome back/forward button!)
   useEffect(() => {
@@ -552,7 +564,19 @@ export default function AttendancePage() {
   const filteredStaffForLevel1 = useMemo(() => {
     let staffList = analyticsData?.staff || analyticsData?.teachers || [];
     if (isTeacher) {
-      staffList = staffList.filter((s) => s.id === profile?.id);
+      const myNormId = localStore.normalizeUserId ? localStore.normalizeUserId(profile?.id) : profile?.id;
+      const myPhone = (profile?.phone || '').replace(/\D/g, '');
+      const myUsername = (profile?.username || '').trim().toLowerCase();
+      const myFullName = (profile?.full_name || profile?.name || `${profile?.first_name || ''} ${profile?.last_name || ''}`).trim().toLowerCase();
+
+      staffList = staffList.filter((s) => {
+        if (s.id === profile?.id) return true;
+        if (localStore.normalizeUserId && localStore.normalizeUserId(s.id) === myNormId) return true;
+        if (myPhone && (s.phone || '').replace(/\D/g, '') === myPhone) return true;
+        if (myUsername && (s.username || '').trim().toLowerCase() === myUsername) return true;
+        if (myFullName && (s.fullName || '').trim().toLowerCase() === myFullName) return true;
+        return false;
+      });
     } else if (staffRoleFilter !== 'all') {
       staffList = staffList.filter((s) => s.role === staffRoleFilter);
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Users,
   UserPlus,
@@ -67,16 +67,25 @@ export default function UserManagement() {
   const currentUserRole = profile?.role || ROLES.OWNER;
   const currentUserId = user?.id || profile?.id;
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlRole = searchParams.get('role');
   const { searchQuery, setSearchQuery } = useSearch();
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'live-sheet'
 
   const isTeacher = String(currentUserRole).toLowerCase() === 'teacher';
+  const isTeachersPath = location.pathname.endsWith('/teachers') || location.pathname.includes('/teachers');
+  const isStudentsPath = location.pathname.endsWith('/students') || location.pathname.includes('/students');
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchQuery || '');
-  const [roleFilter, setRoleFilter] = useState(isTeacher ? ROLES.STUDENT : (urlRole || 'all'));
+  const [roleFilter, setRoleFilter] = useState(() => {
+    if (isTeacher) return ROLES.STUDENT;
+    if (isTeachersPath) return ROLES.TEACHER;
+    if (isStudentsPath) return ROLES.STUDENT;
+    return urlRole || 'all';
+  });
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -103,12 +112,31 @@ export default function UserManagement() {
   useEffect(() => {
     if (isTeacher) {
       setRoleFilter(ROLES.STUDENT);
+      setPage(1);
+      return;
+    }
+    if (location.pathname.endsWith('/teachers') || location.pathname.includes('/teachers')) {
+      setRoleFilter(ROLES.TEACHER);
+      setPage(1);
+      return;
+    }
+    if (location.pathname.endsWith('/students') || location.pathname.includes('/students')) {
+      setRoleFilter(ROLES.STUDENT);
+      setPage(1);
       return;
     }
     if (urlRole && ['owner', 'admin', 'teacher', 'student', 'all'].includes(urlRole)) {
       setRoleFilter(urlRole);
+      setPage(1);
     }
-  }, [urlRole, isTeacher]);
+  }, [urlRole, isTeacher, location.pathname]);
+
+  // Clamps page if page > totalPages to prevent blank screen
+  useEffect(() => {
+    if (page > totalPages && totalPages > 0) {
+      setPage(1);
+    }
+  }, [page, totalPages]);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -1140,6 +1168,10 @@ export default function UserManagement() {
                 ...(currentUserRole === 'owner'
                   ? [
                       { value: ROLES.OWNER, label: t('roles.owner', 'Asoschi (Owner)'), color: '#f59e0b', subtitle: 'Tizim rahbari' },
+                    ]
+                  : []),
+                ...(currentUserRole === 'owner' || currentUserRole === 'admin'
+                  ? [
                       { value: ROLES.ADMIN, label: t('roles.admin', 'Administrator'), color: '#8b5cf6', subtitle: 'Markaz ma’muri' },
                     ]
                   : []),

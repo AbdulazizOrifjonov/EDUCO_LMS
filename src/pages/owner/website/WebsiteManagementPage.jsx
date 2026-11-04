@@ -1,6 +1,6 @@
 import WebsiteFullPageEditor from './WebsiteFullPageEditor';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import {
   Globe,
   Sliders,
@@ -125,6 +125,8 @@ const compressImageFile = (file, maxWidth = 1600, maxHeight = 1000, quality = 0.
 };
 
 export default function WebsiteManagementPage() {
+  const location = useLocation();
+  const basePath = location.pathname.startsWith('/admin') ? '/admin/website' : '/owner/website';
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'overview';
   const actionParam = searchParams.get('action'); // 'edit' | 'create'
@@ -1107,7 +1109,7 @@ export default function WebsiteManagementPage() {
                   Yangi slayd qoʻshish
                 </Button>
                 <a
-                  href="/owner/website?tab=slider&action=create&type=slide"
+                  href={`${basePath}?tab=slider&action=create&type=slide`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
@@ -1162,7 +1164,7 @@ export default function WebsiteManagementPage() {
                         Tahrirlash
                       </Button>
                       <a
-                        href={`/owner/website?tab=slider&action=edit&type=slide&id=${slide.id}`}
+                        href={`${basePath}?tab=slider&action=edit&type=slide&id=${slide.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -1226,7 +1228,7 @@ export default function WebsiteManagementPage() {
                   Yangi kurs yaratish
                 </Button>
                 <a
-                  href="/owner/website?tab=courses&action=create&type=course"
+                  href={`${basePath}?tab=courses&action=create&type=course`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
@@ -1287,7 +1289,7 @@ export default function WebsiteManagementPage() {
                         Tahrirlash
                       </Button>
                       <a
-                        href={`/owner/website?tab=courses&action=edit&type=course&id=${course.id}`}
+                        href={`${basePath}?tab=courses&action=edit&type=course&id=${course.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -1351,7 +1353,7 @@ export default function WebsiteManagementPage() {
                   Yangi fan qoʻshish
                 </Button>
                 <a
-                  href="/owner/website?tab=subjects&action=create&type=subject"
+                  href={`${basePath}?tab=subjects&action=create&type=subject`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
@@ -1396,7 +1398,7 @@ export default function WebsiteManagementPage() {
                       Tahrirlash
                     </Button>
                     <a
-                      href={`/owner/website?tab=subjects&action=edit&type=subject&id=${subj.id}`}
+                      href={`${basePath}?tab=subjects&action=edit&type=subject&id=${subj.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -1459,7 +1461,7 @@ export default function WebsiteManagementPage() {
                   Ustoz qoʻshish
                 </Button>
                 <a
-                  href="/owner/website?tab=teachers&action=create&type=teacher"
+                  href={`${basePath}?tab=teachers&action=create&type=teacher`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
@@ -1511,7 +1513,7 @@ export default function WebsiteManagementPage() {
                       Tahrirlash
                     </Button>
                     <a
-                      href={`/owner/website?tab=teachers&action=edit&type=teacher&id=${teacher.id}`}
+                      href={`${basePath}?tab=teachers&action=edit&type=teacher&id=${teacher.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -1574,7 +1576,7 @@ export default function WebsiteManagementPage() {
                   Yangilik eʼlon qilish
                 </Button>
                 <a
-                  href="/owner/website?tab=news&action=create&type=news"
+                  href={`${basePath}?tab=news&action=create&type=news`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
@@ -1625,7 +1627,7 @@ export default function WebsiteManagementPage() {
                       Tahrirlash
                     </Button>
                     <a
-                      href={`/owner/website?tab=news&action=edit&type=news&id=${item.id}`}
+                      href={`${basePath}?tab=news&action=edit&type=news&id=${item.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -1732,7 +1734,7 @@ export default function WebsiteManagementPage() {
                     Tahrirlash
                   </Button>
                   <a
-                    href={`/owner/website?tab=videos&action=edit&type=video&id=${vid.id}`}
+                    href={`${basePath}?tab=videos&action=edit&type=video&id=${vid.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -1794,7 +1796,7 @@ export default function WebsiteManagementPage() {
                   Rasm qoʻshish
                 </Button>
                 <a
-                  href="/owner/website?tab=gallery&action=create&type=gallery"
+                  href={`${basePath}?tab=gallery&action=create&type=gallery`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
@@ -1833,7 +1835,7 @@ export default function WebsiteManagementPage() {
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                     <a
-                      href={`/owner/website?tab=gallery&action=edit&type=gallery&id=${img.id}`}
+                      href={`${basePath}?tab=gallery&action=edit&type=gallery&id=${img.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-1.5 rounded-lg bg-white/20 hover:bg-white/40 text-white text-xs cursor-pointer inline-flex items-center justify-center"
@@ -1897,7 +1899,7 @@ export default function WebsiteManagementPage() {
                   Fikr qoʻshish
                 </Button>
                 <a
-                  href="/owner/website?tab=testimonials&action=create&type=testimonial"
+                  href={`${basePath}?tab=testimonials&action=create&type=testimonial`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
@@ -1953,7 +1955,7 @@ export default function WebsiteManagementPage() {
                       Tahrirlash
                     </Button>
                     <a
-                      href={`/owner/website?tab=testimonials&action=edit&type=testimonial&id=${test.id}`}
+                      href={`${basePath}?tab=testimonials&action=edit&type=testimonial&id=${test.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-1 rounded-lg text-gray-500 hover:text-emerald-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

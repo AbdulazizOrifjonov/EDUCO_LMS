@@ -621,12 +621,28 @@ export async function getTeacherAndGroupAttendanceAnalytics() {
 
   const teachersAnalytics = rawTeachers.map((teacher, tIdx) => {
     // Find groups belonging to this teacher
-    const teacherGroups = rawGroups.filter(
-      (g) =>
-        g.teacher_id === teacher.id ||
-        g.teacher_name === teacher.fullName ||
-        g.teacher_name === `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim()
-    );
+    const tNormId = localStore.normalizeUserId ? localStore.normalizeUserId(teacher.id) : teacher.id;
+    const tFullName = (teacher.fullName || `${teacher.first_name || ''} ${teacher.last_name || ''}`).trim().toLowerCase();
+    const tPhone = (teacher.phone || '').replace(/\D/g, '');
+    const tSpecialty = (teacher.specialty || '').trim().toLowerCase();
+
+    const teacherGroups = rawGroups.filter((g) => {
+      const gTid = g.teacher_id || g.teacherId;
+      if (gTid && (gTid === teacher.id || (localStore.normalizeUserId && localStore.normalizeUserId(gTid) === tNormId))) {
+        return true;
+      }
+      const gTname = (g.teacher_name || g.teacherName || '').trim().toLowerCase();
+      if (gTname && tFullName && (gTname === tFullName || gTname.includes(tFullName) || tFullName.includes(gTname))) {
+        return true;
+      }
+      if (tPhone && g.teacherPhone && g.teacherPhone.replace(/\D/g, '') === tPhone) {
+        return true;
+      }
+      if (tSpecialty && ((g.name || '').toLowerCase().includes(tSpecialty) || (g.subject || '').toLowerCase().includes(tSpecialty))) {
+        return true;
+      }
+      return false;
+    });
 
     const uniqueStudentIds = new Set();
 

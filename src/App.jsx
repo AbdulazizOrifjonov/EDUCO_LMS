@@ -74,7 +74,10 @@ function RoleRedirectRoute({ segment, fallback = 'dashboard' }) {
   if (segment === 'groups' && role === 'student') return <Navigate to="/student/group" replace />;
   if (segment === 'schedule' && role === 'student') return <Navigate to="/student/schedule" replace />;
   if (segment === 'attendance' && role === 'student') return <Navigate to="/student/attendance" replace />;
-  if (segment === 'sms' && role !== 'owner') return <Navigate to={`/${role}/dashboard`} replace />;
+  if (segment.startsWith('attendance/') && role === 'student') return <Navigate to="/student/attendance" replace />;
+  if ((segment === 'teachers' || segment === 'users') && role === 'student') return <Navigate to="/student/group" replace />;
+  if (segment === 'students' && role === 'student') return <Navigate to="/student/group" replace />;
+  if (segment === 'sms' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
   if (segment === 'payroll' && role !== 'owner') return <Navigate to={`/${role}/dashboard`} replace />;
   if (segment === 'audit' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
   if (segment === 'tuition' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
@@ -151,6 +154,8 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<OwnerDashboard />} />
             <Route path="users" element={<UserManagement />} />
+            <Route path="teachers" element={<UserManagement />} />
+            <Route path="students" element={<UserManagement />} />
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
@@ -202,6 +207,8 @@ export default function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<UserManagement />} />
+            <Route path="teachers" element={<UserManagement />} />
+            <Route path="students" element={<UserManagement />} />
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
@@ -230,6 +237,7 @@ export default function App() {
             <Route path="announcements" element={<AnnouncementsPage />} />
             <Route path="audit" element={<AuditLogPage />} />
             <Route path="tuition" element={<TuitionPage />} />
+            <Route path="sms" element={<SmsManagementPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="website" element={<WebsiteManagementPage />} />
@@ -255,6 +263,7 @@ export default function App() {
             <Route path="courses/edit/:id" element={<Navigate to="/teacher/courses" replace />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="students" element={<UserManagement />} />
+            <Route path="teachers" element={<UserManagement />} />
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
@@ -270,6 +279,8 @@ export default function App() {
             <Route path="groups/:id/add-student" element={<UserCreatePage />} />
             <Route path="schedule" element={<ScheduleManagement />} />
             <Route path="attendance" element={<AttendancePage />} />
+            <Route path="attendance/teachers" element={<TeacherAttendance />} />
+            <Route path="attendance/reports" element={<AttendanceReport />} />
             <Route path="grades" element={<GradesPage />} />
             <Route path="homework" element={<HomeworkPage />} />
             <Route path="homework/:id" element={<HomeworkDetail />} />
@@ -314,6 +325,10 @@ export default function App() {
           <Route path="/courses" element={<RoleRedirectRoute segment="courses" />} />
           <Route path="/groups" element={<RoleRedirectRoute segment="groups" />} />
           <Route path="/users" element={<RoleRedirectRoute segment="users" />} />
+          <Route path="/teachers" element={<RoleRedirectRoute segment="teachers" />} />
+          <Route path="/students" element={<RoleRedirectRoute segment="students" />} />
+          <Route path="/attendance/teachers" element={<RoleRedirectRoute segment="attendance/teachers" />} />
+          <Route path="/attendance/reports" element={<RoleRedirectRoute segment="attendance/reports" />} />
           <Route path="/homework" element={<RoleRedirectRoute segment="homework" />} />
           <Route path="/homework/:id" element={<RoleRedirectRoute segment="homework" />} />
           <Route path="/materials" element={<RoleRedirectRoute segment="materials" />} />

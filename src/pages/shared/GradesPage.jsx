@@ -186,11 +186,18 @@ export default function GradesPage() {
           if (isTeacher) {
             const myName = teacherFullName.trim().toLowerCase();
             const myId = profile?.id;
+            const normMyId = localStore?.normalizeUserId ? localStore.normalizeUserId(myId) : myId;
+            const myPhone = (profile?.phone || '').replace(/\D/g, '');
+            const mySpecialty = (profile?.specialty || '').trim().toLowerCase();
+
             groupList = groupList.filter((g) => {
-              const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId));
+              const gTid = g.teacher_id || g.teacherId;
+              const matchId = (myId && (gTid === myId || (localStore?.normalizeUserId && localStore.normalizeUserId(gTid) === normMyId)));
               const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
               const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
-              return matchId || matchName;
+              const matchPhone = myPhone && g.teacherPhone && g.teacherPhone.replace(/\D/g, '') === myPhone;
+              const matchSpec = mySpecialty && ((g.name || '').toLowerCase().includes(mySpecialty) || (g.subject || '').toLowerCase().includes(mySpecialty));
+              return matchId || matchName || matchPhone || matchSpec;
             });
           }
           setGroups(groupList);
