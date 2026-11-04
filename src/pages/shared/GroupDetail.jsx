@@ -24,6 +24,8 @@ import {
   DollarSign,
   Edit2,
   Edit3,
+  Split,
+  AlertTriangle,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -35,6 +37,7 @@ import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { toast } from '@/components/ui/Toast';
+import GroupSplitModal from '@/components/groups/GroupSplitModal';
 import {
   getGroupById,
   getGroups,
@@ -75,6 +78,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [targetGroupId, setTargetGroupId] = useState('');
   const [studentToTransfer, setStudentToTransfer] = useState(null);
+  const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
 
   // Student Discount Modal
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
@@ -484,6 +488,15 @@ export default function GroupDetail({ groupId: propGroupId }) {
               <Button
                 variant="outline"
                 size="sm"
+                icon={Split}
+                onClick={() => setIsSplitModalOpen(true)}
+                className="text-xs font-semibold text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+              >
+                Guruhni bo‘lish
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 icon={Edit2}
                 onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
                 className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
@@ -503,6 +516,34 @@ export default function GroupDetail({ groupId: propGroupId }) {
           )}
         </div>
       </Card>
+
+      {/* Overloaded Group Alert */}
+      {enrolledCount >= capacity && !isTeacher && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-red-50 via-rose-50 to-amber-50 dark:from-red-950/40 dark:via-rose-950/30 dark:to-amber-950/30 border-2 border-red-300 dark:border-red-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center font-black shrink-0 shadow-sm">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-red-950 dark:text-red-200 uppercase tracking-wide">
+                Guruh sig‘imi to‘lgan ({enrolledCount} / {capacity} talaba)
+              </h4>
+              <p className="text-xs text-red-700 dark:text-red-300">
+                Ushbu guruhdagi talabalar soni me‘yordan ortiq. O‘quvchilarni 2 ta parallel guruhga (ENG-1.1 va ENG-1.2) ajrating.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={Split}
+            onClick={() => setIsSplitModalOpen(true)}
+            className="bg-red-600 hover:bg-red-700 text-white font-black shrink-0 shadow-md shadow-red-600/30 active:scale-95"
+          >
+            2-guruhga ajratish
+          </Button>
+        </div>
+      )}
 
       {/* Overview Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1288,6 +1329,17 @@ export default function GroupDetail({ groupId: propGroupId }) {
         onCrop={handleApplyCroppedAvatar}
         title="Guruh profil rasmini moslashtirish"
         subtitle="Rasmni suring, kattalashtiring va o‘lchamini sozlang"
+      />
+
+      {/* Group Split Modal */}
+      <GroupSplitModal
+        isOpen={isSplitModalOpen}
+        group={group}
+        onClose={() => setIsSplitModalOpen(false)}
+        onSuccess={() => {
+          setIsSplitModalOpen(false);
+          fetchGroup();
+        }}
       />
     </div>
   );

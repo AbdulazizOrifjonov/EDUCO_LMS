@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,6 +22,8 @@ import {
   Plus,
   AlertCircle,
   X,
+  Split,
+  ArrowRightLeft,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -31,10 +33,17 @@ import Select from '@/components/ui/Select';
 import DatePicker from '@/components/ui/DatePicker';
 import Modal from '@/components/ui/Modal';
 import { toast } from '@/components/ui/Toast';
-import { createGroup, updateGroup, getGroupById } from '@/services/groupService';
+import {
+  createGroup,
+  updateGroup,
+  getGroupById,
+  getGroups,
+  generateSubgroupSuggestions,
+} from '@/services/groupService';
 import { getCourses, createCourse } from '@/services/courseService';
 import { getTeachers, createUser } from '@/services/userService';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
+import GroupSplitModal from '@/components/groups/GroupSplitModal';
 import { fileToCompressedDataUrl } from '@/services/settingsService';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone, cleanUzPhone } from '@/utils/phoneFormat';
@@ -55,6 +64,7 @@ export default function GroupCreatePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { profile } = useAuth();
   const currentUserRole = profile?.role || ROLES.OWNER;
   const isTeacher = currentUserRole === ROLES.TEACHER;
@@ -62,6 +72,8 @@ export default function GroupCreatePage() {
 
   const [courses, setCourses] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const [allGroups, setAllGroups] = useState([]);
+  const [splitModalGroup, setSplitModalGroup] = useState(null);
   const [loadingOptions, setLoadingOptions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -93,7 +105,7 @@ export default function GroupCreatePage() {
     resolver: zodResolver(groupSchema),
     defaultValues: {
       name: '',
-      courseId: '',
+      courseId: searchParams.get('courseId') || '',
       teacherId: isTeacher ? (profile?.id || '') : '',
       room: '',
       capacity: 20,
@@ -112,6 +124,64 @@ export default function GroupCreatePage() {
     return courses.find((c) => c.id === selectedCourseId) || null;
   }, [courses, selectedCourseId]);
 
+  // Existing groups for the selected course
+  const existingCourseGroups = useMemo(() => {
+    if (!selectedCourseId) return [];
+    return allGroups.filter(
+      (g) =>
+        (g.course_id === selectedCourseId || g.courseId === selectedCourseId) &&
+        (!isEditing || g.id !== id)
+    );
+  }, [allGroups, selectedCourseId, isEditing, id]);
+
+  // Smart Subgroup suggestions (e.g. ENG-1.1, ENG-1.2)
+  const subgroupSuggestions = useMemo(() => {
+    return generateSubgroupSuggestions(selectedCourse?.name || '', existingCourseGroups.length);
+  }, [selectedCourse, existingCourseGroups.length]);
+
+  const handleQuickApplySubgroup = (subgroupNum) => {
+    if (!selectedCourse) {
+      toast.error('Avval kurs fanini tanlang!');
+      return;
+    }
+    const cName = selectedCourse.name || 'Kurs';
+    const pfx = subgroupSuggestions.prefix || 'GRP';
+    const proposedName = `${cName} 1.${subgroupNum} (${pfx}-1.${subgroupNum})`;
+    setValue('name', proposedName, { shouldValidate: true });
+
+    if (existingCourseGroups.length > 0) {
+      const firstG = existingCourseGroups[0];
+      if (firstG.room && (!watch('room') || watch('room') === '')) {
+        setValue('room', `${firstG.room}B`);
+      }
+      if (firstG.teacher_id && !watch('teacherId') && !isTeacher) {
+        setValue('teacherId', firstG.teacher_id);
+      }
+    }
+    if (!watch('capacity') || Number(watch('capacity')) === 20) {
+      setValue('capacity', 25);
+    }
+    toast.success(`✓ "${proposedName}" parametrlari to‘ldirildi!`);
+  };
+
+  const handleOpenSplitGroup = (grp) => {
+    setSplitModalGroup(grp);
+  };
+
+  // Pre-fill query param name or subgroup if present
+  useEffect(() => {
+    if (!isEditing) {
+      const qSubgroup = searchParams.get('subgroup');
+      if (qSubgroup && selectedCourse) {
+        handleQuickApplySubgroup(Number(qSubgroup) || 2);
+      }
+      const qName = searchParams.get('name');
+      if (qName) {
+        setValue('name', qName, { shouldValidate: true });
+      }
+    }
+  }, [searchParams, selectedCourse, isEditing]);
+
   // Auto pre-fill group monthly price from course fee when a course is selected
   useEffect(() => {
     if (!isEditing && selectedCourseId && courses.length > 0) {
@@ -122,27 +192,27 @@ export default function GroupCreatePage() {
     }
   }, [selectedCourseId, courses, isEditing, setValue, watch]);
 
-  // Load courses and teachers
+  // Load courses, teachers and all existing groups
+  const loadData = async () => {
+    setLoadingOptions(true);
+    try {
+      const [courseRes, teacherRes, groupRes] = await Promise.all([
+        getCourses({ status: 'active', limit: 100 }),
+        getTeachers(),
+        getGroups({ limit: 100 }),
+      ]);
+      setCourses(courseRes.courses || []);
+      setTeachers(teacherRes || []);
+      setAllGroups(groupRes.groups || []);
+    } catch (err) {
+      console.error('Failed to load group options:', err);
+    } finally {
+      setLoadingOptions(false);
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
-    const loadData = async () => {
-      setLoadingOptions(true);
-      try {
-        const [courseRes, teacherRes] = await Promise.all([
-          getCourses({ status: 'active', limit: 100 }),
-          getTeachers(),
-        ]);
-        if (mounted) {
-          setCourses(courseRes.courses || []);
-          setTeachers(teacherRes || []);
-        }
-      } catch (err) {
-        console.error('Failed to load group options:', err);
-      } finally {
-        if (mounted) setLoadingOptions(false);
-      }
-    };
-
     loadData();
 
     if (isEditing && id) {
@@ -475,6 +545,31 @@ export default function GroupCreatePage() {
                 error={errors.name?.message}
                 {...register('name')}
               />
+
+              {/* Quick Subgroup Name Recommendation Chips */}
+              <div className="pt-1.5 space-y-1">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Tavsiya etilgan sub-guruh nomlari:</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {subgroupSuggestions.suggestions.slice(0, 5).map((sug) => (
+                    <button
+                      key={sug.code}
+                      type="button"
+                      onClick={() => {
+                        setValue('name', sug.name, { shouldValidate: true });
+                        toast.info(`Guruh nomi tanlandi: "${sug.name}"`);
+                      }}
+                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 hover:bg-emerald-100 dark:bg-gray-800 dark:hover:bg-emerald-950 text-gray-700 hover:text-emerald-700 dark:text-gray-300 dark:hover:text-emerald-300 border border-gray-200 dark:border-gray-700 transition-all cursor-pointer active:scale-95 flex items-center gap-1 shadow-2xs"
+                      title={`Guruh nomini "${sug.name}" ga o‘zgartirish`}
+                    >
+                      <span>🏷️</span>
+                      <span>{sug.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Course Selector & Inline Creator */}
@@ -600,6 +695,118 @@ export default function GroupCreatePage() {
               )}
             </div>
           </div>
+
+          {/* Parallel Groups & Subgroup Assistant Box */}
+          {selectedCourse && (
+            <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/50 to-emerald-50/60 dark:from-blue-950/40 dark:via-gray-900/60 dark:to-emerald-950/30 border border-blue-200 dark:border-blue-900/60 space-y-3.5 shadow-2xs">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <h4 className="text-xs font-black uppercase tracking-wider text-blue-950 dark:text-blue-200">
+                    «{selectedCourse.name}» bo‘yicha mavjud guruhlar ({existingCourseGroups.length} ta)
+                  </h4>
+                </div>
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-gray-800 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  Parallel guruhlar tizimi
+                </span>
+              </div>
+
+              {existingCourseGroups.length === 0 ? (
+                <div className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-blue-100 dark:border-blue-900 text-xs text-gray-600 dark:text-gray-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span>Ushbu yo‘nalishda hali guruhlar ochilmagan. 1-asosiy guruhni yaratish tavsiya etiladi.</span>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickApplySubgroup(1)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shrink-0 shadow-xs cursor-pointer"
+                  >
+                    ⚡ 1-guruh nomini qo‘yish ({subgroupSuggestions.prefix}-1.1)
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="space-y-1.5">
+                    {existingCourseGroups.map((cg) => {
+                      const count = cg.studentCount || cg.enrolled_count || (cg.student_ids || []).length || 0;
+                      const cap = cg.capacity || 20;
+                      const isFull = count >= cap;
+                      return (
+                        <div
+                          key={cg.id}
+                          className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition-all ${
+                            isFull
+                              ? 'bg-red-50/90 dark:bg-red-950/40 border-red-300 dark:border-red-900 shadow-2xs'
+                              : 'bg-white/90 dark:bg-gray-800/90 border-gray-200/80 dark:border-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className={`w-3 h-3 rounded-full shrink-0 ${
+                                isFull ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'
+                              }`}
+                            />
+                            <div className="min-w-0">
+                              <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                                {cg.name}
+                              </div>
+                              <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                                {cg.room || 'Xona'} • Ustoz: {cg.teacher_name || 'Ustoz'} •{' '}
+                                <span className={isFull ? 'text-red-600 dark:text-red-400 font-black' : 'text-emerald-600 dark:text-emerald-400 font-bold'}>
+                                  {count} / {cap} talaba {isFull && '(Sig‘im to‘lgan! ⚠️)'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/${currentUserRole}/groups/${cg.id}/edit`)}
+                              className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors cursor-pointer"
+                              title="Ushbu guruhni tahrirlashga o‘tish"
+                            >
+                              ✏️ Tahrirlash
+                            </button>
+                            {isFull && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenSplitGroup(cg)}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-black bg-red-600 hover:bg-red-700 text-white shadow-xs transition-colors cursor-pointer flex items-center gap-1 active:scale-95"
+                                title="Ushbu to‘lgan guruhni 2-guruhga ajratish"
+                              >
+                                <Split className="w-3 h-3" />
+                                <span>2-guruhga ajratish</span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Quick Parallel Group Creation Buttons */}
+                  <div className="pt-2 border-t border-blue-200/60 dark:border-blue-900/40 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                      Keyingi parallel guruhni ochish:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickApplySubgroup(2)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-transform active:scale-95 cursor-pointer flex items-center gap-1"
+                    >
+                      <span>➕ 2-guruhni ochish ({subgroupSuggestions.prefix}-1.2)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickApplySubgroup(3)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-black bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-transform active:scale-95 cursor-pointer flex items-center gap-1"
+                    >
+                      <span>➕ 3-guruhni ochish ({subgroupSuggestions.prefix}-1.3)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </Card>
 
         {/* Section 2: Teacher & Room */}
@@ -884,6 +1091,17 @@ export default function GroupCreatePage() {
         onCrop={handleApplyCroppedAvatar}
         title="Guruh profil rasmini moslashtirish"
         subtitle="Rasmni suring, kattalashtiring va o‘lchamini sozlang"
+      />
+
+      {/* Group Split Modal (Split overflowing groups into 2nd group) */}
+      <GroupSplitModal
+        isOpen={Boolean(splitModalGroup)}
+        group={splitModalGroup}
+        onClose={() => setSplitModalGroup(null)}
+        onSuccess={() => {
+          setSplitModalGroup(null);
+          loadData();
+        }}
       />
     </div>
   );

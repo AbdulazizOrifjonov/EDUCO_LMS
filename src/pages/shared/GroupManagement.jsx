@@ -18,6 +18,8 @@ import {
   User,
   Phone,
   BookOpen,
+  Split,
+  AlertTriangle,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -27,6 +29,7 @@ import Badge from '@/components/ui/Badge';
 import Table from '@/components/ui/Table';
 import Select from '@/components/ui/Select';
 import { toast } from '@/components/ui/Toast';
+import GroupSplitModal from '@/components/groups/GroupSplitModal';
 import {
   getGroups,
   updateGroup,
@@ -51,6 +54,16 @@ export default function GroupManagement() {
   const [courses, setCourses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [splitModalGroup, setSplitModalGroup] = useState(null);
+
+  // Identify groups with students exceeding or reaching capacity
+  const overflowGroups = useMemo(() => {
+    return groups.filter((g) => {
+      const cnt = g.studentCount || g.enrolled_count || (g.student_ids || []).length || 0;
+      const cap = g.capacity || 20;
+      return cnt >= cap;
+    });
+  }, [groups]);
 
   // Filters
   const [search, setSearch] = useState(searchQuery || '');
@@ -266,12 +279,17 @@ export default function GroupManagement() {
         header: t('groups.capacity', 'Students / Capacity'),
         key: 'capacity',
         render: (row) => {
-          const percent = Math.min(Math.round(((row.studentCount || 0) / (row.capacity || 20)) * 100), 100);
+          const count = row.studentCount || 0;
+          const cap = row.capacity || 20;
+          const percent = Math.min(Math.round((count / cap) * 100), 100);
+          const isOverloaded = count >= cap;
           return (
-            <div className="w-32">
+            <div className="w-36">
               <div className="flex items-center justify-between text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                <span>{row.studentCount} / {row.capacity}</span>
-                <span className="text-gray-400">{percent}%</span>
+                <span className={isOverloaded ? 'text-brand-red font-bold' : ''}>
+                  {count} / {cap}
+                </span>
+                <span className={isOverloaded ? 'text-brand-red font-bold' : 'text-gray-400'}>{percent}%</span>
               </div>
               <div className="w-full bg-gray-100 dark:bg-surface-dark-tertiary h-1.5 rounded-full overflow-hidden">
                 <div
@@ -281,6 +299,20 @@ export default function GroupManagement() {
                   style={{ width: `${percent}%` }}
                 />
               </div>
+              {isOverloaded && !isTeacher && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSplitModalGroup(row);
+                  }}
+                  className="mt-1 text-[10px] font-black px-1.5 py-0.5 rounded bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-950/80 dark:text-red-300 border border-red-300 dark:border-red-800 flex items-center gap-1 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                  title="Guruhni 2-guruhga ajratish (Split)"
+                >
+                  <Split className="w-2.5 h-2.5 shrink-0" />
+                  <span>2-guruhga ajratish</span>
+                </button>
+              )}
             </div>
           );
         },
@@ -347,6 +379,19 @@ export default function GroupManagement() {
                   onClick={() => navigate(`/${currentUserRole}/groups/edit/${row.id}`)}
                 >
                   <Edit2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`!p-1.5 h-8 w-8 rounded-lg ${
+                    row.studentCount >= (row.capacity || 20)
+                      ? 'text-red-600 hover:bg-red-500/10'
+                      : 'text-amber-600 hover:bg-amber-500/10'
+                  }`}
+                  title="Guruhni 2-guruhga ajratish (Split)"
+                  onClick={() => setSplitModalGroup(row)}
+                >
+                  <Split className="w-4 h-4" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -501,6 +546,41 @@ export default function GroupManagement() {
             ]}
           />
         </div>
+
+        {/* Overloaded Groups Warning Banner */}
+        {overflowGroups.length > 0 && !isTeacher && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-50 via-rose-50 to-amber-50 dark:from-red-950/40 dark:via-rose-950/30 dark:to-amber-950/30 border-2 border-red-300 dark:border-red-800 shadow-xs space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center font-black shrink-0 shadow-sm">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black text-red-950 dark:text-red-200 uppercase tracking-wide">
+                    {overflowGroups.length} ta o‘quv guruhida talabalar sig‘imi to‘lib ketgan!
+                  </h3>
+                  <p className="text-xs text-red-700 dark:text-red-300">
+                    Dars sifatini yuqori ushlab turish uchun guruhlarni 2 ta parallel guruhga (masalan: ENG-1.1 va ENG-1.2) ajratish tavsiya etiladi.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {overflowGroups.map((og) => (
+                <button
+                  key={og.id}
+                  type="button"
+                  onClick={() => setSplitModalGroup(og)}
+                  className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-xs transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Split className="w-3.5 h-3.5" />
+                  <span>«{og.name}» ({og.studentCount || og.enrolled_count || 0} ta) ni 2-guruhga ajratish</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Desktop Table View */}
         <div className="hidden md:block">
@@ -677,6 +757,17 @@ export default function GroupManagement() {
           )}
         </div>
       </Card>
+
+      {/* Group Split Modal (Split overflowing groups into 2nd group) */}
+      <GroupSplitModal
+        isOpen={Boolean(splitModalGroup)}
+        group={splitModalGroup}
+        onClose={() => setSplitModalGroup(null)}
+        onSuccess={() => {
+          setSplitModalGroup(null);
+          fetchGroups();
+        }}
+      />
     </div>
   );
 }

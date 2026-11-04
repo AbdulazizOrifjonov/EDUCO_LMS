@@ -1126,6 +1126,18 @@ class LocalStore {
     return newUser;
   }
 
+  saveUsers(usersList) {
+    if (!Array.isArray(usersList)) return [];
+    this.setItem(STORAGE_KEYS.USERS, usersList);
+    this.pushToServer({ [STORAGE_KEYS.USERS]: usersList }).catch(() => {});
+    try {
+      if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.USERS } }));
+      }
+    } catch (_) {}
+    return usersList;
+  }
+
   updateUserPassword(identifier, newPassword) {
     const list = this.getUsers();
     const cleanId = String(identifier || '').toLowerCase().trim();
@@ -1339,6 +1351,7 @@ class LocalStore {
       room: groupData.room !== undefined ? groupData.room : (existing.room || '101-xona'),
       capacity: Number(groupData.capacity !== undefined ? groupData.capacity : (existing.capacity || 15)),
       enrolled_count: Number(groupData.enrolled_count !== undefined ? groupData.enrolled_count : (existing.enrolled_count || 0)),
+      student_ids: Array.isArray(groupData.student_ids) ? groupData.student_ids : (existing.student_ids || []),
       status: groupData.status || existing.status || 'active',
       monthly_price: Number(groupData.monthly_price !== undefined ? groupData.monthly_price : (groupData.monthlyPrice !== undefined ? groupData.monthlyPrice : (existing.monthly_price || 0))),
       schedule: groupData.schedule || existing.schedule || 'Dush-Chor-Jum, 18:00 - 20:00',

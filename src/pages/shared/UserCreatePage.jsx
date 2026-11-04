@@ -1119,6 +1119,26 @@ export default function UserCreatePage() {
                 ]}
               />
 
+              {/* Overloaded Group Alert & Quick 2nd Group Creation */}
+              {selectedGroupObj && (selectedGroupObj.enrolled_count || selectedGroupObj.studentCount || 0) >= (selectedGroupObj.capacity || 20) && (
+                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      <strong>«{selectedGroupObj.name}»</strong> guruhi to‘lgan ({selectedGroupObj.enrolled_count || selectedGroupObj.studentCount || 0}/{selectedGroupObj.capacity} ta). Yangi 2-parallel guruh ochish tavsiya etiladi.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/${currentUserRole}/groups/create?courseId=${selectedGroupObj.course_id || selectedGroupObj.courseId || ''}&subgroup=2`)}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-black bg-blue-600 hover:bg-blue-700 text-white shrink-0 shadow-xs cursor-pointer active:scale-95 flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>2-guruhni ochish</span>
+                  </button>
+                </div>
+              )}
+
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {isTeacher
                   ? "O‘quvchi ro‘yxatga olingandan so‘ng ushbu tanlangan guruh darslarida va davomatida avtomatik paydo bo‘ladi."

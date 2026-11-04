@@ -95,16 +95,20 @@
       "password_updated_at": "2026-11-02T15:43:28.047Z",
       "is_active": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T05:45:15.649Z",
       "course_ids": [
-        "crs-it",
-        "crs-ingliz-tili"
+        "crs-ingliz-tili",
+        "crs-fullstack"
       ],
       "group_ids": [
-        "grp-it",
-        "grp-ingliz-tili"
+        "grp-ingliz-tili",
+        "grp-fullstack"
       ],
-      "has_temp_phone": false
+      "has_temp_phone": false,
+      "group_id": "grp-fullstack",
+      "group_name": "Full Stack guruhi",
+      "course_id": "crs-fullstack",
+      "course_name": "Full Stack"
     },
     {
       "id": "usr-1793596191113",
@@ -151,14 +155,15 @@
       "password_updated_at": "2026-10-31T17:14:03.425Z",
       "is_active": true,
       "created_at": "2026-10-31T17:14:03.425Z",
-      "updated_at": "2026-11-01T18:01:27.748Z",
+      "updated_at": "2026-11-04T05:45:15.649Z",
       "course_ids": [
         "crs-it"
       ],
       "group_ids": [
         "grp-it"
       ],
-      "subject": "IT va Dasturlash"
+      "subject": "Full Stack",
+      "specialty": "Full Stack"
     },
     {
       "id": "usr-owner-1",
@@ -247,7 +252,8 @@
       ],
       "group_ids": [
         "grp-arab-tili"
-      ]
+      ],
+      "avatar_url": ""
     },
     {
       "id": "usr-teacher-toshtemirova",
@@ -270,15 +276,16 @@
       ],
       "group_ids": [
         "grp-ingliz-tili"
-      ]
+      ],
+      "avatar_url": ""
     },
     {
       "id": "usr-teacher-qosimov",
       "username": "rustam_qosimov",
-      "first_name": "Rustam",
-      "last_name": "Qosimov",
-      "fullName": "Rustam Qosimov",
-      "full_name": "Rustam Qosimov",
+      "first_name": "Shuxrat",
+      "last_name": "Kadirov",
+      "fullName": "Shuxrat Kadirov",
+      "full_name": "Shuxrat Kadirov",
       "role": "teacher",
       "subject": "Shaxmat",
       "phone": "+998 90 123 45 67",
@@ -286,13 +293,17 @@
       "password": "Rustam#4567",
       "is_active": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z",
+      "updated_at": "2026-11-04T04:56:01.494Z",
       "course_ids": [
         "crs-shaxmat"
       ],
       "group_ids": [
         "grp-shaxmat"
-      ]
+      ],
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T04:56:01.494Z",
+      "father_phone": "",
+      "mother_phone": ""
     },
     {
       "id": "usr-student-930098339",
@@ -307,18 +318,24 @@
       "password": "Ismoil#8339",
       "course_ids": [
         "crs-matematika",
-        "crs-it",
-        "crs-ingliz-tili"
+        "crs-ingliz-tili",
+        "crs-fullstack"
       ],
       "group_ids": [
         "grp-matematika",
-        "grp-it",
-        "grp-ingliz-tili"
+        "grp-ingliz-tili",
+        "grp-fullstack"
       ],
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T05:45:15.649Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-fullstack",
+      "group_name": "Full Stack guruhi",
+      "course_id": "crs-fullstack",
+      "course_name": "Full Stack"
     },
     {
       "id": "usr-student-997249967",
@@ -340,7 +357,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-994886110",
@@ -362,7 +381,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-973445313",
@@ -384,7 +405,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-943852253",
@@ -398,15 +421,21 @@
       "email": "qudratilla_negmatov_2253@educo.app",
       "password": "Qudratilla#2253",
       "course_ids": [
-        "crs-it"
+        "crs-fullstack"
       ],
       "group_ids": [
-        "grp-it"
+        "grp-fullstack"
       ],
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T05:45:15.649Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-fullstack",
+      "group_name": "Full Stack guruhi",
+      "course_id": "crs-fullstack",
+      "course_name": "Full Stack"
     },
     {
       "id": "usr-student-909901059",
@@ -430,7 +459,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-909474123",
@@ -454,7 +485,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-901236463",
@@ -476,7 +509,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-936105518",
@@ -500,7 +535,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998093456",
@@ -522,7 +559,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-933921552",
@@ -544,7 +583,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-992223052",
@@ -568,7 +609,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-946019500",
@@ -592,7 +635,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998580121",
@@ -614,7 +659,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998559245",
@@ -636,7 +683,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-935286718",
@@ -658,7 +707,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-935755104",
@@ -680,7 +731,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-994340077",
@@ -702,7 +755,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998352122",
@@ -726,7 +781,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998822309",
@@ -752,7 +809,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-944288894",
@@ -774,7 +833,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-958106969",
@@ -796,7 +857,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-940508780",
@@ -818,7 +881,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-977608589",
@@ -840,7 +905,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-990019382",
@@ -862,7 +929,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-947387535",
@@ -884,7 +953,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-903494929",
@@ -906,7 +977,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998161774",
@@ -928,7 +1001,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-908189959",
@@ -950,7 +1025,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-995488490",
@@ -972,7 +1049,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-946007181",
@@ -994,7 +1073,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-930054773",
@@ -1016,7 +1097,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-935436617",
@@ -1040,7 +1123,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-990000001",
@@ -1062,7 +1147,9 @@
       "is_active": true,
       "has_temp_phone": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-777771201",
@@ -1086,7 +1173,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-952228534",
@@ -1108,7 +1197,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-903333554",
@@ -1130,7 +1221,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998250711",
@@ -1152,7 +1245,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-990000002",
@@ -1174,7 +1269,9 @@
       "is_active": true,
       "has_temp_phone": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-909709995",
@@ -1196,7 +1293,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-939069588",
@@ -1218,7 +1317,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-975190011",
@@ -1244,7 +1345,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-933938338",
@@ -1266,7 +1369,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-950462692",
@@ -1288,7 +1393,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-770225879",
@@ -1310,7 +1417,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-998646396",
@@ -1332,7 +1441,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-902521414",
@@ -1354,7 +1465,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-939019588",
@@ -1376,7 +1489,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-946891331",
@@ -1398,7 +1513,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-949214280",
@@ -1420,7 +1537,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-977221252",
@@ -1444,7 +1563,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-944307035",
@@ -1466,7 +1587,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-990000003",
@@ -1488,7 +1611,9 @@
       "is_active": true,
       "has_temp_phone": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-935061991",
@@ -1510,7 +1635,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-990887845",
@@ -1532,7 +1659,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-932901750",
@@ -1558,7 +1687,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-883669392",
@@ -1580,7 +1714,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-990000004",
@@ -1602,7 +1738,9 @@
       "is_active": true,
       "has_temp_phone": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-948434905",
@@ -1624,7 +1762,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-903565345",
@@ -1646,7 +1786,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-900095755",
@@ -1668,7 +1810,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-950211252",
@@ -1690,7 +1834,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-930096441",
@@ -1712,7 +1858,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-999163660",
@@ -1736,7 +1887,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-915600077",
@@ -1758,7 +1914,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-957737392",
@@ -1782,7 +1943,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-930678890",
@@ -1804,7 +1970,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-945463836",
@@ -1826,7 +1997,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-975479606",
@@ -1848,7 +2021,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-992778855",
@@ -1870,7 +2048,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-909588859",
@@ -1892,7 +2072,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-887749485",
@@ -1914,7 +2096,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-930789384",
@@ -1938,7 +2125,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-956161508",
@@ -1962,7 +2154,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-946142213",
@@ -1986,7 +2183,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-946275090",
@@ -2008,7 +2210,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-995387215",
@@ -2030,7 +2234,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-935278822",
@@ -2052,7 +2261,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-933020997",
@@ -2074,7 +2288,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-991091574",
@@ -2096,7 +2312,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-901594495",
@@ -2118,7 +2336,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-998198187",
@@ -2140,7 +2363,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-773431899",
@@ -2162,7 +2387,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-909332088",
@@ -2184,7 +2414,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-951908080",
@@ -2208,7 +2440,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-996389687",
@@ -2230,7 +2467,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-943501407",
@@ -2252,7 +2491,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-935066822",
@@ -2274,7 +2518,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-935399393",
@@ -2296,7 +2542,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-945373716",
@@ -2318,7 +2569,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-998528047",
@@ -2340,7 +2596,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-997640094",
@@ -2362,7 +2620,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-971089595",
@@ -2384,7 +2644,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-998492912",
@@ -2406,7 +2671,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-990000005",
@@ -2428,7 +2698,12 @@
       "is_active": true,
       "has_temp_phone": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-998272687",
@@ -2450,7 +2725,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-984074950",
@@ -2472,7 +2752,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z"
     },
     {
       "id": "usr-student-771564545",
@@ -2494,7 +2776,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-990202676",
@@ -2516,7 +2803,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-999009996",
@@ -2538,7 +2830,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-999226616",
@@ -2560,7 +2857,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-999220076",
@@ -2582,7 +2884,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-977848807",
@@ -2604,7 +2911,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-990394868",
@@ -2626,7 +2938,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-990000006",
@@ -2648,7 +2965,12 @@
       "is_active": true,
       "has_temp_phone": true,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-rus-tili-2",
+      "groupId": "grp-rus-tili-2",
+      "groupName": "Rus tili 1.2 (RUS-1.2)"
     },
     {
       "id": "usr-student-997948421",
@@ -2670,7 +2992,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-946914031",
@@ -2692,7 +3019,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-501959806",
@@ -2714,7 +3046,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-990577366",
@@ -2736,7 +3073,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     },
     {
       "id": "usr-student-770074732",
@@ -2758,7 +3100,12 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T03:48:37.304Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T03:48:37.304Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T03:48:37.304Z",
+      "group_id": "grp-ingliz-tili-2",
+      "groupId": "grp-ingliz-tili-2",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)"
     }
   ],
   "educo_db_groups": [
@@ -2775,11 +3122,11 @@
       "enrolled_count": 0,
       "status": "active",
       "monthly_price": 500000,
-      "schedule": "Dush-Chor-Jum, 16:00 - 17:30",
+      "schedule": "Dush-Chor-Jum, 10:30 - 12:00",
       "avatar_url": null,
       "image_url": null,
       "created_at": "2026-11-02T12:46:23.736Z",
-      "updated_at": "2026-11-02T12:52:57.467Z"
+      "updated_at": "2026-11-04T05:00:09.057Z"
     },
     {
       "id": "grp-1793622453272",
@@ -2793,12 +3140,12 @@
       "capacity": 20,
       "enrolled_count": 0,
       "status": "active",
-      "monthly_price": 496000,
+      "monthly_price": 500000,
       "schedule": "Sesh-Pay-Shan, 17:30 - 19:00",
-      "avatar_url": null,
-      "image_url": null,
+      "avatar_url": "",
+      "image_url": "",
       "created_at": "2026-11-02T12:27:33.272Z",
-      "updated_at": "2026-11-02T12:29:23.979Z"
+      "updated_at": "2026-11-04T04:34:20.518Z"
     },
     {
       "id": "grp-1793615416295",
@@ -2845,7 +3192,7 @@
       "course_name": "Matematika",
       "teacher_id": "usr-1793603060709",
       "teacher_name": "Beknazarov Bexruz",
-      "room": "Xona 101",
+      "room": "Xona 2",
       "capacity": 35,
       "monthly_price": 500000,
       "student_ids": [
@@ -2878,16 +3225,20 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T04:55:03.171Z",
+      "code": "GRP-6412",
+      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "avatar_url": "",
+      "image_url": ""
     },
     {
       "id": "grp-ingliz-tili",
-      "name": "Ingliz tili guruhi",
+      "name": "Ingliz tili 1.1 (ENG-1.1)",
       "course_id": "crs-ingliz-tili",
       "course_name": "Ingliz tili",
       "teacher_id": "usr-teacher-toshtemirova",
       "teacher_name": "Toshtemirova Madina Shuxrat qizi",
-      "room": "Xona 102",
+      "room": "3",
       "capacity": 35,
       "monthly_price": 500000,
       "student_ids": [
@@ -2910,32 +3261,17 @@
         "usr-student-939019588",
         "usr-student-977221252",
         "usr-student-944307035",
-        "usr-student-990887845",
-        "usr-student-932901750",
-        "usr-student-999163660",
-        "usr-student-915600077",
-        "usr-student-957737392",
-        "usr-student-887749485",
-        "usr-student-930789384",
-        "usr-student-956161508",
-        "usr-student-946142213",
-        "usr-student-935278822",
-        "usr-student-951908080",
-        "usr-student-935399393",
-        "usr-student-998492912",
-        "usr-student-998272687",
-        "usr-student-990394868",
-        "usr-student-997948421",
-        "usr-student-946914031",
-        "usr-student-501959806",
-        "usr-student-990577366",
-        "usr-student-770074732"
+        "usr-student-990887845"
       ],
-      "enrolled_count": 39,
+      "enrolled_count": 20,
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T05:46:45.897Z",
+      "code": "ENG-1.1",
+      "schedule": "Dush-Chor-Jum, 10:30 - 12:00",
+      "avatar_url": "",
+      "image_url": ""
     },
     {
       "id": "grp-arab-tili",
@@ -2944,7 +3280,7 @@
       "course_name": "Arab tili",
       "teacher_id": "usr-teacher-yusupjonova",
       "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
-      "room": "Xona 103",
+      "room": "Xona 3",
       "capacity": 35,
       "monthly_price": 500000,
       "student_ids": [
@@ -2981,16 +3317,20 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "updated_at": "2026-11-04T04:57:58.150Z",
+      "code": "GRP-5560",
+      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "avatar_url": "",
+      "image_url": ""
     },
     {
       "id": "grp-rus-tili",
-      "name": "Rus tili guruhi",
+      "name": "Rus tili 1.1 (RUS-1.1)",
       "course_id": "crs-rus-tili",
       "course_name": "Rus tili",
       "teacher_id": "usr-1793622233829",
       "teacher_name": "Ismatova Shaxnoza",
-      "room": "Xona 104",
+      "room": "Xona 3",
       "capacity": 35,
       "monthly_price": 500000,
       "student_ids": [
@@ -3012,7 +3352,161 @@
         "usr-student-935061991",
         "usr-student-932901750",
         "usr-student-990000004",
-        "usr-student-900095755",
+        "usr-student-900095755"
+      ],
+      "enrolled_count": 19,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T05:46:45.897Z",
+      "code": "RUS-1.1",
+      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "avatar_url": "",
+      "image_url": ""
+    },
+    {
+      "id": "grp-it",
+      "name": "IT & Dasturlash guruhi",
+      "course_id": "crs-it",
+      "course_name": "IT va Dasturlash",
+      "teacher_id": "usr-1793466843425",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "room": " (IT Lab)",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "student_ids": [
+        "usr-student-930098339",
+        "usr-student-943852253",
+        "usr-student-947882906"
+      ],
+      "enrolled_count": 3,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T04:57:29.781Z",
+      "code": "GRP-6339",
+      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "avatar_url": "",
+      "image_url": ""
+    },
+    {
+      "id": "grp-mental",
+      "name": "Mental Arifmetika guruhi",
+      "course_id": "crs-mental",
+      "course_name": "Mental Arifmetika",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "room": "Xona 3",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "student_ids": [
+        "usr-student-909901059",
+        "usr-student-992223052",
+        "usr-student-935286718"
+      ],
+      "enrolled_count": 3,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T04:57:06.180Z",
+      "code": "GRP-9942",
+      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "avatar_url": "",
+      "image_url": ""
+    },
+    {
+      "id": "grp-shaxmat",
+      "name": "Shaxmat guruhi",
+      "course_id": "crs-shaxmat",
+      "course_name": "Shaxmat",
+      "teacher_id": "usr-teacher-qosimov",
+      "teacher_name": "Rustam Qosimov",
+      "room": "Ofis",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "student_ids": [
+        "usr-student-909474123",
+        "usr-student-946019500"
+      ],
+      "enrolled_count": 2,
+      "status": "active",
+      "start_date": "2026-11-01",
+      "created_at": "2026-11-04T03:47:07.677Z",
+      "updated_at": "2026-11-04T04:56:32.417Z",
+      "code": "GRP-5226",
+      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "avatar_url": "",
+      "image_url": ""
+    },
+    {
+      "id": "grp-fullstack",
+      "name": "Full Stack guruhi",
+      "course_id": "crs-fullstack",
+      "course_name": "Full Stack",
+      "teacher_id": "usr-1793466843425",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "schedule_days": "Dush - Chor - Juma",
+      "schedule_time": "18:00 - 20:00",
+      "room": "3-xona (IT Lab)",
+      "status": "active",
+      "is_active": true,
+      "max_students": 15,
+      "student_count": 3,
+      "created_at": "2026-11-04T05:45:15.649Z",
+      "updated_at": "2026-11-04T05:45:15.649Z"
+    },
+    {
+      "id": "grp-ingliz-tili-2",
+      "name": "Ingliz tili 1.2 (ENG-1.2)",
+      "code": "ENG-1.2",
+      "course_id": "crs-ingliz-tili",
+      "course_name": "Ingliz tili",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "room": "Xona 102B",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "status": "active",
+      "student_ids": [
+        "usr-student-932901750",
+        "usr-student-999163660",
+        "usr-student-915600077",
+        "usr-student-957737392",
+        "usr-student-887749485",
+        "usr-student-930789384",
+        "usr-student-956161508",
+        "usr-student-946142213",
+        "usr-student-935278822",
+        "usr-student-951908080",
+        "usr-student-935399393",
+        "usr-student-998492912",
+        "usr-student-998272687",
+        "usr-student-990394868",
+        "usr-student-997948421",
+        "usr-student-946914031",
+        "usr-student-501959806",
+        "usr-student-990577366",
+        "usr-student-770074732"
+      ],
+      "enrolled_count": 19,
+      "avatar_url": "",
+      "image_url": "",
+      "created_at": "2026-11-04T05:46:45.897Z",
+      "updated_at": "2026-11-04T05:46:45.897Z"
+    },
+    {
+      "id": "grp-rus-tili-2",
+      "name": "Rus tili 1.2 (RUS-1.2)",
+      "code": "RUS-1.2",
+      "course_id": "crs-rus-tili",
+      "course_name": "Rus tili",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Ismatova Shaxnoza",
+      "room": "Xona 104B",
+      "capacity": 35,
+      "monthly_price": 500000,
+      "status": "active",
+      "student_ids": [
         "usr-student-930096441",
         "usr-student-930678890",
         "usr-student-975479606",
@@ -3033,73 +3527,11 @@
         "usr-student-977848807",
         "usr-student-990000006"
       ],
-      "enrolled_count": 38,
-      "status": "active",
-      "start_date": "2026-11-01",
-      "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
-    },
-    {
-      "id": "grp-it",
-      "name": "IT & Dasturlash guruhi",
-      "course_id": "crs-it",
-      "course_name": "IT va Dasturlash",
-      "teacher_id": "usr-1793466843425",
-      "teacher_name": "Abdulazizbek Orifjonov",
-      "room": "Xona 201 (IT Lab)",
-      "capacity": 35,
-      "monthly_price": 600000,
-      "student_ids": [
-        "usr-student-930098339",
-        "usr-student-943852253",
-        "usr-student-947882906"
-      ],
-      "enrolled_count": 3,
-      "status": "active",
-      "start_date": "2026-11-01",
-      "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
-    },
-    {
-      "id": "grp-mental",
-      "name": "Mental Arifmetika guruhi",
-      "course_id": "crs-mental",
-      "course_name": "Mental Arifmetika",
-      "teacher_id": "usr-1793622773288",
-      "teacher_name": "Fayoza Karimberdiyeva",
-      "room": "Xona 202",
-      "capacity": 35,
-      "monthly_price": 450000,
-      "student_ids": [
-        "usr-student-909901059",
-        "usr-student-992223052",
-        "usr-student-935286718"
-      ],
-      "enrolled_count": 3,
-      "status": "active",
-      "start_date": "2026-11-01",
-      "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
-    },
-    {
-      "id": "grp-shaxmat",
-      "name": "Shaxmat guruhi",
-      "course_id": "crs-shaxmat",
-      "course_name": "Shaxmat",
-      "teacher_id": "usr-teacher-qosimov",
-      "teacher_name": "Rustam Qosimov",
-      "room": "Xona 203",
-      "capacity": 35,
-      "monthly_price": 400000,
-      "student_ids": [
-        "usr-student-909474123",
-        "usr-student-946019500"
-      ],
-      "enrolled_count": 2,
-      "status": "active",
-      "start_date": "2026-11-01",
-      "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T03:48:37.304Z"
+      "enrolled_count": 19,
+      "avatar_url": "",
+      "image_url": "",
+      "created_at": "2026-11-04T05:46:45.897Z",
+      "updated_at": "2026-11-04T05:46:45.897Z"
     }
   ],
   "educo_db_courses": [

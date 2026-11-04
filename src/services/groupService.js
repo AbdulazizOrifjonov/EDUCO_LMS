@@ -558,6 +558,219 @@ export async function saveGroupSchedule(groupId, scheduleItems = []) {
 }
 
 /**
+ * Helper to generate smart subgroup suggestions
+ * e.g., course "Ingliz tili" -> prefix "ENG" -> "ENG-1.1", "ENG-1.2", "ENG-1.3"
+ */
+export function generateSubgroupSuggestions(courseName = '', existingGroupsCount = 0) {
+  const norm = (courseName || '').toLowerCase();
+  let prefix = 'GRP';
+  if (norm.includes('ingliz') || norm.includes('english')) prefix = 'ENG';
+  else if (norm.includes('rus')) prefix = 'RUS';
+  else if (norm.includes('matem') || norm.includes('math')) prefix = 'MAT';
+  else if (norm.includes('arab') || norm.includes('arabic')) prefix = 'ARB';
+  else if (norm.includes('it') || norm.includes('dastur') || norm.includes('frontend') || norm.includes('backend')) prefix = 'IT';
+  else if (norm.includes('mental')) prefix = 'MNT';
+  else if (norm.includes('shaxmat') || norm.includes('chess')) prefix = 'CHS';
+  else if (norm.includes('fizik') || norm.includes('physic')) prefix = 'FIZ';
+  else if (norm.includes('kimyo') || norm.includes('chem')) prefix = 'KIM';
+  else if (norm.includes('biolog')) prefix = 'BIO';
+  else if (courseName && courseName.trim().length >= 3) {
+    prefix = courseName.trim().slice(0, 3).toUpperCase();
+  }
+
+  const cleanCourse = courseName.trim() || 'Kurs';
+  const nextNum = Math.max(1, existingGroupsCount + 1);
+
+  return {
+    prefix,
+    nextSubgroupCode: `${prefix}-1.${nextNum}`,
+    nextSubgroupName: `${cleanCourse} 1.${nextNum} (${prefix}-1.${nextNum})`,
+    suggestions: [
+      {
+        code: `${prefix}-1.1`,
+        name: `${cleanCourse} 1.1 (${prefix}-1.1)`,
+        label: `${prefix}-1.1`,
+      },
+      {
+        code: `${prefix}-1.2`,
+        name: `${cleanCourse} 1.2 (${prefix}-1.2)`,
+        label: `${prefix}-1.2`,
+      },
+      {
+        code: `${prefix}-1.3`,
+        name: `${cleanCourse} 1.3 (${prefix}-1.3)`,
+        label: `${prefix}-1.3`,
+      },
+      {
+        code: `${prefix}-1.4`,
+        name: `${cleanCourse} 1.4 (${prefix}-1.4)`,
+        label: `${prefix}-1.4`,
+      },
+      {
+        code: `${prefix}-A1`,
+        name: `${cleanCourse} (Boshlang‘ich / A1)`,
+        label: `A1 (Boshlang‘ich)`,
+      },
+      {
+        code: `${prefix}-B1`,
+        name: `${cleanCourse} (O‘rta / B1)`,
+        label: `B1 (O‘rta)`,
+      },
+    ],
+  };
+}
+
+/**
+ * Split an existing group into two (e.g. ENG-1.1 and ENG-1.2)
+ * Distributes students between the source group and the newly created second group.
+ */
+export async function splitGroup({
+  sourceGroupId,
+  renameSourceGroupTo,
+  newGroupName,
+  newGroupCode,
+  room,
+  teacherId,
+  capacity,
+  studentIdsToMove = [],
+}) {
+  const groups = localStore.getGroups();
+  const sourceGroup = groups.find((g) => g.id === sourceGroupId);
+  if (!sourceGroup) {
+    throw new Error('Asosiy guruh topilmadi');
+  }
+
+  // 1. Rename source group if requested (e.g. "Ingliz tili 1.1 (ENG-1.1)")
+  if (renameSourceGroupTo && renameSourceGroupTo.trim()) {
+    sourceGroup.name = renameSourceGroupTo.trim();
+  }
+
+  // 2. Create the new second group (e.g. "Ingliz tili 1.2 (ENG-1.2)")
+  const newGroupId = `grp-${Date.now()}`;
+  const allCourses = localStore.getCourses ? localStore.getCourses() : [];
+  const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+  const course = allCourses.find((c) => c.id === (sourceGroup.course_id || sourceGroup.courseId));
+  const teacher = allUsers.find((u) => u.id === (teacherId || sourceGroup.teacher_id || sourceGroup.teacherId));
+
+  const newGroupObj = {
+    id: newGroupId,
+    name: newGroupName || `${sourceGroup.name} (2-guruh)`,
+    code: newGroupCode || `${sourceGroup.code || 'GRP'}.2`,
+    course_id: sourceGroup.course_id || sourceGroup.courseId || '',
+    courseId: sourceGroup.course_id || sourceGroup.courseId || '',
+    course_name: sourceGroup.course_name || sourceGroup.courseName || course?.name || 'Kurs',
+    courseName: sourceGroup.course_name || sourceGroup.courseName || course?.name || 'Kurs',
+    teacher_id: teacherId || sourceGroup.teacher_id || sourceGroup.teacherId || '',
+    teacherId: teacherId || sourceGroup.teacher_id || sourceGroup.teacherId || '',
+    teacher_name: teacher?.fullName || (teacher?.first_name ? `${teacher.first_name} ${teacher.last_name || ''}`.trim() : (sourceGroup.teacher_name || '')),
+    teacherName: teacher?.fullName || (teacher?.first_name ? `${teacher.first_name} ${teacher.last_name || ''}`.trim() : (sourceGroup.teacher_name || '')),
+    room: room || sourceGroup.room || 'Xona 102',
+    capacity: Number(capacity || sourceGroup.capacity || 20),
+    monthly_price: Number(sourceGroup.monthly_price || 0),
+    monthlyPrice: Number(sourceGroup.monthly_price || 0),
+    status: 'active',
+    student_ids: [],
+    enrolled_count: 0,
+    avatar_url: sourceGroup.avatar_url || '',
+    image_url: sourceGroup.image_url || '',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  // 3. Move selected student IDs from source group to new group
+  const moveSet = new Set(studentIdsToMove.map((id) => localStore.normalizeUserId(id)));
+  const currentSourceStudentIds = sourceGroup.student_ids || [];
+
+  const remainingSourceIds = [];
+  const movedIds = [];
+
+  for (const sId of currentSourceStudentIds) {
+    if (moveSet.has(localStore.normalizeUserId(sId))) {
+      movedIds.push(sId);
+    } else {
+      remainingSourceIds.push(sId);
+    }
+  }
+
+  for (const sId of studentIdsToMove) {
+    if (!movedIds.some((id) => localStore.normalizeUserId(id) === localStore.normalizeUserId(sId))) {
+      movedIds.push(sId);
+    }
+  }
+
+  sourceGroup.student_ids = remainingSourceIds;
+  sourceGroup.enrolled_count = remainingSourceIds.length;
+  newGroupObj.student_ids = movedIds;
+  newGroupObj.enrolled_count = movedIds.length;
+
+  localStore.saveGroup(sourceGroup);
+  const createdGroup = localStore.saveGroup(newGroupObj);
+
+  // 4. Update student users' group_id and memberships
+  const users = localStore.getUsers();
+  let usersChanged = false;
+  for (const u of users) {
+    const norm = localStore.normalizeUserId(u.id);
+    if (moveSet.has(norm)) {
+      u.group_id = newGroupId;
+      u.groupId = newGroupId;
+      u.groupName = newGroupObj.name;
+      usersChanged = true;
+    } else if (u.group_id === sourceGroupId || u.groupId === sourceGroupId) {
+      if (renameSourceGroupTo && renameSourceGroupTo.trim()) {
+        u.groupName = renameSourceGroupTo.trim();
+        usersChanged = true;
+      }
+    }
+  }
+  if (usersChanged) {
+    localStore.saveUsers(users);
+  }
+
+  // 5. Update memberships if exists
+  if (localStore.getMemberships) {
+    const mems = localStore.getMemberships();
+    for (const m of mems) {
+      if (m.group_id === sourceGroupId && moveSet.has(localStore.normalizeUserId(m.student_id))) {
+        m.group_id = newGroupId;
+      }
+    }
+    localStore.setItem('educo_db_memberships', mems);
+  }
+
+  // 6. Broadcast updates
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo_group_updated', {
+          detail: { groupId: sourceGroupId, group: sourceGroup },
+        })
+      );
+      window.dispatchEvent(
+        new CustomEvent('educo_group_updated', {
+          detail: { groupId: newGroupId, group: createdGroup },
+        })
+      );
+    }
+  } catch (_) {}
+
+  // 7. Auto sync to remote if connected
+  try {
+    if (typeof window !== 'undefined' && window.educoSyncRemote) {
+      window.educoSyncRemote();
+    }
+  } catch (_) {}
+
+  return {
+    success: true,
+    sourceGroup,
+    newGroup: createdGroup,
+    movedCount: movedIds.length,
+    remainingCount: remainingSourceIds.length,
+  };
+}
+
+/**
  * Delete a group
  */
 export async function deleteGroup(id) {
