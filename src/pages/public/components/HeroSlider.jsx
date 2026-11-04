@@ -155,52 +155,57 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                 </p>
 
                 {/* Action CTA Buttons (Uniform Height, Balanced, Sleek & Compact Design) */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-3 sm:pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                <div className="flex flex-col xs:flex-row xs:flex-wrap items-stretch xs:items-center gap-2 sm:gap-2.5 pt-3 sm:pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 w-full sm:w-auto">
                   {/* 1. Sinov darsiga yozilish CTA (Lead Generation) */}
                   <a
                     href="#contact"
                     onClick={(e) => scrollToTarget(e, '#contact')}
-                    className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 dark:from-emerald-600 dark:via-teal-600 dark:to-emerald-700 dark:hover:from-emerald-500 dark:hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-900/25 dark:shadow-emerald-950/30 border border-white/20 transition-all hover:scale-102 active:scale-98 cursor-pointer whitespace-nowrap shrink-0 group"
+                    className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-md shadow-emerald-950/25 border border-white/20 transition-all hover:scale-102 active:scale-98 cursor-pointer whitespace-nowrap w-full xs:w-auto shrink-0 group"
                   >
                     <Sparkles className="w-4 h-4 text-amber-300 shrink-0 group-hover:scale-110 transition-transform" />
                     <span>Sinov darsiga yozilish</span>
                   </a>
 
-                  {/* 2. Primary CTA: Courses / Teachers */}
-                  {slide.cta_text && (
-                    <a
-                      href={slide.cta_link || '#courses'}
-                      onClick={(e) => scrollToTarget(e, slide.cta_link || '#courses')}
-                      className="inline-flex items-center justify-center gap-1.5 sm:gap-2 h-10 sm:h-11 px-3.5 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all hover:scale-102 active:scale-98 shadow-md shadow-black/20 whitespace-nowrap shrink-0 group"
-                    >
-                      <span>{slide.cta_text}</span>
-                      <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-1 transition-transform text-blue-300 dark:text-emerald-300" />
-                    </a>
-                  )}
+                  {/* Secondary CTA Group (Equal width on mobile, inline on desktop) */}
+                  <div className="flex items-center gap-1.5 sm:gap-2.5 w-full xs:w-auto">
+                    {/* 2. Primary CTA: Courses / Teachers */}
+                    {slide.cta_text && (
+                      <a
+                        href={slide.cta_link || '#courses'}
+                        onClick={(e) => scrollToTarget(e, slide.cta_link || '#courses')}
+                        className="inline-flex items-center justify-center gap-1.5 sm:gap-2 h-10 sm:h-11 px-3 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all hover:scale-102 active:scale-98 shadow-md shadow-black/20 whitespace-nowrap flex-1 xs:flex-initial min-w-0 group"
+                      >
+                        <span className="hidden xs:inline truncate">{slide.cta_text}</span>
+                        <span className="xs:hidden">Kurslar</span>
+                        <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180 shrink-0 group-hover:translate-x-1 transition-transform text-emerald-300" />
+                      </a>
+                    )}
 
-                  {/* 3. Secondary CTA: About Us / Details */}
-                  {slide.secondary_cta_text && (
-                    <a
-                      href={slide.secondary_cta_link || '#about'}
-                      onClick={(e) => scrollToTarget(e, slide.secondary_cta_link || '#about')}
-                      className="inline-flex items-center justify-center gap-1.5 sm:gap-2 h-10 sm:h-11 px-3.5 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white/90 hover:text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all hover:scale-102 active:scale-98 shadow-md shadow-black/20 whitespace-nowrap shrink-0"
-                    >
-                      <span>{slide.secondary_cta_text}</span>
-                    </a>
-                  )}
+                    {/* 3. Secondary CTA: About Us / Details */}
+                    {slide.secondary_cta_text && (
+                      <a
+                        href={slide.secondary_cta_link || '#about'}
+                        onClick={(e) => scrollToTarget(e, slide.secondary_cta_link || '#about')}
+                        className="inline-flex items-center justify-center gap-1.5 sm:gap-2 h-10 sm:h-11 px-3 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white/90 hover:text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all hover:scale-102 active:scale-98 shadow-md shadow-black/20 whitespace-nowrap flex-1 xs:flex-initial min-w-0"
+                      >
+                        <span className="hidden xs:inline truncate">{slide.secondary_cta_text}</span>
+                        <span className="xs:hidden">Lavhalar</span>
+                      </a>
+                    )}
 
-                  {/* 4. Play Video Highlight Pill */}
-                  <button
-                    type="button"
-                    onClick={onOpenVideo}
-                    className="inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white font-bold text-xs sm:text-sm border border-white/20 hover:border-white/40 backdrop-blur-md transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-md shadow-black/20 whitespace-nowrap shrink-0 group"
-                    title="Markaz videolavhasini tomosha qilish"
-                  >
-                    <div className="w-5 h-5 rounded-full bg-blue-600 dark:bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
-                    </div>
-                    <span>Video</span>
-                  </button>
+                    {/* 4. Play Video Highlight Pill */}
+                    <button
+                      type="button"
+                      onClick={onOpenVideo}
+                      className="inline-flex items-center justify-center gap-1.5 sm:gap-2 h-10 sm:h-11 px-3 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white font-bold text-xs sm:text-sm border border-white/20 hover:border-white/40 backdrop-blur-md transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-md shadow-black/20 whitespace-nowrap flex-1 xs:flex-initial min-w-0 group"
+                      title="Markaz videolavhasini tomosha qilish"
+                    >
+                      <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+                      </div>
+                      <span className="shrink-0">Video</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

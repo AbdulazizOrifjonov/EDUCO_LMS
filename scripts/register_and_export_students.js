@@ -179,13 +179,13 @@ const SUBJECT_CONFIG = {
     price: 500000,
   },
   'IT': {
-    courseId: 'crs-it',
-    courseName: 'IT va Dasturlash',
-    courseCode: 'CRS-IT1',
-    courseColor: '#06b6d4',
-    groupId: 'grp-it',
-    groupName: 'IT & Dasturlash guruhi',
-    room: 'Xona 201 (IT Lab)',
+    courseId: 'crs-fullstack',
+    courseName: 'Full Stack',
+    courseCode: 'CRS-FS1',
+    courseColor: '#10b981',
+    groupId: 'grp-fullstack',
+    groupName: 'Full Stack guruhi',
+    room: '3-xona (IT Lab)',
     teacherId: 'usr-1793466843425',
     teacherName: 'Abdulazizbek Orifjonov',
     teacherPhone: '+998 93 582 17 74',
@@ -419,9 +419,16 @@ async function main() {
       const uPhoneDigits = cleanDigits(u.phone).slice(-9);
       const cfgPhoneDigits = cleanDigits(cfg.teacherPhone).slice(-9);
       if (id === cfg.teacherId || (uPhoneDigits && uPhoneDigits === cfgPhoneDigits)) {
-        u.course_ids = Array.from(new Set([...(u.course_ids || []), cfg.courseId]));
-        u.group_ids = Array.from(new Set([...(u.group_ids || []), cfg.groupId]));
-        u.subject = cfg.courseName;
+        if (cfg.teacherId === 'usr-1793466843425') {
+          u.course_ids = [cfg.courseId];
+          u.group_ids = [cfg.groupId];
+          u.subject = 'Full Stack';
+          u.specialty = 'Full Stack';
+        } else {
+          u.course_ids = Array.from(new Set([...(u.course_ids || []), cfg.courseId]));
+          u.group_ids = Array.from(new Set([...(u.group_ids || []), cfg.groupId]));
+          u.subject = cfg.courseName;
+        }
       }
     }
   }
@@ -534,6 +541,15 @@ async function main() {
   // 6. Push to live Cloudflare D1 store
   console.log('Syncing data to live Cloudflare store (https://educo-lms.pages.dev/api/sync-store)...');
   const syncPayload = {
+    _deleted_ids: [
+      'grp-1793468593324',
+      'grp-it',
+      'crs-1793466841391',
+      'crs-it',
+      'mem-grp-it-usr-student-930098339',
+      'mem-grp-it-usr-student-943852253',
+      'mem-grp-it-usr-student-947882906',
+    ],
     educo_db_users: finalUsers,
     educo_db_courses: finalCourses,
     educo_db_groups: finalGroups,
@@ -618,7 +634,7 @@ async function main() {
       { wch: 20 },
     ];
     // Sheet name max 31 chars
-    const safeSheetName = subjKey.slice(0, 31);
+    const safeSheetName = subjKey === 'IT' ? 'Full Stack' : subjKey.slice(0, 31);
     XLSX.utils.book_append_sheet(wb, wsSubj, safeSheetName);
   }
 

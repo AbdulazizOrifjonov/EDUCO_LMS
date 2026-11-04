@@ -525,9 +525,9 @@ export default function WebsiteFullPageEditor({
     );
   };
 
-  // Common Bottom Form Actions with Back, Delete and Save
+  // Common Bottom Form Actions with Back, Delete and Save (Only shown on desktop side-by-side layout; hidden on mobile/tablet to avoid duplicate buttons)
   const renderBottomFormActions = () => (
-    <div className="hidden sm:flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
+    <div className="hidden lg:flex items-center justify-between gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
       <div>
         {editingItem?.id && (
           <Button
@@ -540,19 +540,19 @@ export default function WebsiteFullPageEditor({
               id: editingItem.id,
               title: editingItem.title || editingItem.name || editingItem.caption || 'Ushbu element'
             })}
-            className="!rounded-2xl font-bold w-full sm:w-auto"
+            className="!rounded-2xl font-bold"
           >
             O‘chirish
           </Button>
         )}
       </div>
-      <div className="flex items-center gap-2.5 self-end sm:self-auto w-full sm:w-auto">
+      <div className="flex items-center gap-2.5">
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={closeEditor}
-          className="!rounded-2xl font-bold flex-1 sm:flex-initial"
+          className="!rounded-2xl font-bold"
         >
           Bekor qilish
         </Button>
@@ -561,7 +561,7 @@ export default function WebsiteFullPageEditor({
           variant="primary"
           size="sm"
           icon={Save}
-          className="!rounded-2xl font-bold shadow-md shadow-emerald-600/20 flex-1 sm:flex-initial"
+          className="!rounded-2xl font-bold shadow-md shadow-emerald-600/20"
         >
           Saqlash
         </Button>
@@ -1880,8 +1880,23 @@ export default function WebsiteFullPageEditor({
           </div>
         </div>
       )}
-      {/* Mobile Sticky Quick Save Bar (Floats at bottom of phone for instant 1-tap save) */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 p-3 shadow-2xl flex items-center gap-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+      {/* Mobile & Tablet Sticky Quick Save Bar (Floats at bottom of screen for instant 1-tap save/delete) */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 p-3 shadow-2xl flex items-center gap-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+        {editingItem?.id && (
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
+            icon={Trash2}
+            onClick={() => setDeleteConfirmItem({
+              type: modalType,
+              id: editingItem.id,
+              title: editingItem.title || editingItem.name || editingItem.caption || 'Ushbu element'
+            })}
+            className="!rounded-xl font-bold text-xs !py-2 !px-3 shrink-0"
+            title="O‘chirish"
+          />
+        )}
         <Button
           type="button"
           variant="outline"

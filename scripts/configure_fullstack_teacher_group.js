@@ -221,8 +221,17 @@ async function run() {
     s.updated_at = now;
   }
 
-  console.log('Sending payload to cloud sync store...');
+  console.log('Sending payload to cloud sync store with permanent _deleted_ids...');
   const payload = {
+    _deleted_ids: [
+      'grp-1793468593324',
+      'grp-it',
+      'crs-1793466841391',
+      'crs-it',
+      'mem-grp-it-usr-student-930098339',
+      'mem-grp-it-usr-student-943852253',
+      'mem-grp-it-usr-student-947882906',
+    ],
     educo_db_users: users,
     educo_db_courses: courses,
     educo_db_groups: groups,
