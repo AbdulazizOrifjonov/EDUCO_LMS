@@ -138,7 +138,22 @@ export async function getGroups({
   }
 
   if (courseId && courseId !== 'all') {
-    list = list.filter((g) => g.course_id === courseId);
+    const allCourses = localStore.getCourses();
+    const targetCourse = allCourses.find((c) => c.id === courseId || c.code === courseId);
+    const targetName = (targetCourse?.name || '').trim().toLowerCase();
+    const targetCode = (targetCourse?.code || '').trim().toLowerCase();
+
+    list = list.filter((g) => {
+      if (g.course_id === courseId || g.courseId === courseId) return true;
+      if (targetName) {
+        const gCourseName = (g.course_name || g.courseName || '').trim().toLowerCase();
+        if (gCourseName && (gCourseName === targetName || gCourseName.startsWith(targetName) || targetName.startsWith(gCourseName))) return true;
+        const gName = (g.name || '').trim().toLowerCase();
+        if (gName && (gName.startsWith(targetName) || gName.includes(targetName))) return true;
+      }
+      if (targetCode && g.code && g.code.toLowerCase().startsWith(targetCode.slice(0, 4))) return true;
+      return false;
+    });
   }
 
   if ((teacherId && teacherId !== 'all') || (teacherName && teacherName.trim())) {

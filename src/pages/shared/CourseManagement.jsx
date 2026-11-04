@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -34,6 +34,7 @@ import {
 } from '@/services/courseService';
 import { useSearch } from '@/context/SearchContext';
 import { useTwoStepConfirm } from '@/context/ConfirmContext';
+import { localStore } from '@/lib/localStore';
 
 export default function CourseManagement() {
   const { t } = useTranslation();
@@ -63,6 +64,26 @@ export default function CourseManagement() {
   const [isDirectionsModalOpen, setIsDirectionsModalOpen] = useState(false);
   const [directions, setDirections] = useState([]);
   const [selectedCourseForView, setSelectedCourseForView] = useState(null);
+
+  const viewCourseGroups = useMemo(() => {
+    if (!selectedCourseForView) return [];
+    if (Array.isArray(selectedCourseForView.groups) && selectedCourseForView.groups.length > 0) {
+      return selectedCourseForView.groups;
+    }
+    const allGroups = localStore.getGroups ? localStore.getGroups() : [];
+    const cId = selectedCourseForView.id;
+    const cName = (selectedCourseForView.name || '').trim().toLowerCase();
+    return allGroups.filter((g) => {
+      if (g.course_id === cId || g.courseId === cId) return true;
+      if (cName) {
+        const gCourseName = (g.course_name || g.courseName || '').trim().toLowerCase();
+        if (gCourseName && (gCourseName === cName || gCourseName.startsWith(cName))) return true;
+        const gName = (g.name || '').trim().toLowerCase();
+        if (gName && (gName.startsWith(cName) || gName.includes(cName))) return true;
+      }
+      return false;
+    });
+  }, [selectedCourseForView]);
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);
@@ -193,11 +214,19 @@ export default function CourseManagement() {
       header: t('courses.groupsCount', 'Active Groups'),
       key: 'groupsCount',
       render: (row) => (
-        <div className="flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/${currentUserRole}/groups?courseId=${row.id}`);
+          }}
+          className="flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium px-2 py-1 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
+          title={`${row.name} kursining barcha guruhlarini ko‘rish`}
+        >
           <Users className="w-4 h-4 text-brand-navy dark:text-blue-400" />
           <span className="font-semibold">{row.groupsCount || 0}</span>
           <span className="text-gray-400">{t('nav.groups', 'groups')}</span>
-        </div>
+        </button>
       ),
     },
     {
@@ -594,6 +623,76 @@ export default function CourseManagement() {
                 </div>
               ) : (
                 <p className="text-xs text-gray-400 italic">Hozircha ustoz biriktirilmagan.</p>
+              )}
+            </div>
+
+            {/* Linked Groups in Course Modal */}
+            <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                  Biriktirilgan guruhlar ({viewCourseGroups.length} ta):
+                </p>
+                {isOwnerOrAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    icon={Plus}
+                    className="text-blue-600 dark:text-blue-400 text-xs font-semibold"
+                    onClick={() => {
+                      const cid = selectedCourseForView.id;
+                      const cname = selectedCourseForView.name || '';
+                      setSelectedCourseForView(null);
+                      navigate(
+                        `/${currentUserRole}/groups/create?courseId=${cid}&courseName=${encodeURIComponent(
+                          cname
+                        )}`
+                      );
+                    }}
+                  >
+                    + Yangi parallel guruh
+                  </Button>
+                )}
+              </div>
+              {viewCourseGroups.length > 0 ? (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {viewCourseGroups.map((grp) => {
+                    const studentCount =
+                      (grp.student_ids || grp.students || []).length || grp.enrolled_count || 0;
+                    const capacity = grp.capacity || 35;
+                    return (
+                      <div
+                        key={grp.id}
+                        className="p-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-surface-dark-secondary flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-bold text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+                            <span>{grp.name}</span>
+                            {grp.code && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold">
+                                {grp.code}
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                            Ustoz: {grp.teacher_name || grp.teacherName || 'Biriktirilmagan'} • {studentCount} / {capacity} o‘quvchi
+                          </p>
+                        </div>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedCourseForView(null);
+                            navigate(`/${currentUserRole}/groups/${grp.id}`);
+                          }}
+                        >
+                          Guruhga o‘tish
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 italic">Hozircha guruh mavjud emas.</p>
               )}
             </div>
 

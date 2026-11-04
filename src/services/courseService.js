@@ -131,9 +131,31 @@ export async function getCourseById(id) {
     }
   }
 
-  const course = localStore.getCourses().find((c) => c.id === id);
+  const allCourses = localStore.getCourses();
+  let course = allCourses.find((c) => c.id === id);
+  if (!course) {
+    course = allCourses.find(
+      (c) => c.code?.toLowerCase() === id?.toLowerCase() || c.name?.toLowerCase() === id?.toLowerCase()
+    );
+  }
   if (!course) throw new Error('Course not found');
-  return course;
+
+  const allGroups = localStore.getGroups();
+  const matchedGroups = allGroups.filter((g) => {
+    return (
+      g.course_id === course.id ||
+      g.courseId === course.id ||
+      (g.course_name && course.name && g.course_name.toLowerCase() === course.name.toLowerCase()) ||
+      (g.name && course.name && g.name.toLowerCase().startsWith(course.name.toLowerCase()))
+    );
+  });
+
+  return {
+    ...course,
+    groups: matchedGroups,
+    groupsCount: matchedGroups.length,
+    activeGroupsCount: matchedGroups.filter((g) => g.status === 'active' || (!g.status && g.status !== 'archived')).length,
+  };
 }
 
 /**

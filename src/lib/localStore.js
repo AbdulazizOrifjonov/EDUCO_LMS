@@ -864,6 +864,7 @@ class LocalStore {
       });
       return {
         ...c,
+        groups: activeGroups,
         groupsCount: activeGroups.length,
         activeGroupsCount: activeGroups.length,
       };
@@ -873,11 +874,16 @@ class LocalStore {
   saveCourse(courseData) {
     const list = this.getCourses();
     const targetId = courseData.id || null;
-    const existingIndex = targetId ? list.findIndex((c) => c.id === targetId) : -1;
+    let existingIndex = targetId ? list.findIndex((c) => c.id === targetId) : -1;
+    if (existingIndex < 0 && courseData.name) {
+      existingIndex = list.findIndex(
+        (c) => c.name?.trim().toLowerCase() === courseData.name.trim().toLowerCase()
+      );
+    }
     const existingCourse = existingIndex >= 0 ? list[existingIndex] : null;
 
     const newCourse = {
-      id: targetId || `crs-${Date.now()}`,
+      id: targetId || existingCourse?.id || `crs-${Date.now()}`,
       name: courseData.name,
       code: courseData.code || existingCourse?.code || `CRS-${Math.floor(1000 + Math.random() * 9000)}`,
       description: courseData.description !== undefined ? courseData.description : (existingCourse?.description || ''),

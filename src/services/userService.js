@@ -347,7 +347,7 @@ export async function createStudent({
 /**
  * Update user details
  */
-export async function updateUser(id, { firstName, lastName, fullName, full_name, username, phone, fatherPhone, motherPhone, role, isActive, password, courseId, subject, status, custom_price, discount_percent, discount_amount, discount_type, discount_reason, group_id }) {
+export async function updateUser(id, { firstName, lastName, fullName, full_name, username, phone, fatherPhone, motherPhone, role, isActive, password, courseId, subject, status, custom_price, discount_percent, discount_amount, discount_type, discount_reason, group_id, group_ids }) {
   let resolvedFirst = firstName;
   let resolvedLast = lastName;
   const rawFullName = fullName || full_name;
@@ -406,8 +406,10 @@ export async function updateUser(id, { firstName, lastName, fullName, full_name,
     is_active: isActive !== undefined ? isActive : localUser.is_active,
     course_id: courseId !== undefined ? courseId : localUser.course_id,
     subject: subject !== undefined ? subject : localUser.subject,
-    group_id: group_id !== undefined ? group_id : localUser.group_id,
-    group_ids: group_id ? Array.from(new Set([...(localUser.group_ids || []), group_id])) : localUser.group_ids,
+    group_id: group_id !== undefined ? (group_id || null) : localUser.group_id,
+    group_ids: group_id !== undefined
+      ? (group_id ? [group_id] : [])
+      : (Array.isArray(group_ids) ? group_ids : localUser.group_ids || []),
     custom_price: custom_price !== undefined ? custom_price : localUser.custom_price,
     discount_percent: discount_percent !== undefined ? Number(discount_percent || 0) : localUser.discount_percent,
     discount_amount: discount_amount !== undefined ? Number(discount_amount || 0) : localUser.discount_amount,

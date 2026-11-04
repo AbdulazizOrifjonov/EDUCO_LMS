@@ -20,6 +20,12 @@ import {
   EyeOff,
   Copy,
   Check,
+  GraduationCap,
+  BookOpen,
+  RefreshCw,
+  ArrowRight,
+  Edit2,
+  Plus,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { useThemeStore } from '@/hooks/useTheme';
@@ -28,6 +34,7 @@ import RoleBadge from '@/components/ui/RoleBadge';
 import Select from '@/components/ui/Select';
 import { LanguageFlag } from '@/components/LanguageSelector';
 import { updateProfile, changePassword, uploadAvatar } from '@/services/settingsService';
+import { getGroups, transferStudent, enrollStudent } from '@/services/groupService';
 import { localStore } from '@/lib/localStore';
 import { ROLES } from '@/lib/constants';
 import { toast } from '@/components/ui/Toast';
@@ -292,6 +299,119 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   const currentDisplayName = fullName || (isViewingOther ? targetUser?.fullName : profile?.full_name) || 'User';
   const effectiveRole = String(userRole || (isViewingOther ? targetUser?.role : profile?.role) || 'student').toLowerCase();
 
+  // Student group & transfer state
+  const [studentGroup, setStudentGroup] = useState(null);
+  const [allGroups, setAllGroups] = useState([]);
+  const [selectedNewGroupId, setSelectedNewGroupId] = useState('');
+  const [isTransferringGroup, setIsTransferringGroup] = useState(false);
+  const [groupTransferSuccess, setGroupTransferSuccess] = useState('');
+
+  const loadStudentGroupInfo = React.useCallback(async () => {
+    const studentId = resolvedTargetId || targetUser?.id || profile?.id;
+    if (!studentId) return;
+
+    try {
+      const res = await getGroups({ status: 'all', limit: 200 });
+      const list = res.groups || [];
+      setAllGroups(list);
+
+      // Find which group this student belongs to
+      let foundGroup = null;
+
+      // 1. Direct group_id on user object
+      const directGid = targetUser?.group_id || targetUser?.group_ids?.[0] || profile?.group_id;
+      if (directGid) {
+        foundGroup = list.find((g) => g.id === directGid);
+      }
+
+      // 2. Student IDs list on groups
+      if (!foundGroup) {
+        foundGroup = list.find(
+          (g) =>
+            Array.isArray(g.student_ids) &&
+            (g.student_ids.includes(studentId) || g.student_ids.map(String).includes(String(studentId)))
+        );
+      }
+
+      // 3. LocalStore memberships check
+      if (!foundGroup) {
+        try {
+          const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+          const normId = localStore.normalizeUserId ? localStore.normalizeUserId(studentId) : String(studentId);
+          const activeMem = memberships.find(
+            (m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false
+          );
+          if (activeMem) {
+            foundGroup = list.find((g) => g.id === activeMem.group_id);
+          }
+        } catch (_) {}
+      }
+
+      setStudentGroup(foundGroup || null);
+      setSelectedNewGroupId(foundGroup ? foundGroup.id : '');
+    } catch (err) {
+      console.warn('Error loading student group in ProfilePage:', err);
+    }
+  }, [resolvedTargetId, targetUser, profile]);
+
+  useEffect(() => {
+    if (effectiveRole === 'student') {
+      loadStudentGroupInfo();
+    }
+  }, [effectiveRole, loadStudentGroupInfo]);
+
+  const handleTransferGroup = async (e) => {
+    e?.preventDefault?.();
+    if (!selectedNewGroupId) {
+      toast.warning('Iltimos, ko‘chirish uchun o‘quv guruhini tanlang!');
+      return;
+    }
+    const studentId = resolvedTargetId || targetUser?.id || profile?.id;
+    if (!studentId) return;
+
+    setIsTransferringGroup(true);
+    setGroupTransferSuccess('');
+    try {
+      const prevGroupId = studentGroup?.id;
+      const targetGroup = allGroups.find((g) => g.id === selectedNewGroupId);
+
+      if (prevGroupId && prevGroupId !== selectedNewGroupId) {
+        await transferStudent(prevGroupId, selectedNewGroupId, studentId);
+      } else if (!prevGroupId) {
+        await enrollStudent(selectedNewGroupId, studentId);
+      }
+
+      // Update targetUser in localStore
+      if (targetUser) {
+        const updated = {
+          ...targetUser,
+          group_id: selectedNewGroupId,
+          group_ids: [selectedNewGroupId],
+          course_id: targetGroup?.course_id || targetGroup?.courseId || targetUser.course_id,
+          subject: targetGroup?.courseName || targetGroup?.course_name || targetUser.subject,
+          updated_at: new Date().toISOString(),
+        };
+        localStore.saveUser(updated);
+        setTargetUser(updated);
+      }
+
+      try {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { type: 'group_transfer' } }));
+      } catch (_) {}
+
+      setStudentGroup(targetGroup || null);
+      const msg = `O‘quvchi muvaffaqiyatli «${targetGroup?.name || 'Yangi guruh'}» guruhiga ko‘chirildi!`;
+      setGroupTransferSuccess(msg);
+      toast.success(msg);
+      setTimeout(() => setGroupTransferSuccess(''), 5000);
+    } catch (err) {
+      console.error('Group transfer error:', err);
+      toast.error(err.message || 'Guruhni o‘zgartirishda xatolik yuz berdi');
+    } finally {
+      setIsTransferringGroup(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Back button if viewing another user from users list */}
@@ -404,6 +524,138 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
           </div>
         </div>
       </Card>
+
+      {/* Student Study Group & Quick Transfer Section (For Owner / Admin) */}
+      {effectiveRole === 'student' && (
+        <Card
+          title="O‘quv guruhi va Ta’lim yo‘nalishi"
+          subtitle="O‘quvchi biriktirilgan guruh, dars jadvali va guruhni almashtirish / ko‘chirish (Transfer)"
+          className="border-2 border-emerald-500/30 dark:border-emerald-600/30 bg-gradient-to-br from-emerald-50/20 via-white to-teal-50/20 dark:from-emerald-950/15 dark:via-gray-900 dark:to-teal-950/15"
+        >
+          <div className="space-y-4">
+            {groupTransferSuccess && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2 border border-emerald-200 dark:border-emerald-800 animate-fade-in">
+                <CheckCircle className="w-4 h-4 shrink-0 text-emerald-600" />
+                <span>{groupTransferSuccess}</span>
+              </div>
+            )}
+
+            {studentGroup ? (
+              <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-emerald-200 dark:border-emerald-800/80 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 shadow-2xs">
+                      <GraduationCap className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                        Joriy o‘quv guruhi
+                      </div>
+                      <div className="text-base sm:text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2 flex-wrap">
+                        <span>«{studentGroup.name}»</span>
+                        {studentGroup.room && (
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700">
+                            🚪 {studentGroup.room}-xona
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/${currentUserRole}/users/edit/${targetUser?.id || resolvedTargetId}`)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                    title="To‘liq tahrirlash sahifasida ko‘chirish va to‘lovlarni sozlash"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>To‘liq tahrirlash</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Kurs / Fan</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100">
+                      {studentGroup.courseName || studentGroup.course_name || 'Fan'}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Asosiy Ustoz</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100">
+                      {studentGroup.teacherName || studentGroup.teacher_name || studentGroup.primaryTeacher?.fullName || 'Noma‘lum'}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Guruh sig‘imi</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      {studentGroup.enrolled_count || studentGroup.studentCount || 0} / {studentGroup.capacity || 20} ta
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Oylik to‘lov</span>
+                    <span className="font-black text-gray-900 dark:text-gray-100">
+                      {(studentGroup.monthly_price || studentGroup.price || 500000).toLocaleString()} so‘m
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                <div className="flex-1">
+                  <span className="font-bold block text-sm mb-0.5">Hozircha guruh biriktirilmagan (Kutish zalida)</span>
+                  <span>Ushbu o‘quvchi hali biron bir o‘quv guruhiga kiritilmagan. Quyidagi ro‘yxatdan guruh tanlab uni biriktirib qo‘yishingiz mumkin.</span>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Group Transfer / Enrollment Selector for Admin & Owner */}
+            {(isOwner || currentUserRole === 'admin') && (
+              <div className="p-4 rounded-2xl bg-gray-50 dark:bg-surface-dark-secondary/70 border border-gray-200 dark:border-gray-700/80 space-y-3">
+                <label className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                  <RefreshCw className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>
+                    {studentGroup
+                      ? "O‘quvchini boshqa guruhga ko‘chirish (Guruhni almashtirish):"
+                      : "O‘quvchini guruhga biriktirish:"}
+                  </span>
+                </label>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-1">
+                    <select
+                      value={selectedNewGroupId}
+                      onChange={(e) => setSelectedNewGroupId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark text-gray-900 dark:text-gray-100 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    >
+                      <option value="">Guruhni tanlang...</option>
+                      {allGroups.map((g) => (
+                        <option key={g.id} value={g.id} disabled={g.id === studentGroup?.id}>
+                          {g.name} — {g.courseName || g.course_name || 'Fan'} ({g.enrolled_count || g.studentCount || 0}/{g.capacity || 20} ta)
+                          {g.id === studentGroup?.id ? ' (Hozirgi guruhi)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="primary"
+                    disabled={!selectedNewGroupId || selectedNewGroupId === studentGroup?.id || isTransferringGroup}
+                    isLoading={isTransferringGroup}
+                    onClick={handleTransferGroup}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs shrink-0 flex items-center justify-center gap-1.5"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                    <span>{studentGroup ? "Guruhga ko‘chirish" : "Guruhga biriktirish"}</span>
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       {/* Tafsilotlar: Edit Details Form (Matches screenshot) */}
       <Card

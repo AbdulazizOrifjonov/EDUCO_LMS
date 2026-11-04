@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,11 +14,17 @@ import {
   ArrowLeft,
   Save,
   Users,
+  Eye,
+  Edit2,
+  Split,
+  Plus,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Badge from '@/components/ui/Badge';
+import GroupSplitModal from '@/components/groups/GroupSplitModal';
 import { toast } from '@/components/ui/Toast';
 import { createCourse, updateCourse, getCourseById, getCourses } from '@/services/courseService';
 import { getCourseCodeSuggestions } from './CourseForm';
@@ -70,6 +76,30 @@ export default function CourseCreatePage() {
   // Teachers assignment (Owner & Admin only)
   const [teachers, setTeachers] = useState([]);
   const [selectedTeacherIds, setSelectedTeacherIds] = useState([]);
+
+  // Linked Groups
+  const [courseGroups, setCourseGroups] = useState([]);
+  const [groupToSplit, setGroupToSplit] = useState(null);
+
+  const refreshCourseGroups = useCallback(async () => {
+    if (!id) return;
+    try {
+      const c = await getCourseById(id);
+      if (c?.groups) {
+        setCourseGroups(c.groups);
+      } else {
+        const allGroups = localStore.getGroups ? localStore.getGroups() : [];
+        const matched = allGroups.filter(
+          (g) =>
+            g.course_id === id ||
+            g.courseId === id ||
+            (g.course_name && c?.name && g.course_name.toLowerCase() === c.name.toLowerCase()) ||
+            (g.name && c?.name && g.name.toLowerCase().startsWith(c.name.toLowerCase()))
+        );
+        setCourseGroups(matched);
+      }
+    } catch (_) {}
+  }, [id]);
 
   const {
     register,
@@ -127,6 +157,7 @@ export default function CourseCreatePage() {
             });
             setSelectedTeacherIds(c.teacher_ids || c.teacherIds || []);
             setIsAutoCode(false);
+            setCourseGroups(c.groups || []);
           }
         })
         .catch(() => {
@@ -495,12 +526,181 @@ export default function CourseCreatePage() {
           )}
         </Card>
 
-        {/* Section 4: Status */}
+        {/* Section 4: Ushbu kursga tegishli o‘quv guruhlari */}
+        {isEditing && (
+          <Card className="p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-brand-navy dark:text-blue-400" />
+                <div>
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>4. Ushbu kursga tegishli o‘quv guruhlari</span>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/50">
+                      {courseGroups.length} ta guruh
+                    </span>
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Ushbu ta‘lim yo‘nalishidagi barcha parallel guruhlar, ularning o‘quvchilari va xonalari
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                icon={Plus}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm"
+                onClick={() =>
+                  navigate(
+                    `/${currentUserRole}/groups/create?courseId=${id}&courseName=${encodeURIComponent(
+                      watchedName || ''
+                    )}`
+                  )
+                }
+              >
+                + Yangi parallel guruh ochish
+              </Button>
+            </div>
+
+            {courseGroups.length === 0 ? (
+              <div className="p-6 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 text-center space-y-2.5">
+                <Users className="w-8 h-8 mx-auto text-gray-400" />
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Ushbu kurs uchun hozircha o‘quv guruhi ochilmagan
+                </p>
+                <p className="text-xs text-gray-500 max-w-md mx-auto">
+                  O‘quvchilarni ro‘yxatdan o‘tkazish va dars jadvalini shakllantirish uchun yangi guruh yarating (Masalan: {watchedName || 'Kurs'} 1.1)
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  icon={Plus}
+                  onClick={() =>
+                    navigate(
+                      `/${currentUserRole}/groups/create?courseId=${id}&courseName=${encodeURIComponent(
+                        watchedName || ''
+                      )}`
+                    )
+                  }
+                >
+                  Birinchi guruhni yaratish
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {courseGroups.map((grp) => {
+                  const studentCount =
+                    (grp.student_ids || grp.students || []).length || grp.enrolled_count || 0;
+                  const capacity = grp.capacity || 35;
+                  const percent = Math.min(100, Math.round((studentCount / capacity) * 100));
+                  const isFull = studentCount >= capacity;
+                  return (
+                    <div
+                      key={grp.id}
+                      className={`p-4 rounded-xl border transition-all space-y-3 ${
+                        isFull
+                          ? 'border-amber-300 dark:border-amber-800/80 bg-amber-50/20 dark:bg-amber-950/10'
+                          : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary hover:border-blue-400/70 dark:hover:border-blue-500/50'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5 flex-wrap">
+                            <span className="truncate">{grp.name}</span>
+                            {grp.code && (
+                              <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-semibold">
+                                {grp.code}
+                              </span>
+                            )}
+                          </h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Ustoz: <strong className="text-gray-700 dark:text-gray-300">{grp.teacher_name || grp.teacherName || 'Biriktirilmagan'}</strong>
+                            {grp.room && (
+                              <span> • Xona: <span className="font-medium text-gray-700 dark:text-gray-300">{grp.room}</span></span>
+                            )}
+                          </p>
+                        </div>
+                        <Badge variant={grp.status === 'active' ? 'success' : 'secondary'} size="xs">
+                          {grp.status === 'active' ? 'Faol' : grp.status || 'Faol'}
+                        </Badge>
+                      </div>
+
+                      {/* Capacity progress */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            <Users className="w-3.5 h-3.5 text-gray-400" />
+                            <span>O‘quvchilar sig‘imi:</span>
+                          </span>
+                          <span className="font-bold text-gray-900 dark:text-white">
+                            {studentCount} / {capacity} ({percent}%)
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              percent >= 100
+                                ? 'bg-rose-500'
+                                : percent >= 75
+                                ? 'bg-amber-500'
+                                : 'bg-emerald-500'
+                            }`}
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-gray-100 dark:border-gray-800/80">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="xs"
+                          icon={Eye}
+                          className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-[11px]"
+                          onClick={() => navigate(`/${currentUserRole}/groups/${grp.id}`)}
+                        >
+                          Ko‘rish
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="xs"
+                          icon={Edit2}
+                          className="text-[11px]"
+                          onClick={() => navigate(`/${currentUserRole}/groups/edit/${grp.id}`)}
+                        >
+                          Tahrirlash
+                        </Button>
+                        {studentCount >= 10 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="xs"
+                            icon={Split}
+                            className="text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 text-[11px]"
+                            title="Guruhni yangi parallel guruhga bo‘lish"
+                            onClick={() => setGroupToSplit(grp)}
+                          >
+                            Bo‘lish
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        )}
+
+        {/* Section 5: Status */}
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-white">
-                Kurs faoliyati (Faol o‘quv kursi)
+                5. Kurs faoliyati (Faol o‘quv kursi)
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {isActive
@@ -543,6 +743,19 @@ export default function CourseCreatePage() {
           </Button>
         </div>
       </form>
+
+      {/* Group Split Modal */}
+      {groupToSplit && (
+        <GroupSplitModal
+          group={groupToSplit}
+          isOpen={!!groupToSplit}
+          onClose={() => setGroupToSplit(null)}
+          onSplitSuccess={() => {
+            setGroupToSplit(null);
+            refreshCourseGroups();
+          }}
+        />
+      )}
     </div>
   );
 }

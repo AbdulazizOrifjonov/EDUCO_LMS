@@ -16,6 +16,7 @@ import {
   Clock,
   Sparkles,
   CheckCircle2,
+  Check,
   AlertCircle,
   Plus,
   BookOpen,
@@ -26,6 +27,8 @@ import {
   Percent,
   Tag,
   BadgeCheck,
+  ArrowRight,
+  RefreshCw,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -74,6 +77,7 @@ export default function UserCreatePage() {
 
   const [groupsList, setGroupsList] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(searchParams.get('groupId') || '');
+  const [originalGroupId, setOriginalGroupId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Teacher direction / Course selection & inline creation
@@ -94,6 +98,7 @@ export default function UserCreatePage() {
 
   // Selected group object and base monthly fee
   const selectedGroupObj = groupsList.find((g) => g.id === selectedGroupId);
+  const originalGroupObj = groupsList.find((g) => g.id === originalGroupId);
   const baseFee = Number(selectedGroupObj?.monthly_price || selectedGroupObj?.price || 500000);
 
   const calculatedEffectivePrice = React.useMemo(() => {
@@ -162,7 +167,7 @@ export default function UserCreatePage() {
 
   const loadGroups = async () => {
     try {
-      const res = await getGroups({ status: 'active', limit: 100 });
+      const res = await getGroups({ status: 'all', limit: 200 });
       let list = res.groups || [];
       if (isTeacher) {
         // Teacher sees ONLY their assigned groups
@@ -252,7 +257,15 @@ export default function UserCreatePage() {
               const { localStore } = await import('@/lib/localStore');
               const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
               const normId = localStore.normalizeUserId(id);
-              targetMem = memberships.find((m) => localStore.normalizeUserId(m.student_id) === normId);
+              targetMem = memberships.find((m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false);
+              if (!targetMem) {
+                targetMem = memberships.find((m) => localStore.normalizeUserId(m.student_id) === normId);
+              }
+              if (!targetMem) {
+                const allGroups = localStore.getGroups ? localStore.getGroups() : [];
+                const foundG = allGroups.find((g) => Array.isArray(g.student_ids) && (g.student_ids.includes(id) || g.student_ids.map(String).includes(String(id))));
+                if (foundG) targetMem = { group_id: foundG.id };
+              }
             } catch (_) {}
 
             const effectiveGroupId =
@@ -263,6 +276,10 @@ export default function UserCreatePage() {
               '';
             if (effectiveGroupId) {
               setSelectedGroupId(effectiveGroupId);
+              setOriginalGroupId(effectiveGroupId);
+            } else {
+              setSelectedGroupId('');
+              setOriginalGroupId('');
             }
 
             // Set pricing & discount state
@@ -399,6 +416,8 @@ export default function UserCreatePage() {
 
       if (isEditing) {
         const selectedCourseObj = coursesList.find((c) => c.id === selectedCourseId);
+        const activeGroupObj = groupsList.find((g) => g.id === selectedGroupId);
+
         await updateUser(id, {
           firstName: data.firstName,
           lastName: data.lastName,
@@ -408,9 +427,10 @@ export default function UserCreatePage() {
           role: data.role,
           isActive: data.isActive,
           password: trimmedPwd || undefined,
-          courseId: selectedCourseId || undefined,
-          subject: selectedCourseObj?.name || undefined,
-          group_id: selectedGroupId || undefined,
+          courseId: activeGroupObj?.course_id || activeGroupObj?.courseId || selectedCourseId || undefined,
+          subject: activeGroupObj?.courseName || activeGroupObj?.course_name || selectedCourseObj?.name || undefined,
+          group_id: selectedGroupId || null,
+          group_ids: selectedGroupId ? [selectedGroupId] : [],
           custom_price: isOwnerOrAdmin && data.role === ROLES.STUDENT ? customPriceVal : undefined,
           discount_percent: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountPercentVal : undefined,
           discount_amount: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountAmountVal : undefined,
@@ -418,17 +438,39 @@ export default function UserCreatePage() {
           discount_reason: isOwnerOrAdmin && data.role === ROLES.STUDENT ? discountReason.trim() : undefined,
         });
 
-        if (data.role === ROLES.STUDENT && selectedGroupId) {
-          try {
-            await enrollStudent(selectedGroupId, id, enrollmentOptions);
-            if (isOwnerOrAdmin) {
-              await updateStudentDiscount(selectedGroupId, id, enrollmentOptions);
+        if (data.role === ROLES.STUDENT) {
+          const groupChanged = originalGroupId !== selectedGroupId;
+          // 1. If previously in an old group and changing, remove from old group
+          if (originalGroupId && groupChanged) {
+            try {
+              const { removeStudent } = await import('@/services/groupService');
+              await removeStudent(originalGroupId, id);
+            } catch (e) {
+              console.warn('Old group remove note:', e);
             }
-          } catch (e) {
-            console.warn('Group update note:', e);
+          }
+
+          // 2. If new group selected
+          if (selectedGroupId && groupChanged) {
+            try {
+              await enrollStudent(selectedGroupId, id, enrollmentOptions);
+              if (isOwnerOrAdmin) {
+                await updateStudentDiscount(selectedGroupId, id, enrollmentOptions);
+              }
+              const newGName = activeGroupObj?.name || 'Yangi guruh';
+              toast.success(`O‘quvchi muvaffaqiyatli «${newGName}» guruhiga o‘tkazildi!`);
+            } catch (e) {
+              console.warn('New group enroll note:', e);
+            }
+          } else if (selectedGroupId && isOwnerOrAdmin) {
+            try {
+              await updateStudentDiscount(selectedGroupId, id, enrollmentOptions);
+            } catch (e) {
+              console.warn('Group discount note:', e);
+            }
           }
         }
-        toast.success('Foydalanuvchi ma‘lumotlari va to‘lov summasi muvaffaqiyatli saqlandi!');
+        toast.success('Foydalanuvchi ma‘lumotlari muvaffaqiyatli saqlandi!');
       } else {
         // If teacher role and an inline course was drafted, auto-create it
         let finalCourseId = selectedCourseId;
@@ -1077,6 +1119,57 @@ export default function UserCreatePage() {
             </div>
 
             <div className="space-y-3">
+              {/* If editing: Prominently show current group details */}
+              {isEditing && (
+                originalGroupObj ? (
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/30 border border-emerald-500/30 dark:border-emerald-800 space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                          <GraduationCap className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                            Joriy biriktirilgan o‘quv guruhi:
+                          </div>
+                          <div className="text-sm font-black text-emerald-950 dark:text-emerald-100 flex items-center gap-2">
+                            <span>«{originalGroupObj.name}»</span>
+                            {originalGroupObj.room && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/90 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-emerald-300 dark:border-emerald-700 shadow-2xs">
+                                🚪 {originalGroupObj.room}-xona
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-xs text-emerald-800 dark:text-emerald-300 font-medium">
+                        Kurs: <strong>{originalGroupObj.courseName || originalGroupObj.course_name || 'Fan'}</strong> • Ustoz: <strong>{originalGroupObj.teacherName || originalGroupObj.teacher_name || 'Noma‘lum'}</strong> • Sig‘im: {originalGroupObj.enrolled_count || originalGroupObj.studentCount || 0}/{originalGroupObj.capacity || 20} ta
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2.5">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Ushbu o‘quvchi hozircha hech qanday guruhga biriktirilmagan (Kutish zalida). Quyidan guruh tanlab biriktirishingiz mumkin.</span>
+                  </div>
+                )
+              )}
+
+              {/* Group Transfer Live Notification Banner */}
+              {isEditing && originalGroupId && selectedGroupId && originalGroupId !== selectedGroupId && (
+                <div className="p-3.5 rounded-2xl bg-blue-500/15 dark:bg-blue-950/50 border-2 border-blue-500 dark:border-blue-600 text-xs text-blue-950 dark:text-blue-100 flex items-center justify-between flex-wrap gap-2 shadow-xs animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 animate-spin" />
+                    <span>
+                      Guruhni o‘zgartirish: <strong>«{originalGroupObj?.name || 'Oldingi guruh'}»</strong> ➔ <strong className="text-emerald-600 dark:text-emerald-400">«{selectedGroupObj?.name || 'Yangi guruh'}»</strong> guruhiga ko‘chirilmoqda.
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-600 text-white shadow-xs">
+                    Saqlash tugmasini bosing
+                  </span>
+                </div>
+              )}
+
               {groupsList.length === 0 && (
                 <div className="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-xs text-blue-900 dark:text-blue-200 space-y-2">
                   <div className="flex items-center gap-2 font-bold">
@@ -1100,7 +1193,7 @@ export default function UserCreatePage() {
               )}
 
               <Select
-                label={isTeacher ? "Sizning o‘quv guruhingiz" : "O‘quv guruhini tanlang"}
+                label={isEditing ? "O‘quvchini boshqa guruhga ko‘chirish (Transfer)" : (isTeacher ? "Sizning o‘quv guruhingiz" : "O‘quv guruhini tanlang")}
                 value={selectedGroupId}
                 onChange={(e) => setSelectedGroupId(e.target.value)}
                 placeholder="Guruhsiz (Keyinroq biriktirish)"
