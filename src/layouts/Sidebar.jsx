@@ -465,7 +465,7 @@ export default function Sidebar({
         </nav>
 
         {/* Footer Section */}
-        <div className="border-t border-white/10 p-3 space-y-2 dark:border-gray-800">
+        <div className="border-t border-white/10 p-3 space-y-2 dark:border-gray-800 shrink-0">
           {/* Controls: Language & Theme */}
           <div
             className={`flex items-center gap-2 ${

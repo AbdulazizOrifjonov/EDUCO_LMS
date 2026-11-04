@@ -248,14 +248,16 @@ export default function GroupManagement() {
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-gray-900 dark:text-gray-100">{row.name}</span>
                 {row.room && (
-                  <span className="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-surface-dark-tertiary text-gray-600 dark:text-gray-300">
-                    {row.room}
+                  <span className="text-[11px] px-2 py-0.5 rounded-md font-medium bg-gray-100 dark:bg-surface-dark-tertiary text-gray-600 dark:text-gray-300">
+                    🚪 {row.room}-xona
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {row.courseName}
-              </p>
+              {row.courseName && row.courseName.trim().toLowerCase() !== row.name.trim().toLowerCase() && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  {row.courseName}
+                </p>
+              )}
             </div>
           </div>
         ),
@@ -380,19 +382,17 @@ export default function GroupManagement() {
                 >
                   <Edit2 className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`!p-1.5 h-8 w-8 rounded-lg ${
-                    row.studentCount >= (row.capacity || 20)
-                      ? 'text-red-600 hover:bg-red-500/10'
-                      : 'text-amber-600 hover:bg-amber-500/10'
-                  }`}
-                  title="Guruhni 2-guruhga ajratish (Split)"
-                  onClick={() => setSplitModalGroup(row)}
-                >
-                  <Split className="w-4 h-4" />
-                </Button>
+                {row.studentCount >= (row.capacity || 20) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="!p-1.5 h-8 w-8 text-red-600 hover:bg-red-500/10 rounded-lg"
+                    title="Guruhni 2-guruhga ajratish (Split)"
+                    onClick={() => setSplitModalGroup(row)}
+                  >
+                    <Split className="w-4 h-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -465,9 +465,44 @@ export default function GroupManagement() {
         </div>
       </div>
 
-      {/* Filters Bar */}
+      {/* Overloaded Groups Warning Banner (Separated page-level alert) */}
+      {overflowGroups.length > 0 && !isTeacher && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-500/10 via-rose-500/10 to-amber-500/10 dark:from-red-950/40 dark:via-rose-950/30 dark:to-amber-950/30 border border-red-200 dark:border-red-800/80 shadow-xs space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black shrink-0 shadow-sm">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-black text-red-950 dark:text-red-200 uppercase tracking-wide">
+                  {overflowGroups.length} ta o‘quv guruhida talabalar sig‘imi to‘lib ketgan!
+                </h3>
+                <p className="text-xs text-red-700 dark:text-red-300 mt-0.5">
+                  Dars sifatini yuqori ushlab turish uchun guruhlarni 2 ta parallel guruhga (masalan: ENG-1.1 va ENG-1.2) ajratish tavsiya etiladi.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {overflowGroups.map((og) => (
+              <button
+                key={og.id}
+                type="button"
+                onClick={() => setSplitModalGroup(og)}
+                className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-xs transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              >
+                <Split className="w-3.5 h-3.5" />
+                <span>«{og.name}» ({og.studentCount || og.enrolled_count || 0} ta) ni 2-guruhga ajratish</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main Groups Card: Filters + Table */}
       <Card noPadding>
-        <div className={`p-4 grid grid-cols-1 sm:grid-cols-2 ${isTeacher ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-3 items-center`}>
+        <div className={`p-4 border-b border-gray-100 dark:border-gray-800/80 grid grid-cols-1 sm:grid-cols-2 ${isTeacher ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-3 items-center`}>
           <Input
             icon={Search}
             size="md"
@@ -547,41 +582,6 @@ export default function GroupManagement() {
           />
         </div>
 
-        {/* Overloaded Groups Warning Banner */}
-        {overflowGroups.length > 0 && !isTeacher && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-50 via-rose-50 to-amber-50 dark:from-red-950/40 dark:via-rose-950/30 dark:to-amber-950/30 border-2 border-red-300 dark:border-red-800 shadow-xs space-y-3">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center font-black shrink-0 shadow-sm">
-                  <AlertTriangle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-black text-red-950 dark:text-red-200 uppercase tracking-wide">
-                    {overflowGroups.length} ta o‘quv guruhida talabalar sig‘imi to‘lib ketgan!
-                  </h3>
-                  <p className="text-xs text-red-700 dark:text-red-300">
-                    Dars sifatini yuqori ushlab turish uchun guruhlarni 2 ta parallel guruhga (masalan: ENG-1.1 va ENG-1.2) ajratish tavsiya etiladi.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              {overflowGroups.map((og) => (
-                <button
-                  key={og.id}
-                  type="button"
-                  onClick={() => setSplitModalGroup(og)}
-                  className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black shadow-xs transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Split className="w-3.5 h-3.5" />
-                  <span>«{og.name}» ({og.studentCount || og.enrolled_count || 0} ta) ni 2-guruhga ajratish</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Desktop Table View */}
         <div className="hidden md:block">
           <Table
@@ -589,6 +589,7 @@ export default function GroupManagement() {
             data={groups}
             isLoading={loading}
             emptyMessage={t('groups.noGroups', 'No study groups match your criteria.')}
+            className="border-0 rounded-none"
           />
         </div>
 
