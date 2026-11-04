@@ -366,9 +366,7 @@ export default function RemindersPage() {
                 <span className="text-xs font-bold uppercase text-amber-700 dark:text-amber-400">
                   Bugun bajarish
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 flex items-center justify-center">
-                  <Clock className="w-4 h-4 animate-pulse" />
-                </div>
+                <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 bg-transparent" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
                 {stats.todayDue}
@@ -389,9 +387,7 @@ export default function RemindersPage() {
                 <span className="text-xs font-bold uppercase text-sky-700 dark:text-sky-400 flex items-center gap-1">
                   <span>🌐 Veb-sayt arizalari</span>
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-                  <Globe className="w-4 h-4" />
-                </div>
+                <Globe className="w-5 h-5 text-sky-600 dark:text-sky-400 shrink-0 bg-transparent" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2 flex items-baseline gap-2">
                 <span>{stats.websiteLeads}</span>
@@ -417,9 +413,7 @@ export default function RemindersPage() {
                 <span className="text-xs font-bold uppercase text-purple-700 dark:text-purple-400">
                   Sinov darslari
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center">
-                  <GraduationCap className="w-4 h-4" />
-                </div>
+                <GraduationCap className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0 bg-transparent" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
                 {stats.trials}
@@ -440,9 +434,7 @@ export default function RemindersPage() {
                 <span className="text-xs font-bold uppercase text-blue-700 dark:text-blue-400">
                   Kutilayotganlar
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center">
-                  <CalendarDays className="w-4 h-4" />
-                </div>
+                <CalendarDays className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 bg-transparent" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
                 {reminders.filter((r) => r.status === 'pending' && r.due_date > todayStr).length}
@@ -463,9 +455,7 @@ export default function RemindersPage() {
                 <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-400">
                   Bajarilganlar
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4" />
-                </div>
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 bg-transparent" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mt-2">
                 {stats.completed}
