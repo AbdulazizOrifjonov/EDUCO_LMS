@@ -182,7 +182,18 @@ export async function getGroups({
   const from = (page - 1) * limit;
   const allSchedules = localStore.getSchedules ? localStore.getSchedules() : [];
   const paginated = list.slice(from, from + limit).map((g) => {
-    const grpSchedules = allSchedules.filter((s) => s.group_id === g.id);
+    let grpSchedules = allSchedules.filter((s) => s.group_id === g.id || s.groups?.id === g.id);
+    if (!grpSchedules.length) {
+      const gCName = (g.course_name || g.courseName || '').toLowerCase().trim();
+      const gTName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').toLowerCase().trim();
+      grpSchedules = allSchedules.filter((s) => {
+        const sCName = (s.courseName || s.subject || s.groups?.courses?.name || '').toLowerCase().trim();
+        const sTName = (s.teacher_name || s.teacherName || '').toLowerCase().trim();
+        const courseMatch = (g.course_id && s.course_id === g.course_id) || (gCName && sCName && (gCName.includes(sCName) || sCName.includes(gCName)));
+        const teacherMatch = (g.teacher_id && s.teacher_id === g.teacher_id) || (gTName && sTName && (gTName.includes(sTName) || sTName.includes(gTName)));
+        return courseMatch && teacherMatch;
+      });
+    }
     return {
       ...g,
       avatar_url: g.avatar_url || g.image_url || null,
@@ -277,7 +288,14 @@ export async function getGroupById(id) {
       teachers: allUsers.filter((u) => u.role === 'teacher').slice(0, 1),
       studentCount: enrichedStudents.length,
       capacity: found.capacity || 20,
-      schedules: localStore.getSchedules ? localStore.getSchedules().filter((s) => s.group_id === id) : [],
+      schedules: localStore.getSchedules
+        ? localStore.getSchedules().filter((s) => {
+            if (s.group_id === id || s.groups?.id === id) return true;
+            const matchC = found.course_id && s.course_id === found.course_id;
+            const matchT = found.teacher_id && s.teacher_id === found.teacher_id;
+            return matchC && matchT;
+          })
+        : [],
     };
   }
   throw new Error('Group not found');

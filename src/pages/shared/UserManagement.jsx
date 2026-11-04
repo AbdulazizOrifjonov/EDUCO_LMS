@@ -874,7 +874,7 @@ export default function UserManagement() {
                 return (
                   <div
                     key={row.id}
-                    className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary p-4 shadow-sm space-y-3"
+                    className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary p-4 shadow-sm space-y-3 overflow-hidden w-full max-w-full"
                   >
                     {/* Header: Avatar, Name, Role, Status */}
                     <div className="flex items-start justify-between gap-2.5">

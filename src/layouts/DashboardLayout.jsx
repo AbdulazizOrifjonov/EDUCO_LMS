@@ -21,7 +21,9 @@ import {
   X,
   Download,
   Globe,
+  RefreshCw,
 } from 'lucide-react';
+import { localStore } from '@/lib/localStore';
 import InstallAppModal from '@/components/InstallAppModal';
 import Sidebar from './Sidebar';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -338,6 +340,23 @@ export default function DashboardLayout({
     return translated !== navKey
       ? translated
       : relevantSegment.charAt(0).toUpperCase() + relevantSegment.slice(1);
+  };
+
+  const [isRefreshingSync, setIsRefreshingSync] = useState(false);
+
+  const handleFullSystemRefresh = async () => {
+    setIsRefreshingSync(true);
+    toast.info("Tizim barcha qurilmalar bilan yangilanmoqda...");
+    try {
+      await localStore.forceRefreshFromServer();
+      toast.success("Tizim ma'lumotlari muvaffaqiyatli yangilandi!");
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (e) {
+      toast.error("Yangilashda xatolik yuz berdi");
+      setIsRefreshingSync(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -857,6 +876,23 @@ export default function DashboardLayout({
                     >
                       <Download className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       <span>Ilovani o‘rnatish (PC / iPhone)</span>
+                    </button>
+                  </div>
+
+                  {/* Sahifani to'liq yangilash (Sinxronizatsiya) */}
+                  <div className="border-t border-gray-100 py-1 dark:border-gray-800">
+                    <button
+                      type="button"
+                      disabled={isRefreshingSync}
+                      onClick={handleFullSystemRefresh}
+                      className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50/70 dark:bg-emerald-950/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors text-left cursor-pointer disabled:opacity-50"
+                      title="Barcha ma'lumotlarni serverdan qayta yuklash va barcha qurilmalar bilan to'liq sinxronlash"
+                    >
+                      <RefreshCw className={`h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 ${isRefreshingSync ? 'animate-spin' : ''}`} />
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-xs">{isRefreshingSync ? 'Yangilanmoqda...' : 'Sahifani yangilash'}</div>
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400 font-normal truncate">Barcha ma‘lumotlarni sinxronlash</div>
+                      </div>
                     </button>
                   </div>
 

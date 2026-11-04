@@ -40,10 +40,12 @@ export default function Dropdown({
         const margin = 12;
 
         let shiftX = 0;
-        if (rect.left < margin) {
-          shiftX = margin - rect.left;
-        } else if (rect.right > viewportWidth - margin) {
+        if (rect.right > viewportWidth - margin) {
           shiftX = (viewportWidth - margin) - rect.right;
+        }
+        // Clamping safety: Never allow shiftX to push the left side past margin!
+        if (rect.left + shiftX < margin) {
+          shiftX = margin - rect.left;
         }
 
         if (shiftX !== 0) {

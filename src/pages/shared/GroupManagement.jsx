@@ -320,17 +320,39 @@ export default function GroupManagement() {
         },
       },
       {
-        header: t('nav.schedule', 'Lessons'),
+        header: t('nav.schedule', 'Dars jadvali'),
         key: 'schedule',
-        render: (row) => (
-          <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-            {row.schedule
-              ? row.schedule
-              : row.schedules?.length
-              ? `${row.schedules.length} ${t('schedule.perWeek', '/ week')}`
-              : t('schedule.noSchedule', 'No timetable')}
-          </span>
-        ),
+        render: (row) => {
+          if (row.schedule) {
+            return (
+              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md border border-blue-200/50">
+                {row.schedule}
+              </span>
+            );
+          }
+          if (row.schedules && row.schedules.length > 0) {
+            const first = row.schedules[0];
+            const timeStr = first.start_time && first.end_time ? `${first.start_time.slice(0, 5)} - ${first.end_time.slice(0, 5)}` : '';
+            return (
+              <div className="text-xs space-y-0.5">
+                <span className="inline-flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-500/20 whitespace-nowrap">
+                  <span>📅</span>
+                  <span>{row.schedules.length} ta dars / hafta</span>
+                </span>
+                {timeStr && (
+                  <span className="block text-[11px] text-gray-500 dark:text-gray-400 font-mono">
+                    {timeStr} {first.room ? `(${first.room})` : ''}
+                  </span>
+                )}
+              </div>
+            );
+          }
+          return (
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+              {t('schedule.noSchedule', 'Dars jadvali tuzilmagan')}
+            </span>
+          );
+        },
       },
       {
         header: t('courses.fee', 'Oylik to‘lov'),

@@ -251,6 +251,7 @@ export default {
       if (request.method === 'GET') {
         const rawClientETag = request.headers.get('if-none-match') || '';
         const clientETag = rawClientETag.replace(/^W\//, '').replace(/"/g, '').trim();
+        const force = url.searchParams.get('force') === '1';
 
         let dbMaxUpdated = null;
         let dbKeyCount = 0;
@@ -272,7 +273,7 @@ export default {
           : `mem-${currentStoreVersion}-${lastStoreUpdatedAt}`;
         const currentETag = `"${currentETagValue}"`;
 
-        if (clientETag && clientETag === currentETagValue) {
+        if (!force && clientETag && clientETag === currentETagValue) {
           return new Response(null, {
             status: 304,
             headers: {

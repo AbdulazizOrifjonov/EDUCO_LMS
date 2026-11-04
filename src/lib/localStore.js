@@ -279,6 +279,41 @@ class LocalStore {
         window.localStorage.setItem('educo_deleted_ids', JSON.stringify(Array.from(set)));
       }
     } catch (_) {}
+    this.purgeDeletedRecords();
+  }
+
+  purgeDeletedRecords() {
+    const deletedIds = this._getDeletedIds();
+    if (!deletedIds || deletedIds.size === 0) return;
+    const keysToClean = [
+      STORAGE_KEYS.USERS,
+      STORAGE_KEYS.GROUPS,
+      STORAGE_KEYS.COURSES,
+      STORAGE_KEYS.LESSON_SCHEDULES,
+      STORAGE_KEYS.MEMBERSHIPS,
+      STORAGE_KEYS.PAYMENTS,
+      STORAGE_KEYS.MATERIALS,
+      STORAGE_KEYS.REMINDERS,
+      STORAGE_KEYS.ATTENDANCE,
+    ];
+    keysToClean.forEach((k) => {
+      const list = this.getItem(k, null);
+      if (Array.isArray(list)) {
+        const cleaned = list.filter((item) => {
+          if (!item || typeof item !== 'object') return false;
+          const id = String(item.id || item.username || '');
+          return !id || !deletedIds.has(id);
+        });
+        if (cleaned.length !== list.length) {
+          this.memoryStore[k] = cleaned;
+          try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+              window.localStorage.setItem(k, JSON.stringify(cleaned));
+            }
+          } catch (_) {}
+        }
+      }
+    });
   }
 
   clear() {
@@ -532,6 +567,16 @@ class LocalStore {
   applyIncomingData(serverData) {
     if (!serverData || typeof serverData !== 'object') return;
 
+    if (Array.isArray(serverData._deleted_ids)) {
+      const set = this._getDeletedIds();
+      serverData._deleted_ids.forEach((id) => set.add(String(id)));
+      try {
+        if (typeof window !== 'undefined' && window.localStorage?.setItem) {
+          window.localStorage.setItem('educo_deleted_ids', JSON.stringify(Array.from(set)));
+        }
+      } catch (_) {}
+    }
+
     let hasChatChanges = false;
     let hasNotifChanges = false;
     let hasGeneralChanges = false;
@@ -570,7 +615,7 @@ class LocalStore {
       if (!hasLocalPendingWrites) {
         const cleanServerList = serverVal.filter((sItem) => {
           if (!sItem || typeof sItem !== 'object') return false;
-          const itemId = String(sItem.id || '');
+          const itemId = String(sItem.id || sItem.username || '');
           return !itemId || !deletedIds.has(itemId);
         });
 
@@ -629,7 +674,7 @@ class LocalStore {
       const mergedMap = new Map();
       serverVal.forEach((sItem) => {
         if (!sItem || typeof sItem !== 'object') return;
-        const itemId = String(sItem.id || '');
+        const itemId = String(sItem.id || sItem.username || '');
         if (itemId && deletedIds.has(itemId)) return;
         if (itemId) mergedMap.set(itemId, sItem);
       });
@@ -637,12 +682,15 @@ class LocalStore {
       let localHasItemsNotInServer = false;
       localVal.forEach((lItem) => {
         if (!lItem || typeof lItem !== 'object') return;
-        const itemId = String(lItem.id || '');
+        const itemId = String(lItem.id || lItem.username || '');
         if (!itemId || deletedIds.has(itemId)) return;
 
         if (!mergedMap.has(itemId)) {
-          mergedMap.set(itemId, lItem);
-          localHasItemsNotInServer = true;
+          const createdTs = new Date(lItem.created_at || 0).getTime();
+          if (Date.now() - createdTs < 60000) {
+            mergedMap.set(itemId, lItem);
+            localHasItemsNotInServer = true;
+          }
         } else {
           const sItem = mergedMap.get(itemId);
           const localTs = new Date(lItem.updated_at || lItem.created_at || 0).getTime();
@@ -713,6 +761,8 @@ class LocalStore {
       this.pushToServer(pushBackPayload).catch(() => {});
     }
 
+    this.purgeDeletedRecords();
+
     if (hasGeneralChanges || hasChatChanges || hasNotifChanges) {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
         window.dispatchEvent(
@@ -729,13 +779,13 @@ class LocalStore {
     }
   }
 
-  async syncWithServer() {
+  async syncWithServer(force = false) {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
     // Skip if offline
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
 
-    if (this._isSyncing) {
+    if (!force && this._isSyncing) {
       if (Date.now() - (this._syncStartTime || 0) > 4000) {
         this._isSyncing = false;
       } else {
@@ -750,13 +800,13 @@ class LocalStore {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
       };
-      if (this._lastServerETag) {
+      if (!force && this._lastServerETag) {
         headers['If-None-Match'] = this._lastServerETag;
       }
-      // Always bust local browser HTTP cache while allowing server-side ETag 304 check
-      const syncUrl = `/api/sync-store?t=${Date.now()}`;
+      // Always bust local browser HTTP cache while allowing server-side ETag 304 check (unless force=true)
+      const syncUrl = `/api/sync-store?t=${Date.now()}${force ? '&force=1' : ''}`;
       const res = await fetch(syncUrl, { headers });
-      if (res.status === 304) {
+      if (!force && res.status === 304) {
         // Data on server is unchanged - ultra fast 0-byte 1-second heartbeat!
         this._isSyncing = false;
         return;
@@ -783,10 +833,34 @@ class LocalStore {
         return;
       }
 
+      if (force && this._pendingOutbox) {
+        this._pendingOutbox.clear();
+      }
+
       this.applyIncomingData(serverData);
+      this.purgeDeletedRecords();
     } catch (e) {
     } finally {
       this._isSyncing = false;
+    }
+  }
+
+  async forceRefreshFromServer() {
+    try {
+      if (this._pendingOutbox) this._pendingOutbox.clear();
+      this._lastServerETag = null;
+      await this.syncWithServer(true);
+      this.purgeDeletedRecords();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { full: true } }));
+        window.dispatchEvent(new CustomEvent('educo-users-update'));
+        window.dispatchEvent(new CustomEvent('educo-website-update'));
+        window.dispatchEvent(new CustomEvent('educo-store-update'));
+      }
+      return true;
+    } catch (e) {
+      console.warn('forceRefreshFromServer exception:', e);
+      return false;
     }
   }
 
@@ -794,10 +868,17 @@ class LocalStore {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
     try {
+      if (payload?.deletedId) {
+        this._recordDeletedId(payload.deletedId);
+      }
+      const fullPayload = {
+        ...payload,
+        _deleted_ids: Array.from(this._getDeletedIds()),
+      };
       const res = await fetch('/api/sync-store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(fullPayload),
       });
       if (res.ok) {
         const etag = res.headers.get('ETag') || res.headers.get('etag');
@@ -1018,9 +1099,9 @@ class LocalStore {
   deleteCourse(id) {
     this._recordDeletedId(id);
     const list = this.getCourses().filter((c) => c.id !== id);
-    this.setItem(STORAGE_KEYS.COURSES, list);
+    this.setItem(STORAGE_KEYS.COURSES, list, id);
     this.broadcastToCloud(STORAGE_KEYS.COURSES, list, id);
-    this.pushToServer({ [STORAGE_KEYS.COURSES]: list }).catch(() => {});
+    this.pushToServer({ [STORAGE_KEYS.COURSES]: list, deletedId: id }).catch(() => {});
     try {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
         window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.COURSES } }));
@@ -1294,13 +1375,14 @@ class LocalStore {
     }
     this._recordDeletedId(id);
     const list = this.getUsers().filter((u) => u.id !== id);
-    this.setItem(STORAGE_KEYS.USERS, list);
+    this.setItem(STORAGE_KEYS.USERS, list, id);
     this.broadcastToCloud(STORAGE_KEYS.USERS, list, id);
     const memberships = this.getMemberships().filter((m) => m.user_id !== id);
     this.setItem(STORAGE_KEYS.MEMBERSHIPS, memberships);
     this.pushToServer({
       [STORAGE_KEYS.USERS]: list,
       [STORAGE_KEYS.MEMBERSHIPS]: memberships,
+      deletedId: id,
     }).catch(() => {});
     try {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
@@ -1502,9 +1584,9 @@ class LocalStore {
   deleteGroup(id) {
     this._recordDeletedId(id);
     const list = this.getGroups().filter((g) => g.id !== id);
-    this.setItem(STORAGE_KEYS.GROUPS, list);
+    this.setItem(STORAGE_KEYS.GROUPS, list, id);
     this.broadcastToCloud(STORAGE_KEYS.GROUPS, list, id);
-    this.pushToServer({ [STORAGE_KEYS.GROUPS]: list }).catch(() => {});
+    this.pushToServer({ [STORAGE_KEYS.GROUPS]: list, deletedId: id }).catch(() => {});
     try {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
         window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.GROUPS } }));
@@ -1670,9 +1752,9 @@ class LocalStore {
   deleteSchedule(id) {
     this._recordDeletedId(id);
     const list = this.getItem(STORAGE_KEYS.LESSON_SCHEDULES, INITIAL_SCHEDULES).filter((s) => s.id !== id);
-    this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, list);
+    this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, list, id);
     this.broadcastToCloud(STORAGE_KEYS.LESSON_SCHEDULES, list, id);
-    this.pushToServer({ [STORAGE_KEYS.LESSON_SCHEDULES]: list }).catch(() => {});
+    this.pushToServer({ [STORAGE_KEYS.LESSON_SCHEDULES]: list, deletedId: id }).catch(() => {});
     try {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('educo-data-sync'));

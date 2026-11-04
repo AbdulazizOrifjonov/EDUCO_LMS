@@ -12,6 +12,7 @@ import {
   X,
   Sparkles,
   Camera,
+  RefreshCw,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import useTheme from '@/hooks/useTheme';
@@ -135,6 +136,20 @@ export default function Sidebar({
       return 0;
     }
   }, [userRole]);
+
+  const [isRefreshingSync, setIsRefreshingSync] = useState(false);
+
+  const handleFullSystemRefresh = async () => {
+    setIsRefreshingSync(true);
+    try {
+      await localStore.forceRefreshFromServer();
+      setTimeout(() => {
+        window.location.reload();
+      }, 400);
+    } catch (_) {
+      setIsRefreshingSync(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -640,6 +655,20 @@ export default function Sidebar({
               </div>
             )}
 
+            {/* Full Sync & Refresh Button */}
+            {(!collapsed || mobileOpen) && (
+              <button
+                type="button"
+                onClick={handleFullSystemRefresh}
+                disabled={isRefreshingSync}
+                className="rounded-lg p-1.5 text-white/70 transition-colors hover:bg-white/10 hover:text-emerald-300 disabled:opacity-50"
+                title="Sahifani yangilash (Barcha ma'lumotlarni sinxronlash)"
+                aria-label="Sahifani yangilash"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshingSync ? 'animate-spin text-emerald-300' : ''}`} />
+              </button>
+            )}
+
             {/* Logout Button */}
             {(!collapsed || mobileOpen) && (
               <button
@@ -654,17 +683,29 @@ export default function Sidebar({
             )}
           </div>
 
-          {/* Collapsed view standalone logout */}
+          {/* Collapsed view standalone buttons */}
           {collapsed && !mobileOpen && (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex w-full items-center justify-center rounded-xl p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-red-300"
-              title={t('common.logout', 'Sign Out')}
-              aria-label={t('common.logout', 'Logout')}
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={handleFullSystemRefresh}
+                disabled={isRefreshingSync}
+                className="flex w-full items-center justify-center rounded-xl p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-emerald-300 disabled:opacity-50"
+                title="Sahifani yangilash (Barcha ma'lumotlarni sinxronlash)"
+                aria-label="Sahifani yangilash"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshingSync ? 'animate-spin text-emerald-300' : ''}`} />
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center justify-center rounded-xl p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-red-300"
+                title={t('common.logout', 'Sign Out')}
+                aria-label={t('common.logout', 'Logout')}
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           )}
         </div>
       </aside>

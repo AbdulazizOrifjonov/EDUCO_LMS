@@ -157,7 +157,19 @@ export default function CourseCreatePage() {
             });
             setSelectedTeacherIds(c.teacher_ids || c.teacherIds || []);
             setIsAutoCode(false);
-            setCourseGroups(c.groups || []);
+            if (c.groups && c.groups.length > 0) {
+              setCourseGroups(c.groups);
+            } else {
+              const allG = localStore.getGroups ? localStore.getGroups() : [];
+              const matched = allG.filter(
+                (g) =>
+                  g.course_id === id ||
+                  g.courseId === id ||
+                  (g.course_name && c?.name && g.course_name.toLowerCase() === c.name.toLowerCase()) ||
+                  (g.name && c?.name && g.name.toLowerCase().startsWith(c.name.toLowerCase()))
+              );
+              setCourseGroups(matched);
+            }
           }
         })
         .catch(() => {
