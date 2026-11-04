@@ -78,7 +78,7 @@ export default function UserManagement() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const pageSize = 10;
+  const pageSize = 50;
 
   // Synchronize with global navbar search bar
   useEffect(() => {
@@ -359,10 +359,10 @@ export default function UserManagement() {
         return (
           <div
             onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
-            className="flex items-center gap-3 whitespace-nowrap cursor-pointer group"
+            className="flex items-center gap-2.5 whitespace-nowrap cursor-pointer group"
             title={t('users.viewProfile', 'Foydalanuvchi profilini ko‘rish va sozlash')}
           >
-            <div className={`w-9 h-9 rounded-full overflow-hidden bg-gradient-to-tr ${grad} text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm ring-2 ring-gray-100 dark:ring-gray-800 group-hover:scale-110 transition-transform`}>
+            <div className={`w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr ${grad} text-white flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-sm ring-2 ring-gray-100 dark:ring-gray-800 group-hover:scale-105 transition-transform`}>
               {avatarSrc ? (
                 <img
                   src={avatarSrc}
@@ -373,7 +373,12 @@ export default function UserManagement() {
                 initials
               )}
             </div>
-            <p className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-emerald-400 group-hover:underline transition-colors">{row.fullName}</p>
+            <p
+              className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-emerald-400 group-hover:underline transition-colors max-w-[140px] md:max-w-[170px] lg:max-w-[210px] truncate"
+              title={row.fullName}
+            >
+              {row.fullName}
+            </p>
           </div>
         );
       },
@@ -381,12 +386,12 @@ export default function UserManagement() {
     {
       header: t('users.role', 'Role'),
       key: 'role',
-      className: 'whitespace-nowrap',
-      cellClassName: 'whitespace-nowrap',
+      className: 'whitespace-nowrap w-[90px]',
+      cellClassName: 'whitespace-nowrap w-[90px]',
       render: (row) => (
         <RoleBadge
           role={row.role}
-          size="md"
+          size="sm"
           onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
           title={t('users.viewProfile', 'Foydalanuvchi profilini ochish')}
         />
@@ -401,6 +406,11 @@ export default function UserManagement() {
         if (row.role === ROLES.STUDENT) {
           const studentGroup = getStudentGroup(row);
           if (studentGroup) {
+            const rawName = studentGroup.name || '';
+            // Remove redundant parentheses like (MAT-1.1) to keep the label clean and short
+            const cleanName = rawName.replace(/\s*\([^)]*\)/g, '').trim() || rawName;
+            const roomNumber = (studentGroup.room || '').replace(/^xona\s*/i, '').trim();
+
             return (
               <button
                 type="button"
@@ -408,19 +418,19 @@ export default function UserManagement() {
                   e.stopPropagation();
                   navigate(`/${currentUserRole}/users/edit/${row.id}`);
                 }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all group/gbtn cursor-pointer shadow-2xs"
-                title="Guruhni o‘zgartirish yoki boshqa guruhga ko‘chirish uchun bosing"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all group/gbtn cursor-pointer shadow-2xs max-w-[180px]"
+                title={`${rawName}${studentGroup.room ? ` • Xona: ${studentGroup.room}` : ''} (Guruhni tahrirlash uchun bosing)`}
               >
                 <GraduationCap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span className="font-semibold underline decoration-dotted underline-offset-2">
-                  {studentGroup.name}
+                <span className="font-semibold underline decoration-dotted underline-offset-2 truncate" title={rawName}>
+                  {cleanName}
                 </span>
-                {studentGroup.room && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-emerald-300 dark:border-emerald-700 font-mono">
-                    🚪 {studentGroup.room}
+                {roomNumber && (
+                  <span className="text-[10px] px-1 py-0.2 rounded bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-emerald-300 dark:border-emerald-700 font-mono shrink-0">
+                    🚪 {roomNumber}
                   </span>
                 )}
-                <Edit2 className="w-2.5 h-2.5 opacity-50 group-hover/gbtn:opacity-100 transition-opacity" />
+                <Edit2 className="w-2.5 h-2.5 opacity-50 group-hover/gbtn:opacity-100 transition-opacity shrink-0" />
               </button>
             );
           }
@@ -431,11 +441,11 @@ export default function UserManagement() {
                 e.stopPropagation();
                 navigate(`/${currentUserRole}/users/edit/${row.id}`);
               }}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xl text-[11px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25 hover:bg-amber-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25 hover:bg-amber-500/20 transition-all cursor-pointer"
               title="Guruhga biriktirish uchun bosing"
             >
               <AlertCircle className="w-3 h-3 text-amber-500 shrink-0" />
-              <span>Guruhsiz (Kutish zali)</span>
+              <span>Guruhsiz</span>
             </button>
           );
         }
@@ -443,9 +453,12 @@ export default function UserManagement() {
         if (row.role === ROLES.TEACHER) {
           const subject = row.subject || row.direction;
           return subject ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-medium bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 max-w-[160px]"
+              title={subject}
+            >
               <BookOpen className="w-3 h-3 text-blue-600 dark:text-blue-400 shrink-0" />
-              {subject}
+              <span className="truncate">{subject}</span>
             </span>
           ) : (
             <span className="text-xs text-gray-400">—</span>
@@ -465,22 +478,22 @@ export default function UserManagement() {
         const hasParentPhone = row.role === 'student' && (row.father_phone || row.mother_phone);
 
         return (
-          <div className="flex items-center gap-2 whitespace-nowrap">
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
             {/* Primary Phone Badge */}
-            <span className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-gray-800 dark:text-gray-200 bg-gray-100/90 dark:bg-gray-800/90 px-2.5 py-1 rounded-xl border border-gray-200 dark:border-gray-700/80 shadow-xs">
-              <Phone className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-gray-800 dark:text-gray-200 bg-gray-100/90 dark:bg-gray-800/90 px-2 py-0.5 rounded-lg border border-gray-200 dark:border-gray-700/80 shadow-2xs">
+              <Phone className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               {primaryPhone ? formatUzPhone(primaryPhone) : '—'}
             </span>
 
-            {/* Compact Parent Popover Badge (Zero row-height inflation!) */}
+            {/* Compact Parent Popover Badge */}
             {hasParentPhone && (
               <div className="relative group/parent inline-block">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all cursor-pointer shadow-2xs"
                   title={t('groups.parentContacts', 'Ota-onasi raqamlari')}
                 >
-                  <Users className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <Users className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400 shrink-0" />
                   <span>{t('groups.parents', 'Ota-onasi')}</span>
                   <ChevronDown className="w-2.5 h-2.5 opacity-70 group-hover/parent:rotate-180 transition-transform" />
                 </button>
@@ -537,12 +550,14 @@ export default function UserManagement() {
     {
       header: t('common.status', 'Status'),
       key: 'status',
+      className: 'whitespace-nowrap w-[80px]',
+      cellClassName: 'whitespace-nowrap w-[80px]',
       render: (row) => (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
+          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold transition-all ${
             row.is_active
-              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs ring-1 ring-emerald-500/20'
-              : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 shadow-xs ring-1 ring-rose-500/20'
+              ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 ring-1 ring-emerald-500/20'
+              : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 ring-1 ring-rose-500/20'
           }`}
         >
           <span
@@ -557,8 +572,10 @@ export default function UserManagement() {
     {
       header: t('common.date', 'Joined'),
       key: 'created_at',
+      className: 'whitespace-nowrap w-[85px]',
+      cellClassName: 'whitespace-nowrap w-[85px]',
       render: (row) => (
-        <span className="text-xs text-gray-500 dark:text-gray-400">
+        <span className="text-[11px] text-gray-500 dark:text-gray-400">
           {row.created_at ? new Date(row.created_at).toLocaleDateString() : '—'}
         </span>
       ),
@@ -566,42 +583,42 @@ export default function UserManagement() {
     {
       header: t('common.actions', 'Actions'),
       key: 'actions',
-      className: 'text-right rtl:text-left',
-      cellClassName: 'text-right rtl:text-left',
+      className: 'text-right rtl:text-left whitespace-nowrap w-[150px] shrink-0',
+      cellClassName: 'text-right rtl:text-left whitespace-nowrap w-[150px] shrink-0',
       render: (row) => (
-        <div className="flex items-center justify-end gap-1.5">
+        <div className="flex items-center justify-end gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="!p-1.5 h-8 w-8 text-blue-600 dark:text-blue-400 hover:bg-blue-500/15 rounded-lg"
+            className="!p-1 h-7 w-7 text-blue-600 dark:text-blue-400 hover:bg-blue-500/15 rounded-lg"
             title={t('users.viewProfile', 'Profilni ko‘rish va sozlash')}
             onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-3.5 h-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="!p-1.5 h-8 w-8 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15 rounded-lg"
+            className="!p-1 h-7 w-7 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/15 rounded-lg"
             title={t('common.edit', 'Tahrirlash')}
             onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
           >
-            <Edit2 className="w-4 h-4" />
+            <Edit2 className="w-3.5 h-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="!p-1.5 h-8 w-8 text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 rounded-lg"
+            className="!p-1 h-7 w-7 text-amber-600 dark:text-amber-400 hover:bg-amber-500/15 rounded-lg"
             title={t('auth.resetPassword', 'Parolni tiklash')}
             onClick={() => handleResetPassword(row)}
           >
-            <KeyRound className="w-4 h-4" />
+            <KeyRound className="w-3.5 h-3.5" />
           </Button>
           {row.role !== ROLES.OWNER && (
             <Button
               variant="ghost"
               size="sm"
-              className={`!p-1.5 h-8 w-8 rounded-lg ${
+              className={`!p-1 h-7 w-7 rounded-lg ${
                 row.is_active
                   ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-500/15'
                   : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15'
@@ -610,9 +627,9 @@ export default function UserManagement() {
               onClick={() => handleToggleStatus(row)}
             >
               {row.is_active ? (
-                <XCircle className="w-4 h-4" />
+                <XCircle className="w-3.5 h-3.5" />
               ) : (
-                <CheckCircle className="w-4 h-4" />
+                <CheckCircle className="w-3.5 h-3.5" />
               )}
             </Button>
           )}
@@ -620,11 +637,11 @@ export default function UserManagement() {
             <Button
               variant="ghost"
               size="sm"
-              className="!p-1.5 h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 rounded-lg"
+              className="!p-1 h-7 w-7 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 rounded-lg"
               title={t('common.delete', 'O‘chirish')}
               onClick={() => handleDeleteUser(row)}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
           )}
         </div>
@@ -1035,6 +1052,7 @@ export default function UserManagement() {
         {/* Desktop User Table */}
         <div className="hidden md:block">
           <Table
+            dense
             columns={columns}
             data={users}
             isLoading={loading}
@@ -1246,40 +1264,89 @@ export default function UserManagement() {
         </div>
 
         {/* Pagination Bar */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-          <div>
-            {t('common.showing', 'Showing')}{' '}
-            <span className="font-semibold text-gray-700 dark:text-gray-200">
-              {users.length > 0 ? (page - 1) * pageSize + 1 : 0}
-            </span>{' '}
-            -{' '}
-            <span className="font-semibold text-gray-700 dark:text-gray-200">
-              {Math.min(page * pageSize, totalCount)}
-            </span>{' '}
-            {t('common.of', 'of')}{' '}
-            <span className="font-semibold text-gray-700 dark:text-gray-200">{totalCount}</span>
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span>
+              {t('common.showing', 'Ko‘rsatilmoqda')}:{' '}
+              <span className="font-semibold text-gray-800 dark:text-gray-200">
+                {users.length > 0 ? (page - 1) * pageSize + 1 : 0}
+              </span>{' '}
+              -{' '}
+              <span className="font-semibold text-gray-800 dark:text-gray-200">
+                {Math.min(page * pageSize, totalCount)}
+              </span>{' '}
+              {t('common.of', 'jami')}{' '}
+              <span className="font-bold text-gray-900 dark:text-white">{totalCount}</span> ta
+            </span>
+            <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60">
+              Har sahifada 50 ta
+            </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="outline"
-              size="sm"
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+            <button
+              type="button"
               disabled={page <= 1 || loading}
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2332] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-2xs cursor-pointer"
+              title="Oldingi sahifa"
             >
               <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
-            </Button>
-            <span className="px-2 font-medium">
-              {page} / {totalPages || 1}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+
+            {(() => {
+              const total = totalPages || 1;
+              const pages = [];
+              if (total <= 7) {
+                for (let i = 1; i <= total; i++) pages.push(i);
+              } else {
+                if (page <= 4) {
+                  pages.push(1, 2, 3, 4, 5, '...', total);
+                } else if (page >= total - 3) {
+                  pages.push(1, '...', total - 4, total - 3, total - 2, total - 1, total);
+                } else {
+                  pages.push(1, '...', page - 1, page, page + 1, '...', total);
+                }
+              }
+
+              return pages.map((item, idx) => {
+                if (item === '...') {
+                  return (
+                    <span
+                      key={`ellipsis-${idx}`}
+                      className="h-8 min-w-[28px] px-1 flex items-center justify-center text-xs font-bold text-gray-400 select-none"
+                    >
+                      •••
+                    </span>
+                  );
+                }
+                const isActive = item === page;
+                return (
+                  <button
+                    key={`page-${item}`}
+                    type="button"
+                    onClick={() => setPage(item)}
+                    className={`h-8 min-w-[32px] px-2.5 flex items-center justify-center rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-brand-navy dark:bg-emerald-600 text-white shadow-xs ring-1 ring-brand-navy/30 dark:ring-emerald-500/40'
+                        : 'bg-white dark:bg-[#1a2332] border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-300'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                );
+              });
+            })()}
+
+            <button
+              type="button"
               disabled={page >= totalPages || loading}
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              className="h-8 w-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a2332] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-2xs cursor-pointer"
+              title="Keyingi sahifa"
             >
               <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-            </Button>
+            </button>
           </div>
         </div>
       </Card>
