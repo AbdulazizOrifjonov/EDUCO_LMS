@@ -6,6 +6,79 @@ import { cleanUzPhone } from '@/utils/phoneFormat';
 const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
 
 /**
+ * Helper to get the set of student IDs enrolled in groups taught by a specific teacher
+ */
+export function getTeacherStudentIds(teacherId, teacherUser = null) {
+  const groups = localStore.getGroups ? localStore.getGroups() : [];
+  const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+  const users = localStore.getUsers ? localStore.getUsers() : [];
+
+  const normTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(teacherId) : teacherId;
+  const teacher =
+    teacherUser ||
+    users.find(
+      (u) =>
+        u.id === normTeacherId ||
+        u.id === teacherId ||
+        (teacherId && (u.phone || '').replace(/\D/g, '').slice(-9) === String(teacherId).replace(/\D/g, '').slice(-9))
+    );
+
+  const teacherName = (teacher?.fullName || `${teacher?.first_name || ''} ${teacher?.last_name || ''}`).trim().toLowerCase();
+  const teacherSpecialty = (teacher?.specialty || teacher?.subject || '').trim().toLowerCase();
+  const teacherPhoneClean = (teacher?.phone || '').replace(/\D/g, '').slice(-9);
+
+  // Find all groups belonging to this teacher
+  const teacherGroups = groups.filter((g) => {
+    const gTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(g.teacherId || g.teacher_id) : (g.teacherId || g.teacher_id);
+    const gTeacherName = (g.teacherName || g.teacher_name || '').toLowerCase();
+    const gTeacherPhone = (g.teacherPhone || g.teacher_phone || '').replace(/\D/g, '').slice(-9);
+
+    if (gTeacherId && (gTeacherId === normTeacherId || gTeacherId === teacherId || (teacher && gTeacherId === teacher.id))) {
+      return true;
+    }
+    if (teacher?.group_ids && teacher.group_ids.includes(g.id)) {
+      return true;
+    }
+    if (teacherPhoneClean && gTeacherPhone && teacherPhoneClean === gTeacherPhone) {
+      return true;
+    }
+    if (teacherName && gTeacherName && (gTeacherName.includes(teacherName) || teacherName.includes(gTeacherName))) {
+      return true;
+    }
+    if (teacherSpecialty && g.name?.toLowerCase().includes(teacherSpecialty)) {
+      return true;
+    }
+    return false;
+  });
+
+  const teacherGroupIds = new Set(teacherGroups.map((g) => g.id));
+  const studentIds = new Set();
+
+  // 1. From group.student_ids
+  teacherGroups.forEach((g) => {
+    (g.student_ids || []).forEach((sId) => studentIds.add(String(sId)));
+  });
+
+  // 2. From group memberships
+  memberships.forEach((m) => {
+    if (teacherGroupIds.has(m.group_id) && m.is_active !== false) {
+      if (m.student_id) studentIds.add(String(m.student_id));
+      if (m.user_id) studentIds.add(String(m.user_id));
+    }
+  });
+
+  // 3. From student.group_ids or student.group_id
+  users.filter((u) => u.role === 'student').forEach((s) => {
+    const sGids = s.group_ids || (s.group_id ? [s.group_id] : []);
+    if (sGids.some((gid) => teacherGroupIds.has(gid))) {
+      studentIds.add(String(s.id));
+    }
+  });
+
+  return studentIds;
+}
+
+/**
  * Get users with filtering, search, pagination, and role-based permissions
  */
 export async function getUsers({
@@ -15,6 +88,8 @@ export async function getUsers({
   page = 1,
   limit = 10,
   currentUserRole = 'owner',
+  currentUserId = null,
+  currentUser = null,
 } = {}) {
   if (!isPlaceholder) {
     try {
@@ -65,7 +140,8 @@ export async function getUsers({
         if (currentUserRole === 'admin') {
           users = users.filter((u) => u.role !== 'owner');
         } else if (currentUserRole === 'teacher') {
-          users = users.filter((u) => u.role === 'student');
+          const teacherStudentIds = getTeacherStudentIds(currentUserId, currentUser);
+          users = users.filter((u) => u.role === 'student' && teacherStudentIds.has(String(u.id)));
         }
 
         if (role && role !== 'all') {
@@ -179,6 +255,8 @@ export async function createUser({
   discount_amount = 0,
   discount_type = null,
   discount_reason = '',
+  group_id = null,
+  group_ids = [],
 }) {
   if (role === 'owner') {
     throw new Error('Tizimda faqat 1 ta Boshliq (Owner) bo‘lishi mumkin!');
@@ -284,6 +362,8 @@ export async function createUser({
     course_id: courseId || null,
     subject: subject || '',
     monthly_salary: monthly_salary || 0,
+    group_id: group_id || (Array.isArray(group_ids) && group_ids[0]) || null,
+    group_ids: Array.isArray(group_ids) && group_ids.length > 0 ? group_ids : (group_id ? [group_id] : []),
     custom_price: custom_price !== undefined ? custom_price : null,
     discount_percent: discount_percent !== undefined ? Number(discount_percent || 0) : 0,
     discount_amount: discount_amount !== undefined ? Number(discount_amount || 0) : 0,
@@ -391,6 +471,13 @@ export async function updateUser(id, { firstName, lastName, fullName, full_name,
   const newLast = resolvedLast !== undefined ? resolvedLast : localUser.last_name;
   const computedFullName = `${newFirst || ''} ${newLast || ''}`.trim() || localUser.full_name || localUser.username;
 
+  const resolvedGroupIds = Array.isArray(group_ids)
+    ? group_ids
+    : (group_id !== undefined ? (group_id ? [group_id] : []) : (localUser.group_ids || []));
+  const resolvedGroupId = group_id !== undefined
+    ? (group_id || null)
+    : (resolvedGroupIds.length > 0 ? resolvedGroupIds[0] : (localUser.group_id || null));
+
   const updated = localStore.saveUser({
     ...localUser,
     id,
@@ -406,10 +493,8 @@ export async function updateUser(id, { firstName, lastName, fullName, full_name,
     is_active: isActive !== undefined ? isActive : localUser.is_active,
     course_id: courseId !== undefined ? courseId : localUser.course_id,
     subject: subject !== undefined ? subject : localUser.subject,
-    group_id: group_id !== undefined ? (group_id || null) : localUser.group_id,
-    group_ids: group_id !== undefined
-      ? (group_id ? [group_id] : [])
-      : (Array.isArray(group_ids) ? group_ids : localUser.group_ids || []),
+    group_id: resolvedGroupId,
+    group_ids: resolvedGroupIds,
     custom_price: custom_price !== undefined ? custom_price : localUser.custom_price,
     discount_percent: discount_percent !== undefined ? Number(discount_percent || 0) : localUser.discount_percent,
     discount_amount: discount_amount !== undefined ? Number(discount_amount || 0) : localUser.discount_amount,

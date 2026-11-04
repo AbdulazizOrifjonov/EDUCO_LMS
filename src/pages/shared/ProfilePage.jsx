@@ -326,6 +326,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
 
   // Student group & transfer state
   const [studentGroup, setStudentGroup] = useState(null);
+  const [studentGroups, setStudentGroups] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
   const [selectedNewGroupId, setSelectedNewGroupId] = useState('');
   const [isTransferringGroup, setIsTransferringGroup] = useState(false);
@@ -340,40 +341,36 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
       const list = res.groups || [];
       setAllGroups(list);
 
-      // Find which group this student belongs to
-      let foundGroup = null;
-
-      // 1. Direct group_id on user object
-      const directGid = targetUser?.group_id || targetUser?.group_ids?.[0] || profile?.group_id;
-      if (directGid) {
-        foundGroup = list.find((g) => g.id === directGid);
+      // Find all groups this student belongs to
+      const targetGroupIds = [];
+      const directGid = targetUser?.group_id || profile?.group_id;
+      if (directGid) targetGroupIds.push(directGid);
+      if (Array.isArray(targetUser?.group_ids)) {
+        targetUser.group_ids.forEach((gid) => {
+          if (gid && !targetGroupIds.includes(gid)) targetGroupIds.push(gid);
+        });
       }
 
-      // 2. Student IDs list on groups
-      if (!foundGroup) {
-        foundGroup = list.find(
-          (g) =>
-            Array.isArray(g.student_ids) &&
-            (g.student_ids.includes(studentId) || g.student_ids.map(String).includes(String(studentId)))
-        );
-      }
+      try {
+        const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
+        const normId = localStore.normalizeUserId ? localStore.normalizeUserId(studentId) : String(studentId);
+        memberships
+          .filter((m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false)
+          .forEach((m) => {
+            if (m.group_id && !targetGroupIds.includes(m.group_id)) targetGroupIds.push(m.group_id);
+          });
+      } catch (_) {}
 
-      // 3. LocalStore memberships check
-      if (!foundGroup) {
-        try {
-          const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
-          const normId = localStore.normalizeUserId ? localStore.normalizeUserId(studentId) : String(studentId);
-          const activeMem = memberships.find(
-            (m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false
-          );
-          if (activeMem) {
-            foundGroup = list.find((g) => g.id === activeMem.group_id);
-          }
-        } catch (_) {}
-      }
+      list.forEach((g) => {
+        if (Array.isArray(g.student_ids) && (g.student_ids.includes(studentId) || g.student_ids.map(String).includes(String(studentId)))) {
+          if (!targetGroupIds.includes(g.id)) targetGroupIds.push(g.id);
+        }
+      });
 
-      setStudentGroup(foundGroup || null);
-      setSelectedNewGroupId(foundGroup ? foundGroup.id : '');
+      const matchedGroups = targetGroupIds.map((gid) => list.find((g) => g.id === gid)).filter(Boolean);
+      setStudentGroups(matchedGroups);
+      setStudentGroup(matchedGroups[0] || null);
+      setSelectedNewGroupId(matchedGroups[0] ? matchedGroups[0].id : '');
     } catch (err) {
       console.warn('Error loading student group in ProfilePage:', err);
     }
@@ -565,65 +562,75 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               </div>
             )}
 
-            {studentGroup ? (
-              <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-emerald-200 dark:border-emerald-800/80 shadow-xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 shadow-2xs">
-                      <GraduationCap className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                        Joriy o‘quv guruhi
-                      </div>
-                      <div className="text-base sm:text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2 flex-wrap">
-                        <span>«{studentGroup.name}»</span>
-                        {studentGroup.room && (
-                          <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700">
-                            🚪 {studentGroup.room}-xona
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/${currentUserRole}/users/edit/${targetUser?.id || resolvedTargetId}`)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
-                    title="To‘liq tahrirlash sahifasida ko‘chirish va to‘lovlarni sozlash"
+            {studentGroups.length > 0 ? (
+              <div className="space-y-3">
+                {studentGroups.map((grp, gIdx) => (
+                  <div
+                    key={grp.id}
+                    className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-emerald-200 dark:border-emerald-800/80 shadow-xs space-y-3"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>To‘liq tahrirlash</span>
-                  </button>
-                </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 shadow-2xs">
+                          <GraduationCap className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                            {studentGroups.length > 1 ? `${gIdx + 1}-o‘quv guruhi` : 'Joriy o‘quv guruhi'}
+                          </div>
+                          <div className="text-base sm:text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2 flex-wrap">
+                            <span>«{grp.name}»</span>
+                            {grp.room && (
+                              <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700">
+                                🚪 {grp.room}-xona
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Kurs / Fan</span>
-                    <span className="font-bold text-gray-900 dark:text-gray-100">
-                      {studentGroup.courseName || studentGroup.course_name || 'Fan'}
-                    </span>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/${currentUserRole}/users/edit/${targetUser?.id || resolvedTargetId}`)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                        title="Guruhni almashtirish, vaqtini yoki ustozini o‘zgartirish uchun tahrirlash sahifasiga o‘tish"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>Tahrirlash va almashtirish</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Kurs / Fan</span>
+                        <span className="font-bold text-gray-900 dark:text-gray-100">
+                          {grp.courseName || grp.course_name || 'Fan'}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Ustoz & Jadval</span>
+                        <span className="font-bold text-gray-900 dark:text-gray-100 truncate block" title={grp.teacherName || grp.teacher_name}>
+                          {grp.teacherName || grp.teacher_name || grp.primaryTeacher?.fullName || 'Noma‘lum'}
+                        </span>
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400 block mt-0.5 truncate">
+                          {grp.schedule_days || grp.schedule || 'Jadvalsiz'}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Guruh sig‘imi</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                          {grp.enrolled_count || grp.studentCount || 0} / {grp.capacity || 20} ta
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Oylik to‘lov</span>
+                        <span className="font-black text-gray-900 dark:text-gray-100">
+                          {(grp.monthly_price || grp.price || 500000).toLocaleString()} so‘m
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Asosiy Ustoz</span>
-                    <span className="font-bold text-gray-900 dark:text-gray-100">
-                      {studentGroup.teacherName || studentGroup.teacher_name || studentGroup.primaryTeacher?.fullName || 'Noma‘lum'}
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Guruh sig‘imi</span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                      {studentGroup.enrolled_count || studentGroup.studentCount || 0} / {studentGroup.capacity || 20} ta
-                    </span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Oylik to‘lov</span>
-                    <span className="font-black text-gray-900 dark:text-gray-100">
-                      {(studentGroup.monthly_price || studentGroup.price || 500000).toLocaleString()} so‘m
-                    </span>
-                  </div>
-                </div>
+                ))}
               </div>
             ) : (
               <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-3">

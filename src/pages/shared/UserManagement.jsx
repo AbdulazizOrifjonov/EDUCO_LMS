@@ -176,33 +176,43 @@ export default function UserManagement() {
     loadGroupsData();
   }, [loadGroupsData]);
 
-  const getStudentGroup = useCallback((user) => {
-    if (!user || user.role !== ROLES.STUDENT) return null;
-    if (user.group_id && groupsMap[user.group_id]) return groupsMap[user.group_id];
-    if (user.group_ids?.length && groupsMap[user.group_ids[0]]) return groupsMap[user.group_ids[0]];
+  const getStudentGroups = useCallback((user) => {
+    if (!user || user.role !== ROLES.STUDENT) return [];
+    const gids = [];
+    if (Array.isArray(user.group_ids) && user.group_ids.length > 0) {
+      user.group_ids.forEach((gid) => { if (gid && !gids.includes(gid)) gids.push(gid); });
+    }
+    if (user.group_id && !gids.includes(user.group_id)) {
+      gids.push(user.group_id);
+    }
 
     try {
       const allG = Object.values(groupsMap).length > 0 ? Object.values(groupsMap) : (localStore.getGroups ? localStore.getGroups() : []);
       const normId = localStore.normalizeUserId ? localStore.normalizeUserId(user.id) : String(user.id);
 
-      const foundByList = allG.find(
-        (g) => Array.isArray(g.student_ids) && (g.student_ids.includes(user.id) || g.student_ids.map(String).includes(String(user.id)))
-      );
-      if (foundByList) return foundByList;
-
       const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
-      const activeMem = memberships.find(
-        (m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false
-      );
-      if (activeMem) {
-        if (groupsMap[activeMem.group_id]) return groupsMap[activeMem.group_id];
-        const g = allG.find((item) => item.id === activeMem.group_id);
-        if (g) return g;
-      }
+      memberships
+        .filter((m) => localStore.normalizeUserId(m.student_id) === normId && m.is_active !== false)
+        .forEach((m) => {
+          if (m.group_id && !gids.includes(m.group_id)) gids.push(m.group_id);
+        });
+
+      allG.forEach((g) => {
+        if (Array.isArray(g.student_ids) && (g.student_ids.includes(user.id) || g.student_ids.map(String).includes(String(user.id)))) {
+          if (!gids.includes(g.id)) gids.push(g.id);
+        }
+      });
     } catch (_) {}
 
-    return null;
+    return gids
+      .map((gid) => groupsMap[gid] || localStore.getGroups?.()?.find((g) => g.id === gid))
+      .filter(Boolean);
   }, [groupsMap]);
+
+  const getStudentGroup = useCallback((user) => {
+    const list = getStudentGroups(user);
+    return list[0] || null;
+  }, [getStudentGroups]);
 
   // Realtime cross-role sync: auto-refresh when another user/role adds or modifies users
   useEffect(() => {
@@ -405,34 +415,51 @@ export default function UserManagement() {
       cellClassName: 'whitespace-nowrap',
       render: (row) => {
         if (row.role === ROLES.STUDENT) {
-          const studentGroup = getStudentGroup(row);
-          if (studentGroup) {
-            const rawName = studentGroup.name || '';
-            // Remove redundant parentheses like (MAT-1.1) to keep the label clean and short
-            const cleanName = rawName.replace(/\s*\([^)]*\)/g, '').trim() || rawName;
-            const roomNumber = (studentGroup.room || '').replace(/^xona\s*/i, '').trim();
-
+          const studentGroups = getStudentGroups(row);
+          if (studentGroups.length > 0) {
             return (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/${currentUserRole}/users/edit/${row.id}`);
-                }}
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all group/gbtn cursor-pointer shadow-2xs max-w-[180px]"
-                title={`${rawName}${studentGroup.room ? ` • Xona: ${studentGroup.room}` : ''} (Guruhni tahrirlash uchun bosing)`}
-              >
-                <GraduationCap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span className="font-semibold underline decoration-dotted underline-offset-2 truncate" title={rawName}>
-                  {cleanName}
-                </span>
-                {roomNumber && (
-                  <span className="text-[10px] px-1 py-0.2 rounded bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-emerald-300 dark:border-emerald-700 font-mono shrink-0">
-                    🚪 {roomNumber}
-                  </span>
+              <div className="flex items-center gap-1 flex-wrap max-w-[220px]">
+                {studentGroups.slice(0, 2).map((sg) => {
+                  const rawName = sg.name || '';
+                  const cleanName = rawName.replace(/\s*\([^)]*\)/g, '').trim() || rawName;
+                  const roomNumber = (sg.room || '').replace(/^xona\s*/i, '').trim();
+                  return (
+                    <button
+                      key={sg.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/${currentUserRole}/users/edit/${row.id}`);
+                      }}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all group/gbtn cursor-pointer shadow-2xs max-w-[170px]"
+                      title={`${rawName}${sg.room ? ` • Xona: ${sg.room}` : ''} (Guruhni boshqarish uchun bosing)`}
+                    >
+                      <GraduationCap className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="font-semibold truncate max-w-[85px]" title={rawName}>
+                        {cleanName}
+                      </span>
+                      {roomNumber && (
+                        <span className="text-[10px] px-1 py-0.2 rounded bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-emerald-300 dark:border-emerald-700 font-mono shrink-0">
+                          🚪 {roomNumber}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                {studentGroups.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/${currentUserRole}/users/edit/${row.id}`);
+                    }}
+                    className="px-1.5 py-0.5 rounded-md text-[10px] font-black bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 hover:bg-blue-500/25 cursor-pointer shadow-2xs"
+                    title={`Jami ${studentGroups.length} ta guruh. Barchasini boshqarish uchun bosing`}
+                  >
+                    +{studentGroups.length - 2} ta
+                  </button>
                 )}
-                <Edit2 className="w-2.5 h-2.5 opacity-50 group-hover/gbtn:opacity-100 transition-opacity shrink-0" />
-              </button>
+              </div>
             );
           }
           return (
