@@ -50,7 +50,10 @@
         "crs-rus-tili"
       ],
       "group_ids": [
-        "grp-rus-tili"
+        "grp-rus-tili",
+        "grp-rus-tili-2",
+        "grp-1793622453272",
+        "grp-rus-tili-4"
       ]
     },
     {
@@ -76,7 +79,11 @@
         "crs-matematika"
       ],
       "group_ids": [
-        "grp-matematika"
+        "grp-matematika",
+        "grp-1793615416295",
+        "grp-matematika-3",
+        "grp-matematika-4",
+        "grp-matematika-5"
       ]
     },
     {
@@ -252,7 +259,9 @@
         "crs-arab-tili"
       ],
       "group_ids": [
-        "grp-arab-tili"
+        "grp-arab-tili",
+        "grp-arab-tili-2",
+        "grp-arab-tili-3"
       ],
       "avatar_url": ""
     },
@@ -276,17 +285,23 @@
         "crs-ingliz-tili"
       ],
       "group_ids": [
-        "grp-ingliz-tili"
+        "grp-ingliz-tili",
+        "grp-ingliz-tili-2",
+        "grp-ingliz-tili-3",
+        "grp-ingliz-tili-4",
+        "grp-ingliz-tili-5",
+        "grp-ingliz-tili-6",
+        "grp-ingliz-tili-7"
       ],
       "avatar_url": ""
     },
     {
       "id": "usr-teacher-qosimov",
-      "username": "rustam_qosimov",
-      "first_name": "Rustam",
+      "username": "shuxrat_qosimov",
+      "first_name": "Shuxrat",
       "last_name": "Qosimov",
-      "fullName": "Rustam Qosimov",
-      "full_name": "Rustam Qosimov",
+      "fullName": "Shuxrat Qosimov",
+      "full_name": "Shuxrat Qosimov",
       "role": "teacher",
       "subject": "Shaxmat",
       "phone": "+998 90 123 45 67",
@@ -973,7 +988,14 @@
         "crs-matematika"
       ],
       "group_ids": [
-        "grp-matematika"
+        "grp-matematika",
+        "grp-ingliz-tili",
+        "grp-ingliz-tili-2",
+        "grp-ingliz-tili-3",
+        "grp-ingliz-tili-4",
+        "grp-ingliz-tili-5",
+        "grp-ingliz-tili-6",
+        "grp-ingliz-tili-7"
       ],
       "is_active": true,
       "has_temp_phone": false,
@@ -2934,7 +2956,13 @@
         "crs-ingliz-tili"
       ],
       "group_ids": [
-        "grp-ingliz-tili"
+        "grp-ingliz-tili",
+        "grp-ingliz-tili-2",
+        "grp-ingliz-tili-3",
+        "grp-ingliz-tili-4",
+        "grp-ingliz-tili-5",
+        "grp-ingliz-tili-6",
+        "grp-ingliz-tili-7"
       ],
       "is_active": true,
       "has_temp_phone": false,
@@ -3272,14 +3300,16 @@
       "enrolled_count": 0,
       "status": "active",
       "monthly_price": 500000,
-      "schedule": "Sesh-Pay-Shan, 17:30 - 19:00",
+      "schedule": "Sesh-Pay-Shan, 10:00 - 11:30",
       "avatar_url": "",
       "image_url": "",
       "created_at": "2026-11-02T12:27:33.272Z",
-      "updated_at": "2026-11-04T04:34:20.518Z",
+      "updated_at": "2026-11-04T07:55:24.833Z",
       "direction": "Rus tili",
       "teacherName": "Shaxnoza Ismatova",
-      "is_active": true
+      "is_active": true,
+      "start_time": "10:00:00",
+      "end_time": "11:30:00"
     },
     {
       "id": "grp-1793615416295",
@@ -3294,14 +3324,16 @@
       "enrolled_count": 0,
       "status": "active",
       "monthly_price": 500000,
-      "schedule": "Sesh-Pay-Shan, 14:00 - 15:30",
+      "schedule": "Sesh-Pay-Shan, 08:30 - 10:00",
       "avatar_url": null,
       "image_url": null,
       "created_at": "2026-11-02T10:30:16.295Z",
-      "updated_at": "2026-11-02T10:33:49.490Z",
+      "updated_at": "2026-11-04T07:55:24.834Z",
       "direction": "Matematika",
       "teacherName": "Bexruz Beknazarov",
-      "is_active": true
+      "is_active": true,
+      "start_time": "08:30:00",
+      "end_time": "10:00:00"
     },
     {
       "id": "grp-matematika",
@@ -3343,14 +3375,16 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T06:03:14.870Z",
+      "updated_at": "2026-11-04T07:55:24.834Z",
       "code": "MAT-1.1",
-      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "schedule": "Dush-Chor-Jum, 09:30 - 11:00",
       "avatar_url": "",
       "image_url": "",
       "direction": "Matematika",
       "teacherName": "Bexruz Beknazarov",
-      "is_active": true
+      "is_active": true,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00"
     },
     {
       "id": "grp-ingliz-tili",
@@ -3359,7 +3393,7 @@
       "course_name": "Ingliz tili",
       "teacher_id": "usr-teacher-toshtemirova",
       "teacher_name": "Toshtemirova Madina Shuxrat qizi",
-      "room": "Xona 102",
+      "room": "102",
       "capacity": 35,
       "monthly_price": 500000,
       "student_ids": [
@@ -3407,22 +3441,24 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T06:03:14.870Z",
+      "updated_at": "2026-11-04T07:55:24.798Z",
       "code": "ENG-1.1",
-      "schedule": "Dush-Chor-Jum, 10:30 - 12:00",
+      "schedule": "Dush-Chor-Jum, 09:00 - 10:30",
       "avatar_url": "",
       "image_url": "",
       "direction": "Ingliz tili",
-      "is_active": true
+      "is_active": true,
+      "start_time": "09:00:00",
+      "end_time": "10:30:00"
     },
     {
       "id": "grp-arab-tili",
-      "name": "Arab tili guruhi",
+      "name": "Arab tili 1.1 (ARB-1.1)",
       "course_id": "crs-arab-tili",
       "course_name": "Arab tili",
       "teacher_id": "usr-teacher-yusupjonova",
       "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
-      "room": "Xona 103",
+      "room": "103",
       "capacity": 35,
       "monthly_price": 500000,
       "student_ids": [
@@ -3459,11 +3495,15 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T06:03:14.870Z",
-      "code": "GRP-5560",
-      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "updated_at": "2026-11-04T07:55:24.833Z",
+      "code": "ARB-1.1",
+      "schedule": "Dush-Chor-Jum, 17:00 - 18:30",
       "avatar_url": "",
-      "image_url": ""
+      "image_url": "",
+      "direction": "Arab tili",
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "is_active": true
     },
     {
       "id": "grp-rus-tili",
@@ -3519,14 +3559,16 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T06:03:14.870Z",
+      "updated_at": "2026-11-04T07:55:24.833Z",
       "code": "RUS-1.1",
-      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "schedule": "Dush-Chor-Jum, 09:30 - 11:00",
       "avatar_url": "",
       "image_url": "",
       "direction": "Rus tili",
       "teacherName": "Shaxnoza Ismatova",
-      "is_active": true
+      "is_active": true,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00"
     },
     {
       "id": "grp-mental",
@@ -3547,24 +3589,26 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T06:03:14.870Z",
+      "updated_at": "2026-11-04T07:55:24.834Z",
       "code": "MNT-1.1",
-      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "schedule": "Dush-Chor-Jum, 16:00 - 17:30",
       "avatar_url": "",
       "image_url": "",
       "direction": "Mental Arifmetika",
       "teacherName": "Fayoza Karimberdiyeva",
       "price": 498000,
-      "is_active": true
+      "is_active": true,
+      "start_time": "16:00:00",
+      "end_time": "17:30:00"
     },
     {
       "id": "grp-shaxmat",
-      "name": "Shaxmat guruhi",
+      "name": "Shaxmat guruhi (CHESS-1.1)",
       "course_id": "crs-shaxmat",
       "course_name": "Shaxmat",
       "teacher_id": "usr-teacher-qosimov",
-      "teacher_name": "Rustam Qosimov",
-      "room": "Xona 203",
+      "teacher_name": "Shuxrat Qosimov",
+      "room": "203",
       "capacity": 35,
       "monthly_price": 400000,
       "student_ids": [
@@ -3575,15 +3619,19 @@
       "status": "active",
       "start_date": "2026-11-01",
       "created_at": "2026-11-04T03:47:07.677Z",
-      "updated_at": "2026-11-04T06:03:14.870Z",
-      "code": "GRP-5226",
-      "schedule": "Dush-Chor-Jum, 18:00 - 20:00",
+      "updated_at": "2026-11-04T07:55:24.834Z",
+      "code": "CHESS-1.1",
+      "schedule": "Sesh-Pay-Shan, 17:00 - 18:30",
       "avatar_url": "",
-      "image_url": ""
+      "image_url": "",
+      "direction": "Shaxmat",
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "is_active": true
     },
     {
       "id": "grp-fullstack",
-      "name": "Full Stack guruhi",
+      "name": "Full Stack guruhi (IT-1.1)",
       "course_id": "crs-fullstack",
       "course_name": "Full Stack",
       "teacher_id": "usr-1793466843425",
@@ -3596,7 +3644,7 @@
       "max_students": 15,
       "student_count": 3,
       "created_at": "2026-11-04T06:01:09.762Z",
-      "updated_at": "2026-11-04T06:03:14.870Z",
+      "updated_at": "2026-11-04T07:55:24.834Z",
       "capacity": 35,
       "monthly_price": 600000,
       "student_ids": [
@@ -3605,7 +3653,12 @@
         "usr-student-947882906"
       ],
       "enrolled_count": 3,
-      "start_date": "2026-11-01"
+      "start_date": "2026-11-01",
+      "code": "IT-1.1",
+      "direction": "Full Stack",
+      "schedule": "Dush-Chor-Jum, 18:00 - 19:30",
+      "start_time": "18:00:00",
+      "end_time": "19:30:00"
     },
     {
       "id": "grp-ingliz-tili-2",
@@ -3615,7 +3668,7 @@
       "course_name": "Ingliz tili",
       "teacher_id": "usr-teacher-toshtemirova",
       "teacher_name": "Toshtemirova Madina Shuxrat qizi",
-      "room": "Xona 102B",
+      "room": "102",
       "capacity": 35,
       "monthly_price": 500000,
       "status": "active",
@@ -3644,7 +3697,12 @@
       "avatar_url": "",
       "image_url": "",
       "created_at": "2026-11-04T05:46:45.897Z",
-      "updated_at": "2026-11-04T05:46:45.897Z"
+      "updated_at": "2026-11-04T07:55:24.832Z",
+      "direction": "Ingliz tili",
+      "schedule": "Dush-Chor-Jum, 10:30 - 12:00",
+      "start_time": "10:30:00",
+      "end_time": "12:00:00",
+      "is_active": true
     },
     {
       "id": "grp-rus-tili-2",
@@ -3683,10 +3741,266 @@
       "avatar_url": "",
       "image_url": "",
       "created_at": "2026-11-04T05:46:45.897Z",
-      "updated_at": "2026-11-04T05:46:45.897Z",
+      "updated_at": "2026-11-04T07:55:24.833Z",
       "direction": "Rus tili",
       "teacherName": "Shaxnoza Ismatova",
-      "is_active": true
+      "is_active": true,
+      "schedule": "Dush-Chor-Jum, 18:00 - 19:30",
+      "start_time": "18:00:00",
+      "end_time": "19:30:00"
+    },
+    {
+      "id": "grp-ingliz-tili-3",
+      "name": "Ingliz tili 1.3 (ENG-1.3)",
+      "code": "ENG-1.3",
+      "course_id": "crs-ingliz-tili",
+      "course_name": "Ingliz tili",
+      "direction": "Ingliz tili",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "room": "102",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 09:30 - 11:00",
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-ingliz-tili-4",
+      "name": "Ingliz tili 1.4 (ENG-1.4)",
+      "code": "ENG-1.4",
+      "course_id": "crs-ingliz-tili",
+      "course_name": "Ingliz tili",
+      "direction": "Ingliz tili",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "room": "102",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 11:00 - 12:30",
+      "start_time": "11:00:00",
+      "end_time": "12:30:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-ingliz-tili-5",
+      "name": "Ingliz tili 1.5 (ENG-1.5)",
+      "code": "ENG-1.5",
+      "course_id": "crs-ingliz-tili",
+      "course_name": "Ingliz tili",
+      "direction": "Ingliz tili",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "room": "102",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 14:00 - 15:30",
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-ingliz-tili-6",
+      "name": "Ingliz tili 1.6 (ENG-1.6)",
+      "code": "ENG-1.6",
+      "course_id": "crs-ingliz-tili",
+      "course_name": "Ingliz tili",
+      "direction": "Ingliz tili",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "room": "102",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 15:30 - 17:00",
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-ingliz-tili-7",
+      "name": "Ingliz tili 1.7 (ENG-1.7)",
+      "code": "ENG-1.7",
+      "course_id": "crs-ingliz-tili",
+      "course_name": "Ingliz tili",
+      "direction": "Ingliz tili",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "room": "102",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 17:00 - 18:30",
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-arab-tili-2",
+      "name": "Arab tili 1.2 (ARB-1.2)",
+      "code": "ARB-1.2",
+      "course_id": "crs-arab-tili",
+      "course_name": "Arab tili",
+      "direction": "Arab tili",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "room": "103",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 07:00 - 08:30",
+      "start_time": "07:00:00",
+      "end_time": "08:30:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-arab-tili-3",
+      "name": "Arab tili 1.3 (ARB-1.3)",
+      "code": "ARB-1.3",
+      "course_id": "crs-arab-tili",
+      "course_name": "Arab tili",
+      "direction": "Arab tili",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "room": "103",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 17:00 - 18:30",
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-rus-tili-4",
+      "name": "Rus tili 1.4 (RUS-1.4)",
+      "code": "RUS-1.4",
+      "course_id": "crs-rus-tili",
+      "course_name": "Rus tili",
+      "direction": "Rus tili",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Ismatova Shaxnoza",
+      "room": "104",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 17:30 - 19:00",
+      "start_time": "17:30:00",
+      "end_time": "19:00:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.833Z",
+      "updated_at": "2026-11-04T07:55:24.833Z"
+    },
+    {
+      "id": "grp-matematika-3",
+      "name": "Matematika 1.3 (MAT-1.3)",
+      "code": "MAT-1.3",
+      "course_id": "crs-matematika",
+      "course_name": "Matematika",
+      "direction": "Matematika",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "room": "101",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 10:00 - 11:30",
+      "start_time": "10:00:00",
+      "end_time": "11:30:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "updated_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "grp-matematika-4",
+      "name": "Matematika 1.4 (MAT-1.4)",
+      "code": "MAT-1.4",
+      "course_id": "crs-matematika",
+      "course_name": "Matematika",
+      "direction": "Matematika",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "room": "101",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 14:00 - 15:30",
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "updated_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "grp-matematika-5",
+      "name": "Matematika 1.5 (MAT-1.5)",
+      "code": "MAT-1.5",
+      "course_id": "crs-matematika",
+      "course_name": "Matematika",
+      "direction": "Matematika",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "room": "101",
+      "capacity": 35,
+      "student_ids": [],
+      "enrolled_count": 0,
+      "status": "active",
+      "is_active": true,
+      "schedule": "Sesh-Pay-Shan, 15:30 - 17:00",
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "monthly_price": 500000,
+      "price": 500000,
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "updated_at": "2026-11-04T07:55:24.834Z"
     }
   ],
   "educo_db_memberships": [
@@ -4174,6 +4488,600 @@
       "end_time": "12:00:00",
       "room": "3",
       "created_at": "2026-11-04T05:02:05.786Z"
+    },
+    {
+      "id": "sch-madina-eng11-d1",
+      "group_id": "grp-ingliz-tili",
+      "day_of_week": 1,
+      "start_time": "09:00:00",
+      "end_time": "10:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng11-d3",
+      "group_id": "grp-ingliz-tili",
+      "day_of_week": 3,
+      "start_time": "09:00:00",
+      "end_time": "10:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng11-d5",
+      "group_id": "grp-ingliz-tili",
+      "day_of_week": 5,
+      "start_time": "09:00:00",
+      "end_time": "10:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng12-d1",
+      "group_id": "grp-ingliz-tili-2",
+      "day_of_week": 1,
+      "start_time": "10:30:00",
+      "end_time": "12:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng12-d3",
+      "group_id": "grp-ingliz-tili-2",
+      "day_of_week": 3,
+      "start_time": "10:30:00",
+      "end_time": "12:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng12-d5",
+      "group_id": "grp-ingliz-tili-2",
+      "day_of_week": 5,
+      "start_time": "10:30:00",
+      "end_time": "12:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng13-d2",
+      "group_id": "grp-ingliz-tili-3",
+      "day_of_week": 2,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng13-d4",
+      "group_id": "grp-ingliz-tili-3",
+      "day_of_week": 4,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng13-d6",
+      "group_id": "grp-ingliz-tili-3",
+      "day_of_week": 6,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng14-d2",
+      "group_id": "grp-ingliz-tili-4",
+      "day_of_week": 2,
+      "start_time": "11:00:00",
+      "end_time": "12:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng14-d4",
+      "group_id": "grp-ingliz-tili-4",
+      "day_of_week": 4,
+      "start_time": "11:00:00",
+      "end_time": "12:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng14-d6",
+      "group_id": "grp-ingliz-tili-4",
+      "day_of_week": 6,
+      "start_time": "11:00:00",
+      "end_time": "12:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng15-d2",
+      "group_id": "grp-ingliz-tili-5",
+      "day_of_week": 2,
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng15-d4",
+      "group_id": "grp-ingliz-tili-5",
+      "day_of_week": 4,
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng15-d6",
+      "group_id": "grp-ingliz-tili-5",
+      "day_of_week": 6,
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng16-d2",
+      "group_id": "grp-ingliz-tili-6",
+      "day_of_week": 2,
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng16-d4",
+      "group_id": "grp-ingliz-tili-6",
+      "day_of_week": 4,
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng16-d6",
+      "group_id": "grp-ingliz-tili-6",
+      "day_of_week": 6,
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng17-d2",
+      "group_id": "grp-ingliz-tili-7",
+      "day_of_week": 2,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng17-d4",
+      "group_id": "grp-ingliz-tili-7",
+      "day_of_week": 4,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-madina-eng17-d6",
+      "group_id": "grp-ingliz-tili-7",
+      "day_of_week": 6,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "102",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb11-d1",
+      "group_id": "grp-arab-tili",
+      "day_of_week": 1,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb11-d3",
+      "group_id": "grp-arab-tili",
+      "day_of_week": 3,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb11-d5",
+      "group_id": "grp-arab-tili",
+      "day_of_week": 5,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb12-d2",
+      "group_id": "grp-arab-tili-2",
+      "day_of_week": 2,
+      "start_time": "07:00:00",
+      "end_time": "08:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb12-d4",
+      "group_id": "grp-arab-tili-2",
+      "day_of_week": 4,
+      "start_time": "07:00:00",
+      "end_time": "08:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb12-d6",
+      "group_id": "grp-arab-tili-2",
+      "day_of_week": 6,
+      "start_time": "07:00:00",
+      "end_time": "08:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb13-d2",
+      "group_id": "grp-arab-tili-3",
+      "day_of_week": 2,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.834Z"
+    },
+    {
+      "id": "sch-umida-arb13-d4",
+      "group_id": "grp-arab-tili-3",
+      "day_of_week": 4,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-umida-arb13-d6",
+      "group_id": "grp-arab-tili-3",
+      "day_of_week": 6,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "103",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus11-d1",
+      "group_id": "grp-rus-tili",
+      "day_of_week": 1,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus11-d3",
+      "group_id": "grp-rus-tili",
+      "day_of_week": 3,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus11-d5",
+      "group_id": "grp-rus-tili",
+      "day_of_week": 5,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus12-d1",
+      "group_id": "grp-rus-tili-2",
+      "day_of_week": 1,
+      "start_time": "18:00:00",
+      "end_time": "19:30:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus12-d3",
+      "group_id": "grp-rus-tili-2",
+      "day_of_week": 3,
+      "start_time": "18:00:00",
+      "end_time": "19:30:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus12-d5",
+      "group_id": "grp-rus-tili-2",
+      "day_of_week": 5,
+      "start_time": "18:00:00",
+      "end_time": "19:30:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus13-d2",
+      "group_id": "grp-1793622453272",
+      "day_of_week": 2,
+      "start_time": "10:00:00",
+      "end_time": "11:30:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus13-d4",
+      "group_id": "grp-1793622453272",
+      "day_of_week": 4,
+      "start_time": "10:00:00",
+      "end_time": "11:30:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus13-d6",
+      "group_id": "grp-1793622453272",
+      "day_of_week": 6,
+      "start_time": "10:00:00",
+      "end_time": "11:30:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus14-d2",
+      "group_id": "grp-rus-tili-4",
+      "day_of_week": 2,
+      "start_time": "17:30:00",
+      "end_time": "19:00:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus14-d4",
+      "group_id": "grp-rus-tili-4",
+      "day_of_week": 4,
+      "start_time": "17:30:00",
+      "end_time": "19:00:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shaxnoza-rus14-d6",
+      "group_id": "grp-rus-tili-4",
+      "day_of_week": 6,
+      "start_time": "17:30:00",
+      "end_time": "19:00:00",
+      "room": "104",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-fayoza-mnt11-d1",
+      "group_id": "grp-mental",
+      "day_of_week": 1,
+      "start_time": "16:00:00",
+      "end_time": "17:30:00",
+      "room": "202",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-fayoza-mnt11-d3",
+      "group_id": "grp-mental",
+      "day_of_week": 3,
+      "start_time": "16:00:00",
+      "end_time": "17:30:00",
+      "room": "202",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-fayoza-mnt11-d5",
+      "group_id": "grp-mental",
+      "day_of_week": 5,
+      "start_time": "16:00:00",
+      "end_time": "17:30:00",
+      "room": "202",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat11-d1",
+      "group_id": "grp-matematika",
+      "day_of_week": 1,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat11-d3",
+      "group_id": "grp-matematika",
+      "day_of_week": 3,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat11-d5",
+      "group_id": "grp-matematika",
+      "day_of_week": 5,
+      "start_time": "09:30:00",
+      "end_time": "11:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat12-d2",
+      "group_id": "grp-1793615416295",
+      "day_of_week": 2,
+      "start_time": "08:30:00",
+      "end_time": "10:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat12-d4",
+      "group_id": "grp-1793615416295",
+      "day_of_week": 4,
+      "start_time": "08:30:00",
+      "end_time": "10:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat12-d6",
+      "group_id": "grp-1793615416295",
+      "day_of_week": 6,
+      "start_time": "08:30:00",
+      "end_time": "10:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat13-d2",
+      "group_id": "grp-matematika-3",
+      "day_of_week": 2,
+      "start_time": "10:00:00",
+      "end_time": "11:30:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat13-d4",
+      "group_id": "grp-matematika-3",
+      "day_of_week": 4,
+      "start_time": "10:00:00",
+      "end_time": "11:30:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat13-d6",
+      "group_id": "grp-matematika-3",
+      "day_of_week": 6,
+      "start_time": "10:00:00",
+      "end_time": "11:30:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat14-d2",
+      "group_id": "grp-matematika-4",
+      "day_of_week": 2,
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat14-d4",
+      "group_id": "grp-matematika-4",
+      "day_of_week": 4,
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat14-d6",
+      "group_id": "grp-matematika-4",
+      "day_of_week": 6,
+      "start_time": "14:00:00",
+      "end_time": "15:30:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat15-d2",
+      "group_id": "grp-matematika-5",
+      "day_of_week": 2,
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat15-d4",
+      "group_id": "grp-matematika-5",
+      "day_of_week": 4,
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-bexruz-mat15-d6",
+      "group_id": "grp-matematika-5",
+      "day_of_week": 6,
+      "start_time": "15:30:00",
+      "end_time": "17:00:00",
+      "room": "101",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shuxrat-chess11-d2",
+      "group_id": "grp-shaxmat",
+      "day_of_week": 2,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "203",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shuxrat-chess11-d4",
+      "group_id": "grp-shaxmat",
+      "day_of_week": 4,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "203",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-shuxrat-chess11-d6",
+      "group_id": "grp-shaxmat",
+      "day_of_week": 6,
+      "start_time": "17:00:00",
+      "end_time": "18:30:00",
+      "room": "203",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-abdulaziz-it11-d1",
+      "group_id": "grp-fullstack",
+      "day_of_week": 1,
+      "start_time": "18:00:00",
+      "end_time": "19:30:00",
+      "room": "3-xona (IT Lab)",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-abdulaziz-it11-d3",
+      "group_id": "grp-fullstack",
+      "day_of_week": 3,
+      "start_time": "18:00:00",
+      "end_time": "19:30:00",
+      "room": "3-xona (IT Lab)",
+      "created_at": "2026-11-04T07:55:24.835Z"
+    },
+    {
+      "id": "sch-abdulaziz-it11-d5",
+      "group_id": "grp-fullstack",
+      "day_of_week": 5,
+      "start_time": "18:00:00",
+      "end_time": "19:30:00",
+      "room": "3-xona (IT Lab)",
+      "created_at": "2026-11-04T07:55:24.835Z"
     }
   ],
   "educo_db_lessons": [],
@@ -6874,5 +7782,5 @@
       "is_active": true
     }
   ],
-  "_sync_version": 1793774906387
+  "_sync_version": 1793779167893
 }

@@ -848,9 +848,101 @@ class LocalStore {
   }
 
   // --- COURSES ---
+  _harmonizeCourses(rawList, rawGroups) {
+    if (!Array.isArray(rawList) || rawList.length === 0) return { courses: rawList || [], groups: rawGroups || [], changed: false };
+
+    const CANONICAL_COURSES = {
+      rus: { id: 'crs-rus-tili', name: 'Rus tili', code: 'CRS-RUS1', price: 500000, color: '#f59e0b', desc: 'Rus tili bo‘yicha professional o‘quv kursi' },
+      fullstack: { id: 'crs-fullstack', name: 'Full Stack', code: 'CRS-FS1', price: 600000, color: '#10b981', desc: 'Full Stack dasturlash bo‘yicha professional kurs' },
+      mental: { id: 'crs-1793623377912', name: 'Mental Arifmetika', code: 'CRS-MNT1', price: 498000, color: '#ec4899', desc: 'Mental arifmetika va tezkor hisoblash' },
+      math: { id: 'crs-matematika', name: 'Matematika', code: 'CRS-MAT1', price: 500000, color: '#3b82f6', desc: 'Matematika va mantiqiy fikrlash kursi' },
+      english: { id: 'crs-ingliz-tili', name: 'Ingliz tili', code: 'CRS-ENG1', price: 500000, color: '#8b5cf6', desc: 'Ingliz tili bo‘yicha professional o‘quv kursi' },
+      arabic: { id: 'crs-arab-tili', name: 'Arab tili', code: 'CRS-ARB1', price: 500000, color: '#10b981', desc: 'Arab tili bo‘yicha professional o‘quv kursi' },
+      chess: { id: 'crs-shaxmat', name: 'Shaxmat', code: 'CRS-CHESS1', price: 400000, color: '#64748b', desc: 'Shaxmat bo‘yicha professional o‘quv kursi' },
+    };
+
+    const getSubjectKey = (c) => {
+      const name = (c.name || '').trim().toLowerCase();
+      const code = (c.code || '').trim().toUpperCase();
+      const id = String(c.id || '').toLowerCase();
+      if (id === 'crs-rus-tili' || code === 'CRS-RUS1' || code === 'CRS-1.1' || name.startsWith('рус') || name.startsWith('rus tili')) return 'rus';
+      if (id === 'crs-fullstack' || id === 'crs-it' || id === 'crs-frontend' || code === 'CRS-FS1' || code === 'CRS-8784' || name.includes('full stack') || name.includes('frontend') || name.includes('it va dasturlash') || name.includes('dasturlash')) return 'fullstack';
+      if (id === 'crs-1793623377912' || id === 'crs-mental' || code === 'CRS-MNT1' || name.includes('mental')) return 'mental';
+      if (id === 'crs-matematika' || id === 'crs-1793615340332' || code === 'CRS-MAT1' || name.includes('matematik') || name.includes('math')) return 'math';
+      if (id === 'crs-ingliz-tili' || code === 'CRS-ENG1' || name.includes('ingliz') || name.includes('english')) return 'english';
+      if (id === 'crs-arab-tili' || code === 'CRS-ARB1' || name.includes('arab') || name.includes('arabic')) return 'arabic';
+      if (id === 'crs-shaxmat' || code === 'CRS-CHESS1' || name.includes('shaxmat') || name.includes('chess')) return 'chess';
+      return null;
+    };
+
+    let changed = false;
+    let groups = Array.isArray(rawGroups) ? [...rawGroups] : [];
+    const seenSubjects = new Map();
+    const cleanCourses = [];
+
+    for (const c of rawList) {
+      const subKey = getSubjectKey(c);
+      if (subKey) {
+        if (!seenSubjects.has(subKey)) {
+          const canon = CANONICAL_COURSES[subKey];
+          const masterCourse = {
+            ...c,
+            id: canon.id,
+            name: canon.name,
+            code: canon.code,
+            monthly_fee: c.monthly_fee || canon.price,
+            price: c.price || c.monthly_fee || canon.price,
+            color: c.color || canon.color,
+            description: c.description || canon.desc,
+            is_active: c.is_active !== false,
+          };
+          seenSubjects.set(subKey, masterCourse);
+          cleanCourses.push(masterCourse);
+
+          if (c.id !== canon.id || c.name !== canon.name) {
+            changed = true;
+            groups = groups.map((g) => {
+              if (g.course_id === c.id || g.courseId === c.id) {
+                return { ...g, course_id: canon.id, courseId: canon.id, course_name: canon.name, courseName: canon.name };
+              }
+              return g;
+            });
+          }
+        } else {
+          // Phantom duplicate course! Merge its groups to the master course & drop duplicate
+          changed = true;
+          const canon = seenSubjects.get(subKey);
+          groups = groups.map((g) => {
+            if (g.course_id === c.id || g.courseId === c.id || (g.course_name && g.course_name.toLowerCase() === c.name?.toLowerCase())) {
+              return { ...g, course_id: canon.id, courseId: canon.id, course_name: canon.name, courseName: canon.name };
+            }
+            return g;
+          });
+        }
+      } else {
+        cleanCourses.push(c);
+      }
+    }
+
+    return { courses: cleanCourses, groups, changed };
+  }
+
   getCourses() {
-    const list = this.getItem(STORAGE_KEYS.COURSES, INITIAL_COURSES);
-    const groups = this.getItem(STORAGE_KEYS.GROUPS, INITIAL_GROUPS);
+    const rawList = this.getItem(STORAGE_KEYS.COURSES, INITIAL_COURSES);
+    const rawGroups = this.getItem(STORAGE_KEYS.GROUPS, INITIAL_GROUPS);
+    const { courses: list, groups, changed } = this._harmonizeCourses(rawList, rawGroups);
+
+    if (changed) {
+      this.memoryStore[STORAGE_KEYS.COURSES] = list;
+      this.memoryStore[STORAGE_KEYS.GROUPS] = groups;
+      try {
+        if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
+          window.localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(list));
+          window.localStorage.setItem(STORAGE_KEYS.GROUPS, JSON.stringify(groups));
+        }
+      } catch (_) {}
+    }
+
     return list.map((c) => {
       const activeGroups = groups.filter((g) => {
         const matchesCourse =

@@ -321,7 +321,7 @@ export default function ScheduleManagement() {
                 { value: 'all', label: t('schedule.allRooms', 'Barcha xonalar'), subtitle: `${distinctRooms.length} ta xona` },
                 ...distinctRooms.map((r) => ({
                   value: r,
-                  label: `${r}-xona`,
+                  label: r.toLowerCase().includes('xona') ? r : `${r}-xona`,
                   subtitle: 'Dars xonasi',
                   color: '#059669',
                 })),
@@ -471,7 +471,7 @@ export default function ScheduleManagement() {
                               {item.room && (
                                 <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200/90 dark:border-gray-700 shadow-2xs">
                                   <Building2 className="w-3 h-3 text-gray-500 shrink-0" />
-                                  <span>{item.room}-xona</span>
+                                  <span>{item.room.toLowerCase().includes('xona') ? item.room : `${item.room}-xona`}</span>
                                 </div>
                               )}
                             </div>
@@ -680,7 +680,7 @@ export default function ScheduleManagement() {
                           {item.room && (
                             <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200/90 dark:border-gray-700 shadow-2xs">
                               <Building2 className="w-3.5 h-3.5 text-gray-500 shrink-0" />
-                              <span>{item.room}-xona</span>
+                              <span>{item.room.toLowerCase().includes('xona') ? item.room : `${item.room}-xona`}</span>
                             </div>
                           )}
                         </div>

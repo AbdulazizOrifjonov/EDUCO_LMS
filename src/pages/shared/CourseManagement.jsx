@@ -16,6 +16,7 @@ import {
   Sparkles,
   DollarSign,
   CheckCircle,
+  FolderPlus,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -267,6 +268,23 @@ export default function CourseManagement() {
 
           {isOwnerOrAdmin && (
             <>
+              {/* Add Group directly under this Course */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="!p-1.5 h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg"
+                title={`«${row.name}» kursiga yangi parallel guruh ochish`}
+                onClick={() =>
+                  navigate(
+                    `/${currentUserRole}/groups/create?courseId=${row.id}&courseName=${encodeURIComponent(
+                      row.name
+                    )}`
+                  )
+                }
+              >
+                <FolderPlus className="w-4 h-4" />
+              </Button>
+
               {/* Update / Edit Course */}
               <Button
                 variant="ghost"
@@ -344,6 +362,26 @@ export default function CourseManagement() {
             </Button>
           )}
         </div>
+      </div>
+
+      {/* 1 Kurs = Ko‘p Guruhlar Information Banner */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/60 to-emerald-50/70 dark:from-blue-950/40 dark:via-gray-900/60 dark:to-emerald-950/30 border border-blue-200/80 dark:border-blue-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+            1:N
+          </div>
+          <div>
+            <h4 className="text-xs font-black uppercase tracking-wider text-blue-950 dark:text-blue-200">
+              Mantiqiy tuzilma: 1 ta Kurs = Ko‘p parallel guruhlar
+            </h4>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+              Har bir fan bo‘yicha kurs 1 marta ochiladi. Guruh qo‘shish uchun kurs qatoridagi <strong className="text-emerald-600 dark:text-emerald-400 font-bold">+ Guruh ochish</strong> tugmasini bosing.
+            </p>
+          </div>
+        </div>
+        <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-white dark:bg-gray-800 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0 self-start sm:self-auto">
+          {courses.length} ta asosiy taʼlim kursi
+        </span>
       </div>
 
       {/* Filters */}
@@ -453,15 +491,35 @@ export default function CourseManagement() {
 
                   {/* Action Buttons */}
                   <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-wrap">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      icon={Eye}
-                      className="text-xs py-1 px-2.5 text-blue-600 dark:text-blue-400"
-                      onClick={() => setSelectedCourseForView(course)}
-                    >
-                      Batafsil
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={Eye}
+                        className="text-xs py-1 px-2.5 text-blue-600 dark:text-blue-400"
+                        onClick={() => setSelectedCourseForView(course)}
+                      >
+                        Batafsil
+                      </Button>
+                      {isOwnerOrAdmin && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={FolderPlus}
+                          className="text-xs py-1 px-2 text-emerald-600 dark:text-emerald-400 font-bold border-emerald-300 dark:border-emerald-800"
+                          title="Ushbu kurs ostida yangi guruh ochish"
+                          onClick={() =>
+                            navigate(
+                              `/${currentUserRole}/groups/create?courseId=${course.id}&courseName=${encodeURIComponent(
+                                course.name
+                              )}`
+                            )
+                          }
+                        >
+                          + Guruh
+                        </Button>
+                      )}
+                    </div>
                     {isOwnerOrAdmin && (
                       <div className="flex items-center gap-1.5">
                         <Button

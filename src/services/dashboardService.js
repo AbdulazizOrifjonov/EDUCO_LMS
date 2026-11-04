@@ -520,7 +520,13 @@ export const dashboardService = {
         const inStudentIds = groups.filter((g) => Array.isArray(g.student_ids) && g.student_ids.map(id => localStore.normalizeUserId(id)).includes(normalizedUserId)).map(g => g.id);
         allowedGroupIds = [...new Set([...enrolled, ...inStudentIds])];
       } else if (role === 'teacher') {
-        allowedGroupIds = groups.filter((g) => g.teacher_id === normalizedUserId).map((g) => g.id);
+        const u = localStore.getUsers ? localStore.getUsers().find(x => x.id === normalizedUserId || x.id === userId) : null;
+        const uName = (u?.fullName || `${u?.first_name || ''} ${u?.last_name || ''}`).trim().toLowerCase();
+        allowedGroupIds = groups.filter((g) => {
+          const matchId = g.teacher_id === normalizedUserId || g.teacher_id === userId;
+          const matchName = uName && g.teacher_name && (g.teacher_name.toLowerCase().includes(uName) || uName.includes(g.teacher_name.toLowerCase()));
+          return matchId || matchName;
+        }).map((g) => g.id);
       } else {
         allowedGroupIds = groups.map((g) => g.id);
       }
@@ -748,8 +754,62 @@ export const dashboardService = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Error fetching upcoming schedule:', error);
-      return [];
+      console.warn('Error fetching upcoming schedule from Supabase, fallback to localStore:', error);
+      const normalizedUserId = localStore.normalizeUserId(userId);
+      const allSchedules = localStore.getSchedules();
+      const groups = localStore.getGroups();
+      const currentDayOfWeek = new Date().getDay() || 7;
+
+      let allowedGroupIds = [];
+      if (role === 'teacher') {
+        const u = localStore.getUsers ? localStore.getUsers().find((x) => x.id === normalizedUserId || x.id === userId) : null;
+        const uName = (u?.fullName || `${u?.first_name || ''} ${u?.last_name || ''}`).trim().toLowerCase();
+        allowedGroupIds = groups
+          .filter((g) => {
+            const matchId = g.teacher_id === normalizedUserId || g.teacher_id === userId;
+            const matchName =
+              uName &&
+              g.teacher_name &&
+              (g.teacher_name.toLowerCase().includes(uName) || uName.includes(g.teacher_name.toLowerCase()));
+            return matchId || matchName;
+          })
+          .map((g) => g.id);
+      } else if (role === 'student') {
+        const memberships = localStore.getMemberships ? localStore.getMemberships() : localStore.getItem('educo_db_memberships', []);
+        const enrolled = memberships.filter((m) => localStore.normalizeUserId(m.student_id) === normalizedUserId && m.is_active !== false).map((m) => m.group_id);
+        const inStudentIds = groups.filter((g) => Array.isArray(g.student_ids) && g.student_ids.map((id) => localStore.normalizeUserId(id)).includes(normalizedUserId)).map((g) => g.id);
+        allowedGroupIds = [...new Set([...enrolled, ...inStudentIds])];
+      } else {
+        allowedGroupIds = groups.map((g) => g.id);
+      }
+
+      const matching = allSchedules.filter((s) => allowedGroupIds.includes(s.group_id));
+      matching.sort((a, b) => {
+        const diffA = (Number(a.day_of_week) - currentDayOfWeek + 7) % 7;
+        const diffB = (Number(b.day_of_week) - currentDayOfWeek + 7) % 7;
+        if (diffA !== diffB) return diffA - diffB;
+        return (a.start_time || '').localeCompare(b.start_time || '');
+      });
+
+      return matching.slice(0, limit).map((s) => {
+        const g = groups.find((grp) => grp.id === s.group_id);
+        return {
+          id: s.id,
+          title: `${g?.name || 'Guruh'} darsi`,
+          lesson_date: new Date().toISOString().split('T')[0],
+          start_time: s.start_time,
+          end_time: s.end_time,
+          groups: {
+            id: g?.id,
+            name: g?.name || 'Guruh',
+            room: s.room || g?.room || 'Xona',
+            courses: {
+              name: g?.course_name || 'Fan',
+              color: g?.courseColor || '#123D78',
+            },
+          },
+        };
+      });
     }
   },
 
