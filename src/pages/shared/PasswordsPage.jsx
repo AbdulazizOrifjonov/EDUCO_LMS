@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import {
   KeyRound,
   Search,
@@ -47,20 +48,25 @@ export default function PasswordsPage() {
   const currentUserRole = (profile?.role || 'owner').toLowerCase();
   const isOwner = currentUserRole === ROLES.OWNER;
   const { searchQuery, setSearchQuery } = useSearch();
+  const [searchParams] = useSearchParams();
+  const qFromUrl = searchParams.get('q') || searchParams.get('search') || '';
+  const roleFromUrl = searchParams.get('role');
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState(searchQuery || '');
-  const [roleFilter, setRoleFilter] = useState('all');
+  const [search, setSearch] = useState(qFromUrl || searchQuery || '');
+  const [roleFilter, setRoleFilter] = useState(roleFromUrl || 'all');
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const roleDropdownRef = useRef(null);
 
-  // Synchronize with Navbar global search bar
+  // Synchronize with URL and Navbar global search bar
   useEffect(() => {
-    if (searchQuery !== undefined) {
+    if (qFromUrl) {
+      setSearch(qFromUrl);
+    } else if (searchQuery !== undefined) {
       setSearch(searchQuery);
     }
-  }, [searchQuery]);
+  }, [qFromUrl, searchQuery]);
 
   // Outside click listener for custom role dropdown
   useEffect(() => {

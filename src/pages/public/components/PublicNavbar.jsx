@@ -22,6 +22,7 @@ import {
   Newspaper,
   Video,
   Info,
+  Instagram,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import useTheme from '@/hooks/useTheme';
@@ -373,10 +374,10 @@ export default function PublicNavbar({ settings }) {
               href={settings?.instagram || "https://www.instagram.com/educomarkaz?rpxt=MTFneWxqaHB1MjFmMg%3D%3D&utm_source=qr"}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:flex items-center justify-center w-9 h-9 rounded-xl text-pink-500 border border-gray-200/80 dark:border-gray-700 bg-gray-50/80 hover:bg-pink-50 hover:border-pink-300 dark:bg-gray-800/80 dark:hover:bg-pink-950/30 transition-all hover:scale-105 shrink-0"
+              className="hidden lg:flex items-center justify-center w-9 h-9 rounded-xl text-white bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 hover:scale-105 transition-all shrink-0 shadow-xs"
               title="Instagram (@educomarkaz)"
             >
-              <span className="text-[11px] font-black">IG</span>
+              <Instagram className="w-4 h-4 text-white stroke-[2.2]" />
             </a>
 
             {/* Language Selector Dropdown (UZ / EN / RU) */}
@@ -522,7 +523,7 @@ export default function PublicNavbar({ settings }) {
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold bg-pink-500/10 text-pink-600 dark:text-pink-400 border border-pink-500/30 transition-colors"
                 >
-                  <span className="text-[11px] font-black">IG</span>
+                  <Instagram className="w-4 h-4 text-pink-600 dark:text-pink-400 stroke-[2.2]" />
                   <span>@educomarkaz</span>
                 </a>
               </div>

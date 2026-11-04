@@ -158,8 +158,9 @@ export default function UserManagement() {
   };
 
   const handleResetPassword = (user) => {
-    setSelectedUser(user);
-    setIsFormOpen(true);
+    if (!user) return;
+    const q = user.username || user.fullName || user.first_name || user.phone || '';
+    navigate(`/${currentUserRole}/passwords?q=${encodeURIComponent(q)}`);
   };
 
   /**

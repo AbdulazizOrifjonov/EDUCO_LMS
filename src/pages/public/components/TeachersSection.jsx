@@ -56,7 +56,10 @@ export default function TeachersSection({ teachers = [], onSelectTeacher = () =>
 
                   {/* Experience Badge */}
                   <span className="absolute bottom-3 left-3 px-3 py-1 rounded-full text-xs font-extrabold bg-blue-600 dark:bg-emerald-500 text-white shadow-md">
-                    {teacher.experience_years} tajriba
+                    {(() => {
+                      const exp = teacher.experience_years || teacher.experience || '3+ yil';
+                      return String(exp).toLowerCase().includes('tajriba') ? exp : `${exp} tajriba`;
+                    })()}
                   </span>
 
                   {/* Telegram / Social Link */}

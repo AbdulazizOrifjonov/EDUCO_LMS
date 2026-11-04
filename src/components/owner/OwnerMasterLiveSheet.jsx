@@ -25,7 +25,7 @@ import {
 import { localStore, STORAGE_KEYS } from '@/lib/localStore';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone } from '@/utils/phoneFormat';
-import { exportToCSV, formatCurrency } from '@/utils/csvExport';
+import { exportToExcel, exportToCSV, formatCurrency } from '@/utils/csvExport';
 import { toast } from '@/components/ui/Toast';
 
 /**
@@ -261,8 +261,8 @@ export default function OwnerMasterLiveSheet() {
     }, 2000);
   };
 
-  // Full Excel Export Handler (.csv with UTF-8 BOM for Microsoft Excel)
-  const handleExportExcel = () => {
+  // Full Excel Export Handler (.xlsx genuine Excel workbook with custom column widths)
+  const handleExport = (format = 'xlsx') => {
     if (!filteredData.length) {
       toast.error('Eksport qilish uchun maʼlumot mavjud emas!');
       return;
@@ -271,14 +271,14 @@ export default function OwnerMasterLiveSheet() {
     const columns = [
       { key: 'seq', label: 'T/R' },
       { key: 'id', label: 'ID Raqami' },
-      { key: 'fullName', label: 'F.I.Sh' },
-      { key: 'roleLabel', label: 'Roli' },
-      { key: 'phone', label: 'Telefon' },
+      { key: 'fullName', label: 'F.I.Sh (To‘liq Ismi)' },
+      { key: 'roleLabel', label: 'Tizimdagi Roli' },
+      { key: 'phone', label: 'Telefon Raqami' },
       { key: 'username', label: 'Login' },
       { key: 'password', label: 'Tizim Paroli' },
-      { key: 'createdAt', label: 'Yaratilgan Sana va Vaqt' },
+      { key: 'createdAt', label: 'Ro‘yxatdan O‘tgan Sana va Vaqt' },
       { key: 'groupCount', label: 'Guruhlar Soni' },
-      { key: 'groupNames', label: 'Biriktirilgan Guruhlar' },
+      { key: 'groupNames', label: 'Biriktirilgan Guruhlar Ro‘yxati' },
       { key: 'studentsCount', label: 'O‘quvchilar Soni' },
       { key: 'paymentSummary', label: 'To‘lov va Moliya Holati' },
       { key: 'attendanceRate', label: 'Davomat Ko‘rsatkichi' },
@@ -303,17 +303,29 @@ export default function OwnerMasterLiveSheet() {
       username: item.username,
       password: item.password,
       createdAt: item.createdAt,
-      groupCount: item.groupCount,
-      groupNames: item.groupNames,
-      studentsCount: item.studentsCount,
+      groupCount: `${item.groupCount} ta`,
+      groupNames: item.groupNames || 'Mavjud emas',
+      studentsCount:
+        item.role === 'teacher'
+          ? `${item.studentsCount} ta o‘quvchi`
+          : item.role === 'student'
+          ? '1 ta talaba'
+          : 'Barcha',
       paymentSummary: item.paymentSummary,
       attendanceRate: item.attendanceRate,
       statusLabel: item.isActive ? 'Faol (Active)' : 'Bloklangan (Inactive)',
     }));
 
-    const filename = `educo_master_baza_${new Date().toISOString().split('T')[0]}`;
-    exportToCSV(columns, rows, filename);
-    toast.success('Barcha maʼlumotlar Excel (.csv) formatida muvaffaqiyatli yuklandi!');
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `educo_master_baza_${dateStr}`;
+
+    if (format === 'csv') {
+      exportToCSV(columns, rows, `${filename}.csv`);
+      toast.success('Barcha maʼlumotlar CSV formatida muvaffaqiyatli yuklandi!');
+    } else {
+      exportToExcel(columns, rows, `${filename}.xlsx`, { sheetName: 'EDUCO_Baza' });
+      toast.success('Barcha maʼlumotlar haqiqiy Excel (.xlsx) formatida muvaffaqiyatli yuklandi!');
+    }
   };
 
   const getRoleBadge = (role) => {
@@ -375,11 +387,11 @@ export default function OwnerMasterLiveSheet() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={refreshData}
-            className="p-2.5 sm:px-3.5 sm:py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all flex items-center gap-2 backdrop-blur-md border border-white/20 cursor-pointer active:scale-95"
+            className="p-2.5 sm:px-3 sm:py-2.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all flex items-center gap-1.5 backdrop-blur-md border border-white/20 cursor-pointer active:scale-95"
             title="Ma’lumotlarni yangilash"
           >
             <RefreshCw className="w-4 h-4" />
@@ -388,11 +400,21 @@ export default function OwnerMasterLiveSheet() {
 
           <button
             type="button"
-            onClick={handleExportExcel}
-            className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-800 font-black text-xs sm:text-sm shadow-xl hover:shadow-2xl transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+            onClick={() => handleExport('xlsx')}
+            className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-white hover:bg-emerald-50 text-emerald-900 font-black text-xs sm:text-sm shadow-xl hover:shadow-2xl transition-all flex items-center gap-2 cursor-pointer active:scale-95 border border-white"
+            title="Haqiqiy Microsoft Excel (.xlsx) faylini yuklab olish"
           >
             <Download className="w-4 h-4 text-emerald-600" />
-            <span>Excelga yuklash (.csv / .xlsx)</span>
+            <span>Excel (.xlsx) yuklab olish</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleExport('csv')}
+            className="px-3 py-2.5 sm:py-3 rounded-2xl bg-emerald-800/60 hover:bg-emerald-800/90 text-emerald-100 font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-emerald-400/30"
+            title="Oddiy CSV (.csv) formatida yuklab olish"
+          >
+            <span>CSV</span>
           </button>
         </div>
       </div>

@@ -11,6 +11,7 @@ import {
   BookOpen,
   GraduationCap,
   Sparkles,
+  Instagram,
 } from 'lucide-react';
 
 export default function PublicFooter({ settings }) {
@@ -89,8 +90,8 @@ export default function PublicFooter({ settings }) {
                   className="flex items-center gap-2.5 p-2 rounded-xl bg-white/5 hover:bg-pink-900/25 border border-white/10 hover:border-pink-500/60 transition-all group"
                   title="Instagram sahifamizga o'tish"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform font-black text-[11px]">
-                    IG
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    <Instagram className="w-4 h-4 text-white stroke-[2.2]" />
                   </div>
                   <div className="min-w-0">
                     <span className="text-[10px] text-gray-400 block leading-tight font-medium">Instagram</span>
@@ -267,7 +268,7 @@ export default function PublicFooter({ settings }) {
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <span className="w-4 h-4 text-pink-400 font-black text-[11px] shrink-0 text-center">IG</span>
+                <Instagram className="w-4 h-4 text-pink-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-gray-400 block leading-tight">Instagram sahifa:</span>
                   <a

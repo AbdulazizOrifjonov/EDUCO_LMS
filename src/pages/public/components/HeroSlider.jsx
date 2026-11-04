@@ -16,6 +16,8 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
   const [isPaused, setIsPaused] = useState(false);
   const touchStartXRef = useRef(0);
   const touchEndXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+  const touchEndYRef = useRef(0);
 
   const activeSlides = slides.filter((s) => s.is_active);
   const total = activeSlides.length;
@@ -41,14 +43,20 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
   };
 
   const handleTouchStart = (e) => {
+    if (!e.touches?.[0]) return;
     touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e) => {
+    if (!e.changedTouches?.[0]) return;
     touchEndXRef.current = e.changedTouches[0].clientX;
-    const diff = touchStartXRef.current - touchEndXRef.current;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) handleNext();
+    touchEndYRef.current = e.changedTouches[0].clientY;
+    const diffX = touchStartXRef.current - touchEndXRef.current;
+    const diffY = touchStartYRef.current - touchEndYRef.current;
+    // Only trigger slide transition if horizontal swipe is decisive and greater than vertical movement
+    if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+      if (diffX > 0) handleNext();
       else handlePrev();
     }
   };
@@ -146,22 +154,16 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                   {slide.subtitle}
                 </p>
 
-                {/* Action CTA Buttons (Uniform Height, Non-wrapping, Sleek Glassmorphic & Modern) */}
-                <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-2 sm:pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                {/* Action CTA Buttons (Uniform Height, Balanced, Sleek & Compact Design) */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-3 sm:pt-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                   {/* 1. Sinov darsiga yozilish CTA (Lead Generation) */}
                   <a
                     href="#contact"
                     onClick={(e) => scrollToTarget(e, '#contact')}
-                    className="relative overflow-hidden inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-5 sm:px-7 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 dark:from-emerald-600 dark:via-teal-600 dark:to-emerald-700 dark:hover:from-emerald-500 dark:hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-blue-900/30 dark:shadow-emerald-950/40 border border-white/20 transition-all hover:scale-102 active:scale-98 cursor-pointer whitespace-nowrap group w-full xs:w-auto shrink-0"
+                    className="relative overflow-hidden inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 dark:from-emerald-600 dark:via-teal-600 dark:to-emerald-700 dark:hover:from-emerald-500 dark:hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-900/25 dark:shadow-emerald-950/30 border border-white/20 transition-all hover:scale-102 active:scale-98 cursor-pointer whitespace-nowrap shrink-0 group"
                   >
-                    {/* Sweeping Shimmer Light Beam */}
-                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent skew-x-[-20deg] pointer-events-none animate-shimmer-sweep" />
-
-                    {/* Seamless Round Golden Sparkle Icon */}
-                    <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-white/20 dark:bg-white/15 border border-white/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" />
-                    </span>
-                    <span className="relative z-10 whitespace-nowrap">Sinov darsiga yozilish</span>
+                    <Sparkles className="w-4 h-4 text-amber-300 shrink-0 group-hover:scale-110 transition-transform" />
+                    <span>Sinov darsiga yozilish</span>
                   </a>
 
                   {/* 2. Primary CTA: Courses / Teachers */}
@@ -169,10 +171,10 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                     <a
                       href={slide.cta_link || '#courses'}
                       onClick={(e) => scrollToTarget(e, slide.cta_link || '#courses')}
-                      className="inline-flex items-center justify-center gap-2 h-12 sm:h-13 px-4 sm:px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98 shadow-lg shadow-black/20 whitespace-nowrap flex-1 xs:flex-none shrink-0 group"
+                      className="inline-flex items-center justify-center gap-1.5 sm:gap-2 h-10 sm:h-11 px-3.5 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all hover:scale-102 active:scale-98 shadow-md shadow-black/20 whitespace-nowrap shrink-0 group"
                     >
                       <span>{slide.cta_text}</span>
-                      <ArrowRight className="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 transition-transform duration-300 text-blue-300 dark:text-emerald-300" />
+                      <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180 group-hover:translate-x-1 transition-transform text-blue-300 dark:text-emerald-300" />
                     </a>
                   )}
 
@@ -181,7 +183,7 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                     <a
                       href={slide.secondary_cta_link || '#about'}
                       onClick={(e) => scrollToTarget(e, slide.secondary_cta_link || '#about')}
-                      className="inline-flex items-center justify-center gap-2 h-12 sm:h-13 px-4 sm:px-6 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all cursor-pointer hover:scale-102 active:scale-98 shadow-lg shadow-black/20 whitespace-nowrap flex-1 xs:flex-none shrink-0"
+                      className="inline-flex items-center justify-center gap-1.5 sm:gap-2 h-10 sm:h-11 px-3.5 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white/90 hover:text-white font-bold text-xs sm:text-sm backdrop-blur-md border border-white/20 hover:border-white/40 transition-all hover:scale-102 active:scale-98 shadow-md shadow-black/20 whitespace-nowrap shrink-0"
                     >
                       <span>{slide.secondary_cta_text}</span>
                     </a>
@@ -191,12 +193,11 @@ export default function HeroSlider({ slides = [], onOpenVideo = () => {} }) {
                   <button
                     type="button"
                     onClick={onOpenVideo}
-                    className="inline-flex items-center justify-center gap-2.5 h-12 sm:h-13 px-4 sm:px-5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 hover:border-white/40 backdrop-blur-md transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-lg shadow-black/20 whitespace-nowrap shrink-0 group"
+                    className="inline-flex items-center justify-center gap-2 h-10 sm:h-11 px-3.5 sm:px-4.5 rounded-xl bg-black/40 hover:bg-black/60 text-white font-bold text-xs sm:text-sm border border-white/20 hover:border-white/40 backdrop-blur-md transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-md shadow-black/20 whitespace-nowrap shrink-0 group"
                     title="Markaz videolavhasini tomosha qilish"
                   >
-                    <div className="relative w-6 h-6 rounded-full bg-blue-600 dark:bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
-                      <span className="absolute inset-0 rounded-full bg-blue-400 dark:bg-emerald-400 animate-ping opacity-60" />
-                      <Play className="relative z-10 w-2.5 h-2.5 fill-current ml-0.5" />
+                    <div className="w-5 h-5 rounded-full bg-blue-600 dark:bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
                     </div>
                     <span>Video</span>
                   </button>

@@ -12,6 +12,7 @@ import {
   BookOpen,
   Check,
   GraduationCap,
+  Instagram,
 } from 'lucide-react';
 import { toast } from '@/components/ui/Toast';
 import ScrollReveal from '@/hooks/useScrollReveal';
@@ -218,7 +219,7 @@ export default function CtaSection({ settings, courses = [], prefilledCourse = '
                 title="Instagram sahifamizga o'tish"
               >
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs font-black text-sm">
-                  IG
+                  <Instagram className="w-6 h-6 text-white stroke-[2.2]" />
                 </div>
                 <div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">

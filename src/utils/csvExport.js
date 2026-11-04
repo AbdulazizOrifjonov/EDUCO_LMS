@@ -1,3 +1,5 @@
+import { exportToExcel } from './excelExport';
+
 /**
  * Formats a date value locale-sensitively.
  * @param {string|Date|number} date 
@@ -47,6 +49,9 @@ export function formatCurrency(amount, currency = 'UZS', locale = 'en-US') {
 
 /**
  * Exports data to CSV and triggers a browser download.
+ * Prepends UTF-8 BOM and explicit Excel delimiter directive (sep=,)
+ * so WPS Office and Microsoft Excel parse each cell into distinct columns.
+ *
  * @param {Array<{ key: string, label: string }|string>} columns - Column definitions or header keys
  * @param {Array<Object>} rows - Data rows
  * @param {string} filename - Target filename (e.g. 'payroll_report.csv')
@@ -84,22 +89,39 @@ export function exportToCSV(columns = [], rows = [], filename = 'export.csv') {
       .join(',');
   });
 
-  // Combine with UTF-8 BOM so Excel opens non-Latin scripts (Uzbek, Russian, Arabic) cleanly
-  const csvContent = '\uFEFF' + [headerRow, ...dataRows].join('\r\n');
+  // Combine with UTF-8 BOM and sep=, directive so Excel / WPS Office splits columns reliably
+  const csvContent = '\uFEFFsep=,\r\n' + [headerRow, ...dataRows].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
 
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename.endsWith('.csv') ? filename : `${filename}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  if (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined' &&
+    typeof URL !== 'undefined' &&
+    typeof URL.createObjectURL === 'function' &&
+    document.createElement
+  ) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename.endsWith('.csv') ? filename : `${filename}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => {
+      if (typeof URL.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(url);
+      }
+    }, 1000);
+  }
+
+  return blob;
 }
+
+export { exportToExcel };
 
 export default {
   exportToCSV,
+  exportToExcel,
   formatDate,
   formatCurrency,
 };
