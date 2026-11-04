@@ -24,6 +24,10 @@ import {
   MessageSquareQuote,
   Sparkles,
   Layers,
+  FileCheck,
+  Megaphone,
+  DollarSign,
+  ShieldAlert,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -65,6 +69,16 @@ const OWNER_NAV_ITEMS = [
     icon: Calendar,
   },
   {
+    label: 'Uyga vazifalar',
+    path: '/owner/homework',
+    icon: FileCheck,
+  },
+  {
+    label: 'O‘quv materiallari',
+    path: '/owner/materials',
+    icon: BookOpen,
+  },
+  {
     labelKey: 'nav.reminders',
     label: 'Eslatmalar',
     path: '/owner/reminders',
@@ -81,6 +95,11 @@ const OWNER_NAV_ITEMS = [
     label: 'Grades',
     path: '/owner/grades',
     icon: Award,
+  },
+  {
+    label: 'Eʼlonlar',
+    path: '/owner/announcements',
+    icon: Megaphone,
   },
   {
     labelKey: 'nav.chat',
@@ -101,10 +120,20 @@ const OWNER_NAV_ITEMS = [
     icon: Smartphone,
   },
   {
+    label: 'Oyliklar (Payroll)',
+    path: '/owner/payroll',
+    icon: DollarSign,
+  },
+  {
     labelKey: 'nav.reports',
     label: 'Reports',
     path: '/owner/reports',
     icon: BarChart3,
+  },
+  {
+    label: 'Audit jurnali',
+    path: '/owner/audit',
+    icon: ShieldAlert,
   },
   {
     labelKey: 'nav.notifications',

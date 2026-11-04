@@ -13,6 +13,8 @@ import {
   Bell,
   Settings,
   GraduationCap,
+  FileCheck,
+  Megaphone,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -54,6 +56,16 @@ const TEACHER_NAV_ITEMS = [
     icon: Calendar,
   },
   {
+    label: 'Uyga vazifalar',
+    path: '/teacher/homework',
+    icon: FileCheck,
+  },
+  {
+    label: 'O‘quv materiallari',
+    path: '/teacher/materials',
+    icon: BookOpen,
+  },
+  {
     labelKey: 'nav.attendance',
     label: 'Davomat',
     path: '/teacher/attendance',
@@ -64,6 +76,11 @@ const TEACHER_NAV_ITEMS = [
     label: 'Baholar & Jurnal',
     path: '/teacher/grades',
     icon: Award,
+  },
+  {
+    label: 'Eʼlonlar',
+    path: '/teacher/announcements',
+    icon: Megaphone,
   },
   {
     labelKey: 'nav.chat',

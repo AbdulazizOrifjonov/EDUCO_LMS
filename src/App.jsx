@@ -55,6 +55,34 @@ const RemindersPage = React.lazy(() => import('@/pages/shared/RemindersPage'));
 const SmsManagementPage = React.lazy(() => import('@/pages/owner/SmsManagementPage'));
 const PublicWebsite = React.lazy(() => import('@/pages/public/PublicWebsite'));
 const WebsiteManagementPage = React.lazy(() => import('@/pages/owner/website/WebsiteManagementPage'));
+const HomeworkPage = React.lazy(() => import('@/pages/shared/HomeworkPage'));
+const HomeworkDetail = React.lazy(() => import('@/pages/shared/HomeworkDetail'));
+const MaterialsPage = React.lazy(() => import('@/pages/shared/MaterialsPage'));
+const AnnouncementsPage = React.lazy(() => import('@/pages/shared/AnnouncementsPage'));
+const AuditLogPage = React.lazy(() => import('@/pages/owner/AuditLogPage'));
+const PayrollPage = React.lazy(() => import('@/pages/owner/PayrollPage'));
+
+function RoleRedirectRoute({ segment, fallback = 'dashboard' }) {
+  const { user, profile, loading } = useAuth();
+  if (loading) {
+    return <LoadingSpinner fullPage text="EDUCO LMS..." />;
+  }
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  const role = String(profile?.role || user?.user_metadata?.role || 'student').toLowerCase();
+  if (segment === 'groups' && role === 'student') return <Navigate to="/student/group" replace />;
+  if (segment === 'schedule' && role === 'student') return <Navigate to="/student/schedule" replace />;
+  if (segment === 'attendance' && role === 'student') return <Navigate to="/student/attendance" replace />;
+  if (segment === 'sms' && role !== 'owner') return <Navigate to={`/${role}/dashboard`} replace />;
+  if (segment === 'payroll' && role !== 'owner') return <Navigate to={`/${role}/dashboard`} replace />;
+  if (segment === 'audit' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
+  if (segment === 'tuition' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
+  if (segment === 'reports' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
+  if (segment === 'website' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
+
+  return <Navigate to={`/${role}/${segment || fallback}`} replace />;
+}
 
 function RootIndexRoute() {
   const { user, profile, loading } = useAuth();
@@ -106,6 +134,7 @@ export default function App() {
           <Route path="/home" element={<PublicWebsite />} />
           <Route path="/website" element={<PublicWebsite />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/invite" element={<InvitePage />} />
           <Route path="/invite/:token" element={<InvitePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -125,15 +154,18 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
-            <Route path="users/profile/:id" element={<SettingsPage />} />
-            <Route path="users/:id" element={<SettingsPage />} />
+            <Route path="users/:id/edit" element={<UserCreatePage />} />
+            <Route path="users/profile/:id" element={<ProfilePage />} />
+            <Route path="users/:id" element={<ProfilePage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="courses" element={<CourseManagement />} />
             <Route path="courses/create" element={<CourseCreatePage />} />
             <Route path="courses/edit/:id" element={<CourseCreatePage />} />
+            <Route path="courses/:id/edit" element={<CourseCreatePage />} />
             <Route path="groups" element={<GroupManagement />} />
             <Route path="groups/create" element={<GroupCreatePage />} />
             <Route path="groups/edit/:id" element={<GroupCreatePage />} />
+            <Route path="groups/:id/edit" element={<GroupCreatePage />} />
             <Route path="groups/:id" element={<GroupDetail />} />
             <Route path="groups/:id/add-student" element={<UserCreatePage />} />
             <Route path="schedule" element={<ScheduleManagement />} />
@@ -141,15 +173,15 @@ export default function App() {
             <Route path="attendance/teachers" element={<TeacherAttendance />} />
             <Route path="attendance/reports" element={<AttendanceReport />} />
             <Route path="grades" element={<GradesPage />} />
-            <Route path="homework" element={<Navigate to="/owner/dashboard" replace />} />
-            <Route path="homework/*" element={<Navigate to="/owner/dashboard" replace />} />
-            <Route path="materials" element={<Navigate to="/owner/dashboard" replace />} />
-            <Route path="announcements" element={<Navigate to="/owner/chat?channel=announcements" replace />} />
-            <Route path="payroll" element={<Navigate to="/owner/dashboard" replace />} />
+            <Route path="homework" element={<HomeworkPage />} />
+            <Route path="homework/:id" element={<HomeworkDetail />} />
+            <Route path="materials" element={<MaterialsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="payroll" element={<PayrollPage />} />
             <Route path="tuition" element={<TuitionPage />} />
             <Route path="sms" element={<SmsManagementPage />} />
             <Route path="reports" element={<ReportsPage />} />
-            <Route path="audit" element={<Navigate to="/owner/dashboard" replace />} />
+            <Route path="audit" element={<AuditLogPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="website" element={<WebsiteManagementPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
@@ -173,15 +205,18 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
-            <Route path="users/profile/:id" element={<SettingsPage />} />
-            <Route path="users/:id" element={<SettingsPage />} />
+            <Route path="users/:id/edit" element={<UserCreatePage />} />
+            <Route path="users/profile/:id" element={<ProfilePage />} />
+            <Route path="users/:id" element={<ProfilePage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="courses" element={<CourseManagement />} />
             <Route path="courses/create" element={<CourseCreatePage />} />
             <Route path="courses/edit/:id" element={<CourseCreatePage />} />
+            <Route path="courses/:id/edit" element={<CourseCreatePage />} />
             <Route path="groups" element={<GroupManagement />} />
             <Route path="groups/create" element={<GroupCreatePage />} />
             <Route path="groups/edit/:id" element={<GroupCreatePage />} />
+            <Route path="groups/:id/edit" element={<GroupCreatePage />} />
             <Route path="groups/:id" element={<GroupDetail />} />
             <Route path="groups/:id/add-student" element={<UserCreatePage />} />
             <Route path="schedule" element={<ScheduleManagement />} />
@@ -189,10 +224,11 @@ export default function App() {
             <Route path="attendance/teachers" element={<TeacherAttendance />} />
             <Route path="attendance/reports" element={<AttendanceReport />} />
             <Route path="grades" element={<GradesPage />} />
-            <Route path="homework" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="homework/*" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="materials" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="announcements" element={<Navigate to="/admin/chat?channel=announcements" replace />} />
+            <Route path="homework" element={<HomeworkPage />} />
+            <Route path="homework/:id" element={<HomeworkDetail />} />
+            <Route path="materials" element={<MaterialsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="audit" element={<AuditLogPage />} />
             <Route path="tuition" element={<TuitionPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
@@ -222,22 +258,24 @@ export default function App() {
             <Route path="users/create" element={<UserCreatePage />} />
             <Route path="students/create" element={<UserCreatePage />} />
             <Route path="users/edit/:id" element={<UserCreatePage />} />
-            <Route path="users/profile/:id" element={<SettingsPage />} />
-            <Route path="users/:id" element={<SettingsPage />} />
+            <Route path="users/:id/edit" element={<UserCreatePage />} />
+            <Route path="users/profile/:id" element={<ProfilePage />} />
+            <Route path="users/:id" element={<ProfilePage />} />
             <Route path="passwords" element={<PasswordsPage />} />
             <Route path="groups" element={<GroupManagement />} />
             <Route path="groups/create" element={<GroupCreatePage />} />
             <Route path="groups/edit/:id" element={<GroupCreatePage />} />
+            <Route path="groups/:id/edit" element={<GroupCreatePage />} />
             <Route path="groups/:id" element={<GroupDetail />} />
             <Route path="groups/:id/add-student" element={<UserCreatePage />} />
             <Route path="schedule" element={<ScheduleManagement />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="grades" element={<GradesPage />} />
-            <Route path="reminders" element={<Navigate to="/teacher/dashboard" replace />} />
-            <Route path="homework" element={<Navigate to="/teacher/dashboard" replace />} />
-            <Route path="homework/*" element={<Navigate to="/teacher/dashboard" replace />} />
-            <Route path="materials" element={<Navigate to="/teacher/dashboard" replace />} />
-            <Route path="announcements" element={<Navigate to="/teacher/chat?channel=announcements" replace />} />
+            <Route path="homework" element={<HomeworkPage />} />
+            <Route path="homework/:id" element={<HomeworkDetail />} />
+            <Route path="materials" element={<MaterialsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="reminders" element={<RemindersPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SettingsPage />} />
@@ -258,16 +296,39 @@ export default function App() {
             <Route path="group" element={<StudentGroupPage />} />
             <Route path="grades" element={<GradesPage />} />
             <Route path="attendance" element={<StudentAttendancePage />} />
-            <Route path="homework" element={<Navigate to="/student/dashboard" replace />} />
-            <Route path="homework/*" element={<Navigate to="/student/dashboard" replace />} />
-            <Route path="materials" element={<Navigate to="/student/dashboard" replace />} />
-            <Route path="announcements" element={<Navigate to="/student/chat?channel=announcements" replace />} />
+            <Route path="homework" element={<HomeworkPage />} />
+            <Route path="homework/:id" element={<HomeworkDetail />} />
+            <Route path="materials" element={<MaterialsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
             <Route path="schedule" element={<StudentSchedulePage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
+
+          {/* Universal direct vanity shortcuts (redirects authenticated users automatically to their role) */}
+          <Route path="/schedule" element={<RoleRedirectRoute segment="schedule" />} />
+          <Route path="/attendance" element={<RoleRedirectRoute segment="attendance" />} />
+          <Route path="/grades" element={<RoleRedirectRoute segment="grades" />} />
+          <Route path="/courses" element={<RoleRedirectRoute segment="courses" />} />
+          <Route path="/groups" element={<RoleRedirectRoute segment="groups" />} />
+          <Route path="/users" element={<RoleRedirectRoute segment="users" />} />
+          <Route path="/homework" element={<RoleRedirectRoute segment="homework" />} />
+          <Route path="/homework/:id" element={<RoleRedirectRoute segment="homework" />} />
+          <Route path="/materials" element={<RoleRedirectRoute segment="materials" />} />
+          <Route path="/announcements" element={<RoleRedirectRoute segment="announcements" />} />
+          <Route path="/payroll" element={<RoleRedirectRoute segment="payroll" />} />
+          <Route path="/audit" element={<RoleRedirectRoute segment="audit" />} />
+          <Route path="/tuition" element={<RoleRedirectRoute segment="tuition" />} />
+          <Route path="/reports" element={<RoleRedirectRoute segment="reports" />} />
+          <Route path="/reminders" element={<RoleRedirectRoute segment="reminders" />} />
+          <Route path="/sms" element={<RoleRedirectRoute segment="sms" />} />
+          <Route path="/settings" element={<RoleRedirectRoute segment="settings" />} />
+          <Route path="/website" element={<RoleRedirectRoute segment="website" />} />
+          <Route path="/notifications" element={<RoleRedirectRoute segment="notifications" />} />
+          <Route path="/passwords" element={<RoleRedirectRoute segment="passwords" />} />
+          <Route path="/chat" element={<RoleRedirectRoute segment="chat" />} />
 
           {/* Global Fallback 404 */}
           <Route path="*" element={<NotFoundPage />} />

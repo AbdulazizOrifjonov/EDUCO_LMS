@@ -23,6 +23,9 @@ import {
   MessageSquareQuote,
   Sparkles,
   Layers,
+  FileCheck,
+  Megaphone,
+  ShieldAlert,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -64,6 +67,16 @@ const ADMIN_NAV_ITEMS = [
     icon: Calendar,
   },
   {
+    label: 'Uyga vazifalar',
+    path: '/admin/homework',
+    icon: FileCheck,
+  },
+  {
+    label: 'O‘quv materiallari',
+    path: '/admin/materials',
+    icon: BookOpen,
+  },
+  {
     labelKey: 'nav.reminders',
     label: 'Eslatmalar',
     path: '/admin/reminders',
@@ -82,6 +95,11 @@ const ADMIN_NAV_ITEMS = [
     icon: Award,
   },
   {
+    label: 'Eʼlonlar',
+    path: '/admin/announcements',
+    icon: Megaphone,
+  },
+  {
     labelKey: 'nav.chat',
     label: 'Chat',
     path: '/admin/chat',
@@ -98,6 +116,11 @@ const ADMIN_NAV_ITEMS = [
     label: 'Reports',
     path: '/admin/reports',
     icon: BarChart3,
+  },
+  {
+    label: 'Audit jurnali',
+    path: '/admin/audit',
+    icon: ShieldAlert,
   },
   {
     labelKey: 'nav.notifications',

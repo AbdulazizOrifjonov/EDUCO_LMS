@@ -573,67 +573,28 @@ export default function WebsiteFullPageEditor({
     <div className="min-h-screen bg-gray-50/70 dark:bg-gray-950 pb-44 pb-[calc(11rem+env(safe-area-inset-bottom,0px))] -m-3 sm:-m-5 lg:-m-6 p-3 sm:p-5 lg:p-6 w-full max-w-full overflow-x-hidden animate-in fade-in duration-200">
       {/* Top Header Navigation Bar (Relative on phone so it doesn't crowd screen, Sticky on desktop) */}
       <div className="relative sm:sticky sm:top-20 z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 mb-5 shadow-sm">
-        {/* Mobile View: Row 1 = [Ortga] + [Bekor] [Saqlash]; Row 2 = Icon + Title */}
-        <div className="sm:hidden space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              icon={ArrowLeft}
-              onClick={closeEditor}
-              className="!rounded-xl font-bold text-xs !py-1.5 !px-3"
-            >
-              Ortga
-            </Button>
-            <div className="flex items-center gap-1.5">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={closeEditor}
-                className="!rounded-xl font-bold text-xs !py-1.5 !px-2.5"
-              >
-                <span className="hidden xs:inline">Bekor qilish</span>
-                <span className="xs:hidden">Bekor</span>
-              </Button>
-              {editingItem?.id && (
-                <Button
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  icon={Trash2}
-                  onClick={() => setDeleteConfirmItem({
-                    type: modalType,
-                    id: editingItem.id,
-                    title: editingItem.title || editingItem.name || editingItem.caption || 'Ushbu element'
-                  })}
-                  className="!rounded-xl font-bold text-xs !py-1.5 !px-2.5"
-                />
-              )}
-              <Button
-                type="submit"
-                form={formId}
-                onClick={triggerFormSubmit}
-                variant="primary"
-                size="sm"
-                icon={Save}
-                className="!rounded-xl font-bold text-xs shadow-md shadow-emerald-600/20 !py-1.5 !px-3"
-              >
-                Saqlash
-              </Button>
+        {/* Mobile View: Clean Header with [Ortga] on left, Module Info on right (No duplicate buttons) */}
+        <div className="sm:hidden flex items-center justify-between gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            icon={ArrowLeft}
+            onClick={closeEditor}
+            className="!rounded-xl font-bold text-xs !py-1.5 !px-3"
+          >
+            Ortga
+          </Button>
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="min-w-0 text-right">
+              <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 truncate">
+                {currentConfig.moduleName}
+              </div>
+              <h1 className="text-xs font-black text-gray-900 dark:text-white truncate">
+                {editingItem?.id ? 'Tahrirlash' : 'Yangi qo‘shish'}
+              </h1>
             </div>
-          </div>
-          <div className="flex items-center gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <ModuleIcon className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 truncate">
-                {currentConfig.moduleName} / {editingItem?.id ? 'Tahrirlash' : 'Yangi qo‘shish'}
-              </div>
-              <h1 className="text-sm font-black text-gray-900 dark:text-white truncate">
-                {currentConfig.title}
-              </h1>
             </div>
           </div>
         </div>
@@ -1880,43 +1841,38 @@ export default function WebsiteFullPageEditor({
           </div>
         </div>
       )}
-      {/* Mobile & Tablet Sticky Quick Save Bar (Floats at bottom of screen for instant 1-tap save/delete) */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 p-3 shadow-2xl flex items-center gap-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
+      {/* Mobile & Tablet Sticky Quick Action Bar (Compact, Uniform h-10 Height, Zero Bulky Red Blocks) */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 px-3 py-2.5 shadow-2xl flex items-center gap-2 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
         {editingItem?.id && (
-          <Button
+          <button
             type="button"
-            variant="danger"
-            size="sm"
-            icon={Trash2}
             onClick={() => setDeleteConfirmItem({
               type: modalType,
               id: editingItem.id,
               title: editingItem.title || editingItem.name || editingItem.caption || 'Ushbu element'
             })}
-            className="!rounded-xl font-bold text-xs !py-2 !px-3 shrink-0"
+            className="h-10 w-10 shrink-0 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 active:bg-rose-500/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/60 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
             title="O‘chirish"
-          />
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
         )}
-        <Button
+        <button
           type="button"
-          variant="outline"
-          size="sm"
           onClick={closeEditor}
-          className="!rounded-xl font-bold text-xs flex-1 justify-center"
+          className="h-10 flex-1 rounded-xl font-bold text-xs border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
         >
           Bekor qilish
-        </Button>
-        <Button
+        </button>
+        <button
           type="submit"
           form={formId}
           onClick={triggerFormSubmit}
-          variant="primary"
-          size="sm"
-          icon={Save}
-          className="!rounded-xl font-bold text-xs flex-1 justify-center shadow-md shadow-emerald-600/20"
+          className="h-10 flex-1 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
         >
-          Saqlash
-        </Button>
+          <Save className="w-4 h-4" />
+          <span>Saqlash</span>
+        </button>
       </div>
       {/* Universal Telegram-style Image Cropper Modal */}
       {cropperFile && (

@@ -9,6 +9,9 @@ import {
   MessageSquare,
   Bell,
   Settings,
+  FileCheck,
+  BookOpen,
+  Megaphone,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -32,6 +35,16 @@ const STUDENT_NAV_ITEMS = [
     icon: Calendar,
   },
   {
+    label: 'Uyga vazifalar',
+    path: '/student/homework',
+    icon: FileCheck,
+  },
+  {
+    label: 'O‘quv materiallari',
+    path: '/student/materials',
+    icon: BookOpen,
+  },
+  {
     labelKey: 'dashboard.myGrades',
     label: 'Grades',
     path: '/student/grades',
@@ -42,6 +55,11 @@ const STUDENT_NAV_ITEMS = [
     label: 'Attendance',
     path: '/student/attendance',
     icon: CheckSquare,
+  },
+  {
+    label: 'Eʼlonlar',
+    path: '/student/announcements',
+    icon: Megaphone,
   },
   {
     labelKey: 'nav.chat',
