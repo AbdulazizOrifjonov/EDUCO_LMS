@@ -146,8 +146,8 @@ export default {
         });
       }
 
-      // --- API: REALTIME EVENT SOURCE STREAM (/api/realtime-stream) ---
-      if (url.pathname === '/api/realtime-stream') {
+      // --- API: REALTIME EVENT SOURCE STREAM (/api/realtime, /api/realtime-stream) ---
+      if (url.pathname === '/api/realtime' || url.pathname === '/api/realtime-stream') {
         return new Response(': keep-alive\n\n', {
           status: 200,
           headers: {
