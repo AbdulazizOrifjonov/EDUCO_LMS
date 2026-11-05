@@ -232,6 +232,25 @@ export default function ChatWindow({
 
   currentGroupIdRef.current = activeGroup?.id;
 
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+    setIsScrolledUp(false);
+    setNewMessagesBadge(false);
+  };
+
+  const scrollToBottomSmooth = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+    setIsScrolledUp(false);
+    setNewMessagesBadge(false);
+  };
+
   // Load message history & subscribe to Realtime
   useEffect(() => {
     if (!activeGroup?.id || (isStaffChat && userRole === 'student')) {
@@ -420,24 +439,7 @@ export default function ChatWindow({
     }
   }, [activeGroup?.id, currentUser, messages.length, isStaffChat, userRole]);
 
-  const scrollToBottom = () => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-    setIsScrolledUp(false);
-    setNewMessagesBadge(false);
-  };
 
-  const scrollToBottomSmooth = () => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTo({
-        top: messagesContainerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-    setIsScrolledUp(false);
-    setNewMessagesBadge(false);
-  };
 
   const handleScroll = async () => {
     if (!messagesContainerRef.current) return;

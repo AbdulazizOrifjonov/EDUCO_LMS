@@ -132,6 +132,7 @@ export default function WebsiteManagementPage() {
   const actionParam = searchParams.get('action'); // 'edit' | 'create'
   const typeParam = searchParams.get('type');
   const idParam = searchParams.get('id');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const setTab = (tabId) => {
     setSearchParams({ tab: tabId });
@@ -196,7 +197,6 @@ export default function WebsiteManagementPage() {
   const [cropperAspectRatio, setCropperAspectRatio] = useState('4:3');
 
   // Search filter inside lists
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Open Editor Helper (URL-Driven & Full Page)
   const openEditor = (type, item = null, updateUrl = true) => {
