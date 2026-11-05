@@ -302,29 +302,49 @@ function createMockTable(tableName) {
           }
         });
       } else if (tableName === 'lessons') {
-        const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const currentDayOfWeek = now.getDay() || 7; // 1 (Mon) to 7 (Sun)
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - (currentDayOfWeek - 1));
+
         const schedules = localStore.getSchedules();
         rows = [];
 
+        // Deduplicate schedules by group_id + day_of_week + start_time
+        const seenSchedMap = new Set();
+
         schedules.forEach((s) => {
+          const day = Number(s.day_of_week) || 1;
+          const startTime = (s.start_time || '18:00').slice(0, 5);
+          const endTime = (s.end_time || '20:00').slice(0, 5);
+          const schedKey = `${s.group_id}_${day}_${startTime}_${endTime}`;
+          if (seenSchedMap.has(schedKey)) return;
+          seenSchedMap.add(schedKey);
+
           const g = groups.find((grp) => grp.id === s.group_id);
-          const c = g ? courses.find((crs) => crs.id === g.course_id) : null;
+          if (!g) return;
+          const c = courses.find((crs) => crs.id === g.course_id);
+
+          const schedDate = new Date(monday);
+          schedDate.setDate(monday.getDate() + (day - 1));
+          const schedDateStr = schedDate.toISOString().split('T')[0];
+
           rows.push({
-            id: `lsn-${s.id || s.group_id}`,
+            id: `lsn-${s.id || `${s.group_id}-${day}`}`,
             group_id: s.group_id,
-            title: s.title || `${g?.name || 'Guruh'} — Dars mashgʻuloti`,
+            title: s.title || `${g.name}`,
             description: s.description || 'Muntazam dars mashgʻuloti',
-            lesson_date: today,
+            lesson_date: schedDateStr,
             start_time: s.start_time || '18:00',
             end_time: s.end_time || '20:00',
             status: 'scheduled',
-            groups: g ? {
+            groups: {
               id: g.id,
               name: g.name,
               room: s.room || g.room || '101-xona',
               courses: c ? { name: c.name, color: c.color } : { name: g.course_name || 'Kurs', color: '#123D78' },
               group_teachers: g.teacher_id ? [{ teacher_id: g.teacher_id }] : [],
-            } : null,
+            },
           });
         });
 

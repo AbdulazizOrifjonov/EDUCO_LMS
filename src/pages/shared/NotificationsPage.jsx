@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -35,6 +35,23 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'PAYMENT' | 'SALARY' | 'ATTENDANCE' | 'SYSTEM'
 
+  const loadNotifications = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      setLoading(true);
+      const [list, count] = await Promise.all([
+        getNotifications(user.id, { type: filterType !== 'ALL' ? filterType : undefined }),
+        getUnreadCount(user.id),
+      ]);
+      setNotifications(list);
+      setUnreadCount(count);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id, filterType]);
+
   useEffect(() => {
     if (!user?.id) return;
 
@@ -49,23 +66,7 @@ export default function NotificationsPage() {
     return () => {
       if (channel) channel.unsubscribe();
     };
-  }, [user?.id, filterType]);
-
-  const loadNotifications = async () => {
-    try {
-      setLoading(true);
-      const [list, count] = await Promise.all([
-        getNotifications(user?.id, { type: filterType !== 'ALL' ? filterType : undefined }),
-        getUnreadCount(user?.id),
-      ]);
-      setNotifications(list);
-      setUnreadCount(count);
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user?.id, loadNotifications]);
 
   const handleMarkAsRead = async (id, e) => {
     e?.stopPropagation();

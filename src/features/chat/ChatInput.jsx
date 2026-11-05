@@ -124,12 +124,7 @@ export default function ChatInput({
     setInputText(e.target.value);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+
 
   const handleEmojiSelect = (emoji) => {
     setInputText((prev) => prev + emoji);

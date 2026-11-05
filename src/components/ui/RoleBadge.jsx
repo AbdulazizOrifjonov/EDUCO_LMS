@@ -1,5 +1,6 @@
 // src/components/ui/RoleBadge.jsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ROLES } from '@/lib/constants';
 
 export const isMentorUser = (user, role) => {
@@ -24,6 +25,34 @@ export const isMentorUser = (user, role) => {
     return true;
   }
   return false;
+};
+
+export const getRoleLabel = (roleKey, isMentor, lang = 'uz') => {
+  const l = String(lang || 'uz').toLowerCase();
+  if (isMentor) {
+    if (l.startsWith('ru')) return 'МЕНТОР';
+    return 'MENTOR';
+  }
+  if (roleKey === ROLES.OWNER || roleKey === 'owner') {
+    if (l.startsWith('en')) return 'OWNER';
+    if (l.startsWith('ru')) return 'РУКОВОДИТЕЛЬ';
+    return 'RAHBAR';
+  }
+  if (roleKey === ROLES.ADMIN || roleKey === 'admin') {
+    if (l.startsWith('ru')) return 'АДМИНИСТРАТОР';
+    return 'ADMIN';
+  }
+  if (roleKey === ROLES.TEACHER || roleKey === 'teacher') {
+    if (l.startsWith('en')) return 'TEACHER';
+    if (l.startsWith('ru')) return 'УЧИТЕЛЬ';
+    return 'USTOZ';
+  }
+  if (roleKey === ROLES.STUDENT || roleKey === 'student') {
+    if (l.startsWith('en')) return 'STUDENT';
+    if (l.startsWith('ru')) return 'СТУДЕНТ';
+    return "O'QUVCHI";
+  }
+  return String(roleKey || '').toUpperCase();
 };
 
 export const ROLE_CONFIG = {
@@ -60,18 +89,23 @@ export const ROLE_CONFIG = {
 };
 
 export default function RoleBadge({ role, user, className = '', size = 'md', onClick, title }) {
+  const { i18n } = useTranslation();
+  const currentLang = i18n?.language || 'uz';
   const normRole = String(role || '').toLowerCase();
   const isMentor = isMentorUser(user, normRole);
 
-  const cfg = isMentor
-    ? ROLE_CONFIG[ROLES.MENTOR]
+  const roleKey = isMentor
+    ? ROLES.MENTOR
     : normRole === 'owner' || normRole === ROLES.OWNER
-    ? ROLE_CONFIG[ROLES.OWNER]
+    ? ROLES.OWNER
     : normRole === 'admin' || normRole === 'administrator' || normRole === ROLES.ADMIN
-    ? ROLE_CONFIG[ROLES.ADMIN]
+    ? ROLES.ADMIN
     : normRole === 'teacher' || normRole === 'ustoz' || normRole === ROLES.TEACHER
-    ? ROLE_CONFIG[ROLES.TEACHER]
-    : ROLE_CONFIG[ROLES.STUDENT];
+    ? ROLES.TEACHER
+    : ROLES.STUDENT;
+
+  const cfg = ROLE_CONFIG[roleKey] || ROLE_CONFIG[ROLES.STUDENT];
+  const dynamicLabel = getRoleLabel(roleKey, isMentor, currentLang);
 
   const sizeClasses = {
     sm: 'text-[10px] px-2 py-0.5 gap-1',
@@ -85,15 +119,15 @@ export default function RoleBadge({ role, user, className = '', size = 'md', onC
     <Comp
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      title={title}
+      title={title || dynamicLabel}
       className={`inline-flex items-center font-black uppercase tracking-wider rounded-full transition-all select-none ${cfg.className} ${sizeClasses} ${
         onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : ''
       } ${className}`}
     >
-      <span className="shrink-0 text-xs sm:text-sm leading-none" role="img" aria-label={cfg.label}>
+      <span className="shrink-0 text-xs sm:text-sm leading-none" role="img" aria-label={dynamicLabel}>
         {cfg.icon}
       </span>
-      <span className="font-extrabold">{cfg.label}</span>
+      <span className="font-extrabold">{dynamicLabel}</span>
     </Comp>
   );
 }

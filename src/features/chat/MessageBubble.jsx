@@ -241,40 +241,6 @@ export default function MessageBubble({
     }
   };
 
-  const handleCopy = () => {
-    const contentToCopy = displayMessageText || message.chat_attachments?.[0]?.file_name || '';
-    if (contentToCopy) {
-      try {
-        navigator.clipboard?.writeText(contentToCopy);
-      } catch (_) {}
-      toast.success(t('chat.copied', 'Xabar nusxalandi! 📋'));
-    }
-  };
-
-  const handlePin = () => {
-    onPin?.(message);
-  };
-
-  const handleForward = () => {
-    onForward?.(message);
-  };
-
-  const handleEdit = () => {
-    onEdit?.(message);
-  };
-
-  const handleReply = () => {
-    onReply?.(message);
-  };
-
-  const handleDelete = () => {
-    onDelete?.(message.id);
-  };
-
-  const handleReact = (emoji) => {
-    onToggleReaction?.(message.id, emoji);
-  };
-
   const isRtl = i18n.language === 'ar' || document.documentElement.dir === 'rtl';
   const isOwn =
     Boolean(currentUserId) &&
@@ -314,6 +280,40 @@ export default function MessageBubble({
     .replace(/^📢 \[.*?\]:\n?/i, '')
     .replace(/<!--REPLY:[\s\S]*?-->/g, '')
     .trim();
+
+  const handleCopy = () => {
+    const contentToCopy = displayMessageText || message.chat_attachments?.[0]?.file_name || '';
+    if (contentToCopy) {
+      try {
+        navigator.clipboard?.writeText(contentToCopy);
+      } catch (_) {}
+      toast.success(t('chat.copied', 'Xabar nusxalandi! 📋'));
+    }
+  };
+
+  const handlePin = () => {
+    onPin?.(message);
+  };
+
+  const handleForward = () => {
+    onForward?.(message);
+  };
+
+  const handleEdit = () => {
+    onEdit?.(message);
+  };
+
+  const handleReply = () => {
+    onReply?.(message);
+  };
+
+  const handleDelete = () => {
+    onDelete?.(message.id);
+  };
+
+  const handleReact = (emoji) => {
+    onToggleReaction?.(message.id, emoji);
+  };
 
   // Close context menu on ESC key
   useEffect(() => {

@@ -215,6 +215,9 @@
       "firstName": "First Name",
       "lastName": "Last Name",
       "role": "Role",
+      "group": "Study Group",
+      "noGroup": "No Group",
+      "mentor": "Mentor",
       "owner": "Owner",
       "admin": "Administrator",
       "teacher": "Teacher",
@@ -268,6 +271,7 @@
       "studentsTab": "Students",
       "teachersTab": "Teachers",
       "adminsTab": "Administrators",
+      "ownersTab": "Owners",
       "assignToGroup": "Assign to Study Group",
       "unassignedGroup": "No Group / Assign Later",
       "studentCreatedAndEnrolled": "New student created and enrolled in group!",
@@ -847,7 +851,8 @@
       "student": "Student",
       "teacher": "Teacher",
       "owner": "Owner",
-      "admin": "Administrator"
+      "admin": "Administrator",
+      "mentor": "Mentor"
     },
     "days": {
       "monday": "Monday",

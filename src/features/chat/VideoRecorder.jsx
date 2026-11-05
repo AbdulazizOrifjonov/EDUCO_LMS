@@ -53,13 +53,7 @@ export default function VideoRecorder({
 
   const MAX_SECONDS = 60; // 60 seconds Telegram video note limit
 
-  useEffect(() => {
-    checkBrowserCapabilities();
-    return () => {
-      stopMediaStream();
-      if (videoUrl) URL.revokeObjectURL(videoUrl);
-    };
-  }, []);
+
 
   const stopMediaStream = () => {
     if (timerRef.current) {

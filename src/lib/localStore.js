@@ -1705,12 +1705,23 @@ class LocalStore {
     let raw = this.getItem(STORAGE_KEYS.LESSON_SCHEDULES, INITIAL_SCHEDULES);
     if (!Array.isArray(raw)) raw = [];
 
+    // Deduplicate any duplicates in raw storage by group_id + day_of_week + start_time
+    const seen = new Set();
+    const dedupedRaw = [];
+    raw.forEach((s) => {
+      const key = [s.group_id, s.day_of_week, (s.start_time || '').slice(0, 5)].join('_');
+      if (!seen.has(key)) {
+        seen.add(key);
+        dedupedRaw.push(s);
+      }
+    });
+
     const groups = this.getGroups();
     const courses = this.getCourses();
     const users = this.getUsers();
 
     // Enrich with group, course, teacher relationships
-    return raw.map((s) => {
+    return dedupedRaw.map((s) => {
       const g = groups.find((grp) => grp.id === s.group_id);
       const c = g ? courses.find((crs) => crs.id === g.course_id) : null;
       const t = g ? users.find((usr) => usr.id === g.teacher_id) : null;

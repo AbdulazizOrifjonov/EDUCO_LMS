@@ -21,6 +21,7 @@ import { LanguageFlag } from '@/components/LanguageSelector';
 import { uploadAvatar } from '@/services/settingsService';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { localStore } from '@/lib/localStore';
+import { isMentorUser, getRoleLabel } from '@/components/ui/RoleBadge';
 
 export default function Sidebar({
   items = [],
@@ -643,13 +644,21 @@ export default function Sidebar({
                   {displayName}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                  <span
-                    className={`inline-block whitespace-nowrap shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getRoleBadgeClasses(
-                      userRole
-                    )}`}
-                  >
-                    {t(`roles.${userRole}`, userRole)}
-                  </span>
+                  {(() => {
+                    const isUserMentor = isMentorUser(profile || user, userRole);
+                    const badgeText = isUserMentor
+                      ? (i18n?.language?.startsWith('ru') ? '⚡ МЕНТОР' : '⚡ MENTOR')
+                      : getRoleLabel(userRole, false, i18n?.language);
+                    return (
+                      <span
+                        className={`inline-block whitespace-nowrap shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getRoleBadgeClasses(
+                          isUserMentor ? 'mentor' : userRole
+                        )}`}
+                      >
+                        {badgeText}
+                      </span>
+                    );
+                  })()}
                   <span className="inline-flex items-center gap-1 text-[10px] text-blue-200 dark:text-emerald-300 font-medium shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-sky-300 dark:bg-emerald-400 animate-pulse" />
                     Online

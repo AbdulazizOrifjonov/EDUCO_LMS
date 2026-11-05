@@ -39,6 +39,37 @@ export default function SettingsPage() {
   const [isExportingBackup, setIsExportingBackup] = useState(false);
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
 
+  // Center Settings State
+  const [centerConfig, setCenterConfig] = useState({
+    center_name: 'EDUCO Learning Center',
+    timezone: 'Asia/Tashkent',
+    attendance_deadline_hours: 24,
+    default_absence_type: 'unexcused',
+    chat_retention_days: 90,
+    max_file_size_mb: 25,
+  });
+
+  const [loadingCenter, setLoadingCenter] = useState(false);
+  const [savingCenter, setSavingCenter] = useState(false);
+  const [centerSuccess, setCenterSuccess] = useState('');
+
+  const loadCenter = React.useCallback(async () => {
+    try {
+      setLoadingCenter(true);
+      const data = await getCenterSettings();
+      if (data) {
+        setCenterConfig((prev) => ({
+          ...prev,
+          ...data,
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to load center settings:', err);
+    } finally {
+      setLoadingCenter(false);
+    }
+  }, []);
+
   const handleExportBackup = async () => {
     try {
       setIsExportingBackup(true);
@@ -107,42 +138,11 @@ export default function SettingsPage() {
     }
   }, [paramId, searchParams]);
 
-  // Center Settings State
-  const [centerConfig, setCenterConfig] = useState({
-    center_name: 'EDUCO Learning Center',
-    timezone: 'Asia/Tashkent',
-    attendance_deadline_hours: 24,
-    default_absence_type: 'unexcused',
-    chat_retention_days: 90,
-    max_file_size_mb: 25,
-  });
-
-  const [loadingCenter, setLoadingCenter] = useState(false);
-  const [savingCenter, setSavingCenter] = useState(false);
-  const [centerSuccess, setCenterSuccess] = useState('');
-
   useEffect(() => {
     if (canManageCenter) {
       loadCenter();
     }
-  }, [canManageCenter]);
-
-  const loadCenter = async () => {
-    try {
-      setLoadingCenter(true);
-      const data = await getCenterSettings();
-      if (data) {
-        setCenterConfig((prev) => ({
-          ...prev,
-          ...data,
-        }));
-      }
-    } catch (err) {
-      console.error('Failed to load center settings:', err);
-    } finally {
-      setLoadingCenter(false);
-    }
-  };
+  }, [canManageCenter, loadCenter]);
 
   const handleCenterSave = async (e) => {
     e.preventDefault();

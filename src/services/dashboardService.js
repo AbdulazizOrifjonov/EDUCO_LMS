@@ -618,17 +618,29 @@ export const dashboardService = {
       const { data, error } = await query;
       if (error) throw error;
 
-      return (data || []).map((l) => ({
+      const rawLessons = (data || []).map((l) => ({
         id: l.id,
-        title: l.title || 'Lesson',
+        title: l.groups?.name || l.title || 'Dars mashg‘uloti',
         startTime: l.start_time?.slice(0, 5) || '09:00',
         endTime: l.end_time?.slice(0, 5) || '10:30',
         status: l.status || 'scheduled',
         groupName: l.groups?.name || 'General Group',
-        room: l.groups?.room || 'Room 101',
-        courseName: l.groups?.courses?.name || 'Course',
+        room: l.groups?.room || '101-xona',
+        courseName: l.groups?.courses?.name || 'Kurs',
         courseColor: l.groups?.courses?.color || '#064e3b',
       }));
+
+      // Deduplicate to guarantee zero duplicate lesson blocks
+      const seenLessons = new Set();
+      const uniqueLessons = [];
+      for (const l of rawLessons) {
+        const key = `${l.groupName}_${l.startTime}_${l.endTime}`;
+        if (!seenLessons.has(key)) {
+          seenLessons.add(key);
+          uniqueLessons.push(l);
+        }
+      }
+      return uniqueLessons;
     } catch (error) {
       console.warn("Error fetching today's lessons from Supabase, fallback to localStore:", error);
       const normalizedUserId = localStore.normalizeUserId(userId);
@@ -703,20 +715,32 @@ export const dashboardService = {
         return allowedGroupIds.length === 0 || allowedGroupIds.includes(s.group_id);
       });
 
-      return todayScheds.map((s) => {
+      const rawTodayScheds = todayScheds.map((s) => {
         const g = groups.find((grp) => grp.id === s.group_id);
+        const c = g ? courses.find((crs) => crs.id === g.course_id) : null;
         return {
           id: s.id,
-          title: `${g?.name || 'Guruh'} darsi`,
+          title: g?.name || 'Guruh',
           startTime: (s.start_time || '09:00').slice(0, 5),
           endTime: (s.end_time || '10:30').slice(0, 5),
           status: 'scheduled',
           groupName: g?.name || 'Guruh',
           room: s.room || g?.room || '101-xona',
-          courseName: s.courseName || g?.course_name || 'Kurs',
-          courseColor: s.color || '#123D78',
+          courseName: s.courseName || g?.course_name || c?.name || 'Kurs',
+          courseColor: s.color || c?.color || '#123D78',
         };
       });
+
+      const seenFallback = new Set();
+      const uniqueFallback = [];
+      for (const s of rawTodayScheds) {
+        const key = `${s.groupName}_${s.startTime}_${s.endTime}`;
+        if (!seenFallback.has(key)) {
+          seenFallback.add(key);
+          uniqueFallback.push(s);
+        }
+      }
+      return uniqueFallback;
     }
   },
 

@@ -24,18 +24,6 @@ export default function AudioRecorder({ onRecordingComplete, onCancel }) {
 
   const MAX_SECONDS = 120; // 2 minutes
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    startRecording();
-    return () => {
-      isMountedRef.current = false;
-      cleanupStreams();
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-      }
-    };
-  }, []);
-
   const cleanupStreams = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);

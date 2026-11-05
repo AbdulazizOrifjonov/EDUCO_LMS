@@ -332,52 +332,68 @@ export default function StudentDashboard() {
         {/* Today's Schedule (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           <Card
-            title={t('dashboard.todayLessons', "Today's Schedule")}
-            subtitle={t('dashboard.todayTimelineSubtitle', 'Your timetable of classes for today')}
+            title={t('dashboard.todayLessons', 'Bugungi darslar')}
+            subtitle={t('dashboard.todayTimelineSubtitle', 'Bugungi kunga rejalashtirilgan o‘quv mashg‘ulotlaringiz')}
             headerAction={
               <Button
                 onClick={() => navigate('/student/schedule')}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-brand-navy dark:text-blue-400"
+                className="text-xs text-blue-600 dark:text-emerald-400 font-semibold"
               >
-                {t('dashboard.mySchedule', 'Weekly Timetable')} &rarr;
+                {t('dashboard.mySchedule', 'Haftalik jadval')} &rarr;
               </Button>
             }
           >
             {todaySchedule.length === 0 ? (
               <EmptyState
                 icon={Calendar}
-                title={t('dashboard.noLessonsToday', 'No classes scheduled today')}
-                description={t('dashboard.noLessonsDesc', 'Enjoy your study break or work on upcoming assignments.')}
+                title={t('dashboard.noLessonsToday', 'Bugun darslar rejalashtirilmagan')}
+                description={t('dashboard.noLessonsDesc', 'Bugungi kunda siz uchun darslar mavjud emas. Vazifalaringizni bajarib borishingiz mumkin.')}
               />
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800 -mx-5 -my-5">
                 {todaySchedule.map((lesson) => (
                   <div
                     key={lesson.id}
-                    className="p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
+                    className="p-3.5 sm:p-4.5 flex items-start sm:items-center justify-between gap-3 hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
                   >
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-emerald-950/40 text-blue-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-emerald-950/40 text-blue-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0 shadow-2xs">
                         <Clock className="w-4 h-4" />
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                          {lesson.title}
-                        </h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {lesson.courseName} &bull; {lesson.room ? `${lesson.room}-xona` : ''}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-xs" title={lesson.groupName || lesson.title}>
+                            {lesson.groupName || lesson.title}
+                          </h4>
+                          {lesson.courseName && (
+                            <span
+                              className="px-2 py-0.5 rounded-md text-[10px] font-bold text-white shadow-2xs shrink-0"
+                              style={{ backgroundColor: lesson.courseColor || '#123D78' }}
+                            >
+                              {lesson.courseName}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                            {lesson.room ? (lesson.room.includes('xona') ? lesson.room : `${lesson.room}-xona`) : '101-xona'}
+                          </span>
+                          <span className="text-gray-300 dark:text-gray-600">&bull;</span>
+                          <span className="text-gray-500 dark:text-gray-400">
+                            {t('dashboard.regularLesson', 'Dars mashg‘uloti')}
+                          </span>
                         </p>
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <span className="text-xs font-semibold text-gray-900 dark:text-white block">
+                    <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-surface-dark-tertiary text-xs font-bold text-gray-800 dark:text-gray-200 font-mono tracking-tight shadow-2xs">
                         {lesson.startTime} - {lesson.endTime}
                       </span>
-                      <Badge variant="primary" size="sm" className="mt-1">
-                        {t('common.active', 'Rejalashtirilgan')}
+                      <Badge variant="primary" size="sm" className="font-bold text-[10px]">
+                        {lesson.status === 'completed' ? t('common.completed', 'Tugallangan') : t('common.active', 'Faol')}
                       </Badge>
                     </div>
                   </div>

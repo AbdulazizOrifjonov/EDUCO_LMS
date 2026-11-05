@@ -61,7 +61,7 @@ import { useSearch } from '@/context/SearchContext';
 import { useTwoStepConfirm } from '@/context/ConfirmContext';
 
 export default function UserManagement() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { profile, user } = useAuth();
   const { confirmDelete } = useTwoStepConfirm();
   const currentUserRole = profile?.role || ROLES.OWNER;
@@ -497,6 +497,12 @@ export default function UserManagement() {
                   const rawName = sg.name || '';
                   const cleanName = rawName.replace(/\s*\([^)]*\)/g, '').trim() || rawName;
                   const roomNumber = (sg.room || '').replace(/^xona\s*/i, '').trim();
+                  const roomLabel = i18n?.language?.startsWith('en')
+                    ? `Room ${roomNumber}`
+                    : i18n?.language?.startsWith('ru')
+                    ? `Каб. ${roomNumber}`
+                    : `Xona: ${roomNumber}`;
+
                   return (
                     <button
                       key={sg.id}
@@ -506,7 +512,7 @@ export default function UserManagement() {
                         navigate(`/${currentUserRole}/users/profile/${row.id}`);
                       }}
                       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all group/gbtn cursor-pointer shadow-2xs max-w-[170px]"
-                      title={`${rawName}${sg.room ? ` • Xona: ${sg.room}` : ''} (Guruhni boshqarish va almashtirish uchun bosing)`}
+                      title={`${rawName}${sg.room ? ` • ${roomLabel}` : ''}`}
                     >
                       <GraduationCap className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <span className="font-semibold truncate max-w-[85px]" title={rawName}>
@@ -528,9 +534,9 @@ export default function UserManagement() {
                       navigate(`/${currentUserRole}/users/profile/${row.id}`);
                     }}
                     className="px-1.5 py-0.5 rounded-md text-[10px] font-black bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 hover:bg-blue-500/25 cursor-pointer shadow-2xs"
-                    title={`Jami ${studentGroups.length} ta guruh. Barchasini boshqarish uchun bosing`}
+                    title={`+${studentGroups.length - 2}`}
                   >
-                    +{studentGroups.length - 2} ta
+                    +{studentGroups.length - 2}
                   </button>
                 )}
               </div>
@@ -544,10 +550,10 @@ export default function UserManagement() {
                 navigate(`/${currentUserRole}/users/profile/${row.id}`);
               }}
               className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25 hover:bg-amber-500/20 transition-all cursor-pointer"
-              title="Guruhga biriktirish uchun bosing"
+              title={t('users.noGroup', 'Guruhsiz')}
             >
               <AlertCircle className="w-3 h-3 text-amber-500 shrink-0" />
-              <span>Guruhsiz</span>
+              <span>{t('users.noGroup', 'Guruhsiz')}</span>
             </button>
           );
         }
@@ -555,6 +561,12 @@ export default function UserManagement() {
         if (row.role === ROLES.TEACHER || row.role === 'teacher' || row.role === 'mentor') {
           const teacherGroups = getTeacherGroups(row);
           const subject = row.subject || row.specialty || row.direction || (teacherGroups[0]?.course_name || 'Fan');
+          const groupCountText = i18n?.language?.startsWith('en')
+            ? `${teacherGroups.length} ${teacherGroups.length === 1 ? 'group' : 'groups'}`
+            : i18n?.language?.startsWith('ru')
+            ? `${teacherGroups.length} ${teacherGroups.length === 1 ? 'группа' : 'групп'}`
+            : `${teacherGroups.length} ta guruh`;
+
           return (
             <div className="flex items-center gap-1.5 flex-wrap max-w-[240px]">
               {subject && (
@@ -577,7 +589,7 @@ export default function UserManagement() {
                   title={teacherGroups.map((tg) => `${tg.name}: ${tg.schedule || tg.schedule_time || 'Jadval'}`).join('\n')}
                 >
                   <Users className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span>{teacherGroups.length} ta guruh</span>
+                  <span>{groupCountText}</span>
                 </button>
               )}
             </div>
@@ -1128,7 +1140,7 @@ export default function UserManagement() {
                   ? [{ key: ROLES.ADMIN, label: t('users.adminsTab', 'Administrator'), count: userStats.admins, icon: Shield }]
                   : []),
                 ...(currentUserRole === ROLES.OWNER || currentUserRole === 'owner'
-                  ? [{ key: ROLES.OWNER, label: 'Rahbar (Owner)', count: userStats.owners, icon: Shield }]
+                  ? [{ key: ROLES.OWNER, label: t('users.ownersTab', 'Rahbar (Owner)'), count: userStats.owners, icon: Shield }]
                   : []),
               ];
 
@@ -1251,11 +1263,25 @@ export default function UserManagement() {
           <span className="text-[11px] text-gray-500 dark:text-gray-400">
             {isTeacher ? (
               <>
-                Guruhlaringizda jami: <strong className="text-gray-800 dark:text-gray-200">{userStats.students} nafar o‘quvchi</strong>
+                {i18n.language?.startsWith('en')
+                  ? 'Total in your groups: '
+                  : i18n.language?.startsWith('ru')
+                  ? 'Всего в ваших группах: '
+                  : 'Guruhlaringizda jami: '}
+                <strong className="text-gray-800 dark:text-gray-200">
+                  {userStats.students} {i18n.language?.startsWith('en') ? 'students' : i18n.language?.startsWith('ru') ? 'студентов' : 'nafar o‘quvchi'}
+                </strong>
               </>
             ) : (
               <>
-                Jami tizimda: <strong className="text-gray-800 dark:text-gray-200">{userStats.total} ta</strong> ({userStats.students} o‘quvchi, {userStats.teachers} ustoz, {userStats.admins} admin{userStats.owners > 0 ? `, ${userStats.owners} rahbar` : ''})
+                {i18n.language?.startsWith('en')
+                  ? 'Total in system: '
+                  : i18n.language?.startsWith('ru')
+                  ? 'Всего в системе: '
+                  : 'Jami tizimda: '}
+                <strong className="text-gray-800 dark:text-gray-200">
+                  {userStats.total} {i18n.language?.startsWith('en') ? '' : i18n.language?.startsWith('ru') ? '' : 'ta'}
+                </strong> ({userStats.students} {i18n.language?.startsWith('en') ? 'students' : i18n.language?.startsWith('ru') ? 'студентов' : 'o‘quvchi'}, {userStats.teachers} {i18n.language?.startsWith('en') ? 'teachers' : i18n.language?.startsWith('ru') ? 'учителей' : 'ustoz'}, {userStats.admins} admin{userStats.owners > 0 ? `, ${userStats.owners} ${i18n.language?.startsWith('en') ? 'owner' : i18n.language?.startsWith('ru') ? 'руководитель' : 'rahbar'}` : ''})
               </>
             )}
           </span>

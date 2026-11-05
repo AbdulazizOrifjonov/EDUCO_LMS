@@ -281,8 +281,8 @@ export default function AdminDashboard() {
         {/* Today's Schedule (2 cols) */}
         <div className="lg:col-span-2 space-y-4">
           <Card
-            title={t('dashboard.todayLessons', "Today's Schedule")}
-            subtitle={t('dashboard.todayTimelineSubtitle', 'Real-time timeline of lessons occurring today')}
+            title={t('dashboard.todayLessons', 'Bugungi darslar')}
+            subtitle={t('dashboard.todayTimelineSubtitle', 'Bugungi kunda o‘tkaziladigan darslar grafigi')}
             headerAction={
               <Button
                 onClick={() => navigate('/admin/schedule')}
@@ -290,16 +290,16 @@ export default function AdminDashboard() {
                 size="sm"
                 className="text-xs text-blue-600 dark:text-emerald-400 hover:text-blue-700 dark:hover:text-emerald-300 font-semibold"
               >
-                {t('dashboard.scheduleGrid', 'Schedule Grid →')}
+                {t('dashboard.scheduleGrid', 'To‘liq jadval →')}
               </Button>
             }
           >
             {todaySchedule.length === 0 ? (
               <EmptyState
                 icon={Calendar}
-                title={t('dashboard.noLessonsToday', 'No lessons scheduled today')}
-                description={t('dashboard.noLessonsFoundDesc', "No active lesson blocks were found for today's date.")}
-                actionText={t('schedule.addLesson', 'Schedule a Lesson')}
+                title={t('dashboard.noLessonsToday', 'Bugun darslar rejalashtirilmagan')}
+                description={t('dashboard.noLessonsFoundDesc', 'Bugungi sana uchun faol dars mashg‘ulotlari topilmadi.')}
+                actionText={t('schedule.addLesson', 'Dars rejalashtirish')}
                 onAction={() => navigate('/admin/schedule')}
               />
             ) : (
@@ -307,38 +307,46 @@ export default function AdminDashboard() {
                 {todaySchedule.map((lesson) => (
                   <div
                     key={lesson.id}
-                    className="p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
+                    className="p-3.5 sm:p-4.5 flex items-start sm:items-center justify-between gap-3 hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
                   >
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-emerald-500/20 text-blue-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/10 dark:bg-emerald-500/20 text-blue-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0 shadow-2xs">
                         <Clock className="w-4 h-4" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                            {lesson.title}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-xs" title={lesson.groupName || lesson.title}>
+                            {lesson.groupName || lesson.title}
                           </h4>
-                          <span
-                            className="px-2 py-0.5 rounded text-[10px] font-semibold text-white"
-                            style={{ backgroundColor: lesson.courseColor || '#123D78' }}
-                          >
-                            {lesson.courseName}
-                          </span>
+                          {lesson.courseName && (
+                            <span
+                              className="px-2 py-0.5 rounded-md text-[10px] font-bold text-white shadow-2xs shrink-0"
+                              style={{ backgroundColor: lesson.courseColor || '#123D78' }}
+                            >
+                              {lesson.courseName}
+                            </span>
+                          )}
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {lesson.groupName} &bull; {lesson.room ? `${lesson.room}-xona` : ''}
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                            {lesson.room ? (lesson.room.includes('xona') ? lesson.room : `${lesson.room}-xona`) : '101-xona'}
+                          </span>
+                          <span className="text-gray-300 dark:text-gray-600">&bull;</span>
+                          <span className="text-gray-500 dark:text-gray-400">
+                            {t('dashboard.regularLesson', 'Dars mashg‘uloti')}
+                          </span>
                         </p>
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <span className="text-xs font-semibold text-gray-900 dark:text-white block">
+                    <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-surface-dark-tertiary text-xs font-bold text-gray-800 dark:text-gray-200 font-mono tracking-tight shadow-2xs">
                         {lesson.startTime} - {lesson.endTime}
                       </span>
                       <Badge
                         variant={lesson.status === 'completed' ? 'success' : 'primary'}
                         size="sm"
-                        className="mt-1"
+                        className="font-bold text-[10px]"
                       >
                         {lesson.status === 'completed' ? t('common.completed', 'Tugallangan') : t('common.active', 'Faol')}
                       </Badge>

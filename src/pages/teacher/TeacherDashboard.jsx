@@ -349,31 +349,47 @@ export default function TeacherDashboard() {
                 {todayLessons.map((l) => (
                   <div
                     key={l.id}
-                    className="p-4 sm:p-5 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
+                    className="p-3.5 sm:p-4.5 flex items-start sm:items-center justify-between gap-3 hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40 transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-emerald-950/40 text-blue-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-emerald-950/40 text-blue-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 sm:mt-0 shadow-2xs">
                         <Clock className="w-4 h-4" />
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                          {l.title}
-                        </h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {l.groupName} &bull; {l.room ? `${l.room}-xona` : ''} &bull; {l.courseName}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-xs" title={l.groupName || l.title}>
+                            {l.groupName || l.title}
+                          </h4>
+                          {l.courseName && (
+                            <span
+                              className="px-2 py-0.5 rounded-md text-[10px] font-bold text-white shadow-2xs shrink-0"
+                              style={{ backgroundColor: l.courseColor || '#123D78' }}
+                            >
+                              {l.courseName}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1.5 flex-wrap">
+                          <span className="font-medium text-gray-700 dark:text-gray-300">
+                            {l.room ? (l.room.includes('xona') ? l.room : `${l.room}-xona`) : '101-xona'}
+                          </span>
+                          <span className="text-gray-300 dark:text-gray-600">&bull;</span>
+                          <span className="text-gray-500 dark:text-gray-400">
+                            {t('dashboard.regularLesson', 'Dars mashg‘uloti')}
+                          </span>
                         </p>
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
-                      <span className="text-xs font-semibold text-gray-900 dark:text-white block">
+                    <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-surface-dark-tertiary text-xs font-bold text-gray-800 dark:text-gray-200 font-mono tracking-tight shadow-2xs">
                         {l.startTime} - {l.endTime}
                       </span>
                       <Button
                         onClick={() => navigate(`/teacher/attendance?lessonId=${l.id}`)}
                         size="sm"
                         variant="primary"
-                        className="mt-1.5 text-xs py-1"
+                        className="mt-1 text-xs py-1 px-2.5 font-bold shadow-xs cursor-pointer"
                       >
                         {t('dashboard.takeAttendance', 'Davomat olish')}
                       </Button>

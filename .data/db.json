@@ -7030,33 +7030,6 @@
       "created_at": "2026-11-04T05:02:05.786Z"
     },
     {
-      "id": "sch-madina-eng11-d1",
-      "group_id": "grp-ingliz-tili",
-      "day_of_week": 1,
-      "start_time": "09:00:00",
-      "end_time": "10:30:00",
-      "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
-    },
-    {
-      "id": "sch-madina-eng11-d3",
-      "group_id": "grp-ingliz-tili",
-      "day_of_week": 3,
-      "start_time": "09:00:00",
-      "end_time": "10:30:00",
-      "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
-    },
-    {
-      "id": "sch-madina-eng11-d5",
-      "group_id": "grp-ingliz-tili",
-      "day_of_week": 5,
-      "start_time": "09:00:00",
-      "end_time": "10:30:00",
-      "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
-    },
-    {
       "id": "sch-madina-eng12-d1",
       "group_id": "grp-ingliz-tili-2",
       "day_of_week": 1,
@@ -7354,33 +7327,6 @@
       "created_at": "2026-11-04T07:55:24.835Z"
     },
     {
-      "id": "sch-shaxnoza-rus13-d2",
-      "group_id": "grp-1793622453272",
-      "day_of_week": 2,
-      "start_time": "10:00:00",
-      "end_time": "11:30:00",
-      "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
-    },
-    {
-      "id": "sch-shaxnoza-rus13-d4",
-      "group_id": "grp-1793622453272",
-      "day_of_week": 4,
-      "start_time": "10:00:00",
-      "end_time": "11:30:00",
-      "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
-    },
-    {
-      "id": "sch-shaxnoza-rus13-d6",
-      "group_id": "grp-1793622453272",
-      "day_of_week": 6,
-      "start_time": "10:00:00",
-      "end_time": "11:30:00",
-      "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
-    },
-    {
       "id": "sch-shaxnoza-rus14-d2",
       "group_id": "grp-rus-tili-4",
       "day_of_week": 2,
@@ -7458,33 +7404,6 @@
       "day_of_week": 5,
       "start_time": "09:30:00",
       "end_time": "11:00:00",
-      "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
-    },
-    {
-      "id": "sch-bexruz-mat12-d2",
-      "group_id": "grp-1793615416295",
-      "day_of_week": 2,
-      "start_time": "08:30:00",
-      "end_time": "10:00:00",
-      "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
-    },
-    {
-      "id": "sch-bexruz-mat12-d4",
-      "group_id": "grp-1793615416295",
-      "day_of_week": 4,
-      "start_time": "08:30:00",
-      "end_time": "10:00:00",
-      "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
-    },
-    {
-      "id": "sch-bexruz-mat12-d6",
-      "group_id": "grp-1793615416295",
-      "day_of_week": 6,
-      "start_time": "08:30:00",
-      "end_time": "10:00:00",
       "room": "101",
       "created_at": "2026-11-04T07:55:24.835Z"
     },
