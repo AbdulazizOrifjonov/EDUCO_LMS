@@ -217,12 +217,14 @@ export default function PublicNavbar({ settings }) {
       e.preventDefault();
       const targetId = href.replace('#', '');
       if (targetId === 'top') {
+        window.dispatchEvent(new CustomEvent('educo-smooth-scroll-to', { detail: { top: 0 } }));
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         const el = document.getElementById(targetId);
         if (el) {
           const yOffset = -80;
-          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          const y = el.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop) + yOffset;
+          window.dispatchEvent(new CustomEvent('educo-smooth-scroll-to', { detail: { top: y } }));
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
       }

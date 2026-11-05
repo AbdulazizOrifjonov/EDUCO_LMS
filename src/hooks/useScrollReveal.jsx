@@ -2,10 +2,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 /**
- * High-Performance Eager Scroll Reveal Hook
- * - Eager pre-triggering (320px ahead of viewport) prevents lagging/stuck animations on fast scroll
- * - Instant viewport check on mount prevents initial invisible state
- * - Capped delay keeps cascade elegant without stalling user viewing
+ * Apple & Asus ROG-Grade Scroll Reveal Hook
+ * - Bounding box check triggers on mount ONLY for elements genuinely in initial viewport.
+ * - Negative bottom rootMargin triggers animation when element enters 45px into view,
+ *   ensuring the user visually witnesses the luxurious floating entrance.
+ * - Hardware accelerated translate3d + cubic-bezier(0.16, 1, 0.3, 1) provides 120fps silkiness.
+ * - Stagger delays gracefully cascade elements without blocking viewing.
  */
 export function useScrollReveal(options = {}) {
   const ref = useRef(null);
@@ -20,17 +22,17 @@ export function useScrollReveal(options = {}) {
       return;
     }
 
-    // 1. Immediate bounding box check on mount (zero lag for in-view or near-view elements)
+    // 1. Initial viewport check: ONLY mark visible if genuinely inside initial visible screen
     try {
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-      if (rect.top <= vh + 300 && rect.bottom >= -200) {
+      if (rect.top < vh - 50 && rect.bottom > 40) {
         setIsVisible(true);
         return;
       }
     } catch (_) {}
 
-    // 2. High-performance eager observer with 320px pre-trigger margin
+    // 2. Observer with negative bottom margin: triggers as element glides 45px into viewport
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -39,30 +41,30 @@ export function useScrollReveal(options = {}) {
         }
       },
       {
-        threshold: options.threshold ?? 0.001,
-        rootMargin: options.rootMargin ?? '320px 0px 180px 0px',
+        threshold: options.threshold ?? 0.06,
+        rootMargin: options.rootMargin ?? '0px 0px -45px 0px',
       }
     );
 
     observer.observe(el);
 
-    // 3. Fast scroll emergency safety: if user scrolls past rapidly, reveal immediately
-    const handleFastScroll = () => {
+    // 3. Fallback scroll handler for fast swipes to guarantee zero permanently hidden elements
+    const handleScrollCheck = () => {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-      if (rect.top <= vh + 150) {
+      if (rect.top < vh) {
         setIsVisible(true);
         observer.unobserve(el);
-        window.removeEventListener('scroll', handleFastScroll);
+        window.removeEventListener('scroll', handleScrollCheck);
       }
     };
 
-    window.addEventListener('scroll', handleFastScroll, { passive: true });
+    window.addEventListener('scroll', handleScrollCheck, { passive: true });
 
     return () => {
       if (el) observer.unobserve(el);
-      window.removeEventListener('scroll', handleFastScroll);
+      window.removeEventListener('scroll', handleScrollCheck);
     };
   }, [options.threshold, options.rootMargin]);
 
@@ -87,8 +89,8 @@ export function ScrollReveal({
     zoom: 'reveal-init-zoom',
   }[animation] || 'reveal-init-up';
 
-  // Cap animation delay to max 100ms so fast scrolling never leaves empty spaces
-  const effectiveDelay = Math.min(Math.max(delay, 0), 100);
+  // Allow gentle stagger cascade up to 350ms so cards glide in one after another
+  const effectiveDelay = Math.min(Math.max(delay, 0), 350);
 
   return (
     <Component

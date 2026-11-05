@@ -266,33 +266,34 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 
 /* ==========================================================================
    PUBLIC WEBSITE & MODERN SCROLL ANIMATIONS (Intersection Observer Driven)
+   Apple & Asus ROG-Inspired Luxury Fluid Entrance Transitions
    ========================================================================== */
 
 .reveal-init-left {
   opacity: 0;
-  transform: translateX(-20px);
-  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(-40px, 0, 0);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-init-right {
   opacity: 0;
-  transform: translateX(20px);
-  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(40px, 0, 0);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-init-up {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(0, 38px, 0) scale(0.985);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
 .reveal-init-zoom {
   opacity: 0;
-  transform: scale(0.96) translateY(12px);
-  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(0, 26px, 0) scale(0.93);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 

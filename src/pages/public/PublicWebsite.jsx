@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import websiteService from '@/services/websiteService';
+import useAppleSmoothScroll from '@/hooks/useAppleSmoothScroll';
 import PublicNavbar from './components/PublicNavbar';
 import PublicAnimatedBackground from './components/PublicAnimatedBackground';
 import HeroSlider from './components/HeroSlider';
@@ -42,6 +43,10 @@ export default function PublicWebsite() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
 
+  // Activate Apple & Asus ROG-Grade Inertial Smooth Scroll
+  const hasActiveModal = Boolean(selectedCourse || selectedTeacher || selectedNews || selectedImage || activeVideo);
+  const { scrollTo } = useAppleSmoothScroll({ enabled: !hasActiveModal });
+
   // CTA form pre-fill from course selection
   const [prefilledCourseTitle, setPrefilledCourseTitle] = useState('');
 
@@ -79,8 +84,8 @@ export default function PublicWebsite() {
     const ctaEl = document.getElementById('contact') || document.getElementById('aloqa');
     if (ctaEl) {
       const yOffset = -80;
-      const y = ctaEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      const y = ctaEl.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop) + yOffset;
+      scrollTo(y);
     }
   };
 
