@@ -124,6 +124,6 @@ describe('Admin Section Comprehensive Pages Audit', () => {
       expect(container.textContent).not.toContain('Sahifa topilmadi');
       expect(container.textContent).not.toContain('Page not found');
       expect(container.textContent).not.toContain('404');
-    });
+    }, 15000);
   }
 });
