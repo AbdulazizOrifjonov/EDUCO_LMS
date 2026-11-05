@@ -1321,6 +1321,12 @@ class LocalStore {
       title: userData.title || existing?.title || (fullName.toLowerCase().includes('abdulazizbek') ? 'Mentor' : undefined),
       specialty: userData.specialty || existing?.specialty || (fullName.toLowerCase().includes('abdulazizbek') ? 'Full Stack' : undefined),
       subject: userData.subject || existing?.subject || (fullName.toLowerCase().includes('abdulazizbek') ? 'Full Stack' : undefined),
+      group_id: userData.group_id !== undefined ? userData.group_id : (existing?.group_id || null),
+      group_ids: Array.isArray(userData.group_ids)
+        ? userData.group_ids
+        : (Array.isArray(existing?.group_ids) ? existing.group_ids : (userData.group_id || existing?.group_id ? [userData.group_id || existing?.group_id] : [])),
+      course_id: userData.course_id !== undefined ? userData.course_id : (existing?.course_id || null),
+      course_ids: Array.isArray(userData.course_ids) ? userData.course_ids : (existing?.course_ids || []),
       created_at: userData.created_at || existing?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

@@ -32,6 +32,12 @@ import {
   Layers,
   Filter,
   CheckCircle2,
+  AlertTriangle,
+  CheckSquare,
+  Square,
+  X,
+  CalendarCheck,
+  Search,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { useThemeStore } from '@/hooks/useTheme';
@@ -40,7 +46,8 @@ import RoleBadge, { isMentorUser } from '@/components/ui/RoleBadge';
 import Select from '@/components/ui/Select';
 import { LanguageFlag } from '@/components/LanguageSelector';
 import { updateProfile, changePassword, uploadAvatar } from '@/services/settingsService';
-import { getGroups, transferStudent, enrollStudent } from '@/services/groupService';
+import { getGroups, transferStudent, enrollStudent, removeStudent } from '@/services/groupService';
+import { getScheduleConflictDetails, hasScheduleConflict } from '@/utils/scheduleConflict';
 import { localStore } from '@/lib/localStore';
 import { ROLES } from '@/lib/constants';
 import { toast } from '@/components/ui/Toast';
@@ -103,7 +110,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   const [passwordError, setPasswordError] = useState('');
   const [cropModalFile, setCropModalFile] = useState(null);
 
-  // Student group & transfer state
+  // Student group, multi-course & transfer states
   const [studentGroup, setStudentGroup] = useState(null);
   const [studentGroups, setStudentGroups] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
@@ -111,6 +118,11 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   const [selectedCourseFilter, setSelectedCourseFilter] = useState('all');
   const [selectedTeacherFilter, setSelectedTeacherFilter] = useState('all');
   const [selectedNewGroupId, setSelectedNewGroupId] = useState('');
+  const [selectedSourceGroupId, setSelectedSourceGroupId] = useState('');
+  const [selectedGroupIds, setSelectedGroupIds] = useState([]);
+  const [transferMode, setTransferMode] = useState('add'); // 'add' | 'transfer'
+  const [showOnlyFreeTime, setShowOnlyFreeTime] = useState(false);
+  const [groupSearchQuery, setGroupSearchQuery] = useState('');
   const [isTransferringGroup, setIsTransferringGroup] = useState(false);
   const [groupTransferSuccess, setGroupTransferSuccess] = useState('');
 
@@ -234,10 +246,29 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
         }
       });
 
+      // Populate courses list
+      const allCourses = localStore.getCourses ? localStore.getCourses() : [];
+      const courseMap = new Map();
+      allCourses.forEach((c) => {
+        if (c?.id) courseMap.set(c.id, c);
+      });
+      list.forEach((g) => {
+        const cid = g.course_id || g.courseId;
+        const cname = g.courseName || g.course_name;
+        if (cid && !courseMap.has(cid)) {
+          courseMap.set(cid, { id: cid, name: cname || 'Fan' });
+        } else if (!cid && cname && !courseMap.has(cname.toLowerCase())) {
+          courseMap.set(cname.toLowerCase(), { id: cname.toLowerCase(), name: cname });
+        }
+      });
+      setCoursesList(Array.from(courseMap.values()));
+
       const matchedGroups = targetGroupIds.map((gid) => list.find((g) => g.id === gid)).filter(Boolean);
       setStudentGroups(matchedGroups);
       setStudentGroup(matchedGroups[0] || null);
-      setSelectedNewGroupId(matchedGroups[0] ? matchedGroups[0].id : '');
+      if (matchedGroups.length > 0) {
+        setSelectedSourceGroupId(matchedGroups[0].id);
+      }
     } catch (err) {
       console.warn('Error loading student group in ProfilePage:', err);
     }
@@ -491,49 +522,163 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
     }
   }, [effectiveRole, loadStudentGroupInfo]);
 
-  const handleTransferGroup = async (e) => {
-    e?.preventDefault?.();
-    if (!selectedNewGroupId) {
-      toast.warning('Iltimos, ko‘chirish uchun o‘quv guruhini tanlang!');
-      return;
-    }
+  // Calculate groups matching student's free time (no schedule clash)
+  const freeTimeGroupsCount = React.useMemo(() => {
+    if (studentGroups.length === 0) return allGroups.length;
+    return allGroups.filter((g) => {
+      const isAlreadyEnrolled = studentGroups.some((eg) => eg.id === g.id);
+      if (isAlreadyEnrolled) return false;
+      const conflict = getScheduleConflictDetails(g, studentGroups);
+      return !conflict.hasConflict;
+    }).length;
+  }, [allGroups, studentGroups]);
+
+  // Candidate groups filtered by course, free-time toggle, and search query
+  const filteredCandidateGroups = React.useMemo(() => {
+    const selCourse = coursesList.find((c) => c.id === selectedCourseFilter);
+    return allGroups.filter((g) => {
+      // 1. Course filter
+      if (selectedCourseFilter !== 'all') {
+        const matchCid = g.course_id === selectedCourseFilter || g.courseId === selectedCourseFilter;
+        const matchCname = selCourse && g.course_name && g.course_name.toLowerCase() === selCourse.name.toLowerCase();
+        const matchGname = selCourse && g.name && g.name.toLowerCase().includes(selCourse.name.toLowerCase());
+        if (!matchCid && !matchCname && !matchGname) return false;
+      }
+
+      // 2. Free-time filter: only show groups that do not conflict with existing schedule
+      if (showOnlyFreeTime && studentGroups.length > 0) {
+        const isAlreadyEnrolled = studentGroups.some((eg) => eg.id === g.id);
+        if (!isAlreadyEnrolled) {
+          const conflict = getScheduleConflictDetails(g, studentGroups);
+          if (conflict.hasConflict) return false;
+        }
+      }
+
+      // 3. Search query filter
+      if (groupSearchQuery.trim()) {
+        const q = groupSearchQuery.toLowerCase().trim();
+        const name = (g.name || '').toLowerCase();
+        const teacher = (g.teacher_name || g.teacherName || '').toLowerCase();
+        const course = (g.course_name || g.courseName || '').toLowerCase();
+        const sched = (g.schedule || g.schedule_time || '').toLowerCase();
+        const room = (g.room || '').toLowerCase();
+        if (!name.includes(q) && !teacher.includes(q) && !course.includes(q) && !sched.includes(q) && !room.includes(q)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [allGroups, selectedCourseFilter, coursesList, showOnlyFreeTime, studentGroups, groupSearchQuery]);
+
+  const totalMonthlyTuition = React.useMemo(() => {
+    return studentGroups.reduce((acc, g) => acc + Number(g.monthly_price || g.price || 500000), 0);
+  }, [studentGroups]);
+
+  // Enroll student into an additional group (2nd or 3rd course)
+  const handleEnrollAdditionalGroup = async (groupId) => {
     const studentId = resolvedTargetId || targetUser?.id || profile?.id;
-    if (!studentId) return;
+    if (!studentId || !groupId) return;
+
+    const targetGroup = allGroups.find((g) => g.id === groupId);
+    if (!targetGroup) return;
 
     setIsTransferringGroup(true);
     setGroupTransferSuccess('');
     try {
-      const prevGroupId = studentGroup?.id;
-      const targetGroup = allGroups.find((g) => g.id === selectedNewGroupId);
+      await enrollStudent(groupId, studentId);
 
-      if (prevGroupId && prevGroupId !== selectedNewGroupId) {
-        await transferStudent(prevGroupId, selectedNewGroupId, studentId);
-      } else if (!prevGroupId) {
-        await enrollStudent(selectedNewGroupId, studentId);
+      const allUsers = localStore.getUsers();
+      const currentUser = allUsers.find((u) => u.id === studentId || u.username === studentId) || targetUser || {};
+      const currentIds = Array.isArray(currentUser.group_ids)
+        ? [...currentUser.group_ids]
+        : (currentUser.group_id ? [currentUser.group_id] : []);
+      if (!currentIds.includes(groupId)) {
+        currentIds.push(groupId);
       }
 
-      // Update targetUser in localStore
-      if (targetUser) {
-        const updated = {
-          ...targetUser,
-          group_id: selectedNewGroupId,
-          group_ids: [selectedNewGroupId],
-          course_id: targetGroup?.course_id || targetGroup?.courseId || targetUser.course_id,
-          subject: targetGroup?.courseName || targetGroup?.course_name || targetUser.subject,
-          updated_at: new Date().toISOString(),
-        };
-        localStore.saveUser(updated);
-        setTargetUser(updated);
-      }
+      const updated = {
+        ...currentUser,
+        group_id: currentUser.group_id || groupId,
+        group_ids: currentIds,
+        course_id: targetGroup.course_id || targetGroup.courseId || currentUser.course_id,
+        subject: targetGroup.courseName || targetGroup.course_name || currentUser.subject,
+        updated_at: new Date().toISOString(),
+      };
+      localStore.saveUser(updated);
+      setTargetUser(updated);
+
+      await loadStudentGroupInfo();
 
       try {
-        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { type: 'group_transfer' } }));
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { type: 'group_enroll', groupId, studentId } }));
       } catch (_) {}
 
-      setStudentGroup(targetGroup || null);
-      const msg = `O‘quvchi muvaffaqiyatli «${targetGroup?.name || 'Yangi guruh'}» guruhiga ko‘chirildi!`;
+      const msg = `O‘quvchi «${targetGroup.name}» guruhiga muvaffaqiyatli qo‘shildi! (Jami ${currentIds.length} ta faol kurs)`;
       setGroupTransferSuccess(msg);
       toast.success(msg);
+      setSelectedNewGroupId('');
+      setSelectedGroupIds([]);
+      setTimeout(() => setGroupTransferSuccess(''), 5000);
+    } catch (err) {
+      console.error('Group enroll error:', err);
+      toast.error(err.message || 'Guruhga qo‘shishda xatolik yuz berdi');
+    } finally {
+      setIsTransferringGroup(false);
+    }
+  };
+
+  // Transfer student from sourceGroupId to targetGroupId
+  const handleTransferGroup = async (targetGroupId, sourceGroupId = null) => {
+    const studentId = resolvedTargetId || targetUser?.id || profile?.id;
+    if (!studentId || !targetGroupId) return;
+
+    const fromGroupId = sourceGroupId || selectedSourceGroupId || (studentGroups[0] ? studentGroups[0].id : null);
+    const targetGroup = allGroups.find((g) => g.id === targetGroupId);
+    if (!targetGroup) return;
+
+    setIsTransferringGroup(true);
+    setGroupTransferSuccess('');
+    try {
+      if (fromGroupId && fromGroupId !== targetGroupId) {
+        await transferStudent(fromGroupId, targetGroupId, studentId);
+      } else if (!fromGroupId) {
+        await enrollStudent(targetGroupId, studentId);
+      }
+
+      const allUsers = localStore.getUsers();
+      const currentUser = allUsers.find((u) => u.id === studentId || u.username === studentId) || targetUser || {};
+      const currentIds = (Array.isArray(currentUser.group_ids)
+        ? currentUser.group_ids
+        : (currentUser.group_id ? [currentUser.group_id] : [])
+      ).filter((id) => id !== fromGroupId);
+
+      if (!currentIds.includes(targetGroupId)) {
+        currentIds.push(targetGroupId);
+      }
+
+      const updated = {
+        ...currentUser,
+        group_id: targetGroupId,
+        group_ids: currentIds,
+        course_id: targetGroup.course_id || targetGroup.courseId || currentUser.course_id,
+        subject: targetGroup.courseName || targetGroup.course_name || currentUser.subject,
+        updated_at: new Date().toISOString(),
+      };
+      localStore.saveUser(updated);
+      setTargetUser(updated);
+
+      await loadStudentGroupInfo();
+
+      try {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { type: 'group_transfer', fromGroupId, toGroupId: targetGroupId, studentId } }));
+      } catch (_) {}
+
+      const msg = `O‘quvchi muvaffaqiyatli «${targetGroup.name}» guruhiga ko‘chirildi!`;
+      setGroupTransferSuccess(msg);
+      toast.success(msg);
+      setSelectedNewGroupId('');
+      setSelectedGroupIds([]);
       setTimeout(() => setGroupTransferSuccess(''), 5000);
     } catch (err) {
       console.error('Group transfer error:', err);
@@ -541,6 +686,116 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
     } finally {
       setIsTransferringGroup(false);
     }
+  };
+
+  // Remove student from a single group
+  const handleRemoveGroup = async (groupId) => {
+    const studentId = resolvedTargetId || targetUser?.id || profile?.id;
+    if (!studentId || !groupId) return;
+
+    const grp = allGroups.find((g) => g.id === groupId) || studentGroups.find((g) => g.id === groupId);
+    if (!window.confirm(`Rostdan ham o‘quvchini «${grp?.name || 'ushbu'}» guruhidan chiqarmoqchimisiz?`)) {
+      return;
+    }
+
+    setIsTransferringGroup(true);
+    setGroupTransferSuccess('');
+    try {
+      await removeStudent(groupId, studentId);
+
+      const allUsers = localStore.getUsers();
+      const currentUser = allUsers.find((u) => u.id === studentId || u.username === studentId) || targetUser || {};
+      const currentIds = (Array.isArray(currentUser.group_ids)
+        ? currentUser.group_ids
+        : (currentUser.group_id ? [currentUser.group_id] : [])
+      ).filter((id) => id !== groupId);
+
+      const updated = {
+        ...currentUser,
+        group_id: currentIds[0] || null,
+        group_ids: currentIds,
+        updated_at: new Date().toISOString(),
+      };
+      localStore.saveUser(updated);
+      setTargetUser(updated);
+
+      await loadStudentGroupInfo();
+
+      try {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { type: 'group_remove', groupId, studentId } }));
+      } catch (_) {}
+
+      const msg = `O‘quvchi «${grp?.name || ''}» guruhidan muvaffaqiyatli chiqarildi!`;
+      setGroupTransferSuccess(msg);
+      toast.success(msg);
+      setTimeout(() => setGroupTransferSuccess(''), 5000);
+    } catch (err) {
+      console.error('Group remove error:', err);
+      toast.error(err.message || 'Guruhdan chiqarishda xatolik yuz berdi');
+    } finally {
+      setIsTransferringGroup(false);
+    }
+  };
+
+  // Batch enroll for multi-selection
+  const handleBatchEnrollGroups = async (groupIds) => {
+    const studentId = resolvedTargetId || targetUser?.id || profile?.id;
+    if (!studentId || !Array.isArray(groupIds) || groupIds.length === 0) return;
+
+    setIsTransferringGroup(true);
+    setGroupTransferSuccess('');
+    try {
+      for (const gid of groupIds) {
+        if (!studentGroups.some((eg) => eg.id === gid)) {
+          await enrollStudent(gid, studentId);
+        }
+      }
+
+      const allUsers = localStore.getUsers();
+      const currentUser = allUsers.find((u) => u.id === studentId || u.username === studentId) || targetUser || {};
+      const prevIds = Array.isArray(currentUser.group_ids)
+        ? currentUser.group_ids
+        : (currentUser.group_id ? [currentUser.group_id] : []);
+      const mergedIds = Array.from(new Set([...prevIds, ...groupIds]));
+
+      const updated = {
+        ...currentUser,
+        group_id: mergedIds[0] || null,
+        group_ids: mergedIds,
+        updated_at: new Date().toISOString(),
+      };
+      localStore.saveUser(updated);
+      setTargetUser(updated);
+
+      await loadStudentGroupInfo();
+
+      try {
+        window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { type: 'group_batch_enroll', studentId } }));
+      } catch (_) {}
+
+      const msg = `O‘quvchi muvaffaqiyatli ${groupIds.length} ta guruhga biriktirildi!`;
+      setGroupTransferSuccess(msg);
+      toast.success(msg);
+      setSelectedGroupIds([]);
+      setSelectedNewGroupId('');
+      setTimeout(() => setGroupTransferSuccess(''), 5000);
+    } catch (err) {
+      console.error('Batch enroll error:', err);
+      toast.error(err.message || 'Guruhlarga biriktirishda xatolik yuz berdi');
+    } finally {
+      setIsTransferringGroup(false);
+    }
+  };
+
+  const handleToggleGroupSelection = (groupId) => {
+    setSelectedGroupIds((prev) => {
+      if (prev.includes(groupId)) {
+        return prev.filter((id) => id !== groupId);
+      } else {
+        return [...prev, groupId];
+      }
+    });
+    setSelectedNewGroupId(groupId);
   };
 
   return (
@@ -893,7 +1148,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
       {effectiveRole === 'student' && (
         <Card
           title="O‘quv guruhi va Ta’lim yo‘nalishi"
-          subtitle="O‘quvchining joriy kursi, guruhi, dars soatlari hamda yangi yo‘nalish / guruhga ko‘chirish (Transfer)"
+          subtitle="O‘quvchining joriy kurslari, dars jadvali, bo‘sh vaqtlari hamda 2 yoki 3-kursga yozish / guruh almashtirish paneli"
           className="border-2 border-emerald-500/30 dark:border-emerald-600/30 bg-gradient-to-br from-emerald-50/20 via-white to-teal-50/20 dark:from-emerald-950/15 dark:via-gray-900 dark:to-teal-950/15"
         >
           <div className="space-y-6">
@@ -904,12 +1159,46 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               </div>
             )}
 
-            {/* Current Active Groups */}
+            {/* Current Active Groups Summary Banner */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-xs uppercase font-extrabold tracking-wider text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                    <span>Faol ta’lim yo‘nalishlari</span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-600 text-white font-black">
+                      {studentGroups.length} ta kurs
+                    </span>
+                  </div>
+                  <div className="text-sm font-black text-gray-900 dark:text-gray-100 mt-0.5">
+                    {studentGroups.length === 0
+                      ? 'Hozircha guruh biriktirilmagan (Kutish zalida)'
+                      : studentGroups.map((g) => g.courseName || g.course_name || g.name).join(' • ')}
+                  </div>
+                </div>
+              </div>
+
+              {studentGroups.length > 0 && (
+                <div className="text-left sm:text-right p-2.5 px-3.5 rounded-xl bg-white/90 dark:bg-gray-800/90 border border-emerald-500/20 shadow-2xs shrink-0">
+                  <span className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 block">Jami oylik to‘lov</span>
+                  <span className="text-base font-black text-emerald-700 dark:text-emerald-300">
+                    {totalMonthlyTuition.toLocaleString()} so‘m/oy
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Enrolled Groups Cards List */}
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                  <GraduationCap className="w-4 h-4 text-emerald-600" />
-                  <span>Joriy biriktirilgan ta’lim yo‘nalishi va guruhi:</span>
+                  <BookOpen className="w-4 h-4 text-emerald-600" />
+                  <span>Joriy biriktirilgan guruhlar ro‘yxati:</span>
+                </span>
+                <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                  {studentGroups.length > 0 ? `${studentGroups.length} ta guruh faol` : 'Kutish zalida'}
                 </span>
               </div>
 
@@ -918,35 +1207,49 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                   {studentGroups.map((grp, gIdx) => (
                     <div
                       key={grp.id}
-                      className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-emerald-200 dark:border-emerald-800/80 shadow-xs space-y-3"
+                      className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border-2 border-emerald-200 dark:border-emerald-800/80 shadow-xs space-y-3"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 shadow-2xs">
-                            <GraduationCap className="w-7 h-7" />
+                          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                            <span className="font-black text-sm">{gIdx + 1}</span>
                           </div>
                           <div>
                             <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                              {studentGroups.length > 1 ? `${gIdx + 1}-o‘quv guruhi` : 'Asosiy o‘quv guruhi'}
+                              {studentGroups.length > 1 ? `${gIdx + 1}-o‘quv kursi` : 'Asosiy o‘quv kursi'}
                             </div>
                             <div className="text-base sm:text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2 flex-wrap">
                               <span>«{grp.name}»</span>
                               {grp.room && (
                                 <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700">
-                                  🚪 {grp.room}-xona
+                                  🚪 {grp.room.replace(/^xona\s*/i, '')}-xona
                                 </span>
                               )}
                             </div>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 font-mono text-xs font-black text-emerald-900 dark:text-emerald-200 self-start sm:self-auto flex items-center gap-1.5">
-                          <Clock className="w-4 h-4 text-emerald-600" />
-                          <span>{grp.schedule || grp.schedule_time || 'Jadval belgilanmagan'}</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="p-2 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 font-mono text-xs font-black text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                            <Clock className="w-4 h-4 text-emerald-600" />
+                            <span>{grp.schedule || grp.schedule_time || 'Jadval belgilanmagan'}</span>
+                          </div>
+
+                          {/* Quick Remove Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGroup(grp.id)}
+                            disabled={isTransferringGroup}
+                            className="px-2.5 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 dark:text-rose-300 border border-rose-300 dark:border-rose-800 transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+                            title="O‘quvchini ushbu guruhdan chiqarish"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">Chiqarish</span>
+                          </button>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
                         <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
                           <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Kurs / Fan</span>
                           <span className="font-bold text-gray-900 dark:text-gray-100">
@@ -989,27 +1292,58 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               )}
             </div>
 
-            {/* ADVANCED COURSE & GROUP TRANSFER FLOW (Owner, Admin & Teacher) */}
+            {/* ADVANCED MULTI-COURSE ENROLLMENT & TRANSFER PANEL (Owner, Admin & Teacher) */}
             {(isOwner || currentUserRole === 'admin' || currentUserRole === 'teacher') && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-surface-dark-secondary/80 border-2 border-blue-500/30 dark:border-blue-500/20 space-y-4">
-                <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-surface-dark-secondary/80 border-2 border-blue-500/30 dark:border-blue-500/20 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-gray-200/80 dark:border-gray-700/80">
                   <div className="flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    <h4 className="text-xs font-black uppercase tracking-wider text-gray-900 dark:text-gray-100">
-                      Ta’lim yo‘nalishi va O‘quv guruhini almashtirish (Transfer paneli)
+                    <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <h4 className="text-xs sm:text-sm font-black uppercase tracking-wider text-gray-900 dark:text-gray-100">
+                      Guruhlarni boshqarish, 2-3 kursga yozish va Almashtirish
                     </h4>
                   </div>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-700 dark:text-blue-300">
-                    Bosqichma-bosqich tanlash
-                  </span>
+
+                  {/* Mode Selector Tabs: Add Additional Course vs Transfer Existing Group */}
+                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-200/70 dark:bg-gray-800">
+                    <button
+                      type="button"
+                      onClick={() => setTransferMode('add')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                        transferMode === 'add'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-emerald-600'
+                      }`}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>➕ 2 yoki 3-kursga yozish</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTransferMode('transfer')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                        transferMode === 'transfer'
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:text-blue-600'
+                      }`}
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>🔄 Guruhni almashtirish</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Step 1: Filter by Course / Direction */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                    <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-                    <span>1-QADAM: Ta’lim yo‘nalishini (Kursni) tanlang:</span>
-                  </label>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                      <span>1-QADAM: Ta’lim yo‘nalishini (Kursni) tanlang:</span>
+                    </label>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Kurs bo‘yicha filtrlash
+                    </span>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     <button
                       type="button"
@@ -1023,7 +1357,14 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                       Barcha kurslar ({allGroups.length})
                     </button>
                     {coursesList.map((c) => {
-                      const count = allGroups.filter((g) => g.course_id === c.id || g.courseId === c.id || (g.course_name && c.name && g.course_name.toLowerCase() === c.name.toLowerCase())).length;
+                      const count = allGroups.filter((g) => {
+                        return (
+                          g.course_id === c.id ||
+                          g.courseId === c.id ||
+                          (g.course_name && c.name && g.course_name.toLowerCase() === c.name.toLowerCase()) ||
+                          (g.name && c.name && g.name.toLowerCase().includes(c.name.toLowerCase()))
+                        );
+                      }).length;
                       return (
                         <button
                           key={c.id}
@@ -1045,146 +1386,295 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                   </div>
                 </div>
 
-                {/* Step 2: Available Groups Grid with Exact Times & Teachers */}
+                {/* Step 2: Available Groups Grid with Free-Time Toggle & Conflict Detection */}
                 <div className="space-y-2 pt-1">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
                     <label className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-blue-600" />
                       <span>2-QADAM: Dars vaqti va ustoziga qarab guruhni tanlang:</span>
                     </label>
-                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                      Guruh ustiga bosing
-                    </span>
+
+                    {/* Controls: Free-Time Filter & Search Input */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {studentGroups.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowOnlyFreeTime(!showOnlyFreeTime)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs ${
+                            showOnlyFreeTime
+                              ? 'bg-emerald-600 text-white ring-2 ring-emerald-400/40 shadow-sm'
+                              : 'bg-white dark:bg-surface-dark text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:border-emerald-500 hover:text-emerald-600'
+                          }`}
+                          title="Faqat o‘quvchining hozirgi dars jadvaliga to‘qnash kelmaydigan bo‘sh vaqtlardagi guruhlarni ko‘rsatish"
+                        >
+                          <Clock className="w-3.5 h-3.5 shrink-0" />
+                          <span>🟢 Faqat bo‘sh vaqtdagi guruhlar ({freeTimeGroupsCount} ta)</span>
+                        </button>
+                      )}
+
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={groupSearchQuery}
+                          onChange={(e) => setGroupSearchQuery(e.target.value)}
+                          placeholder="Guruh yoki ustoz..."
+                          className="pl-8 pr-3 py-1 rounded-xl text-xs bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-hidden focus:border-blue-500 w-36 sm:w-44"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  {(() => {
-                    const selCourse = coursesList.find((c) => c.id === selectedCourseFilter);
-                    const matchingGroups = allGroups.filter((g) => {
-                      if (selectedCourseFilter === 'all') return true;
-                      if (g.course_id === selectedCourseFilter || g.courseId === selectedCourseFilter) return true;
-                      if (selCourse && g.course_name && g.course_name.toLowerCase() === selCourse.name.toLowerCase()) return true;
-                      if (selCourse && g.name && g.name.toLowerCase().includes(selCourse.name.toLowerCase())) return true;
-                      return false;
-                    });
+                  {filteredCandidateGroups.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/40 text-xs text-amber-800 dark:text-amber-200 text-center space-y-1">
+                      <div className="font-bold">Ushbu filtr bo‘yicha guruhlar topilmadi.</div>
+                      <div className="text-[11px] text-amber-700 dark:text-amber-300">
+                        {showOnlyFreeTime
+                          ? 'Bo‘sh vaqt filtrini o‘chirib ko‘ring yoki yuqoridagi kurs tanlovini almashtiring.'
+                          : 'Yuqoridan «Barcha kurslar»ni tanlang yoki qidiruv so‘zini tozalang.'}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-h-[380px] overflow-y-auto p-1">
+                      {filteredCandidateGroups.map((g) => {
+                        const isEnrolled = studentGroups.some((eg) => eg.id === g.id);
+                        const isSelected = selectedNewGroupId === g.id || selectedGroupIds.includes(g.id);
+                        const conflict = getScheduleConflictDetails(g, studentGroups);
 
-                    if (matchingGroups.length === 0) {
-                      return (
-                        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/40 text-xs text-amber-800 dark:text-amber-200 text-center">
-                          Ushbu kurs bo‘yicha hozircha ochiq guruhlar mavjud emas. Yuqoridan «Barcha kurslar»ni tanlang.
-                        </div>
-                      );
-                    }
+                        const cleanSchedule = g.schedule || g.schedule_time || 'Jadval';
+                        const timeOnly = cleanSchedule.replace(/^(Dush-Chor-Jum|Sesh-Pay-Shan|Har kuni|Hafta kunlari)[,\s]*/i, '').trim() || cleanSchedule;
+                        const daysOnly = g.schedule_days || (cleanSchedule.toLowerCase().includes('sesh') ? 'Sesh-Pay-Shan' : 'Dush-Chor-Jum');
+                        const isMentor = isMentorUser(null, '') || String(g.teacher_name || '').toLowerCase().includes('abdulazizbek');
 
-                    return (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto p-1">
-                        {matchingGroups.map((g) => {
-                          const isSelected = selectedNewGroupId === g.id;
-                          const isCurrent = studentGroup?.id === g.id;
-                          const cleanSchedule = g.schedule || g.schedule_time || 'Jadval';
-                          const timeOnly = cleanSchedule.replace(/^(Dush-Chor-Jum|Sesh-Pay-Shan|Har kuni|Hafta kunlari)[,\s]*/i, '').trim() || cleanSchedule;
-                          const daysOnly = g.schedule_days || (cleanSchedule.toLowerCase().includes('sesh') ? 'Sesh-Pay-Shan' : 'Dush-Chor-Jum');
-                          const isMentor = isMentorUser(null, '') || String(g.teacher_name || '').toLowerCase().includes('abdulazizbek');
-
-                          return (
-                            <div
-                              key={g.id}
-                              onClick={() => setSelectedNewGroupId(g.id)}
-                              className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
-                                isSelected
-                                  ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/50 shadow-md ring-2 ring-blue-500/30'
-                                  : isCurrent
-                                  ? 'border-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 opacity-80'
-                                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark hover:border-blue-400 hover:shadow-xs'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <div className="font-extrabold text-xs sm:text-sm text-gray-900 dark:text-gray-100 flex items-center gap-1.5 flex-wrap">
-                                    <span>«{g.name}»</span>
-                                    {isCurrent && (
-                                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
-                                        Hozirgi guruhi
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                                    Kurs: <b className="text-gray-700 dark:text-gray-300">{g.courseName || g.course_name || 'Fan'}</b>
-                                  </div>
+                        return (
+                          <div
+                            key={g.id}
+                            onClick={() => {
+                              setSelectedNewGroupId(g.id);
+                              handleToggleGroupSelection(g.id);
+                            }}
+                            className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                              isSelected
+                                ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/50 shadow-md ring-2 ring-blue-500/30'
+                                : isEnrolled
+                                ? 'border-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20'
+                                : conflict.hasConflict
+                                ? 'border-rose-200 dark:border-rose-900/50 bg-rose-50/20 dark:bg-rose-950/10 hover:border-rose-400'
+                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark hover:border-blue-400 hover:shadow-xs'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1">
+                                <div className="font-extrabold text-xs sm:text-sm text-gray-900 dark:text-gray-100 flex items-center gap-1.5 flex-wrap">
+                                  <span>«{g.name}»</span>
+                                  {isEnrolled && (
+                                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-extrabold border border-emerald-500/30 flex items-center gap-1">
+                                      <Check className="w-3 h-3 text-emerald-600" />
+                                      <span>Hozirgi guruhi</span>
+                                    </span>
+                                  )}
+                                  {!isEnrolled && conflict.hasConflict && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-500/15 text-rose-700 dark:text-rose-300 font-bold border border-rose-500/30 flex items-center gap-1">
+                                      <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0" />
+                                      <span>Vaqt to‘qnashadi</span>
+                                    </span>
+                                  )}
+                                  {!isEnrolled && !conflict.hasConflict && studentGroups.length > 0 && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30 flex items-center gap-1">
+                                      <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
+                                      <span>🟢 Bo‘sh vaqt</span>
+                                    </span>
+                                  )}
                                 </div>
-
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                                  isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 dark:border-gray-600'
-                                }`}>
-                                  {isSelected && <Check className="w-3 h-3" />}
+                                <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                  Kurs: <b className="text-gray-700 dark:text-gray-300">{g.courseName || g.course_name || 'Fan'}</b>
                                 </div>
                               </div>
 
-                              {/* Prominent Time & Ustoz Info */}
-                              <div className="space-y-1.5 text-xs">
-                                <div className="p-2 rounded-lg bg-amber-500/10 dark:bg-amber-950/40 border border-amber-400/30 flex items-center justify-between gap-2">
-                                  <span className="font-bold text-[11px] text-amber-900 dark:text-amber-200 flex items-center gap-1">
-                                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                                    <span>{timeOnly}</span>
-                                  </span>
-                                  <span className="font-mono text-[10px] text-gray-600 dark:text-gray-300">
-                                    📅 {daysOnly}
-                                  </span>
-                                </div>
-
-                                <div className="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
-                                  <span className="truncate flex items-center gap-1">
-                                    <span>Ustoz:</span>
-                                    <b className="text-gray-900 dark:text-gray-100">{g.teacher_name || g.teacherName || 'Ustoz'}</b>
-                                    {isMentor && (
-                                      <span className="text-[9px] px-1 py-0.2 rounded font-black bg-gradient-to-r from-amber-500/25 to-yellow-500/25 text-amber-700 dark:text-amber-300 border border-amber-400/40">
-                                        ⚡ MENTOR
-                                      </span>
-                                    )}
-                                  </span>
-                                  <span className="shrink-0 font-bold">
-                                    🚪 {g.room || '101-xona'} • 👥 {g.enrolled_count || 0}/{g.capacity || 30}
-                                  </span>
-                                </div>
+                              <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                                isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 dark:border-gray-600'
+                              }`}>
+                                {isSelected && <Check className="w-3 h-3" />}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()}
+
+                            {/* Prominent Schedule & Teacher Box */}
+                            <div className="space-y-1.5 text-xs">
+                              <div className={`p-2 rounded-lg border flex items-center justify-between gap-2 ${
+                                conflict.hasConflict
+                                  ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300/40 text-rose-900 dark:text-rose-200'
+                                  : 'bg-amber-500/10 dark:bg-amber-950/40 border-amber-400/30 text-amber-900 dark:text-amber-200'
+                              }`}>
+                                <span className="font-bold text-[11px] flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                                  <span>{timeOnly}</span>
+                                </span>
+                                <span className="font-mono text-[10px] text-gray-600 dark:text-gray-300">
+                                  📅 {daysOnly}
+                                </span>
+                              </div>
+
+                              {conflict.hasConflict && (
+                                <div className="text-[10px] text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                                  <span>{conflict.conflictMessage}</span>
+                                </div>
+                              )}
+
+                              <div className="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
+                                <span className="truncate flex items-center gap-1">
+                                  <span>Ustoz:</span>
+                                  <b className="text-gray-900 dark:text-gray-100">{g.teacher_name || g.teacherName || 'Ustoz'}</b>
+                                  {isMentor && (
+                                    <span className="text-[9px] px-1 py-0.2 rounded font-black bg-gradient-to-r from-amber-500/25 to-yellow-500/25 text-amber-700 dark:text-amber-300 border border-amber-400/40">
+                                      ⚡ MENTOR
+                                    </span>
+                                  )}
+                                </span>
+                                <span className="shrink-0 font-bold">
+                                  🚪 {g.room ? g.room.replace(/^xona\s*/i, '') + '-xona' : '101-xona'} • 👥 {g.enrolled_count || 0}/{g.capacity || 30}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
-                {/* Step 3: Confirmation & Submit Bar */}
+                {/* Step 3: Confirmation & Multi-Course / Transfer Action Bar */}
                 {selectedNewGroupId && (
-                  <div className="p-3.5 rounded-xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 animate-fade-in">
+                  <div className="p-4 rounded-xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/30 flex flex-col gap-3 animate-fade-in shadow-xs">
                     {(() => {
                       const selGroup = allGroups.find((g) => g.id === selectedNewGroupId);
+                      const isAlreadyEnrolled = studentGroups.some((eg) => eg.id === selectedNewGroupId);
+                      const conflict = getScheduleConflictDetails(selGroup, studentGroups);
+
                       return (
-                        <div className="text-xs">
-                          <span className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300 block">
-                            Tanlangan yangi o‘quv guruhi:
-                          </span>
-                          <span className="font-black text-gray-900 dark:text-gray-100 text-sm">
-                            «{selGroup?.name}»
-                          </span>
-                          <span className="text-xs text-gray-600 dark:text-gray-400 block mt-0.5">
-                            ⏰ Vaqti: <b>{selGroup?.schedule || selGroup?.schedule_time || 'Jadval'}</b> • Ustoz: <b>{selGroup?.teacher_name || 'Ustoz'}</b> • Xona: <b>{selGroup?.room || '101-xona'}</b>
-                          </span>
-                        </div>
+                        <>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-blue-200 dark:border-blue-800">
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300 block">
+                                Tanlangan o‘quv guruhi:
+                              </span>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-black text-gray-900 dark:text-gray-100 text-sm">
+                                  «{selGroup?.name}»
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded-md bg-blue-600 text-white font-bold">
+                                  📚 {selGroup?.courseName || selGroup?.course_name || 'Fan'}
+                                </span>
+                              </div>
+                              <span className="text-xs text-gray-600 dark:text-gray-400 block mt-0.5">
+                                ⏰ Vaqti: <b>{selGroup?.schedule || selGroup?.schedule_time || 'Jadval'}</b> • Ustoz: <b>{selGroup?.teacher_name || 'Ustoz'}</b> • Oylik to‘lov: <b>{Number(selGroup?.monthly_price || selGroup?.price || 500000).toLocaleString()} so‘m</b>
+                              </span>
+                            </div>
+
+                            {/* Schedule Compatibility Status Indicator */}
+                            <div>
+                              {conflict.hasConflict ? (
+                                <div className="p-2 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-800 dark:text-rose-200 text-xs font-bold flex items-center gap-1.5">
+                                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                                  <span>Diqqat: {conflict.conflictMessage}!</span>
+                                </div>
+                              ) : studentGroups.length > 0 ? (
+                                <div className="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-xs font-bold flex items-center gap-1.5">
+                                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                                  <span>🟢 Dars vaqtlari mos (Bo‘sh vaqtga to‘g‘ri keladi)!</span>
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          {/* Action Buttons based on Selected Mode */}
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+                            {/* If Transfer Mode: Choose which existing group to replace */}
+                            {transferMode === 'transfer' && studentGroups.length > 1 ? (
+                              <div className="flex items-center gap-2 flex-wrap text-xs">
+                                <span className="font-bold text-gray-700 dark:text-gray-300">Qaysi guruh o‘rniga:</span>
+                                <select
+                                  value={selectedSourceGroupId}
+                                  onChange={(e) => setSelectedSourceGroupId(e.target.value)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-700 text-xs font-bold text-gray-900 dark:text-white"
+                                >
+                                  {studentGroups.map((eg) => (
+                                    <option key={eg.id} value={eg.id}>
+                                      «{eg.name}» ({eg.courseName || eg.course_name})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            ) : <div />}
+
+                            <div className="flex items-center gap-2 justify-end flex-wrap">
+                              {/* 1. Enroll as Additional Course Button (Multi-course: 2 or 3 courses) */}
+                              {!isAlreadyEnrolled && (
+                                <Button
+                                  type="button"
+                                  variant="primary"
+                                  disabled={isTransferringGroup}
+                                  isLoading={isTransferringGroup}
+                                  onClick={() => handleEnrollAdditionalGroup(selGroup.id)}
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  <span>
+                                    {studentGroups.length === 0
+                                      ? 'Guruhga biriktirish va saqlash'
+                                      : `➕ Qo‘shimcha ${studentGroups.length + 1}-kurs sifatida qo‘shish`}
+                                  </span>
+                                </Button>
+                              )}
+
+                              {/* 2. Transfer / Replace Button */}
+                              {studentGroups.length > 0 && !isAlreadyEnrolled && (
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  disabled={isTransferringGroup}
+                                  isLoading={isTransferringGroup}
+                                  onClick={() => handleTransferGroup(selGroup.id, selectedSourceGroupId)}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <RefreshCw className="w-4 h-4" />
+                                  <span>🔄 Mavjud guruh o‘rniga almashtirish (Transfer)</span>
+                                </Button>
+                              )}
+
+                              {/* 3. If currently enrolled: Remove option */}
+                              {isAlreadyEnrolled && (
+                                <Button
+                                  type="button"
+                                  variant="danger"
+                                  disabled={isTransferringGroup}
+                                  onClick={() => handleRemoveGroup(selGroup.id)}
+                                  className="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  <span>Ushbu guruhdan chiqarish</span>
+                                </Button>
+                              )}
+
+                              {/* 4. Batch enroll button if multiple groups checked */}
+                              {selectedGroupIds.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="primary"
+                                  disabled={isTransferringGroup}
+                                  isLoading={isTransferringGroup}
+                                  onClick={() => handleBatchEnrollGroups(selectedGroupIds)}
+                                  className="bg-purple-600 hover:bg-purple-700 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <Check className="w-4 h-4" />
+                                  <span>✅ Tanlangan barcha ({selectedGroupIds.length} ta) guruhlarga a‘zo qilish</span>
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </>
                       );
                     })()}
-
-                    <Button
-                      type="button"
-                      variant="primary"
-                      disabled={!selectedNewGroupId || selectedNewGroupId === studentGroup?.id || isTransferringGroup}
-                      isLoading={isTransferringGroup}
-                      onClick={() => handleTransferGroup(selectedNewGroupId)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xs px-5 py-2.5 rounded-xl shadow-md shrink-0 flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                      <span>{studentGroup ? "Ushbu guruhga ko‘chirish va saqlash" : "Guruhga biriktirish va saqlash"}</span>
-                    </Button>
                   </div>
                 )}
               </div>
