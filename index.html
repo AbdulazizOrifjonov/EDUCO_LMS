@@ -34,6 +34,26 @@
         window.__pwaPrompt = e;
         window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
       });
+
+      // PWA Service Worker Registration & Seamless Background Auto-Update
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function(reg) {
+            reg.onupdatefound = function() {
+              var installing = reg.installing;
+              if (installing) {
+                installing.onstatechange = function() {
+                  if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                    installing.postMessage({ type: 'SKIP_WAITING' });
+                  }
+                };
+              }
+            };
+          }).catch(function(err) {
+            console.warn('SW registration issue:', err);
+          });
+        });
+      }
     </script>
   </head>
   <body class="antialiased">

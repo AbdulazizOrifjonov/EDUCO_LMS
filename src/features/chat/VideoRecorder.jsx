@@ -399,6 +399,13 @@ export default function VideoRecorder({
   };
 
   useEffect(() => {
+    checkBrowserCapabilities();
+    return () => {
+      stopMediaStream();
+    };
+  }, []);
+
+  useEffect(() => {
     if (videoLiveRef.current && streamRef.current && !videoUrl && !uploadMode) {
       videoLiveRef.current.srcObject = streamRef.current;
       videoLiveRef.current.play().catch(() => {});

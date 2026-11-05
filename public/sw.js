@@ -1,5 +1,5 @@
 // EDUCO LMS Service Worker for System Push Notifications & PWA Offline Resilience
-const CACHE_NAME = 'educo-v18-resilient-pwa';
+const CACHE_NAME = 'educo-v19-bulletproof-pwa';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -95,10 +95,15 @@ self.addEventListener('fetch', (event) => {
     fetch(event.request)
       .then((response) => {
         // Cache successful HTML & static assets
-        if (response && response.status === 200 && response.type === 'basic') {
+        if (response && response.status === 200) {
           const resClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, resClone).catch(() => {});
+            // If navigating, guarantee /index.html and / are cached
+            if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+              cache.put('/index.html', resClone.clone()).catch(() => {});
+              cache.put('/', resClone.clone()).catch(() => {});
+            }
           });
         }
         return response;
@@ -109,7 +114,7 @@ self.addEventListener('fetch', (event) => {
         if (cached) return cached;
 
         // 2. If navigating to a page, return cached index.html
-        if (event.request.mode === 'navigate') {
+        if (event.request.mode === 'navigate' || event.request.destination === 'document') {
           const indexCached = (await caches.match('/index.html')) || (await caches.match('/'));
           if (indexCached) return indexCached;
         }

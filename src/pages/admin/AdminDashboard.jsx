@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import dashboardService from '@/services/dashboardService';
+import { localStore } from '@/lib/localStore';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -57,6 +58,8 @@ export default function AdminDashboard() {
       if (isManual) setRefreshing(true);
       else setLoading(true);
       setError(null);
+
+      await localStore.syncWithServer(isManual).catch(() => {});
 
       const [adminStats, lessons, enrollments] = await Promise.all([
         dashboardService.getAdminStats(),

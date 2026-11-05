@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import dashboardService from '@/services/dashboardService';
+import { localStore } from '@/lib/localStore';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -68,6 +69,8 @@ export default function OwnerDashboard() {
       if (isManualRefresh) setRefreshing(true);
       else setLoading(true);
       setError(null);
+
+      await localStore.syncWithServer(isManualRefresh).catch(() => {});
 
       const [statsData, lessonsData, activityData, weeklyAtt] = await Promise.all([
         dashboardService.getOwnerStats(),
