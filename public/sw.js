@@ -1,7 +1,12 @@
-// EDUCO LMS Service Worker for System Push Notifications
-const CACHE_NAME = 'educo-v16-microscopic-responsive-polish';
+// EDUCO LMS Service Worker for System Push Notifications & PWA Offline Resilience
+const CACHE_NAME = 'educo-v18-resilient-pwa';
 
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(['/', '/index.html']).catch(() => {});
+    })
+  );
   self.skipWaiting();
 });
 
@@ -29,6 +34,8 @@ self.addEventListener('message', (event) => {
       },
     };
     event.waitUntil(self.registration.showNotification(title || 'EDUCO LMS', options));
+  } else if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });
 
@@ -76,10 +83,42 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// 4. Fetch event handler (required for Chromium/Desktop PWA installation criteria)
+// 4. Fetch event handler with bulletproof fallback so Chromium never throws ERR_FAILED
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (!event.request.url.startsWith('http')) return;
+
+  // Let API requests pass directly without SW interference
+  if (event.request.url.includes('/api/')) return;
+
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request)
+      .then((response) => {
+        // Cache successful HTML & static assets
+        if (response && response.status === 200 && response.type === 'basic') {
+          const resClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, resClone).catch(() => {});
+          });
+        }
+        return response;
+      })
+      .catch(async () => {
+        // 1. Try matching cached response for request
+        const cached = await caches.match(event.request);
+        if (cached) return cached;
+
+        // 2. If navigating to a page, return cached index.html
+        if (event.request.mode === 'navigate') {
+          const indexCached = (await caches.match('/index.html')) || (await caches.match('/'));
+          if (indexCached) return indexCached;
+        }
+
+        // 3. Resilient fallback response (never return undefined to avoid ERR_FAILED)
+        return new Response(
+          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>EDUCO LMS</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#0f172a;color:#f8fafc;text-align:center;padding:20px}button{background:#2563eb;color:white;border:none;padding:12px 24px;border-radius:12px;font-weight:bold;cursor:pointer;margin-top:16px}</style></head><body><div><h2>EDUCO LMS</h2><p>Internet aloqasi yoki tarmoqda uzilish yuz berdi.</p><button onclick="window.location.reload()">Qayta yuklash</button></div></body></html>',
+          { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
+      })
   );
 });
