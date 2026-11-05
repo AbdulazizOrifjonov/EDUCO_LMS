@@ -49,44 +49,7 @@ import { createStudentReminder } from '@/services/reminderService';
 import { getCourses, createCourse } from '@/services/courseService';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone, cleanUzPhone } from '@/utils/phoneFormat';
-
-/**
- * Parses schedule strings like "Dush-Chor-Jum, 09:30 - 11:00"
- * Returns active days and time minutes from midnight for conflict detection.
- */
-function parseSchedule(scheduleStr) {
-  if (!scheduleStr) return null;
-  const s = String(scheduleStr).toLowerCase();
-  const days = [];
-  if (s.includes('dush') || s.includes('mon')) days.push('mon');
-  if (s.includes('sesh') || s.includes('tue')) days.push('tue');
-  if (s.includes('chor') || s.includes('wed')) days.push('wed');
-  if (s.includes('pay') || s.includes('thu')) days.push('thu');
-  if (s.includes('jum') || s.includes('fri')) days.push('fri');
-  if (s.includes('shan') || s.includes('sat')) days.push('sat');
-  if (s.includes('yak') || s.includes('sun')) days.push('sun');
-
-  const timeMatch = s.match(/(\d{1,2})[:.](\d{2})\s*[-—–]\s*(\d{1,2})[:.](\d{2})/);
-  let startMin = null;
-  let endMin = null;
-  if (timeMatch) {
-    startMin = parseInt(timeMatch[1], 10) * 60 + parseInt(timeMatch[2], 10);
-    endMin = parseInt(timeMatch[3], 10) * 60 + parseInt(timeMatch[4], 10);
-  }
-  return { days, startMin, endMin, raw: scheduleStr };
-}
-
-function hasScheduleConflict(sched1, sched2) {
-  const p1 = parseSchedule(sched1);
-  const p2 = parseSchedule(sched2);
-  if (!p1 || !p2) return false;
-  const sharedDays = p1.days.filter((d) => p2.days.includes(d));
-  if (sharedDays.length === 0) return false;
-  if (p1.startMin !== null && p1.endMin !== null && p2.startMin !== null && p2.endMin !== null) {
-    return Math.max(p1.startMin, p2.startMin) < Math.min(p1.endMin, p2.endMin);
-  }
-  return true;
-}
+import { parseSchedule, hasScheduleConflict, getScheduleConflictDetails } from '@/utils/scheduleConflict';
 
 const userSchema = z.object({
   firstName: z.string().min(2, 'Ism kamida 2 ta harfdan iborat bo‘lishi kerak'),

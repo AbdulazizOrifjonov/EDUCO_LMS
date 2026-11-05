@@ -1433,6 +1433,29 @@ export default function UserManagement() {
                       )}
                     </div>
 
+                    {/* Groups Row for Mobile */}
+                    {(() => {
+                      const studentGroups = getStudentEnrolledGroups(row);
+                      if (row.role !== 'student' || studentGroups.length === 0) return null;
+                      return (
+                        <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                            Guruhlar:
+                          </span>
+                          {studentGroups.map((sg) => (
+                            <span
+                              key={sg.id}
+                              onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 cursor-pointer"
+                            >
+                              <GraduationCap className="w-3 h-3 text-emerald-600" />
+                              <span>{sg.name}</span>
+                            </span>
+                          ))}
+                        </div>
+                      );
+                    })()}
+
                     {/* Actions (Structured 2-row layout for mobile: never squished, no text wraps) */}
                     <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 space-y-2">
                       <div className="grid grid-cols-2 gap-2">
