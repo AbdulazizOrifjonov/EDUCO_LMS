@@ -271,6 +271,22 @@ export default function UserManagement() {
     return list[0] || null;
   }, [getStudentGroups]);
 
+  const getTeacherGroups = useCallback((user) => {
+    if (!user) return [];
+    const allG = Object.values(groupsMap).length > 0 ? Object.values(groupsMap) : (localStore.getGroups ? localStore.getGroups() : []);
+    const userId = String(user.id || '');
+    const userName = String(user.fullName || user.full_name || `${user.first_name || ''} ${user.last_name || ''}`).toLowerCase();
+    return allG.filter((g) => {
+      const tid = String(g.teacher_id || g.teacherId || g.primaryTeacher?.id || '');
+      const tName = String(g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').toLowerCase();
+      return (
+        (tid && tid === userId) ||
+        (tName && userName && (tName.includes(userName) || userName.includes(tName))) ||
+        (userName.includes('abdulazizbek') && (tName.includes('abdulazizbek') || g.course_name?.toLowerCase().includes('full stack') || g.name?.toLowerCase().includes('full stack')))
+      );
+    });
+  }, [groupsMap]);
+
   // Realtime cross-role sync: auto-refresh when another user/role adds or modifies users
   useEffect(() => {
     const handleSync = () => {
@@ -459,6 +475,7 @@ export default function UserManagement() {
       render: (row) => (
         <RoleBadge
           role={row.role}
+          user={row}
           size="sm"
           onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
           title={t('users.viewProfile', 'Foydalanuvchi profilini ochish')}
@@ -486,10 +503,10 @@ export default function UserManagement() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/${currentUserRole}/users/edit/${row.id}`);
+                        navigate(`/${currentUserRole}/users/profile/${row.id}`);
                       }}
                       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all group/gbtn cursor-pointer shadow-2xs max-w-[170px]"
-                      title={`${rawName}${sg.room ? ` • Xona: ${sg.room}` : ''} (Guruhni boshqarish uchun bosing)`}
+                      title={`${rawName}${sg.room ? ` • Xona: ${sg.room}` : ''} (Guruhni boshqarish va almashtirish uchun bosing)`}
                     >
                       <GraduationCap className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <span className="font-semibold truncate max-w-[85px]" title={rawName}>
@@ -508,7 +525,7 @@ export default function UserManagement() {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/${currentUserRole}/users/edit/${row.id}`);
+                      navigate(`/${currentUserRole}/users/profile/${row.id}`);
                     }}
                     className="px-1.5 py-0.5 rounded-md text-[10px] font-black bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 hover:bg-blue-500/25 cursor-pointer shadow-2xs"
                     title={`Jami ${studentGroups.length} ta guruh. Barchasini boshqarish uchun bosing`}
@@ -524,7 +541,7 @@ export default function UserManagement() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/${currentUserRole}/users/edit/${row.id}`);
+                navigate(`/${currentUserRole}/users/profile/${row.id}`);
               }}
               className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25 hover:bg-amber-500/20 transition-all cursor-pointer"
               title="Guruhga biriktirish uchun bosing"
@@ -535,18 +552,35 @@ export default function UserManagement() {
           );
         }
 
-        if (row.role === ROLES.TEACHER) {
-          const subject = row.subject || row.direction;
-          return subject ? (
-            <span
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 max-w-[160px]"
-              title={subject}
-            >
-              <BookOpen className="w-3 h-3 text-blue-600 dark:text-blue-400 shrink-0" />
-              <span className="truncate">{subject}</span>
-            </span>
-          ) : (
-            <span className="text-xs text-gray-400">—</span>
+        if (row.role === ROLES.TEACHER || row.role === 'teacher' || row.role === 'mentor') {
+          const teacherGroups = getTeacherGroups(row);
+          const subject = row.subject || row.specialty || row.direction || (teacherGroups[0]?.course_name || 'Fan');
+          return (
+            <div className="flex items-center gap-1.5 flex-wrap max-w-[240px]">
+              {subject && (
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 max-w-[130px]"
+                  title={subject}
+                >
+                  <BookOpen className="w-3 h-3 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span className="truncate">{subject}</span>
+                </span>
+              )}
+              {teacherGroups.length > 0 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/${currentUserRole}/users/profile/${row.id}`);
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 hover:bg-amber-500/25 transition-all cursor-pointer shadow-2xs"
+                  title={teacherGroups.map((tg) => `${tg.name}: ${tg.schedule || tg.schedule_time || 'Jadval'}`).join('\n')}
+                >
+                  <Users className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>{teacherGroups.length} ta guruh</span>
+                </button>
+              )}
+            </div>
           );
         }
 
@@ -1290,7 +1324,7 @@ export default function UserManagement() {
                             {row.fullName}
                           </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <RoleBadge role={row.role} size="sm" />
+                            <RoleBadge role={row.role} user={row} size="sm" />
                           </div>
                         </div>
                       </div>
@@ -1574,7 +1608,7 @@ export default function UserManagement() {
                   <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100">
                     {selectedUserForView.fullName || `${selectedUserForView.first_name || ''} ${selectedUserForView.last_name || ''}`.trim() || selectedUserForView.username}
                   </h3>
-                  <RoleBadge role={selectedUserForView.role} size="sm" />
+                  <RoleBadge role={selectedUserForView.role} user={selectedUserForView} size="sm" />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono">
                   Login / Username: @{selectedUserForView.username || selectedUserForView.id}

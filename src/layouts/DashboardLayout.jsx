@@ -746,7 +746,9 @@ export default function DashboardLayout({
               >
                 {/* Avatar */}
                 <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full overflow-hidden bg-gradient-to-tr ${
-                  userRole === 'owner'
+                  profile?.is_mentor || userRole === 'mentor' || profile?.username === 'abdulazizbek_orifjonov'
+                    ? 'from-amber-500 via-orange-500 to-yellow-500'
+                    : userRole === 'owner'
                     ? 'from-rose-500 to-red-600'
                     : userRole === 'admin'
                     ? 'from-purple-600 to-indigo-600'
@@ -769,8 +771,10 @@ export default function DashboardLayout({
                   <p className="max-w-[120px] truncate text-xs font-semibold text-gray-900 dark:text-white">
                     {displayName}
                   </p>
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    {t(`roles.${userRole}`, userRole)}
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    {profile?.is_mentor || userRole === 'mentor' || profile?.username === 'abdulazizbek_orifjonov'
+                      ? '⚡ MENTOR'
+                      : t(`roles.${userRole}`, userRole)}
                   </p>
                 </div>
                 <ChevronDown className="hidden h-4 w-4 text-gray-400 xl:block" />
@@ -787,7 +791,9 @@ export default function DashboardLayout({
                     <label
                       title={t('users.uploadAvatar', 'Rasm yuklash')}
                       className={`group relative flex h-10 w-10 flex-shrink-0 cursor-pointer items-center justify-center rounded-full overflow-hidden bg-gradient-to-tr ${
-                        userRole === 'owner'
+                        profile?.is_mentor || userRole === 'mentor' || profile?.username === 'abdulazizbek_orifjonov'
+                          ? 'from-amber-500 via-orange-500 to-yellow-500'
+                          : userRole === 'owner'
                           ? 'from-rose-500 to-red-600'
                           : userRole === 'admin'
                           ? 'from-purple-600 to-indigo-600'

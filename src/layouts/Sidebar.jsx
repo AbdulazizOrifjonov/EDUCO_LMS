@@ -175,6 +175,9 @@ export default function Sidebar({
   // Role badge styling
   const getRoleBadgeClasses = (r) => {
     switch (r) {
+      case ROLES.MENTOR:
+      case 'mentor':
+        return 'bg-gradient-to-r from-amber-500/30 via-orange-500/30 to-yellow-500/25 text-amber-200 border-amber-400/60 font-black';
       case ROLES.OWNER:
       case 'owner':
         return 'bg-rose-500/25 text-rose-200 border-rose-400/40';

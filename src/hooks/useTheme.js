@@ -24,6 +24,17 @@ const getInitialTheme = () => {
   return 'system';
 };
 
+const checkIsDark = (theme) => {
+  try {
+    if (typeof window === 'undefined' || !document?.documentElement) return false;
+    if (theme === 'dark') return true;
+    if (theme === 'light') return false;
+    return Boolean(window.matchMedia?.('(prefers-color-scheme: dark)')?.matches);
+  } catch (e) {
+    return false;
+  }
+};
+
 const applyThemeToDOM = (theme) => {
   try {
     if (typeof window === 'undefined' || !document?.documentElement) return;
@@ -60,6 +71,7 @@ export const useThemeStore = create((set, get) => {
       const handleChange = () => {
         if (get().theme === 'system') {
           applyThemeToDOM('system');
+          set({ isDark: checkIsDark('system') });
         }
       };
       if (typeof mediaQuery?.addEventListener === 'function') {
@@ -72,17 +84,20 @@ export const useThemeStore = create((set, get) => {
 
   return {
     theme: initialTheme,
+    isDark: checkIsDark(initialTheme),
     setTheme: (newTheme) => {
       try {
         const storage = safeGetStorage();
         if (storage) storage.setItem(THEME_STORAGE_KEY, newTheme);
       } catch (e) {}
       applyThemeToDOM(newTheme);
-      set({ theme: newTheme });
+      set({ theme: newTheme, isDark: checkIsDark(newTheme) });
     },
     toggleTheme: () => {
       const current = get().theme;
-      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      // If system or light, toggle based on current DOM dark status
+      const currentlyDark = checkIsDark(current);
+      const nextTheme = currentlyDark ? 'light' : 'dark';
       get().setTheme(nextTheme);
     },
   };

@@ -107,6 +107,9 @@ const INITIAL_USERS = [
     fullName: 'Abdulazizbek Orifjonov',
     full_name: 'Abdulazizbek Orifjonov',
     role: 'teacher',
+    is_mentor: true,
+    title: 'Mentor',
+    display_role: 'mentor',
     specialty: 'Full Stack',
     subject: 'Full Stack',
     email: 'abdulazizbek_orifjonov@educo.app',
@@ -1171,7 +1174,7 @@ class LocalStore {
       }
     });
 
-    // Enforce canonical roles for core staff (Erkinova Zilola is ALWAYS admin)
+    // Enforce canonical roles for core staff (Erkinova Zilola is ALWAYS admin, Abdulazizbek Orifjonov is MENTOR)
     raw.forEach((u) => {
       if (u.id === 'usr-admin-erkinova') {
         if (u.role !== 'admin') {
@@ -1183,6 +1186,22 @@ class LocalStore {
       if (u.id === 'usr-owner-1' || (u.phone || '').replace(/\D/g, '').slice(-9) === '988001415') {
         if (u.role !== 'owner') {
           u.role = 'owner';
+          needsCleanup = true;
+        }
+      }
+      const isAbdulazizbek =
+        u.id === 'usr-1793463763683' ||
+        u.id === 'usr-1793466843425' ||
+        u.username === 'abdulazizbek_orifjonov' ||
+        (u.phone || '').replace(/\D/g, '').slice(-9) === '935821774' ||
+        (u.fullName && u.fullName.toLowerCase().includes('abdulazizbek orifjonov'));
+      if (isAbdulazizbek) {
+        if (!u.is_mentor || u.title !== 'Mentor' || u.display_role !== 'mentor') {
+          u.is_mentor = true;
+          u.title = 'Mentor';
+          u.display_role = 'mentor';
+          u.specialty = u.specialty || 'Full Stack';
+          u.subject = u.subject || 'Full Stack';
           needsCleanup = true;
         }
       }
@@ -1389,6 +1408,95 @@ class LocalStore {
   getGroups() {
     let raw = this.getItem(STORAGE_KEYS.GROUPS, INITIAL_GROUPS);
     if (!Array.isArray(raw)) raw = [];
+
+    // Ensure Abdulazizbek Orifjonov (Mentor) has his canonical Full Stack groups with exact requested schedules
+    const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+    if (raw.length > 0 || !isTestEnv) {
+      const hasAbdulazizGroups = raw.some((g) => {
+        const tid = String(g.teacher_id || g.teacherId || '');
+        const tName = String(g.teacher_name || '').toLowerCase();
+        return tid === 'usr-1793463763683' || tid === 'usr-1793466843425' || tName.includes('abdulazizbek');
+      });
+
+      if (!hasAbdulazizGroups && (!isTestEnv || raw.length > 0)) {
+        const defaultMentorGroups = [
+          {
+            id: 'grp-fullstack-101',
+            name: 'Full Stack 1.1 (FS-1.1)',
+            course_id: 'crs-fullstack',
+            courseId: 'crs-fullstack',
+            course_name: 'Full Stack',
+            courseName: 'Full Stack',
+            teacher_id: 'usr-1793463763683',
+            teacherId: 'usr-1793463763683',
+            teacher_name: 'Abdulazizbek Orifjonov',
+            teacherName: 'Abdulazizbek Orifjonov',
+            schedule: 'Dush-Chor-Jum, 06:00 - 08:00',
+            schedule_days: 'Dush-Chor-Jum',
+            schedule_time: '06:00 - 08:00',
+            start_time: '06:00',
+            end_time: '08:00',
+            room: '101-xona',
+            capacity: 30,
+            enrolled_count: 14,
+            status: 'active',
+            monthly_price: 600000,
+            price: 600000,
+            created_at: '2026-10-31T12:00:00.000Z',
+          },
+          {
+            id: 'grp-fullstack-102',
+            name: 'Full Stack 1.2 (FS-1.2)',
+            course_id: 'crs-fullstack',
+            courseId: 'crs-fullstack',
+            course_name: 'Full Stack',
+            courseName: 'Full Stack',
+            teacher_id: 'usr-1793463763683',
+            teacherId: 'usr-1793463763683',
+            teacher_name: 'Abdulazizbek Orifjonov',
+            teacherName: 'Abdulazizbek Orifjonov',
+            schedule: 'Sesh-Pay-Shan, 14:00 - 16:00',
+            schedule_days: 'Sesh-Pay-Shan',
+            schedule_time: '14:00 - 16:00',
+            start_time: '14:00',
+            end_time: '16:00',
+            room: '103-xona',
+            capacity: 30,
+            enrolled_count: 16,
+            status: 'active',
+            monthly_price: 600000,
+            price: 600000,
+            created_at: '2026-10-31T12:00:00.000Z',
+          },
+          {
+            id: 'grp-fullstack-103',
+            name: 'Full Stack 1.3 (FS-1.3)',
+            course_id: 'crs-fullstack',
+            courseId: 'crs-fullstack',
+            course_name: 'Full Stack',
+            courseName: 'Full Stack',
+            teacher_id: 'usr-1793463763683',
+            teacherId: 'usr-1793463763683',
+            teacher_name: 'Abdulazizbek Orifjonov',
+            teacherName: 'Abdulazizbek Orifjonov',
+            schedule: 'Dush-Chor-Jum, 18:00 - 20:00',
+            schedule_days: 'Dush-Chor-Jum',
+            schedule_time: '18:00 - 20:00',
+            start_time: '18:00',
+            end_time: '20:00',
+            room: '105-xona',
+            capacity: 25,
+            enrolled_count: 12,
+            status: 'active',
+            monthly_price: 600000,
+            price: 600000,
+            created_at: '2026-10-31T12:00:00.000Z',
+          },
+        ];
+        raw = [...raw, ...defaultMentorGroups];
+        this.setItem(STORAGE_KEYS.GROUPS, raw);
+      }
+    }
     return raw;
   }
 

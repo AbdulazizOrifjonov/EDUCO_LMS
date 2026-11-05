@@ -3,6 +3,7 @@ export const ROLES = {
   ADMIN: 'admin',
   TEACHER: 'teacher',
   STUDENT: 'student',
+  MENTOR: 'mentor',
 };
 
 export const BRAND_COLORS = {

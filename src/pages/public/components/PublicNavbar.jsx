@@ -126,7 +126,25 @@ export default function PublicNavbar({ settings }) {
 
   const currentLang = (i18n.language?.split('-')[0] || 'uz').toLowerCase();
   const tr = navTranslations[currentLang] || navTranslations.uz;
-  const isDark = theme === 'dark';
+  
+  const [activeDark, setActiveDark] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return theme === 'dark';
+  });
+
+  useEffect(() => {
+    const updateTheme = () => {
+      if (typeof document !== 'undefined') {
+        setActiveDark(document.documentElement.classList.contains('dark'));
+      }
+    };
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, [theme]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -243,14 +261,10 @@ export default function PublicNavbar({ settings }) {
     }
   };
 
-  // Modern frosted glass styling based on theme and scroll position
+  // Modern frosted glass styling based on theme and scroll position with zero layout shift
   const headerClass = isScrolled
-    ? isDark
-      ? 'public-navbar-scrolled-dark shadow-md'
-      : 'public-navbar-scrolled-light shadow-md'
-    : isDark
-      ? 'public-navbar-top-dark shadow-xs'
-      : 'public-navbar-top-light shadow-xs';
+    ? 'bg-white/95 dark:bg-[#060b14]/95 backdrop-blur-xl border-b border-slate-200/90 dark:border-slate-800/90 shadow-md'
+    : 'bg-white/90 dark:bg-[#060b14]/90 backdrop-blur-lg border-b border-slate-200/60 dark:border-slate-800/60 shadow-xs';
 
   // Detect iOS (Safari, Chrome iOS, In-App webviews, and standalone PWA) to guarantee notch/status-bar clearance
   const isIos =
@@ -260,7 +274,7 @@ export default function PublicNavbar({ settings }) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 public-navbar-header ${headerClass}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 public-navbar-header ${headerClass}`}
       style={{
         paddingTop: isIos
           ? 'max(env(safe-area-inset-top, 44px), 44px)'
@@ -279,12 +293,16 @@ export default function PublicNavbar({ settings }) {
             <img
               src="/educo-logo.png"
               alt="EDUCO"
-              className="h-7 sm:h-8 lg:h-9 w-auto object-contain dark:hidden group-hover:scale-102 transition-transform"
+              width="160"
+              height="36"
+              className="h-7 sm:h-8 lg:h-9 w-auto object-contain dark:hidden group-hover:scale-102 transition-transform shrink-0"
             />
             <img
               src="/educo-logo-white.png"
               alt="EDUCO"
-              className="h-7 sm:h-8 lg:h-9 w-auto object-contain hidden dark:block group-hover:scale-102 transition-transform"
+              width="160"
+              height="36"
+              className="h-7 sm:h-8 lg:h-9 w-auto object-contain hidden dark:block group-hover:scale-102 transition-transform shrink-0"
             />
           </a>
 
@@ -392,14 +410,14 @@ export default function PublicNavbar({ settings }) {
               type="button"
               onClick={toggleTheme}
               className={`h-9 w-9 sm:h-10 sm:w-10 inline-flex items-center justify-center rounded-xl border transition-all shadow-xs cursor-pointer shrink-0 ${
-                isDark
+                activeDark
                   ? 'border-emerald-700/60 bg-emerald-950/40 text-amber-400 hover:bg-emerald-900/60 hover:scale-105 active:scale-95'
                   : 'border-blue-200/90 bg-blue-50/80 text-blue-700 hover:bg-blue-100 hover:scale-105 active:scale-95'
               }`}
-              title={isDark ? tr.lightMode : tr.darkMode}
+              title={activeDark ? tr.lightMode : tr.darkMode}
               aria-label="Toggle theme"
             >
-              {isDark ? (
+              {activeDark ? (
                 <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 transition-transform hover:rotate-45" />
               ) : (
                 <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-700 transition-transform hover:-rotate-12" />
@@ -411,13 +429,13 @@ export default function PublicNavbar({ settings }) {
               <div className="relative shrink-0">
                 <Link
                   to={getDashboardPath()}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 ${
-                    isDark
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 shrink-0 ${
+                    activeDark
                       ? 'bg-gradient-to-r from-[#064e3b] via-emerald-600 to-teal-700 hover:from-[#053d2e] hover:to-emerald-800 shadow-emerald-950/40'
                       : 'bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-900/25'
                   }`}
                 >
-                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-[10px] sm:text-xs text-white">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-[10px] sm:text-xs text-white shrink-0">
                     {(profile?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                   </div>
                   <span className="hidden sm:inline whitespace-nowrap">{tr.dashboard}</span>
@@ -431,8 +449,8 @@ export default function PublicNavbar({ settings }) {
               <div className="relative shrink-0">
                 <Link
                   to="/login"
-                  className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 cursor-pointer ${
-                    isDark
+                  className={`flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 h-9 sm:h-10 rounded-xl text-white font-bold text-xs sm:text-sm shadow-md transition-all hover:scale-102 active:scale-98 cursor-pointer shrink-0 ${
+                    activeDark
                       ? 'bg-gradient-to-r from-[#064e3b] via-emerald-600 to-teal-700 hover:from-[#053d2e] hover:to-emerald-800 shadow-emerald-950/40 ring-1 ring-emerald-400/30'
                       : 'bg-gradient-to-r from-[#123D78] via-[#1a4f94] to-[#123D78] hover:from-[#0d2d59] hover:to-[#0d2d59] shadow-blue-900/25 ring-1 ring-blue-300/30'
                   }`}

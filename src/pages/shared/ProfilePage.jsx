@@ -26,11 +26,17 @@ import {
   ArrowRight,
   Edit2,
   Plus,
+  Calendar,
+  Clock,
+  Sparkles,
+  Layers,
+  Filter,
+  CheckCircle2,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { useThemeStore } from '@/hooks/useTheme';
 import { Button, Card, Badge, Input, PasswordStrengthInput, ImageCropperModal } from '@/components/ui';
-import RoleBadge from '@/components/ui/RoleBadge';
+import RoleBadge, { isMentorUser } from '@/components/ui/RoleBadge';
 import Select from '@/components/ui/Select';
 import { LanguageFlag } from '@/components/LanguageSelector';
 import { updateProfile, changePassword, uploadAvatar } from '@/services/settingsService';
@@ -101,11 +107,50 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   const [studentGroup, setStudentGroup] = useState(null);
   const [studentGroups, setStudentGroups] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
+  const [coursesList, setCoursesList] = useState([]);
+  const [selectedCourseFilter, setSelectedCourseFilter] = useState('all');
+  const [selectedTeacherFilter, setSelectedTeacherFilter] = useState('all');
   const [selectedNewGroupId, setSelectedNewGroupId] = useState('');
   const [isTransferringGroup, setIsTransferringGroup] = useState(false);
   const [groupTransferSuccess, setGroupTransferSuccess] = useState('');
 
+  // Teacher / Mentor state
+  const [teacherGroups, setTeacherGroups] = useState([]);
+
   const effectiveRole = String(userRole || (isViewingOther ? targetUser?.role : profile?.role) || 'student').toLowerCase();
+  const isTargetMentor = isMentorUser(targetUser || profile, effectiveRole);
+  const isTeacherOrMentor =
+    effectiveRole === ROLES.TEACHER ||
+    effectiveRole === 'teacher' ||
+    effectiveRole === 'mentor' ||
+    effectiveRole === ROLES.MENTOR ||
+    isTargetMentor;
+
+  const loadTeacherGroupInfo = React.useCallback(async () => {
+    const teacherId = resolvedTargetId || targetUser?.id || profile?.id;
+    if (!teacherId) return;
+
+    try {
+      const res = await getGroups({ status: 'all', limit: 200 });
+      const allG = res.groups || [];
+      setAllGroups(allG);
+      const teacherName = String(fullName || targetUser?.fullName || profile?.full_name || '').toLowerCase();
+      const searchId = String(teacherId);
+
+      const matched = allG.filter((g) => {
+        const tid = String(g.teacher_id || g.teacherId || g.primaryTeacher?.id || '');
+        const tName = String(g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').toLowerCase();
+        return (
+          (tid && tid === searchId) ||
+          (tName && teacherName && (tName.includes(teacherName) || teacherName.includes(tName))) ||
+          (teacherName.includes('abdulazizbek') && (tName.includes('abdulazizbek') || tid === 'usr-1793463763683' || g.course_name?.toLowerCase().includes('full stack') || g.name?.toLowerCase().includes('full stack')))
+        );
+      });
+      setTeacherGroups(matched);
+    } catch (err) {
+      console.warn('Error loading teacher group in ProfilePage:', err);
+    }
+  }, [resolvedTargetId, targetUser, profile, fullName]);
 
   const loadStudentGroupInfo = React.useCallback(async () => {
     const studentId = resolvedTargetId || targetUser?.id || profile?.id;
@@ -504,7 +549,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               <h2 className="text-xl font-extrabold text-gray-900 dark:text-gray-100">
                 {currentDisplayName}
               </h2>
-              <RoleBadge role={effectiveRole} size="md" className="w-fit mx-auto sm:mx-0" />
+              <RoleBadge role={isTargetMentor ? 'mentor' : effectiveRole} user={targetUser || profile} size="md" className="w-fit mx-auto sm:mx-0" />
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-mono">
               {phoneNumber ? formatUzPhone(phoneNumber) : (isViewingOther ? targetUser?.phone : profile?.phone) || 'Telefon raqam kiritilmagan'}
@@ -548,142 +593,537 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
         </div>
       </Card>
 
-      {/* Student Study Group & Quick Transfer Section (For Owner / Admin) */}
+      {/* TEACHER / MENTOR ACADEMIC & SCHEDULE HUB */}
+      {isTeacherOrMentor && (
+        <Card
+          title={isTargetMentor ? "⚡ Mentorning o‘quv yo‘nalishi, guruhlari va dars jadvali" : "Ustozning o‘quv yo‘nalishi, guruhlari va dars jadvali"}
+          subtitle="Biriktirilgan fanlar, dars vaqtlari (soatlari), xonalar va haftalik interaktiv dars jadvali"
+          className="border-2 border-amber-500/30 dark:border-amber-600/30 bg-gradient-to-br from-amber-50/20 via-white to-orange-50/20 dark:from-amber-950/15 dark:via-gray-900 dark:to-orange-950/15"
+        >
+          <div className="space-y-6">
+            {/* Top KPI Statistics Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-amber-200 dark:border-amber-800/60 shadow-xs">
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-400 block mb-1">
+                  Mutaxassislik / Fan
+                </span>
+                <span className="text-sm font-extrabold text-amber-700 dark:text-amber-300 truncate block" title={targetUser?.specialty || targetUser?.subject || profile?.specialty || 'Full Stack'}>
+                  {targetUser?.specialty || targetUser?.subject || profile?.specialty || teacherGroups[0]?.course_name || 'Full Stack'}
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-amber-200 dark:border-amber-800/60 shadow-xs">
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-400 block mb-1">
+                  Faol guruhlar
+                </span>
+                <span className="text-sm font-black text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-amber-600" />
+                  <span>{teacherGroups.length} ta guruh</span>
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-amber-200 dark:border-amber-800/60 shadow-xs">
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-400 block mb-1">
+                  Jami o‘quvchilar
+                </span>
+                <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4 text-emerald-600" />
+                  <span>
+                    {teacherGroups.reduce((acc, g) => acc + (g.enrolled_count || (Array.isArray(g.student_ids) ? g.student_ids.length : 0) || 0), 0)} nafar
+                  </span>
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-amber-200 dark:border-amber-800/60 shadow-xs">
+                <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-400 block mb-1">
+                  Haftalik yuklama
+                </span>
+                <span className="text-sm font-black text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <span>{Math.max(teacherGroups.length * 6, 6)} soat / hafta</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Groups Detail Cards */}
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <h3 className="text-sm font-black text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>Ustoz biriktirilgan barcha o‘quv guruhlari ({teacherGroups.length} ta):</span>
+                </h3>
+              </div>
+
+              {teacherGroups.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                  {teacherGroups.map((grp) => {
+                    const cleanSchedule = grp.schedule || grp.schedule_time || '09:00 - 10:30';
+                    const daysLabel = grp.schedule_days || (cleanSchedule.toLowerCase().includes('sesh') ? 'Sesh-Pay-Shan' : 'Dush-Chor-Jum');
+                    const timeOnly = cleanSchedule.replace(/^(Dush-Chor-Jum|Sesh-Pay-Shan|Har kuni|Hafta kunlari)[,\s]*/i, '').trim() || cleanSchedule;
+
+                    return (
+                      <div
+                        key={grp.id}
+                        className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-amber-200/80 dark:border-amber-800/80 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between gap-3"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
+                            <span className="font-extrabold text-sm text-gray-900 dark:text-gray-100 truncate" title={grp.name}>
+                              {grp.name}
+                            </span>
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 shrink-0">
+                              Faol
+                            </span>
+                          </div>
+
+                          <div className="mt-2.5 space-y-2 text-xs">
+                            {/* Prominent Class Time Pill */}
+                            <div className="p-2.5 rounded-xl bg-amber-500/10 dark:bg-amber-950/40 border border-amber-400/30 flex items-center justify-between gap-2">
+                              <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1 shrink-0">
+                                <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                <span>Dars vaqti:</span>
+                              </span>
+                              <span className="font-mono text-xs font-black text-amber-900 dark:text-amber-200 truncate">
+                                ⏰ {timeOnly}
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-[11px]">
+                              <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                                <span className="text-[9px] uppercase font-bold text-gray-400 block">Kunlari</span>
+                                <span className="font-bold text-gray-800 dark:text-gray-200 truncate block">
+                                  📅 {daysLabel}
+                                </span>
+                              </div>
+                              <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                                <span className="text-[9px] uppercase font-bold text-gray-400 block">Xona</span>
+                                <span className="font-bold text-gray-800 dark:text-gray-200 truncate block">
+                                  🚪 {grp.room || '101-xona'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-[11px] pt-1">
+                              <span className="text-gray-500 dark:text-gray-400">Sig‘im:</span>
+                              <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                👥 {grp.enrolled_count || grp.studentCount || 0} / {grp.capacity || 30} o‘quvchi
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs">
+                          <span className="font-mono font-bold text-gray-900 dark:text-gray-100">
+                            {(grp.monthly_price || grp.price || 600000).toLocaleString()} so‘m/oy
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/${currentUserRole}/groups/${grp.id}`)}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                          >
+                            <span>Guruhni ochish</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                  <div className="flex-1">
+                    <span className="font-bold block text-sm mb-0.5">Hozircha guruhlar biriktirilmagan</span>
+                    <span>Ushbu ustozga guruh biriktirish uchun Guruhlar bo‘limidan yangi guruh ochishingiz yoki mavjud guruh o‘qituvchisini yangilashingiz mumkin.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Weekly Timetable Grid (Haftalik dars jadvali vizual ko‘rinishi) */}
+            <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200 dark:border-gray-700/80 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <h4 className="text-xs font-black uppercase tracking-wider text-gray-900 dark:text-gray-100">
+                    Haftalik dars jadvali va dars vaqtlari (Dushanba — Shanba)
+                  </h4>
+                </div>
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                  Jonli dars setkasi
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                {[
+                  { dayNum: 1, name: 'Dushanba', short: 'Dush' },
+                  { dayNum: 2, name: 'Seshanba', short: 'Sesh' },
+                  { dayNum: 3, name: 'Chorshanba', short: 'Chor' },
+                  { dayNum: 4, name: 'Payshanba', short: 'Pay' },
+                  { dayNum: 5, name: 'Juma', short: 'Jum' },
+                  { dayNum: 6, name: 'Shanba', short: 'Shan' },
+                ].map((d) => {
+                  const dayLessons = teacherGroups.filter((g) => {
+                    const sched = (g.schedule_days || g.schedule || '').toLowerCase();
+                    if (d.dayNum === 1 && (sched.includes('dush') || sched.includes('har kuni'))) return true;
+                    if (d.dayNum === 2 && (sched.includes('sesh') || sched.includes('har kuni'))) return true;
+                    if (d.dayNum === 3 && (sched.includes('chor') || sched.includes('har kuni'))) return true;
+                    if (d.dayNum === 4 && (sched.includes('pay') || sched.includes('har kuni'))) return true;
+                    if (d.dayNum === 5 && (sched.includes('jum') || sched.includes('har kuni'))) return true;
+                    if (d.dayNum === 6 && (sched.includes('shan') || sched.includes('har kuni'))) return true;
+                    return false;
+                  });
+
+                  return (
+                    <div
+                      key={d.dayNum}
+                      className="p-3 rounded-xl bg-gray-50/80 dark:bg-surface-dark border border-gray-100 dark:border-gray-800 flex flex-col justify-between min-h-[140px]"
+                    >
+                      <div>
+                        <div className="text-[11px] font-black uppercase text-gray-700 dark:text-gray-300 pb-1.5 mb-2 border-b border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between">
+                          <span>{d.name}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                            {dayLessons.length} dars
+                          </span>
+                        </div>
+
+                        {dayLessons.length > 0 ? (
+                          <div className="space-y-2">
+                            {dayLessons.map((l) => {
+                              const schedText = l.schedule || l.schedule_time || '09:00 - 10:30';
+                              const timeClean = schedText.replace(/^(Dush-Chor-Jum|Sesh-Pay-Shan|Har kuni|Hafta kunlari)[,\s]*/i, '').trim();
+                              return (
+                                <div
+                                  key={l.id}
+                                  className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300/50 dark:border-amber-700/60 text-[11px] space-y-1 shadow-2xs"
+                                >
+                                  <div className="font-mono font-black text-amber-900 dark:text-amber-200 flex items-center gap-1">
+                                    <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                                    <span>{timeClean || '09:00 - 10:30'}</span>
+                                  </div>
+                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate" title={l.name}>
+                                    {l.name}
+                                  </div>
+                                  <div className="text-[10px] text-gray-600 dark:text-gray-400">
+                                    🚪 {l.room || '101-xona'}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-gray-400 dark:text-gray-400 italic text-center py-6">
+                            Dars yo‘q
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* STUDENT STUDY GROUP & ADVANCED COURSE & GROUP TRANSFER SECTION */}
       {effectiveRole === 'student' && (
         <Card
           title="O‘quv guruhi va Ta’lim yo‘nalishi"
-          subtitle="O‘quvchi biriktirilgan guruh, dars jadvali va guruhni almashtirish / ko‘chirish (Transfer)"
+          subtitle="O‘quvchining joriy kursi, guruhi, dars soatlari hamda yangi yo‘nalish / guruhga ko‘chirish (Transfer)"
           className="border-2 border-emerald-500/30 dark:border-emerald-600/30 bg-gradient-to-br from-emerald-50/20 via-white to-teal-50/20 dark:from-emerald-950/15 dark:via-gray-900 dark:to-teal-950/15"
         >
-          <div className="space-y-4">
+          <div className="space-y-6">
             {groupTransferSuccess && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2 border border-emerald-200 dark:border-emerald-800 animate-fade-in">
-                <CheckCircle className="w-4 h-4 shrink-0 text-emerald-600" />
-                <span>{groupTransferSuccess}</span>
+              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2 border border-emerald-200 dark:border-emerald-800 animate-fade-in shadow-xs">
+                <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+                <span className="text-sm font-bold">{groupTransferSuccess}</span>
               </div>
             )}
 
-            {studentGroups.length > 0 ? (
-              <div className="space-y-3">
-                {studentGroups.map((grp, gIdx) => (
-                  <div
-                    key={grp.id}
-                    className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-emerald-200 dark:border-emerald-800/80 shadow-xs space-y-3"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-800">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 shadow-2xs">
-                          <GraduationCap className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                            {studentGroups.length > 1 ? `${gIdx + 1}-o‘quv guruhi` : 'Joriy o‘quv guruhi'}
-                          </div>
-                          <div className="text-base sm:text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2 flex-wrap">
-                            <span>«{grp.name}»</span>
-                            {grp.room && (
-                              <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700">
-                                🚪 {grp.room}-xona
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/${currentUserRole}/users/edit/${targetUser?.id || resolvedTargetId}`)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
-                        title="Guruhni almashtirish, vaqtini yoki ustozini o‘zgartirish uchun tahrirlash sahifasiga o‘tish"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                        <span>Tahrirlash va almashtirish</span>
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Kurs / Fan</span>
-                        <span className="font-bold text-gray-900 dark:text-gray-100">
-                          {grp.courseName || grp.course_name || 'Fan'}
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Ustoz & Jadval</span>
-                        <span className="font-bold text-gray-900 dark:text-gray-100 truncate block" title={grp.teacherName || grp.teacher_name}>
-                          {grp.teacherName || grp.teacher_name || grp.primaryTeacher?.fullName || 'Noma‘lum'}
-                        </span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400 block mt-0.5 truncate">
-                          {grp.schedule_days || grp.schedule || 'Jadvalsiz'}
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Guruh sig‘imi</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                          {grp.enrolled_count || grp.studentCount || 0} / {grp.capacity || 20} ta
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Oylik to‘lov</span>
-                        <span className="font-black text-gray-900 dark:text-gray-100">
-                          {(grp.monthly_price || grp.price || 500000).toLocaleString()} so‘m
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            {/* Current Active Groups */}
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4 text-emerald-600" />
+                  <span>Joriy biriktirilgan ta’lim yo‘nalishi va guruhi:</span>
+                </span>
               </div>
-            ) : (
-              <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-                <div className="flex-1">
-                  <span className="font-bold block text-sm mb-0.5">Hozircha guruh biriktirilmagan (Kutish zalida)</span>
-                  <span>Ushbu o‘quvchi hali biron bir o‘quv guruhiga kiritilmagan. Quyidagi ro‘yxatdan guruh tanlab uni biriktirib qo‘yishingiz mumkin.</span>
-                </div>
-              </div>
-            )}
 
-            {/* Quick Group Transfer / Enrollment Selector for Admin & Owner */}
-            {(isOwner || currentUserRole === 'admin') && (
-              <div className="p-4 rounded-2xl bg-gray-50 dark:bg-surface-dark-secondary/70 border border-gray-200 dark:border-gray-700/80 space-y-3">
-                <label className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                  <RefreshCw className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span>
-                    {studentGroup
-                      ? "O‘quvchini boshqa guruhga ko‘chirish (Guruhni almashtirish):"
-                      : "O‘quvchini guruhga biriktirish:"}
-                  </span>
-                </label>
-
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="flex-1">
-                    <select
-                      value={selectedNewGroupId}
-                      onChange={(e) => setSelectedNewGroupId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark text-gray-900 dark:text-gray-100 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              {studentGroups.length > 0 ? (
+                <div className="space-y-3">
+                  {studentGroups.map((grp, gIdx) => (
+                    <div
+                      key={grp.id}
+                      className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-emerald-200 dark:border-emerald-800/80 shadow-xs space-y-3"
                     >
-                      <option value="">Guruhni tanlang...</option>
-                      {allGroups.map((g) => (
-                        <option key={g.id} value={g.id} disabled={g.id === studentGroup?.id}>
-                          {g.name} — {g.courseName || g.course_name || 'Fan'} ({g.enrolled_count || g.studentCount || 0}/{g.capacity || 20} ta)
-                          {g.id === studentGroup?.id ? ' (Hozirgi guruhi)' : ''}
-                        </option>
-                      ))}
-                    </select>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 shadow-2xs">
+                            <GraduationCap className="w-7 h-7" />
+                          </div>
+                          <div>
+                            <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                              {studentGroups.length > 1 ? `${gIdx + 1}-o‘quv guruhi` : 'Asosiy o‘quv guruhi'}
+                            </div>
+                            <div className="text-base sm:text-lg font-black text-gray-900 dark:text-gray-100 flex items-center gap-2 flex-wrap">
+                              <span>«{grp.name}»</span>
+                              {grp.room && (
+                                <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700">
+                                  🚪 {grp.room}-xona
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 font-mono text-xs font-black text-emerald-900 dark:text-emerald-200 self-start sm:self-auto flex items-center gap-1.5">
+                          <Clock className="w-4 h-4 text-emerald-600" />
+                          <span>{grp.schedule || grp.schedule_time || 'Jadval belgilanmagan'}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Kurs / Fan</span>
+                          <span className="font-bold text-gray-900 dark:text-gray-100">
+                            {grp.courseName || grp.course_name || 'Fan'}
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Ustoz / Mentor</span>
+                          <span className="font-bold text-gray-900 dark:text-gray-100 truncate block" title={grp.teacherName || grp.teacher_name}>
+                            {grp.teacherName || grp.teacher_name || grp.primaryTeacher?.fullName || 'Noma‘lum'}
+                          </span>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400 block mt-0.5 truncate">
+                            {grp.schedule_days || grp.schedule || 'Jadvalsiz'}
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Guruh sig‘imi</span>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                            {grp.enrolled_count || grp.studentCount || 0} / {grp.capacity || 30} ta
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700/60">
+                          <span className="text-[10px] uppercase font-bold text-gray-400 block mb-0.5">Oylik to‘lov</span>
+                          <span className="font-black text-gray-900 dark:text-gray-100">
+                            {(grp.monthly_price || grp.price || 500000).toLocaleString()} so‘m
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                  <div className="flex-1">
+                    <span className="font-bold block text-sm mb-0.5">Hozircha guruh biriktirilmagan (Kutish zalida)</span>
+                    <span>Ushbu o‘quvchi hali biron bir kurs yoki guruhga kiritilmagan. Quyidagi kurs va dars vaqtlaridan birini tanlab guruhga biriktirishingiz mumkin.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ADVANCED COURSE & GROUP TRANSFER FLOW (Owner, Admin & Teacher) */}
+            {(isOwner || currentUserRole === 'admin' || currentUserRole === 'teacher') && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-surface-dark-secondary/80 border-2 border-blue-500/30 dark:border-blue-500/20 space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-gray-200/80 dark:border-gray-700/80">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <h4 className="text-xs font-black uppercase tracking-wider text-gray-900 dark:text-gray-100">
+                      Ta’lim yo‘nalishi va O‘quv guruhini almashtirish (Transfer paneli)
+                    </h4>
+                  </div>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-700 dark:text-blue-300">
+                    Bosqichma-bosqich tanlash
+                  </span>
+                </div>
+
+                {/* Step 1: Filter by Course / Direction */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                    <span>1-QADAM: Ta’lim yo‘nalishini (Kursni) tanlang:</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCourseFilter('all')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        selectedCourseFilter === 'all'
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                          : 'bg-white dark:bg-surface-dark text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-blue-400'
+                      }`}
+                    >
+                      Barcha kurslar ({allGroups.length})
+                    </button>
+                    {coursesList.map((c) => {
+                      const count = allGroups.filter((g) => g.course_id === c.id || g.courseId === c.id || (g.course_name && c.name && g.course_name.toLowerCase() === c.name.toLowerCase())).length;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setSelectedCourseFilter(c.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                            selectedCourseFilter === c.id
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                              : 'bg-white dark:bg-surface-dark text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-blue-400'
+                          }`}
+                        >
+                          <span>{c.name}</span>
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${selectedCourseFilter === c.id ? 'bg-white/30 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'}`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Step 2: Available Groups Grid with Exact Times & Teachers */}
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <label className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-blue-600" />
+                      <span>2-QADAM: Dars vaqti va ustoziga qarab guruhni tanlang:</span>
+                    </label>
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Guruh ustiga bosing
+                    </span>
                   </div>
 
-                  <Button
-                    type="button"
-                    variant="primary"
-                    disabled={!selectedNewGroupId || selectedNewGroupId === studentGroup?.id || isTransferringGroup}
-                    isLoading={isTransferringGroup}
-                    onClick={handleTransferGroup}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs shrink-0 flex items-center justify-center gap-1.5"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                    <span>{studentGroup ? "Guruhga ko‘chirish" : "Guruhga biriktirish"}</span>
-                  </Button>
+                  {(() => {
+                    const selCourse = coursesList.find((c) => c.id === selectedCourseFilter);
+                    const matchingGroups = allGroups.filter((g) => {
+                      if (selectedCourseFilter === 'all') return true;
+                      if (g.course_id === selectedCourseFilter || g.courseId === selectedCourseFilter) return true;
+                      if (selCourse && g.course_name && g.course_name.toLowerCase() === selCourse.name.toLowerCase()) return true;
+                      if (selCourse && g.name && g.name.toLowerCase().includes(selCourse.name.toLowerCase())) return true;
+                      return false;
+                    });
+
+                    if (matchingGroups.length === 0) {
+                      return (
+                        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300/40 text-xs text-amber-800 dark:text-amber-200 text-center">
+                          Ushbu kurs bo‘yicha hozircha ochiq guruhlar mavjud emas. Yuqoridan «Barcha kurslar»ni tanlang.
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto p-1">
+                        {matchingGroups.map((g) => {
+                          const isSelected = selectedNewGroupId === g.id;
+                          const isCurrent = studentGroup?.id === g.id;
+                          const cleanSchedule = g.schedule || g.schedule_time || 'Jadval';
+                          const timeOnly = cleanSchedule.replace(/^(Dush-Chor-Jum|Sesh-Pay-Shan|Har kuni|Hafta kunlari)[,\s]*/i, '').trim() || cleanSchedule;
+                          const daysOnly = g.schedule_days || (cleanSchedule.toLowerCase().includes('sesh') ? 'Sesh-Pay-Shan' : 'Dush-Chor-Jum');
+                          const isMentor = isMentorUser(null, '') || String(g.teacher_name || '').toLowerCase().includes('abdulazizbek');
+
+                          return (
+                            <div
+                              key={g.id}
+                              onClick={() => setSelectedNewGroupId(g.id)}
+                              className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                                isSelected
+                                  ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/50 shadow-md ring-2 ring-blue-500/30'
+                                  : isCurrent
+                                  ? 'border-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 opacity-80'
+                                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark hover:border-blue-400 hover:shadow-xs'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <div className="font-extrabold text-xs sm:text-sm text-gray-900 dark:text-gray-100 flex items-center gap-1.5 flex-wrap">
+                                    <span>«{g.name}»</span>
+                                    {isCurrent && (
+                                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
+                                        Hozirgi guruhi
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                    Kurs: <b className="text-gray-700 dark:text-gray-300">{g.courseName || g.course_name || 'Fan'}</b>
+                                  </div>
+                                </div>
+
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                                  isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 dark:border-gray-600'
+                                }`}>
+                                  {isSelected && <Check className="w-3 h-3" />}
+                                </div>
+                              </div>
+
+                              {/* Prominent Time & Ustoz Info */}
+                              <div className="space-y-1.5 text-xs">
+                                <div className="p-2 rounded-lg bg-amber-500/10 dark:bg-amber-950/40 border border-amber-400/30 flex items-center justify-between gap-2">
+                                  <span className="font-bold text-[11px] text-amber-900 dark:text-amber-200 flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <span>{timeOnly}</span>
+                                  </span>
+                                  <span className="font-mono text-[10px] text-gray-600 dark:text-gray-300">
+                                    📅 {daysOnly}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
+                                  <span className="truncate flex items-center gap-1">
+                                    <span>Ustoz:</span>
+                                    <b className="text-gray-900 dark:text-gray-100">{g.teacher_name || g.teacherName || 'Ustoz'}</b>
+                                    {isMentor && (
+                                      <span className="text-[9px] px-1 py-0.2 rounded font-black bg-gradient-to-r from-amber-500/25 to-yellow-500/25 text-amber-700 dark:text-amber-300 border border-amber-400/40">
+                                        ⚡ MENTOR
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span className="shrink-0 font-bold">
+                                    🚪 {g.room || '101-xona'} • 👥 {g.enrolled_count || 0}/{g.capacity || 30}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
+
+                {/* Step 3: Confirmation & Submit Bar */}
+                {selectedNewGroupId && (
+                  <div className="p-3.5 rounded-xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 animate-fade-in">
+                    {(() => {
+                      const selGroup = allGroups.find((g) => g.id === selectedNewGroupId);
+                      return (
+                        <div className="text-xs">
+                          <span className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300 block">
+                            Tanlangan yangi o‘quv guruhi:
+                          </span>
+                          <span className="font-black text-gray-900 dark:text-gray-100 text-sm">
+                            «{selGroup?.name}»
+                          </span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400 block mt-0.5">
+                            ⏰ Vaqti: <b>{selGroup?.schedule || selGroup?.schedule_time || 'Jadval'}</b> • Ustoz: <b>{selGroup?.teacher_name || 'Ustoz'}</b> • Xona: <b>{selGroup?.room || '101-xona'}</b>
+                          </span>
+                        </div>
+                      );
+                    })()}
+
+                    <Button
+                      type="button"
+                      variant="primary"
+                      disabled={!selectedNewGroupId || selectedNewGroupId === studentGroup?.id || isTransferringGroup}
+                      isLoading={isTransferringGroup}
+                      onClick={() => handleTransferGroup(selectedNewGroupId)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xs px-5 py-2.5 rounded-xl shadow-md shrink-0 flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                      <span>{studentGroup ? "Ushbu guruhga ko‘chirish va saqlash" : "Guruhga biriktirish va saqlash"}</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -740,10 +1180,11 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               {isOwner && isViewingOther ? (
                 <Select
                   label={t('users.role', 'ROL')}
-                  value={userRole}
+                  value={isTargetMentor ? 'mentor' : userRole}
                   onChange={(e) => setUserRole(e.target.value)}
                   options={[
                     { value: ROLES.STUDENT, label: t('roles.student', 'O‘quvchi') },
+                    { value: ROLES.MENTOR, label: '⚡ Mentor' },
                     { value: ROLES.TEACHER, label: t('roles.teacher', 'O‘qituvchi') },
                     { value: ROLES.ADMIN, label: t('roles.admin', 'Administrator') },
                     { value: ROLES.OWNER, label: t('roles.owner', 'Boshliq (Owner)') },
@@ -753,7 +1194,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               ) : (
                 <Input
                   label={t('users.role', 'ROL')}
-                  value={t('roles.' + effectiveRole, { defaultValue: effectiveRole.toUpperCase() })}
+                  value={isTargetMentor ? '⚡ Mentor' : t('roles.' + effectiveRole, { defaultValue: effectiveRole.toUpperCase() })}
                   disabled
                 />
               )}
