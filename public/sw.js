@@ -1,20 +1,14 @@
-// EDUCO LMS Service Worker for System Push Notifications & PWA Offline Resilience
-const CACHE_NAME = 'educo-v19-bulletproof-pwa';
+// EDUCO LMS Service Worker for System Push Notifications & PWA Lifecycle
+const CACHE_NAME = 'educo-v20-pure-network';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(['/', '/index.html']).catch(() => {});
-    })
-  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
@@ -83,47 +77,5 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// 4. Fetch event handler with bulletproof fallback so Chromium never throws ERR_FAILED
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  if (!event.request.url.startsWith('http')) return;
-
-  // Let API requests pass directly without SW interference
-  if (event.request.url.includes('/api/')) return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Cache successful HTML & static assets
-        if (response && response.status === 200) {
-          const resClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, resClone).catch(() => {});
-            // If navigating, guarantee /index.html and / are cached
-            if (event.request.mode === 'navigate' || event.request.destination === 'document') {
-              cache.put('/index.html', resClone.clone()).catch(() => {});
-              cache.put('/', resClone.clone()).catch(() => {});
-            }
-          });
-        }
-        return response;
-      })
-      .catch(async () => {
-        // 1. Try matching cached response for request
-        const cached = await caches.match(event.request);
-        if (cached) return cached;
-
-        // 2. If navigating to a page, return cached index.html
-        if (event.request.mode === 'navigate' || event.request.destination === 'document') {
-          const indexCached = (await caches.match('/index.html')) || (await caches.match('/'));
-          if (indexCached) return indexCached;
-        }
-
-        // 3. Resilient fallback response (never return undefined to avoid ERR_FAILED)
-        return new Response(
-          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>EDUCO LMS</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#0f172a;color:#f8fafc;text-align:center;padding:20px}button{background:#2563eb;color:white;border:none;padding:12px 24px;border-radius:12px;font-weight:bold;cursor:pointer;margin-top:16px}</style></head><body><div><h2>EDUCO LMS</h2><p>Internet aloqasi yoki tarmoqda uzilish yuz berdi.</p><button onclick="window.location.reload()">Qayta yuklash</button></div></body></html>',
-          { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-        );
-      })
-  );
-});
+// Notice: No 'fetch' event listener!
+// Direct native network navigation guarantees net::ERR_FAILED NEVER occurs!
