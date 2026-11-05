@@ -46,7 +46,26 @@ function syncStoragePlugin() {
       if (key === 'deletedId' || key === '_deleted_ids') continue;
 
       if (Array.isArray(val)) {
+        const isWebsiteCollection = key.startsWith('educo_db_website_');
         const existingList = Array.isArray(current[key]) ? current[key] : [];
+
+        // For website collections, the client sends the authoritative updated list.
+        // Recognize omitted items as deleted so they are never resurrected!
+        if (isWebsiteCollection) {
+          const incomingIds = new Set(val.map((item) => String(item?.id || item?.username || '')).filter(Boolean));
+          existingList.forEach((oldItem) => {
+            const oldId = String(oldItem?.id || oldItem?.username || '');
+            if (oldId && !incomingIds.has(oldId)) {
+              deletedSet.add(oldId);
+            }
+          });
+          merged[key] = val.filter((item) => {
+            const id = String(item?.id || item?.username || '');
+            return !deletedSet.has(id);
+          });
+          continue;
+        }
+
         const map = new Map();
 
         // 1. Populate existing server records (excluding known deleted IDs)
@@ -70,7 +89,7 @@ function syncStoragePlugin() {
             const old = map.get(id);
             const oldTs = new Date(old.updated_at || old.created_at || 0).getTime();
             const newTs = new Date(item.updated_at || item.created_at || 0).getTime();
-            if (newTs >= oldTs) {
+            if (newTs >= oldTs || isNaN(oldTs)) {
               map.set(id, { ...old, ...item });
             }
           }

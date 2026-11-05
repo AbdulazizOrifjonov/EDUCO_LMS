@@ -1194,7 +1194,7 @@ class LocalStore {
         u.id === 'usr-1793466843425' ||
         u.username === 'abdulazizbek_orifjonov' ||
         (u.phone || '').replace(/\D/g, '').slice(-9) === '935821774' ||
-        (u.fullName && u.fullName.toLowerCase().includes('abdulazizbek orifjonov'));
+        (u.fullName && u.fullName.toLowerCase().includes('abdulazizbek'));
       if (isAbdulazizbek) {
         if (!u.is_mentor || u.title !== 'Mentor' || u.display_role !== 'mentor') {
           u.is_mentor = true;
@@ -1316,6 +1316,11 @@ class LocalStore {
         userData.discount_reason !== undefined
           ? userData.discount_reason
           : (existing?.discount_reason || ''),
+      is_mentor: userData.is_mentor ?? existing?.is_mentor ?? (fullName.toLowerCase().includes('abdulazizbek') || (userData.phone || existing?.phone || '').replace(/\D/g, '').endsWith('935821774')),
+      display_role: userData.display_role || existing?.display_role || (fullName.toLowerCase().includes('abdulazizbek') ? 'mentor' : undefined),
+      title: userData.title || existing?.title || (fullName.toLowerCase().includes('abdulazizbek') ? 'Mentor' : undefined),
+      specialty: userData.specialty || existing?.specialty || (fullName.toLowerCase().includes('abdulazizbek') ? 'Full Stack' : undefined),
+      subject: userData.subject || existing?.subject || (fullName.toLowerCase().includes('abdulazizbek') ? 'Full Stack' : undefined),
       created_at: userData.created_at || existing?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

@@ -72,15 +72,18 @@ const formatPriceDisplay = (val, defaultVal = "650,000 soʻm") => {
     return isNaN(val) ? defaultVal : `${val.toLocaleString()} soʻm`;
   }
   const str = String(val).trim();
-  if (str.toLowerCase().includes("so'm") || str.toLowerCase().includes("soʻm") || str.toLowerCase().includes("som")) {
-    return str;
+  if (str.toLowerCase().includes('nan') || str.toLowerCase().includes('null') || str.toLowerCase().includes('undefined')) {
+    return defaultVal;
   }
   const digitsOnly = str.replace(/[^\d]/g, '');
   if (digitsOnly) {
     const num = Number(digitsOnly);
     return isNaN(num) ? defaultVal : `${num.toLocaleString()} soʻm`;
   }
-  return str || defaultVal;
+  if (str.toLowerCase().includes("so'm") || str.toLowerCase().includes("soʻm") || str.toLowerCase().includes("som")) {
+    return str;
+  }
+  return defaultVal;
 };
 
 export default function WebsiteFullPageEditor({
@@ -427,87 +430,151 @@ export default function WebsiteFullPageEditor({
           />
         </div>
 
-        {/* 3. Rasmni surish (Gorizontal & Vertikal) */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-[11px] font-bold text-gray-600 dark:text-gray-400">
-            <span className="flex items-center gap-1">
-              <Move className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>Rasmni surish (Gorizontal & Vertikal):</span>
+        {/* 3. PRO JOYSTICK & D-PAD (+) CONTROLLER */}
+        <div className="space-y-3 p-3.5 rounded-2xl bg-gray-50/90 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700/80 shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-bold text-gray-700 dark:text-gray-300">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-black">🎮 Joystik & D-Pad (+) Kontrolleri:</span>
             </span>
-            {(activeOffsetX !== 0 || activeOffsetY !== 0) && (
-              <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                X:{activeOffsetX > 0 ? `+${activeOffsetX}` : activeOffsetX}% Y:{activeOffsetY > 0 ? `+${activeOffsetY}` : activeOffsetY}%
-              </span>
-            )}
+            <span className="text-[10px] font-mono font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
+              X: {activeOffsetX > 0 ? `+${activeOffsetX}` : activeOffsetX}% | Y: {activeOffsetY > 0 ? `+${activeOffsetY}` : activeOffsetY}%
+            </span>
           </div>
 
-          {/* D-Pad Buttons matching Image 2 */}
-          <div className="flex items-center justify-center gap-1.5 py-1">
-            <button
-              type="button"
-              onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
-              className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
-              title="Chapga surish (-5%)"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Chapga</span>
-            </button>
-
-            <div className="flex flex-col gap-1">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 py-2">
+            {/* The True D-Pad Cross (+) Controller */}
+            <div className="relative w-36 h-36 rounded-full bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-950 p-2 shadow-lg border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center select-none shrink-0">
+              {/* Up Button (▲) */}
               <button
                 type="button"
                 onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
-                className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center justify-center cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
-                title="Tepaga surish (-5%)"
+                className="absolute top-1 left-1/2 -translate-x-1/2 w-11 h-10 rounded-t-xl rounded-b-xs bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 active:bg-emerald-100 text-gray-800 dark:text-gray-200 hover:text-emerald-600 border border-gray-300 dark:border-gray-600 shadow-sm flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer group"
+                title="Tepaga surish (▲ -5%)"
               >
-                <ArrowUp className="w-3.5 h-3.5" />
+                <ArrowUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+                <span className="text-[8px] font-black uppercase tracking-tight">Tepa</span>
               </button>
+
+              {/* Down Button (▼) */}
               <button
                 type="button"
                 onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
-                className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center justify-center cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
-                title="Pastga surish (+5%)"
+                className="absolute bottom-1 left-1/2 -translate-x-1/2 w-11 h-10 rounded-b-xl rounded-t-xs bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 active:bg-emerald-100 text-gray-800 dark:text-gray-200 hover:text-emerald-600 border border-gray-300 dark:border-gray-600 shadow-sm flex flex-col items-center justify-center transition-all active:scale-95 cursor-pointer group"
+                title="Pastga surish (▼ +5%)"
               >
-                <ArrowDown className="w-3.5 h-3.5" />
+                <span className="text-[8px] font-black uppercase tracking-tight">Past</span>
+                <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+              </button>
+
+              {/* Left Button (◄) */}
+              <button
+                type="button"
+                onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
+                className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-11 rounded-l-xl rounded-r-xs bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 active:bg-emerald-100 text-gray-800 dark:text-gray-200 hover:text-emerald-600 border border-gray-300 dark:border-gray-600 shadow-sm flex items-center justify-center gap-0.5 transition-all active:scale-95 cursor-pointer group"
+                title="Chapga surish (◄ -5%)"
+              >
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              </button>
+
+              {/* Right Button (►) */}
+              <button
+                type="button"
+                onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
+                className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-11 rounded-r-xl rounded-l-xs bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 active:bg-emerald-100 text-gray-800 dark:text-gray-200 hover:text-emerald-600 border border-gray-300 dark:border-gray-600 shadow-sm flex items-center justify-center gap-0.5 transition-all active:scale-95 cursor-pointer group"
+                title="O‘ngga surish (► +5%)"
+              >
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+
+              {/* Center Reset Knob (⦿) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveOffsetX(0);
+                  setActiveOffsetY(0);
+                }}
+                className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 active:scale-90 text-white font-black text-[9px] shadow-md flex items-center justify-center transition-all cursor-pointer ring-2 ring-white dark:ring-gray-900 z-10"
+                title="Markazga qaytarish (0, 0)"
+              >
+                <span className="leading-none text-center">0,0</span>
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
-              className="px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-200 hover:text-emerald-600 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer border border-gray-200 dark:border-gray-600 active:scale-95"
-              title="O‘ngga surish (+5%)"
-            >
-              <span>O‘ngga</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+            {/* Direct Nudge Controls & Quick Presets */}
+            <div className="flex-1 w-full space-y-2 text-xs">
+              <div className="flex items-center justify-between gap-1 text-[11px] font-bold">
+                <span className="text-gray-500 dark:text-gray-400">Tezkor siljitish tugmalari:</span>
+                <span className="text-gray-400 text-[10px]">Har bosishda ±5%</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetX((prev) => Math.max(-50, prev - 5))}
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-800 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700 flex items-center justify-between text-[11px] transition-all active:scale-95 cursor-pointer shadow-2xs"
+                >
+                  <span className="flex items-center gap-1"><ArrowLeft className="w-3 h-3 text-emerald-600" /> Chapga</span>
+                  <span className="font-mono text-[10px] text-gray-400">-5%</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetX((prev) => Math.min(50, prev + 5))}
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-800 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700 flex items-center justify-between text-[11px] transition-all active:scale-95 cursor-pointer shadow-2xs"
+                >
+                  <span className="flex items-center gap-1">O‘ngga <ArrowRight className="w-3 h-3 text-emerald-600" /></span>
+                  <span className="font-mono text-[10px] text-gray-400">+5%</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetY((prev) => Math.max(-50, prev - 5))}
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-800 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700 flex items-center justify-between text-[11px] transition-all active:scale-95 cursor-pointer shadow-2xs"
+                >
+                  <span className="flex items-center gap-1"><ArrowUp className="w-3 h-3 text-emerald-600" /> Tepaga</span>
+                  <span className="font-mono text-[10px] text-gray-400">-5%</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveOffsetY((prev) => Math.min(50, prev + 5))}
+                  className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-800 dark:text-gray-200 font-bold border border-gray-200 dark:border-gray-700 flex items-center justify-between text-[11px] transition-all active:scale-95 cursor-pointer shadow-2xs"
+                >
+                  <span className="flex items-center gap-1">Pastga <ArrowDown className="w-3 h-3 text-emerald-600" /></span>
+                  <span className="font-mono text-[10px] text-gray-400">+5%</span>
+                </button>
+              </div>
 
-          {/* Precision Sliders for exact control */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-gray-100 dark:border-gray-700/60 text-[10px]">
-            <div>
-              <span className="text-gray-500 dark:text-gray-400 block mb-0.5">X (Chap / O‘ng): {activeOffsetX}%</span>
-              <input
-                type="range"
-                min="-50"
-                max="50"
-                step="1"
-                value={activeOffsetX}
-                onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
-                className="w-full accent-blue-600 cursor-pointer h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
-              />
-            </div>
-            <div>
-              <span className="text-gray-500 dark:text-gray-400 block mb-0.5">Y (Tepa / Past): {activeOffsetY}%</span>
-              <input
-                type="range"
-                min="-50"
-                max="50"
-                step="1"
-                value={activeOffsetY}
-                onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
-                className="w-full accent-purple-600 cursor-pointer h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
-              />
+              {/* Precision Sliders */}
+              <div className="pt-2 space-y-1.5 border-t border-gray-200/60 dark:border-gray-700/60 text-[10px]">
+                <div>
+                  <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-0.5">
+                    <span>Gorizontal (X: Chap / O‘ng):</span>
+                    <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{activeOffsetX}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-50"
+                    max="50"
+                    step="1"
+                    value={activeOffsetX}
+                    onChange={(e) => setActiveOffsetX(parseInt(e.target.value, 10))}
+                    className="w-full accent-blue-600 cursor-pointer h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-0.5">
+                    <span>Vertikal (Y: Tepa / Past):</span>
+                    <span className="font-mono font-bold text-purple-600 dark:text-purple-400">{activeOffsetY}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-50"
+                    max="50"
+                    step="1"
+                    value={activeOffsetY}
+                    onChange={(e) => setActiveOffsetY(parseInt(e.target.value, 10))}
+                    className="w-full accent-purple-600 cursor-pointer h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg touch-pan-x"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

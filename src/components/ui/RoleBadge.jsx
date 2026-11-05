@@ -4,13 +4,23 @@ import { ROLES } from '@/lib/constants';
 
 export const isMentorUser = (user, role) => {
   const normRole = String(role || user?.role || '').toLowerCase().trim();
-  if (normRole === 'mentor') return true;
-  if (!user) return false;
+  if (normRole === 'mentor' || normRole === 'mentors') return true;
+  if (!user) {
+    if (typeof role === 'string' && role.toLowerCase().includes('mentor')) return true;
+    return false;
+  }
   if (user.is_mentor === true || user.display_role === 'mentor' || user.title?.toLowerCase() === 'mentor') return true;
   const username = String(user.username || user.email || '').toLowerCase();
-  const fullName = String(user.fullName || user.full_name || `${user.first_name || ''} ${user.last_name || ''}`).toLowerCase();
+  const fullName = String(user.fullName || user.full_name || `${user.first_name || ''} ${user.last_name || ''}` || user.name || '').toLowerCase();
   const phone = String(user.phone || user.phone_number || '').replace(/\D/g, '');
-  if (username.includes('abdulazizbek') || fullName.includes('abdulazizbek') || phone.endsWith('935821774')) {
+  const id = String(user.id || '');
+  if (
+    username.includes('abdulazizbek') ||
+    fullName.includes('abdulazizbek') ||
+    phone.endsWith('935821774') ||
+    id === 'usr-1793466843425' ||
+    id === 'usr-1793463763683'
+  ) {
     return true;
   }
   return false;

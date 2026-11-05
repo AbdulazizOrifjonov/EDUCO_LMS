@@ -316,7 +316,7 @@ export default function PasswordsPage() {
       className: '!px-2 whitespace-nowrap',
       cellClassName: '!px-2 !py-2.5 whitespace-nowrap',
       render: (row) => (
-        <RoleBadge role={row.role} size="sm" />
+        <RoleBadge role={row.role} user={row} size="sm" />
       ),
     },
     {
@@ -820,7 +820,7 @@ export default function PasswordsPage() {
                           </p>
                         </div>
                       </div>
-                      <RoleBadge role={user.role} size="sm" />
+                      <RoleBadge role={user.role} user={user} size="sm" />
                     </div>
 
                     {/* Middle Row 1: Login / Phone */}
@@ -1008,7 +1008,7 @@ export default function PasswordsPage() {
                   )}
                 </p>
               </div>
-              <RoleBadge role={selectedUser.role} size="sm" />
+              <RoleBadge role={selectedUser.role} user={selectedUser} size="sm" />
             </div>
 
             <PasswordStrengthInput
