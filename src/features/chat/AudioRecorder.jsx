@@ -40,6 +40,20 @@ export default function AudioRecorder({ onRecordingComplete, onCancel }) {
     }
   };
 
+  const stopRecording = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
+
   const startRecording = async () => {
     setErrorMessage(null);
     audioChunksRef.current = [];
@@ -114,20 +128,6 @@ export default function AudioRecorder({ onRecordingComplete, onCancel }) {
       } else {
         setErrorMessage(t('chat.microphoneNotSupported', 'Mikrofon topilmadi yoki band. Audio fayl yuklashingiz mumkin.'));
       }
-    }
-  };
-
-  const stopRecording = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
     }
   };
 

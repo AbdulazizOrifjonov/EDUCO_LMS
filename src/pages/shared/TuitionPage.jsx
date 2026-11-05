@@ -188,6 +188,42 @@ export default function TuitionPage() {
     }
   };
 
+  const filteredStudents = useMemo(() => {
+    let list = studentsSummary;
+    if (isStudent && profile?.id) {
+      list = list.filter((s) => s.studentId === profile.id);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const rawDigits = q.replace(/\D/g, '');
+      list = list.filter(
+        (s) =>
+          (s.studentName && s.studentName.toLowerCase().includes(q)) ||
+          (s.studentEmail && s.studentEmail.toLowerCase().includes(q)) ||
+          (s.studentPhone && (s.studentPhone.toLowerCase().includes(q) || (rawDigits && s.studentPhone.replace(/\D/g, '').includes(rawDigits))))
+      );
+    }
+    return list;
+  }, [studentsSummary, searchQuery, isStudent, profile?.id]);
+
+  const filteredHistory = useMemo(() => {
+    let list = paymentHistory;
+    if (isStudent && profile?.id) {
+      list = list.filter((p) => p.studentId === profile.id);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (p) =>
+          (p.studentName && p.studentName.toLowerCase().includes(q)) ||
+          (p.referenceNumber && p.referenceNumber.toLowerCase().includes(q)) ||
+          (p.payment_method && p.payment_method.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [paymentHistory, searchQuery, isStudent, profile?.id]);
+
+
   // Selection & Delete Handlers for Payment History
   const handleSelectPayment = (id) => {
     setSelectedPayments((prev) => {
@@ -254,41 +290,6 @@ export default function TuitionPage() {
       setIsDeleting(false);
     }
   };
-
-  const filteredStudents = useMemo(() => {
-    let list = studentsSummary;
-    if (isStudent && profile?.id) {
-      list = list.filter((s) => s.studentId === profile.id);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      const rawDigits = q.replace(/\D/g, '');
-      list = list.filter(
-        (s) =>
-          (s.studentName && s.studentName.toLowerCase().includes(q)) ||
-          (s.studentEmail && s.studentEmail.toLowerCase().includes(q)) ||
-          (s.studentPhone && (s.studentPhone.toLowerCase().includes(q) || (rawDigits && s.studentPhone.replace(/\D/g, '').includes(rawDigits))))
-      );
-    }
-    return list;
-  }, [studentsSummary, searchQuery, isStudent, profile?.id]);
-
-  const filteredHistory = useMemo(() => {
-    let list = paymentHistory;
-    if (isStudent && profile?.id) {
-      list = list.filter((p) => p.studentId === profile.id);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (p) =>
-          (p.studentName && p.studentName.toLowerCase().includes(q)) ||
-          (p.referenceNumber && p.referenceNumber.toLowerCase().includes(q)) ||
-          (p.payment_method && p.payment_method.toLowerCase().includes(q))
-      );
-    }
-    return list;
-  }, [paymentHistory, searchQuery, isStudent, profile?.id]);
 
   const handleExport = () => {
     if (activeTab === 'summary') {

@@ -60,14 +60,7 @@ export default function PayrollPage() {
   const [editingRule, setEditingRule] = useState(null);
   const [periodModalOpen, setPeriodModalOpen] = useState(false);
 
-  // Initial load
-  useEffect(() => {
-    if (!isOwner) return;
-
-    loadInitialData();
-  }, [isOwner]);
-
-  const loadInitialData = async () => {
+  const loadInitialData = React.useCallback(async () => {
     try {
       setLoading(true);
       const [fetchedRules, fetchedPeriods] = await Promise.all([
@@ -86,7 +79,14 @@ export default function PayrollPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    if (!isOwner) return;
+
+    loadInitialData();
+  }, [isOwner, loadInitialData]);
 
   // Load calculations and payments when selectedPeriodId changes
   useEffect(() => {

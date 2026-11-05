@@ -71,30 +71,126 @@ export default function VideoRecorder({
     }
   };
 
-  const checkBrowserCapabilities = async () => {
-    if (
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia ||
-      typeof window.MediaRecorder === 'undefined'
-    ) {
-      setHasCameraSupport(false);
-      setUploadMode(true);
-      return;
+  const stopRecording = () => {
+    drawingLoopRef.current?.();
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const startRecording = () => {
+    if (!streamRef.current) return;
+    chunksRef.current = [];
+    setRecordingSeconds(0);
+
+    const hasAudio = streamRef.current.getAudioTracks().length > 0;
+    let mimeType = hasAudio ? 'video/webm;codecs=vp8,opus' : 'video/webm';
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      if (MediaRecorder.isTypeSupported('video/webm')) {
+        mimeType = 'video/webm';
+      } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+        mimeType = 'video/mp4';
+      } else {
+        mimeType = '';
+      }
     }
 
     try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoInputs = devices.filter((d) => d.kind === 'videoinput');
-      setAvailableDevices(videoInputs);
-      if (videoInputs.length === 0) {
-        setHasCameraSupport(false);
-        setUploadMode(true);
-        return;
+      // Create hidden 1:1 square canvas stream so camera switching mid-recording
+      // never freezes or terminates the MediaRecorder track!
+      let recordStream = streamRef.current;
+      let isDrawing = true;
+
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 480;
+        canvas.height = 480;
+        const ctx = canvas.getContext('2d');
+
+        const drawLoop = () => {
+          if (!isDrawing) return;
+          const v = videoLiveRef.current;
+          if (v && v.readyState >= 2) {
+            const vw = v.videoWidth || 480;
+            const vh = v.videoHeight || 480;
+            const minDim = Math.min(vw, vh);
+            const sx = (vw - minDim) / 2;
+            const sy = (vh - minDim) / 2;
+
+            ctx.save();
+            ctx.clearRect(0, 0, 480, 480);
+            if (facingModeRef.current === 'user') {
+              // Mirror front camera for natural selfie orientation
+              ctx.translate(480, 0);
+              ctx.scale(-1, 1);
+            }
+            ctx.drawImage(v, sx, sy, minDim, minDim, 0, 0, 480, 480);
+            ctx.restore();
+          }
+          requestAnimationFrame(drawLoop);
+        };
+        drawLoop();
+
+        drawingLoopRef.current = () => {
+          isDrawing = false;
+        };
+
+        if (canvas.captureStream) {
+          const cStream = canvas.captureStream(30);
+          const micTrack = streamRef.current.getAudioTracks()[0];
+          if (micTrack) {
+            cStream.addTrack(micTrack);
+          }
+          recordStream = cStream;
+        }
+      } catch (canvasErr) {
+        console.warn('Canvas stream fallback to direct stream:', canvasErr);
+        recordStream = streamRef.current;
       }
-      startCameraStream(facingMode);
+
+      const recorder = mimeType
+        ? new MediaRecorder(recordStream, { mimeType })
+        : new MediaRecorder(recordStream);
+
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        drawingLoopRef.current?.();
+        const type = recorder.mimeType || 'video/webm';
+        const blob = new Blob(chunksRef.current, { type });
+        setVideoBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setVideoUrl(url);
+        setIsRecording(false);
+        stopMediaStream();
+      };
+
+      recorder.start(400);
+      setIsRecording(true);
+
+      timerRef.current = setInterval(() => {
+        setRecordingSeconds((prev) => {
+          if (prev >= MAX_SECONDS - 1) {
+            stopRecording();
+            return MAX_SECONDS;
+          }
+          return prev + 1;
+        });
+      }, 1000);
     } catch (err) {
-      console.warn('Error enumerating devices:', err);
-      startCameraStream(facingMode);
+      console.error('Failed to start MediaRecorder:', err);
+      drawingLoopRef.current?.();
+      setPermissionError('Video yozishni boshlab bo‘lmadi.');
     }
   };
 
@@ -157,32 +253,6 @@ export default function VideoRecorder({
       }
     }
   };
-
-  useEffect(() => {
-    if (videoLiveRef.current && streamRef.current && !videoUrl && !uploadMode) {
-      videoLiveRef.current.srcObject = streamRef.current;
-      videoLiveRef.current.play().catch(() => {});
-    }
-  }, [uploadMode, videoUrl]);
-
-  // Auto-start recording when autoStart prop is true and stream is ready
-  useEffect(() => {
-    if (
-      autoStart &&
-      !autoStartedRef.current &&
-      hasCameraSupport &&
-      streamRef.current &&
-      !isRecording &&
-      !videoBlob &&
-      !uploadMode
-    ) {
-      autoStartedRef.current = true;
-      const t = setTimeout(() => {
-        startRecording();
-      }, 350);
-      return () => clearTimeout(t);
-    }
-  }, [autoStart, hasCameraSupport, uploadMode, isRecording, videoBlob]);
 
   const switchCameraFacing = async () => {
     if (isSwitchingCamera) return;
@@ -301,128 +371,58 @@ export default function VideoRecorder({
     setIsSwitchingCamera(false);
   };
 
-  const startRecording = () => {
-    if (!streamRef.current) return;
-    chunksRef.current = [];
-    setRecordingSeconds(0);
-
-    const hasAudio = streamRef.current.getAudioTracks().length > 0;
-    let mimeType = hasAudio ? 'video/webm;codecs=vp8,opus' : 'video/webm';
-    if (!MediaRecorder.isTypeSupported(mimeType)) {
-      if (MediaRecorder.isTypeSupported('video/webm')) {
-        mimeType = 'video/webm';
-      } else if (MediaRecorder.isTypeSupported('video/mp4')) {
-        mimeType = 'video/mp4';
-      } else {
-        mimeType = '';
-      }
+  const checkBrowserCapabilities = async () => {
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia ||
+      typeof window.MediaRecorder === 'undefined'
+    ) {
+      setHasCameraSupport(false);
+      setUploadMode(true);
+      return;
     }
 
     try {
-      // Create hidden 1:1 square canvas stream so camera switching mid-recording
-      // never freezes or terminates the MediaRecorder track!
-      let recordStream = streamRef.current;
-      let isDrawing = true;
-
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 480;
-        canvas.height = 480;
-        const ctx = canvas.getContext('2d');
-
-        const drawLoop = () => {
-          if (!isDrawing) return;
-          const v = videoLiveRef.current;
-          if (v && v.readyState >= 2) {
-            const vw = v.videoWidth || 480;
-            const vh = v.videoHeight || 480;
-            const minDim = Math.min(vw, vh);
-            const sx = (vw - minDim) / 2;
-            const sy = (vh - minDim) / 2;
-
-            ctx.save();
-            ctx.clearRect(0, 0, 480, 480);
-            if (facingModeRef.current === 'user') {
-              // Mirror front camera for natural selfie orientation
-              ctx.translate(480, 0);
-              ctx.scale(-1, 1);
-            }
-            ctx.drawImage(v, sx, sy, minDim, minDim, 0, 0, 480, 480);
-            ctx.restore();
-          }
-          requestAnimationFrame(drawLoop);
-        };
-        drawLoop();
-
-        drawingLoopRef.current = () => {
-          isDrawing = false;
-        };
-
-        if (canvas.captureStream) {
-          const cStream = canvas.captureStream(30);
-          const micTrack = streamRef.current.getAudioTracks()[0];
-          if (micTrack) {
-            cStream.addTrack(micTrack);
-          }
-          recordStream = cStream;
-        }
-      } catch (canvasErr) {
-        console.warn('Canvas stream fallback to direct stream:', canvasErr);
-        recordStream = streamRef.current;
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoInputs = devices.filter((d) => d.kind === 'videoinput');
+      setAvailableDevices(videoInputs);
+      if (videoInputs.length === 0) {
+        setHasCameraSupport(false);
+        setUploadMode(true);
+        return;
       }
-
-      const recorder = mimeType
-        ? new MediaRecorder(recordStream, { mimeType })
-        : new MediaRecorder(recordStream);
-
-      mediaRecorderRef.current = recorder;
-
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
-      recorder.onstop = () => {
-        drawingLoopRef.current?.();
-        const type = recorder.mimeType || 'video/webm';
-        const blob = new Blob(chunksRef.current, { type });
-        setVideoBlob(blob);
-        const url = URL.createObjectURL(blob);
-        setVideoUrl(url);
-        setIsRecording(false);
-        stopMediaStream();
-      };
-
-      recorder.start(400);
-      setIsRecording(true);
-
-      timerRef.current = setInterval(() => {
-        setRecordingSeconds((prev) => {
-          if (prev >= MAX_SECONDS - 1) {
-            stopRecording();
-            return MAX_SECONDS;
-          }
-          return prev + 1;
-        });
-      }, 1000);
+      startCameraStream(facingMode);
     } catch (err) {
-      console.error('Failed to start MediaRecorder:', err);
-      drawingLoopRef.current?.();
-      setPermissionError('Video yozishni boshlab bo‘lmadi.');
+      console.warn('Error enumerating devices:', err);
+      startCameraStream(facingMode);
     }
   };
 
-  const stopRecording = () => {
-    drawingLoopRef.current?.();
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+  useEffect(() => {
+    if (videoLiveRef.current && streamRef.current && !videoUrl && !uploadMode) {
+      videoLiveRef.current.srcObject = streamRef.current;
+      videoLiveRef.current.play().catch(() => {});
     }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
+  }, [uploadMode, videoUrl]);
+
+  // Auto-start recording when autoStart prop is true and stream is ready
+  useEffect(() => {
+    if (
+      autoStart &&
+      !autoStartedRef.current &&
+      hasCameraSupport &&
+      streamRef.current &&
+      !isRecording &&
+      !videoBlob &&
+      !uploadMode
+    ) {
+      autoStartedRef.current = true;
+      const t = setTimeout(() => {
+        startRecording();
+      }, 350);
+      return () => clearTimeout(t);
     }
-  };
+  }, [autoStart, hasCameraSupport, uploadMode, isRecording, videoBlob]);
 
   const handleRetake = () => {
     if (videoUrl) {

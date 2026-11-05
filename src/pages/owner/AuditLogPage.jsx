@@ -41,13 +41,7 @@ export default function AuditLogPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  useEffect(() => {
-    if (hasAccess) {
-      loadLogs();
-    }
-  }, [hasAccess, page, actionFilter, startDate, endDate]);
-
-  const loadLogs = async () => {
+  const loadLogs = React.useCallback(async () => {
     try {
       setLoading(true);
       const res = await getAuditLogs({
@@ -68,7 +62,13 @@ export default function AuditLogPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [actionFilter, search, startDate, endDate, isOwner, page, pageSize]);
+
+  useEffect(() => {
+    if (hasAccess) {
+      loadLogs();
+    }
+  }, [hasAccess, loadLogs]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
