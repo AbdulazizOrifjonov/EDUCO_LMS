@@ -83,9 +83,9 @@ export default function TuitionPage() {
   const [discountReason, setDiscountReason] = useState('');
   const [savingDiscount, setSavingDiscount] = useState(false);
 
-  const loadData = React.useCallback(async () => {
+  const loadData = React.useCallback(async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       const [summary, history] = await Promise.all([
         getTuitionSummary({ status: statusFilter !== 'ALL' ? statusFilter : undefined }),
         getTuitionPayments({}),
@@ -95,7 +95,7 @@ export default function TuitionPage() {
     } catch (err) {
       console.error('Error fetching tuition records:', err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [statusFilter]);
 
@@ -103,7 +103,7 @@ export default function TuitionPage() {
     loadData();
 
     const handleSync = () => {
-      loadData();
+      loadData(true);
     };
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);

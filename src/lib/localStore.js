@@ -896,7 +896,7 @@ class LocalStore {
   }
 
   // --- GLOBAL REALTIME CROSS-DEVICE ENGINE ---
-  startRealtimeEngine(intervalMs = 1000) {
+  startRealtimeEngine(intervalMs = 15000) {
     if (typeof window === 'undefined') return;
     if (this._realtimeTimer) return;
 
@@ -907,8 +907,9 @@ class LocalStore {
     // Run initial sync right away
     this.syncWithServer().catch(() => {});
 
-    // High frequency 1000ms heartbeat (checks every 1s across all opened devices)
+    // Gentle background heartbeat (only when tab is visible)
     this._realtimeTimer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       this.syncWithServer().catch(() => {});
     }, intervalMs);
 
@@ -2795,6 +2796,7 @@ class LocalStore {
     const list = this.getSmsQueue();
     const queueItem = {
       id: item.id || `sms-job-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      tracking_id: item.tracking_id || null,
       student_id: item.student_id,
       recipient_phone: item.recipient_phone,
       recipient_name: item.recipient_name || '',
@@ -2804,15 +2806,24 @@ class LocalStore {
       course_name: item.course_name || '',
       group_name: item.group_name || '',
       due_date: item.due_date || null,
-      status: item.status || 'pending',
+      status: item.status || 'PENDING',
       device_id: item.device_id || null,
       attempts: item.attempts || 0,
       max_attempts: item.max_attempts || 3,
       last_attempt_at: item.last_attempt_at || null,
       error_message: item.error_message || null,
       billing_period: item.billing_period || new Date().toISOString().slice(0, 7),
-      idempotency_key: item.idempotency_key || `idemp-${item.student_id}-${item.billing_period || new Date().toISOString().slice(0, 7)}`,
+      idempotency_key: item.idempotency_key || (item.student_id ? `idemp-${item.student_id}-${item.billing_period || new Date().toISOString().slice(0, 7)}` : `idemp-${item.id || item.recipient_phone || Math.random().toString(36).slice(2, 8)}-${item.billing_period || new Date().toISOString().slice(0, 7)}`),
       scheduled_at: item.scheduled_at || new Date().toISOString(),
+      queued_at: item.queued_at || item.created_at || new Date().toISOString(),
+      dispatched_at: item.dispatched_at || null,
+      android_sent_at: item.android_sent_at || null,
+      delivered_at: item.delivered_at || null,
+      failed_at: item.failed_at || null,
+      lms_latency_ms: item.lms_latency_ms ?? null,
+      android_latency_ms: item.android_latency_ms ?? null,
+      carrier_latency_ms: item.carrier_latency_ms ?? null,
+      total_latency_ms: item.total_latency_ms ?? null,
       sent_at: item.sent_at || null,
       created_at: item.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -2864,13 +2875,18 @@ class LocalStore {
     const newLog = {
       id: logData.id || `sms-log-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       queue_id: logData.queue_id || null,
+      tracking_id: logData.tracking_id || null,
       device_id: logData.device_id || null,
       recipient_phone: logData.recipient_phone,
       recipient_name: logData.recipient_name || '',
-      status: logData.status || 'sent',
+      status: logData.status || 'SUBMITTED',
+      dispatched_at: logData.dispatched_at || null,
+      android_sent_at: logData.android_sent_at || null,
+      delivered_at: logData.delivered_at || null,
+      failed_at: logData.failed_at || null,
       response_payload: logData.response_payload || {},
       error_details: logData.error_details || null,
-      created_at: new Date().toISOString(),
+      created_at: logData.created_at || new Date().toISOString(),
     };
     list.unshift(newLog);
     if (list.length > 500) list.pop(); // Keep last 500 logs
@@ -2917,10 +2933,11 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
     localStore.syncWithServer().catch(() => {});
   });
 
-  // 4. Realtime periodic sync (har 1 sekundda / every 1000ms uninterrupted)
+  // 4. Gentle periodic background sync (15 seconds, skipped when tab is in background)
   setInterval(() => {
+    if (typeof document !== 'undefined' && document.hidden) return;
     localStore.syncWithServer().catch(() => {});
-  }, 1000);
+  }, 15000);
 
   // 5. Connect to SSE Realtime stream if available (dev / supported servers)
   if (typeof window !== 'undefined' && typeof EventSource !== 'undefined') {
@@ -2950,7 +2967,7 @@ if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.
   }
 }
 
-export function startRealtimeEngine(intervalMs = 1000) {
+export function startRealtimeEngine(intervalMs = 15000) {
   try {
     if (localStore && typeof localStore.startRealtimeEngine === 'function') {
       return localStore.startRealtimeEngine(intervalMs);
@@ -2959,7 +2976,7 @@ export function startRealtimeEngine(intervalMs = 1000) {
 }
 
 if (!localStore.startRealtimeEngine) {
-  localStore.startRealtimeEngine = function(intervalMs = 1000) {
+  localStore.startRealtimeEngine = function(intervalMs = 15000) {
     return startRealtimeEngine(intervalMs);
   };
 }

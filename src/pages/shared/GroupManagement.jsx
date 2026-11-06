@@ -103,8 +103,8 @@ export default function GroupManagement() {
     }
   };
 
-  const fetchGroups = useCallback(async () => {
-    setLoading(true);
+  const fetchGroups = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const effectiveTeacherId = isTeacher ? (profile?.id || profile?.userId) : teacherFilter;
       const effectiveTeacherName = isTeacher ? teacherFullName : '';
@@ -147,9 +147,11 @@ export default function GroupManagement() {
       setTotalCount(fetchedGroups.length);
     } catch (err) {
       console.error(err);
-      toast.error(t('groups.fetchError', 'Failed to load groups'));
+      if (!isSilent) {
+        toast.error(t('groups.fetchError', 'Failed to load groups'));
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [search, courseFilter, teacherFilter, statusFilter, page, isTeacher, profile?.id, profile?.userId, teacherFullName, t]);
 
@@ -161,9 +163,9 @@ export default function GroupManagement() {
     fetchGroups();
   }, [fetchGroups]);
 
-  // Realtime cross-role sync: auto-refresh when another user/role creates or modifies groups
+  // Realtime cross-role sync: auto-refresh silently when another user/role creates or modifies groups
   useEffect(() => {
-    const handleSync = () => fetchGroups();
+    const handleSync = () => fetchGroups(true);
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);
   }, [fetchGroups]);

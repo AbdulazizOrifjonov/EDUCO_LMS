@@ -14,6 +14,10 @@ import {
   processQueueBatch,
   retryQueueItem,
   cancelQueueItem,
+  reconcileSmsDeliveryStatuses,
+  calculateSmsLatencies,
+  normalizeSmsStatus,
+  SMS_STATUS,
 } from '../src/services/smsService';
 import { localStore } from '../src/lib/localStore';
 
@@ -121,7 +125,8 @@ describe('SMS Service - Comprehensive Suite', () => {
       const logs = localStore.getSmsLogs();
       const testLog = logs.find((l) => l.recipient_phone === '+998936101774');
       expect(testLog).toBeDefined();
-      expect(testLog.status).toBe('sent');
+      expect(['DELIVERED', 'SUBMITTED', 'sent']).toContain(testLog.status);
+      expect(testLog.tracking_id).toBeDefined();
     });
   });
 
@@ -142,7 +147,7 @@ describe('SMS Service - Comprehensive Suite', () => {
 
         // Check updated status in queue
         const updatedQueue = localStore.getSmsQueue();
-        const sentItems = updatedQueue.filter((q) => q.status === 'sent');
+        const sentItems = updatedQueue.filter((q) => [SMS_STATUS.SUBMITTED, SMS_STATUS.DELIVERED, 'sent'].includes(q.status));
         expect(sentItems.length).toBeGreaterThan(0);
       }
     });
@@ -208,6 +213,176 @@ describe('SMS Service - Comprehensive Suite', () => {
       expect(first).toHaveProperty('hasPhone');
       expect(typeof first.messageText).toBe('string');
       expect(first.messageText.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Lifecycle Statuses & Operator Callback Verification', () => {
+    it('defines all 6 distinct lifecycle statuses correctly', () => {
+      expect(SMS_STATUS.PENDING).toBe('PENDING');
+      expect(SMS_STATUS.DISPATCHING).toBe('DISPATCHING');
+      expect(SMS_STATUS.SUBMITTED).toBe('SUBMITTED');
+      expect(SMS_STATUS.DELIVERED).toBe('DELIVERED');
+      expect(SMS_STATUS.FAILED).toBe('FAILED');
+      expect(SMS_STATUS.UNKNOWN).toBe('UNKNOWN');
+    });
+
+    it('strictly ensures SUBMITTED is not treated as DELIVERED', () => {
+      expect(SMS_STATUS.SUBMITTED).not.toBe(SMS_STATUS.DELIVERED);
+      expect(normalizeSmsStatus('SUBMITTED')).toBe(SMS_STATUS.SUBMITTED);
+      expect(normalizeSmsStatus('DELIVERED')).toBe(SMS_STATUS.DELIVERED);
+      expect(normalizeSmsStatus('sent')).toBe(SMS_STATUS.SUBMITTED);
+      expect(normalizeSmsStatus('delivered')).toBe(SMS_STATUS.DELIVERED);
+    });
+
+    it('accurately normalizes legacy and alternate status values', () => {
+      expect(normalizeSmsStatus('pending')).toBe(SMS_STATUS.PENDING);
+      expect(normalizeSmsStatus('processing')).toBe(SMS_STATUS.DISPATCHING);
+      expect(normalizeSmsStatus('failed')).toBe(SMS_STATUS.FAILED);
+      expect(normalizeSmsStatus('error')).toBe(SMS_STATUS.FAILED);
+      expect(normalizeSmsStatus('cancelled')).toBe(SMS_STATUS.FAILED);
+      expect(normalizeSmsStatus('unknown')).toBe(SMS_STATUS.UNKNOWN);
+      expect(normalizeSmsStatus('something_else')).toBe('SOMETHING_ELSE');
+    });
+  });
+
+  describe('Latency & Granular Monitoring Timestamps', () => {
+    it('calculates LMS, Android, and Carrier latencies accurately', () => {
+      const timestamps = {
+        queued_at: '2026-11-06T10:00:00.000Z',
+        dispatched_at: '2026-11-06T10:00:02.000Z',    // LMS latency: 2000ms
+        android_sent_at: '2026-11-06T10:00:05.500Z',  // Android Gateway latency: 3500ms
+        delivered_at: '2026-11-06T10:00:09.000Z',     // Carrier GSM latency: 3500ms
+      };
+
+      const latencies = calculateSmsLatencies(timestamps);
+      expect(latencies.lms_latency_ms).toBe(2000);
+      expect(latencies.android_latency_ms).toBe(3500);
+      expect(latencies.carrier_latency_ms).toBe(3500);
+      expect(latencies.total_latency_ms).toBe(9000);
+    });
+
+    it('handles partial timestamps gracefully without throwing errors', () => {
+      const partial = {
+        queued_at: '2026-11-06T10:00:00.000Z',
+        dispatched_at: '2026-11-06T10:00:01.200Z',
+      };
+      const latencies = calculateSmsLatencies(partial);
+      expect(latencies.lms_latency_ms).toBe(1200);
+      expect(latencies.android_latency_ms).toBeNull();
+      expect(latencies.carrier_latency_ms).toBeNull();
+      expect(latencies.total_latency_ms).toBeNull();
+    });
+  });
+
+  describe('Multi-Item Batch Latency Testing: 1, 10, and 50 SMS', () => {
+    it('processes 1 SMS item with complete tracking ID and timestamps', async () => {
+      localStore.setItem('educo_db_sms_queue', []);
+      const item = {
+        id: 'test-single-1',
+        recipient_phone: '+998935550001',
+        recipient_name: 'Single Test Student',
+        message_text: 'Yagona test xabari',
+        amount_due: 100000,
+        status: SMS_STATUS.PENDING,
+        created_at: new Date().toISOString(),
+        queued_at: new Date().toISOString(),
+      };
+      localStore.saveSmsQueueItem(item);
+
+      const res = await processQueueBatch({ limit: 1 });
+      expect(res.processed).toBe(1);
+      expect(res.sent).toBe(1);
+
+      const queue = localStore.getSmsQueue();
+      const processed = queue.find((q) => q.id === 'test-single-1');
+      expect(processed).toBeDefined();
+      expect([SMS_STATUS.SUBMITTED, SMS_STATUS.DELIVERED]).toContain(processed.status);
+      expect(processed.tracking_id).toBeDefined();
+      expect(processed.dispatched_at).toBeDefined();
+      expect(processed.android_sent_at).toBeDefined();
+    });
+
+    it('processes 10 SMS items with distinct tracking IDs and rate-limiting', async () => {
+      localStore.setItem('educo_db_sms_queue', []);
+      const items = Array.from({ length: 10 }, (_, i) => ({
+        id: `test-batch10-${i + 1}`,
+        student_id: `usr-batch10-${i + 1}`,
+        idempotency_key: `idemp-batch10-${i + 1}`,
+        recipient_phone: `+9989355500${(i + 10).toString().padStart(2, '0')}`,
+        recipient_name: `Talaba #${i + 1}`,
+        message_text: `Test xabar #${i + 1}`,
+        amount_due: 150000 + i * 10000,
+        status: SMS_STATUS.PENDING,
+        created_at: new Date().toISOString(),
+        queued_at: new Date().toISOString(),
+      }));
+      items.forEach((it) => localStore.saveSmsQueueItem(it));
+
+      let progressCount = 0;
+      const res = await processQueueBatch({
+        limit: 10,
+        onProgress: (p) => {
+          progressCount = p.current;
+        },
+      });
+
+      expect(res.processed).toBe(10);
+      expect(res.sent).toBe(10);
+      expect(progressCount).toBe(10);
+
+      const queue = localStore.getSmsQueue();
+      const trackingIds = new Set();
+      queue.forEach((q) => {
+        expect([SMS_STATUS.SUBMITTED, SMS_STATUS.DELIVERED]).toContain(q.status);
+        expect(q.tracking_id).toBeDefined();
+        trackingIds.add(q.tracking_id);
+      });
+      // All 10 tracking IDs must be unique
+      expect(trackingIds.size).toBe(10);
+    });
+
+    it('processes 50 SMS items at scale maintaining zero duplicates and full persistence', async () => {
+      localStore.setItem('educo_db_sms_queue', []);
+      const items = Array.from({ length: 50 }, (_, i) => ({
+        id: `test-batch50-${i + 1}`,
+        student_id: `usr-batch50-${i + 1}`,
+        idempotency_key: `idemp-batch50-${i + 1}`,
+        recipient_phone: `+9989010000${(i + 10).toString().padStart(2, '0')}`,
+        recipient_name: `Katta Talaba #${i + 1}`,
+        message_text: `Katta masshtabli test xabari #${i + 1}`,
+        amount_due: 200000,
+        status: SMS_STATUS.PENDING,
+        created_at: new Date().toISOString(),
+        queued_at: new Date().toISOString(),
+      }));
+      items.forEach((it) => localStore.saveSmsQueueItem(it));
+
+      const res = await processQueueBatch({ limit: 50 });
+      expect(res.processed).toBe(50);
+      expect(res.sent).toBe(50);
+
+      const queue = localStore.getSmsQueue();
+      expect(queue.length).toBe(50);
+
+      // Verify no pending items left
+      const pendingLeft = queue.filter((q) => q.status === SMS_STATUS.PENDING);
+      expect(pendingLeft.length).toBe(0);
+
+      // Verify all items have timestamps and tracking IDs
+      queue.forEach((q) => {
+        expect([SMS_STATUS.SUBMITTED, SMS_STATUS.DELIVERED]).toContain(q.status);
+        expect(q.tracking_id).toBeDefined();
+        expect(q.dispatched_at).toBeDefined();
+        expect(q.android_sent_at).toBeDefined();
+      });
+    }, 15000);
+  });
+
+  describe('reconcileSmsDeliveryStatuses', () => {
+    it('executes status reconciliation cleanly without throwing errors', async () => {
+      const res = await reconcileSmsDeliveryStatuses();
+      expect(res).toBeDefined();
+      expect(typeof res.reconciledCount).toBe('number');
     });
   });
 });

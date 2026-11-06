@@ -5,12 +5,10 @@ import { localStore } from '@/lib/localStore';
  */
 
 export async function getStudentReminders() {
-  await localStore.syncWithServer().catch(() => {});
   return localStore.getStudentReminders();
 }
 
 export async function getDueReminders() {
-  await localStore.syncWithServer().catch(() => {});
   const list = localStore.getStudentReminders();
   const todayStr = new Date().toISOString().split('T')[0];
 

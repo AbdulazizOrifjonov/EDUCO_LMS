@@ -61,10 +61,10 @@ export default function TeacherDashboard() {
     user?.email?.split('@')[0] ||
     'Teacher';
 
-  const loadData = async (isManual = false) => {
+  const loadData = async (isManual = false, isSilent = false) => {
     try {
       if (isManual) setRefreshing(true);
-      else setLoading(true);
+      else if (!isSilent) setLoading(true);
       setError(null);
 
       const teacherId = user?.id;
@@ -82,9 +82,11 @@ export default function TeacherDashboard() {
       setRecentGrades(gradesRes);
     } catch (err) {
       console.error('Teacher dashboard error:', err);
-      setError(err.message || 'Failed to load teacher workspace');
+      if (!isSilent) {
+        setError(err.message || 'Failed to load teacher workspace');
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
       setRefreshing(false);
     }
   };
@@ -98,7 +100,7 @@ export default function TeacherDashboard() {
   useEffect(() => {
     const handleSync = () => {
       if (user?.id) {
-        loadData(false);
+        loadData(false, true);
       }
     };
     window.addEventListener('educo-data-sync', handleSync);
@@ -118,7 +120,7 @@ export default function TeacherDashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
-      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20">
+      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20 animate-slide-up-soft">
         {/* Decorative ambient blur glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-sky-400/10 dark:bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -174,7 +176,7 @@ export default function TeacherDashboard() {
       )}
 
       {/* Quick Action Buttons */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5">
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5 animate-slide-up-soft [animation-delay:80ms]">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-emerald-400 mr-1 shrink-0 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" />
           {t('dashboard.teacherQuickActions', 'Tezkor amallar:')}
@@ -223,7 +225,7 @@ export default function TeacherDashboard() {
 
       {/* Stats Summary Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card noPadding className="p-5 flex items-center gap-4">
+        <Card noPadding className="p-5 flex items-center gap-4 animate-slide-left-soft [animation-delay:80ms]">
           <div className="w-12 h-12 rounded-xl bg-blue-500/15 dark:bg-emerald-500/20 text-blue-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Layers className="w-6 h-6" />
           </div>
@@ -237,7 +239,7 @@ export default function TeacherDashboard() {
           </div>
         </Card>
 
-        <Card noPadding className="p-5 flex items-center gap-4">
+        <Card noPadding className="p-5 flex items-center gap-4 animate-slide-up-soft [animation-delay:120ms]">
           <div className="w-12 h-12 rounded-xl bg-blue-500/15 dark:bg-emerald-500/20 text-blue-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Users className="w-6 h-6" />
           </div>
@@ -251,7 +253,7 @@ export default function TeacherDashboard() {
           </div>
         </Card>
 
-        <Card noPadding className="p-5 flex items-center gap-4">
+        <Card noPadding className="p-5 flex items-center gap-4 animate-slide-right-soft [animation-delay:160ms]">
           <div className="w-12 h-12 rounded-xl bg-amber-500/15 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
             <Clock className="w-6 h-6" />
           </div>

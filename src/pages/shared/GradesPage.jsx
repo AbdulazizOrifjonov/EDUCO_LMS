@@ -214,9 +214,9 @@ export default function GradesPage() {
   }, [isStudent, profile]);
 
   // Load group students, grades, and today's attendance
-  const fetchGroupGrades = useCallback(async () => {
+  const fetchGroupGrades = useCallback(async (isSilent = false) => {
     if (isStudent || !selectedGroupId) return;
-    setLoading(true);
+    if (!isSilent) setLoading(true);
     try {
       const today = new Date().toISOString().split('T')[0];
       const lessonId = `lsn-${selectedGroupId}-${today}`;
@@ -279,9 +279,11 @@ export default function GradesPage() {
       setCurrentLesson(lesson);
     } catch (err) {
       console.error(err);
-      toast.error(t('grades.fetchError', 'Failed to load group grades'));
+      if (!isSilent) {
+        toast.error(t('grades.fetchError', 'Failed to load group grades'));
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [selectedGroupId, isStudent, profile, t]);
 
@@ -291,7 +293,7 @@ export default function GradesPage() {
 
   useEffect(() => {
     const handleSync = () => {
-      fetchGroupGrades();
+      fetchGroupGrades(true);
     };
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);

@@ -161,7 +161,7 @@ export default function DashboardLayout({
         } catch (_) {}
       };
       checkReminders();
-      const interval = setInterval(checkReminders, 4000);
+      const interval = setInterval(checkReminders, 15000);
       return () => clearInterval(interval);
     }
   }, [role]);

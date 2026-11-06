@@ -460,4 +460,120 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   will-change: transform;
 }
 
+/* ==========================================================================
+   Dashboard Deluxe Choreographed Animations (Staggered Glides & Chart Rises)
+   ========================================================================== */
+@keyframes slideInUpSoft {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeftSoft {
+  0% {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRightSoft {
+  0% {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes popScaleSoft {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes growBarUp {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+}
+
+@keyframes donutRotateIn {
+  0% {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-90deg) scale(1);
+  }
+}
+
+@keyframes chartLineDraw {
+  0% {
+    stroke-dashoffset: 1200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-slide-up-soft {
+  animation: slideInUpSoft 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-slide-left-soft {
+  animation: slideInLeftSoft 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-slide-right-soft {
+  animation: slideInRightSoft 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-pop-scale {
+  animation: popScaleSoft 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-donut-spin {
+  animation: donutRotateIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bar-grow {
+  animation: growBarUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-chart-draw {
+  stroke-dasharray: 1200;
+  animation: chartLineDraw 1.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
 

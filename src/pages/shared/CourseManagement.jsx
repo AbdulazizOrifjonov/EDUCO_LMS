@@ -86,8 +86,8 @@ export default function CourseManagement() {
     });
   }, [selectedCourseForView]);
 
-  const fetchCourses = useCallback(async () => {
-    setLoading(true);
+  const fetchCourses = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const data = await getCourses({
         search,
@@ -100,9 +100,11 @@ export default function CourseManagement() {
       setTotalCount(data.totalCount || 0);
     } catch (err) {
       console.error(err);
-      toast.error(t('courses.fetchError', 'Failed to load courses'));
+      if (!isSilent) {
+        toast.error(t('courses.fetchError', 'Failed to load courses'));
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [search, statusFilter, page, t]);
 
@@ -110,9 +112,9 @@ export default function CourseManagement() {
     fetchCourses();
   }, [fetchCourses]);
 
-  // Realtime cross-role sync: auto-refresh when another user/role adds or modifies courses
+  // Realtime cross-role sync: auto-refresh silently when another user/role adds or modifies courses
   useEffect(() => {
-    const handleSync = () => fetchCourses();
+    const handleSync = () => fetchCourses(true);
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);
   }, [fetchCourses]);

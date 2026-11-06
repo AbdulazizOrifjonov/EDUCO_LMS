@@ -83,8 +83,8 @@ export default function ScheduleManagement() {
   const [initialSlot, setInitialSlot] = useState({ day: 1, time: '09:00' });
   const [mobileDay, setMobileDay] = useState(1);
 
-  const fetchScheduleData = useCallback(async () => {
-    setLoading(true);
+  const fetchScheduleData = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const data = localStore.getSchedules();
 
@@ -99,9 +99,11 @@ export default function ScheduleManagement() {
       setSchedules(formatted);
     } catch (err) {
       console.error(err);
-      toast.error(t('schedule.fetchError', 'Failed to load timetable'));
+      if (!isSilent) {
+        toast.error(t('schedule.fetchError', 'Failed to load timetable'));
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [t]);
 
@@ -145,7 +147,7 @@ export default function ScheduleManagement() {
     loadFilters();
 
     const handleSync = () => {
-      fetchScheduleData();
+      fetchScheduleData(true);
       loadFilters();
     };
     window.addEventListener('educo-data-sync', handleSync);

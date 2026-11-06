@@ -138,8 +138,8 @@ export default function UserManagement() {
     }
   }, [page, totalPages]);
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
+  const fetchUsers = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const data = await getUsers({
         role: roleFilter,
@@ -156,9 +156,11 @@ export default function UserManagement() {
       setTotalCount(data.totalCount || 0);
     } catch (err) {
       console.error(err);
-      toast.error(t('users.fetchError', 'Failed to load users'));
+      if (!isSilent) {
+        toast.error(t('users.fetchError', 'Failed to load users'));
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [roleFilter, statusFilter, search, page, currentUserRole, currentUserId, profile, user, t]);
 
@@ -287,10 +289,10 @@ export default function UserManagement() {
     });
   }, [groupsMap]);
 
-  // Realtime cross-role sync: auto-refresh when another user/role adds or modifies users
+  // Realtime cross-role sync: auto-refresh silently when another user/role adds or modifies users
   useEffect(() => {
     const handleSync = () => {
-      fetchUsers();
+      fetchUsers(true);
       loadGroupsData();
     };
     window.addEventListener('educo-data-sync', handleSync);

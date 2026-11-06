@@ -96,8 +96,8 @@ export default function PasswordsPage() {
   const [newPassword, setNewPassword] = useState('');
   const [isSavingPassword, setIsSavingPassword] = useState(false);
 
-  const fetchCredentials = useCallback(async () => {
-    setLoading(true);
+  const fetchCredentials = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const res = await getUsers({
         search: '',
@@ -117,9 +117,11 @@ export default function PasswordsPage() {
       setUsers(list);
     } catch (err) {
       console.error('Failed to load passwords:', err);
-      toast.error(t('users.fetchError', 'Foydalanuvchilar parollarini yuklab bo‘lmadi'));
+      if (!isSilent) {
+        toast.error(t('users.fetchError', 'Foydalanuvchilar parollarini yuklab bo‘lmadi'));
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [currentUserRole, isOwner, t]);
 
@@ -129,7 +131,7 @@ export default function PasswordsPage() {
 
   // Real-time synchronization across devices (when roles, users, or passwords change)
   useEffect(() => {
-    const handleSync = () => fetchCredentials();
+    const handleSync = () => fetchCredentials(true);
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);
   }, [fetchCredentials]);

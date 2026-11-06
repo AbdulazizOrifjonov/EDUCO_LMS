@@ -61,10 +61,10 @@ export default function StudentDashboard() {
     user?.email?.split('@')[0] ||
     'Student';
 
-  const loadData = async (isManual = false) => {
+  const loadData = async (isManual = false, isSilent = false) => {
     try {
       if (isManual) setRefreshing(true);
-      else setLoading(true);
+      else if (!isSilent) setLoading(true);
       setError(null);
 
       const studentId = user?.id;
@@ -78,9 +78,11 @@ export default function StudentDashboard() {
       setTodaySchedule(lessonsRes);
     } catch (err) {
       console.error('Student dashboard error:', err);
-      setError(err.message || 'Failed to load your student dashboard');
+      if (!isSilent) {
+        setError(err.message || 'Failed to load your student dashboard');
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
       setRefreshing(false);
     }
   };
@@ -94,7 +96,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     const handleSync = () => {
       if (user?.id) {
-        loadData(false);
+        loadData(false, true);
       }
     };
     window.addEventListener('educo-data-sync', handleSync);
@@ -114,7 +116,7 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
-      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20">
+      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20 animate-slide-up-soft">
         {/* Decorative ambient blur glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-sky-400/10 dark:bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -173,8 +175,8 @@ export default function StudentDashboard() {
 
       {/* Current Group Info Card & Attendance Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Current Group Banner Card */}
-        <Card className="p-6 flex flex-col justify-between border-l-4 border-l-brand-navy">
+        {/* Current Group Banner Card - Glides in from Left */}
+        <Card className="p-6 flex flex-col justify-between border-l-4 border-l-brand-navy animate-slide-left-soft [animation-delay:100ms]">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -255,8 +257,8 @@ export default function StudentDashboard() {
           </div>
         </Card>
 
-        {/* Attendance Summary (present/late/absent percentages) */}
-        <Card className="lg:col-span-2 p-6">
+        {/* Attendance Summary (present/late/absent percentages) - Glides in from Right */}
+        <Card className="lg:col-span-2 p-6 animate-slide-right-soft [animation-delay:100ms]">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-gray-900 dark:text-white">

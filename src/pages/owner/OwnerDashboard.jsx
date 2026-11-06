@@ -29,6 +29,7 @@ import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import EmptyState from '@/components/ui/EmptyState';
+import OwnerAnalyticsCharts from '@/components/owner/OwnerAnalyticsCharts';
 
 // Dynamic vertical 5-stop gradient for each attendance bar:
 // Eng pasti: qizil (#f43f5e) -> sal teparog'i: sabzirang (#f97316) -> o'rtasi: sariq (#facc15) -> keyin: och yashil (#a3e635) -> eng tepasi: yashil (#10b981)
@@ -56,6 +57,7 @@ export default function OwnerDashboard() {
   const [todayLessons, setTodayLessons] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [attendanceChart, setAttendanceChart] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
 
   const userName =
     profile?.first_name ||
@@ -64,30 +66,36 @@ export default function OwnerDashboard() {
     user?.email?.split('@')[0] ||
     'Owner';
 
-  const loadDashboardData = async (isManualRefresh = false) => {
+  const loadDashboardData = async (isManualRefresh = false, isSilent = false) => {
     try {
       if (isManualRefresh) setRefreshing(true);
-      else setLoading(true);
+      else if (!isSilent) setLoading(true);
       setError(null);
 
-      await localStore.syncWithServer(isManualRefresh).catch(() => {});
+      if (!isSilent) {
+        await localStore.syncWithServer(isManualRefresh).catch(() => {});
+      }
 
-      const [statsData, lessonsData, activityData, weeklyAtt] = await Promise.all([
+      const [statsData, lessonsData, activityData, weeklyAtt, analyticsData] = await Promise.all([
         dashboardService.getOwnerStats(),
         dashboardService.getTodayLessons(user?.id, 'owner'),
         dashboardService.getRecentActivity(6),
         dashboardService.getWeeklyAttendanceSummary(),
+        dashboardService.getOwnerAnalyticsData ? dashboardService.getOwnerAnalyticsData() : null,
       ]);
 
       setStats(statsData);
       setTodayLessons(lessonsData);
       setRecentActivity(activityData);
       setAttendanceChart(weeklyAtt);
+      setAnalytics(analyticsData);
     } catch (err) {
       console.error('Owner dashboard data error:', err);
-      setError(err.message || 'Failed to fetch dashboard data');
+      if (!isSilent) {
+        setError(err.message || 'Failed to fetch dashboard data');
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
       setRefreshing(false);
     }
   };
@@ -98,7 +106,7 @@ export default function OwnerDashboard() {
 
   useEffect(() => {
     const handleSync = () => {
-      loadDashboardData(false);
+      loadDashboardData(false, true);
     };
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);
@@ -185,7 +193,7 @@ export default function OwnerDashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Top Welcome Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
-      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/35">
+      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/35 animate-slide-up-soft">
         {/* Subtle decorative circles */}
         <div className="absolute right-0 top-0 -mt-10 -mr-10 w-56 h-56 bg-white/10 dark:bg-emerald-400/15 rounded-full pointer-events-none blur-3xl" />
         <div className="absolute right-40 bottom-0 -mb-10 w-36 h-36 bg-sky-400/10 dark:teal-400/10 rounded-full pointer-events-none blur-2xl" />
@@ -242,7 +250,7 @@ export default function OwnerDashboard() {
       )}
 
       {/* Quick Action Buttons Row (Colorful and welcoming) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 animate-slide-up-soft [animation-delay:80ms]">
         <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mr-2 shrink-0">
           {t('dashboard.quickActions', 'Tezkor amallar')}:
         </span>
@@ -288,16 +296,20 @@ export default function OwnerDashboard() {
         </button>
       </div>
 
-      {/* 6 Stats Cards Grid */}
+      {/* 6 Stats Cards Grid - Staggered Slide In from Left and Right */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5 sm:gap-4">
         {statsCards.map((item, index) => {
           const Icon = item.icon;
+          const isLeft = index < 3;
+          const animClass = isLeft ? 'animate-slide-left-soft' : 'animate-slide-right-soft';
+          const delayMs = ((index % 3) + 1) * 75;
           return (
             <Card
               key={index}
               noPadding
               onClick={item.onClick}
-              className={`p-4 flex flex-col justify-between hover:shadow-card-hover ${item.borderColor || 'hover:border-brand-navy/30'} transition-all cursor-pointer group`}
+              style={{ animationDelay: `${delayMs}ms` }}
+              className={`p-4 flex flex-col justify-between hover:shadow-card-hover ${item.borderColor || 'hover:border-brand-navy/30'} transition-all cursor-pointer group ${animClass}`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-10 h-10 rounded-xl ${item.bgColor} ${item.color} flex items-center justify-center transition-transform group-hover:scale-105 shrink-0`}>
@@ -322,10 +334,13 @@ export default function OwnerDashboard() {
         })}
       </div>
 
+      {/* Interactive Executive Analytics & Visual Charts Suite */}
+      <OwnerAnalyticsCharts analytics={analytics} />
+
       {/* Middle Section: Today's Lessons & Weekly Attendance Bar Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Today's Lessons (2 cols) */}
-        <div className="lg:col-span-2 space-y-4">
+        {/* Today's Lessons (2 cols) - Glides in from Left */}
+        <div className="lg:col-span-2 space-y-4 animate-slide-left-soft [animation-delay:180ms]">
           <Card
             title={t('dashboard.todayLessons', 'Bugungi darslar')}
             subtitle={t('dashboard.scheduledToday', `Bugungi rejalashtirilgan mashg‘ulotlar (${new Date().toLocaleDateString()})`)}
@@ -404,8 +419,8 @@ export default function OwnerDashboard() {
           </Card>
         </div>
 
-        {/* Weekly Attendance Overview Bar Chart Placeholder (1 col) */}
-        <div>
+        {/* Weekly Attendance Overview Bar Chart Placeholder (1 col) - Glides in from Right */}
+        <div className="animate-slide-right-soft [animation-delay:180ms]">
           <Card
             title={t('dashboard.attendanceOverview', 'Davomat ko‘rsatkichlari')}
             subtitle={t('dashboard.attendanceSubtitle', 'Barcha guruhlar bo‘yicha haftalik davomat')}
@@ -425,10 +440,11 @@ export default function OwnerDashboard() {
                     </span>
                     <div className="w-full bg-gray-100 dark:bg-surface-dark-tertiary rounded-t-lg h-32 relative overflow-hidden flex items-end">
                       <div
-                        className="w-full rounded-t-md transition-all duration-500 group-hover:brightness-110 relative flex flex-col justify-start shadow-md shadow-emerald-500/20"
+                        className="w-full rounded-t-md transition-all duration-500 group-hover:brightness-110 relative flex flex-col justify-start shadow-md shadow-emerald-500/20 animate-bar-grow"
                         style={{
                           height: `${bar.rate}%`,
                           background: ATTENDANCE_BAR_GRADIENT,
+                          animationDelay: `${idx * 80}ms`,
                         }}
                       >
                         {/* Bright top cap highlight (glowing light green) */}
@@ -463,8 +479,8 @@ export default function OwnerDashboard() {
         </div>
       </div>
 
-      {/* Bottom Section: Recent Activity Feed */}
-      <div>
+      {/* Bottom Section: Recent Activity Feed - Rises softly from bottom */}
+      <div className="animate-slide-up-soft [animation-delay:240ms]">
         <Card
           title={t('dashboard.recentActivity', 'Recent Activity Feed')}
           subtitle={t('dashboard.activitySubtitle', 'System audit events, user activations, and enrollments')}

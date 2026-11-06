@@ -279,9 +279,9 @@ export default function AttendancePage() {
   }, [refreshGroupStatuses]);
 
   // Load lesson and students for Roster
-  const loadGroupAttendance = useCallback(async () => {
+  const loadGroupAttendance = useCallback(async (isSilent = false) => {
     if (!selectedRosterGroupId || !selectedDate) return;
-    setLoadingRoster(true);
+    if (!isSilent) setLoadingRoster(true);
     try {
       const groupData = await getGroupById(selectedRosterGroupId);
       const enrolledStudents = groupData.students || [];
@@ -334,9 +334,11 @@ export default function AttendancePage() {
       setAttendanceMap(map);
     } catch (err) {
       console.error(err);
-      toast.error(t('attendance.loadError', 'Davomat roʻyxatini yuklashda xatolik'));
+      if (!isSilent) {
+        toast.error(t('attendance.loadError', 'Davomat roʻyxatini yuklashda xatolik'));
+      }
     } finally {
-      setLoadingRoster(false);
+      if (!isSilent) setLoadingRoster(false);
     }
   }, [selectedRosterGroupId, selectedDate, profile, t]);
 
@@ -347,7 +349,7 @@ export default function AttendancePage() {
         loadAnalytics();
       }
       if (activeTab === 'roster' && selectedRosterGroupId && !savingRoster) {
-        loadGroupAttendance();
+        loadGroupAttendance(true);
       }
     };
     window.addEventListener('educo-data-sync', handleSync);

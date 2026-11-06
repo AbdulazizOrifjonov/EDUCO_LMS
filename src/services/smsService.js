@@ -4,6 +4,65 @@ import { getTuitionSummary } from './tuitionService';
 import { formatCurrency, formatDate } from '@/utils/csvExport';
 
 /**
+ * Definitive 6 SMS Lifecyle Statuses
+ * - PENDING: Queued, awaiting dispatch
+ * - DISPATCHING: Transmitted to Gateway/Cloud queue
+ * - SUBMITTED: Android SmsManager confirmed handed to carrier (SMS_SENT callback)
+ * - DELIVERED: Carrier delivered report confirmed (SMS_DELIVERED callback)
+ * - FAILED: Transmission or carrier failure
+ * - UNKNOWN: Delivery status unconfirmed after threshold timeout
+ */
+export const SMS_STATUS = {
+  PENDING: 'PENDING',
+  DISPATCHING: 'DISPATCHING',
+  SUBMITTED: 'SUBMITTED',
+  DELIVERED: 'DELIVERED',
+  FAILED: 'FAILED',
+  UNKNOWN: 'UNKNOWN',
+};
+
+/**
+ * Normalizes any legacy or mixed-case status to canonical SMS_STATUS
+ */
+export function normalizeSmsStatus(status) {
+  if (!status) return SMS_STATUS.PENDING;
+  const s = String(status).toUpperCase();
+  if (s === 'DELIVERED') return SMS_STATUS.DELIVERED;
+  if (s === 'SUBMITTED' || s === 'SENT') return SMS_STATUS.SUBMITTED;
+  if (s === 'DISPATCHING' || s === 'PROCESSING') return SMS_STATUS.DISPATCHING;
+  if (s === 'FAILED' || s === 'ERROR' || s === 'CANCELLED') return SMS_STATUS.FAILED;
+  if (s === 'UNKNOWN') return SMS_STATUS.UNKNOWN;
+  if (s === 'PENDING') return SMS_STATUS.PENDING;
+  return s;
+}
+
+/**
+ * Calculates granular stage latencies in milliseconds
+ */
+export function calculateSmsLatencies(item) {
+  const queued = item?.queued_at || item?.created_at ? new Date(item.queued_at || item.created_at).getTime() : null;
+  const dispatched = item?.dispatched_at ? new Date(item.dispatched_at).getTime() : null;
+  const androidSent = item?.android_sent_at ? new Date(item.android_sent_at).getTime() : null;
+  const delivered = item?.delivered_at ? new Date(item.delivered_at).getTime() : null;
+
+  const lmsLatencyMs = dispatched && queued ? Math.max(0, dispatched - queued) : null;
+  const androidLatencyMs = androidSent && dispatched ? Math.max(0, androidSent - dispatched) : null;
+  const carrierLatencyMs = delivered && androidSent ? Math.max(0, delivered - androidSent) : null;
+  const totalLatencyMs = delivered && queued ? Math.max(0, delivered - queued) : null;
+
+  return {
+    lms_latency_ms: item?.lms_latency_ms ?? lmsLatencyMs,
+    android_latency_ms: item?.android_latency_ms ?? androidLatencyMs,
+    carrier_latency_ms: item?.carrier_latency_ms ?? carrierLatencyMs,
+    total_latency_ms: item?.total_latency_ms ?? totalLatencyMs,
+    lmsLatencyMs: item?.lms_latency_ms ?? lmsLatencyMs,
+    androidLatencyMs: item?.android_latency_ms ?? androidLatencyMs,
+    carrierLatencyMs: item?.carrier_latency_ms ?? carrierLatencyMs,
+    totalLatencyMs: item?.total_latency_ms ?? totalLatencyMs,
+  };
+}
+
+/**
  * Normalizes an Uzbek or international phone number
  */
 export function normalizePhone(raw) {
@@ -422,6 +481,9 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
     // Ultra-fast simulated transmission delay (120ms)
     await new Promise((r) => setTimeout(r, 120));
     const nowIso = new Date().toISOString();
+    const androidSentIso = new Date(Date.now() + 250).toISOString();
+    const deliveredIso = new Date(Date.now() + 750).toISOString();
+    const trackingId = `demo-tr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
     try {
       await supabase.from('sms_devices').update({
@@ -436,12 +498,21 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
     return {
       success: true,
       simulated: true,
-      message: 'SMS qabul qiluvchi telefoniga muvaffaqiyatli uzatildi (Demo Gateway rejimi)',
+      tracking_id: trackingId,
+      status: SMS_STATUS.DELIVERED,
+      dispatched_at: nowIso,
+      android_sent_at: androidSentIso,
+      delivered_at: deliveredIso,
+      message: 'SMS qabul qiluvchi telefoniga muvaffaqiyatli yetkazildi (Demo Gateway rejimi)',
       data: {
+        id: trackingId,
+        state: 'Delivered',
         success: true,
         simulated: true,
         phone: normalizedPhone,
-        delivered_at: nowIso,
+        dispatched_at: nowIso,
+        android_sent_at: androidSentIso,
+        delivered_at: deliveredIso,
         via_device: device.name,
       },
     };
@@ -491,7 +562,36 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
         }
       }
 
-      return { success: true, simulated: Boolean(res.data?.simulated), data: res.data || { success: true } };
+      // Extract tracking ID and granular status from Gateway response
+      const trackingId = res.data?.id || res.data?.messageId || `tr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const rawState = res.data?.state || res.data?.recipients?.[0]?.state || 'Pending';
+
+      let mappedStatus = SMS_STATUS.DISPATCHING;
+      let androidSentAt = null;
+      let deliveredAt = null;
+
+      if (rawState === 'Delivered') {
+        mappedStatus = SMS_STATUS.DELIVERED;
+        androidSentAt = isoNow;
+        deliveredAt = isoNow;
+      } else if (rawState === 'Sent') {
+        mappedStatus = SMS_STATUS.SUBMITTED;
+        androidSentAt = isoNow;
+      } else {
+        // Pending / Process in Gateway Cloud: queued on cloud, waiting for Android phone poll
+        mappedStatus = SMS_STATUS.DISPATCHING;
+      }
+
+      return {
+        success: true,
+        tracking_id: trackingId,
+        status: mappedStatus,
+        dispatched_at: isoNow,
+        android_sent_at: androidSentAt,
+        delivered_at: deliveredAt,
+        simulated: Boolean(res.data?.simulated),
+        data: res.data || { success: true, id: trackingId },
+      };
     } catch (err) {
       const errorMsg = err.name === 'AbortError' ? 'Qurilma bilan aloqa uzildi (Timeout 10s)' : err.message;
       throw new Error(errorMsg);
@@ -548,16 +648,22 @@ export async function sendTestSms({ phone, message, deviceId }) {
     forceSend: true,
   });
 
-  // Log the test send
+  // Log the test send with granular status and timestamps
   localStore.addSmsLog({
+    tracking_id: result.tracking_id || null,
     recipient_phone: normalizedPhone,
     recipient_name: 'Test qabul qiluvchi',
     device_id: targetDevice.id,
-    status: 'sent',
+    status: result.status || SMS_STATUS.SUBMITTED,
+    dispatched_at: result.dispatched_at || new Date().toISOString(),
+    android_sent_at: result.android_sent_at || null,
+    delivered_at: result.delivered_at || null,
     response_payload: {
       delivered_via: targetDevice.name,
       role: targetDevice.device_role,
       simulated: Boolean(result.simulated),
+      tracking_id: result.tracking_id || null,
+      status: result.status || SMS_STATUS.SUBMITTED,
       ...(result.data || {}),
     },
   });
@@ -566,6 +672,11 @@ export async function sendTestSms({ phone, message, deviceId }) {
     success: true,
     deduplicated: false,
     simulated: Boolean(result.simulated),
+    tracking_id: result.tracking_id || null,
+    status: result.status || SMS_STATUS.SUBMITTED,
+    dispatched_at: result.dispatched_at,
+    android_sent_at: result.android_sent_at,
+    delivered_at: result.delivered_at,
     device: targetDevice,
     result,
   };
@@ -698,6 +809,7 @@ export async function generateDebtorQueue(options = {}) {
       due_date: formatDate(new Date()),
     });
 
+    const nowIso = new Date().toISOString();
     const queueItem = {
       student_id: debtor.studentId,
       recipient_phone: normalizePhone(targetPhone),
@@ -708,12 +820,18 @@ export async function generateDebtorQueue(options = {}) {
       course_name: effectiveCourseName,
       group_name: effectiveGroupName,
       due_date: new Date().toISOString().split('T')[0],
-      status: 'pending',
+      status: SMS_STATUS.PENDING,
       attempts: 0,
       max_attempts: settings.max_retries || 3,
       billing_period: currentPeriod,
       idempotency_key: idempotencyKey,
-      scheduled_at: new Date().toISOString(),
+      scheduled_at: nowIso,
+      queued_at: nowIso,
+      created_at: nowIso,
+      dispatched_at: null,
+      android_sent_at: null,
+      delivered_at: null,
+      failed_at: null,
     };
 
     try {
@@ -958,173 +1076,234 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     }
 
     const allQueue = localStore.getSmsQueue();
-    // Sort pending items: scheduled earlier items first, newly retried items (with future scheduled_at) at the end
+    // Sort pending items: scheduled earlier items first, newly retried items at the end
     const pendingItems = allQueue
-      .filter((q) => q.status === 'pending')
+      .filter((q) => {
+        const norm = normalizeSmsStatus(q.status);
+        return norm === SMS_STATUS.PENDING || norm === SMS_STATUS.DISPATCHING;
+      })
       .sort((a, b) => {
-        const timeA = new Date(a.scheduled_at || a.created_at || 0).getTime();
-        const timeB = new Date(b.scheduled_at || b.created_at || 0).getTime();
+        const timeA = new Date(a.scheduled_at || a.queued_at || a.created_at || 0).getTime();
+        const timeB = new Date(b.scheduled_at || b.queued_at || b.created_at || 0).getTime();
         return timeA - timeB;
       })
       .slice(0, limit);
 
     if (pendingItems.length === 0) {
-      return { processed: 0, sent: 0, failed: 0 };
+      return { processed: 0, submitted: 0, delivered: 0, sent: 0, failed: 0 };
     }
 
-    let sentCount = 0;
+    let submittedCount = 0;
+    let deliveredCount = 0;
     let failedCount = 0;
 
     const isSimulatedBatch = isDemoGateway(primaryDevice) || (backupDevice && isDemoGateway(backupDevice));
-    // In simulated/test mode: ultra-fast 150ms delay for continuous sending of all items!
-    // In real gateway mode: 1200ms-2000ms delay between messages
+    // Rate-limiting delay: in simulated mode: 120ms. In real gateway: 1500ms - 2200ms
+    // To protect SIM card from telecom operator spam block while providing optimal delivery speed
     const intervalMs = isSimulatedBatch
-      ? 150
-      : Math.min(Math.max((settings.send_interval_seconds || 1.2) * 1000, 800), 3000);
+      ? 120
+      : Math.min(Math.max((settings.send_interval_seconds || 1.8) * 1000, 1200), 3000);
 
-  for (let i = 0; i < pendingItems.length; i++) {
-    const item = pendingItems[i];
+    for (let i = 0; i < pendingItems.length; i++) {
+      const item = pendingItems[i];
 
-    // 0. Strict Anti-Duplicate Check: verify if this item was already sent
-    const currentQueue = localStore.getSmsQueue();
-    const alreadySentItem = currentQueue.find(
-      (q) => q.id !== item.id && q.idempotency_key === item.idempotency_key && q.status === 'sent'
-    );
-    const itemAlreadyDelivered = currentQueue.find((q) => q.id === item.id && q.status === 'sent');
+      // 0. Strict Anti-Duplicate Check: verify if this item was already delivered or submitted
+      const currentQueue = localStore.getSmsQueue();
+      const alreadySentItem = currentQueue.find(
+        (q) => q.id !== item.id &&
+          q.idempotency_key === item.idempotency_key &&
+          (normalizeSmsStatus(q.status) === SMS_STATUS.DELIVERED || normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED)
+      );
+      const itemAlreadyDelivered = currentQueue.find(
+        (q) => q.id === item.id && (normalizeSmsStatus(q.status) === SMS_STATUS.DELIVERED || normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED)
+      );
 
-    if (alreadySentItem || itemAlreadyDelivered) {
-      console.warn(`[smsService] Dublikatsiya oldi olindi: ${item.recipient_phone} (${item.idempotency_key})`);
-      const skipUpdates = {
-        status: itemAlreadyDelivered ? 'sent' : 'cancelled',
-        error_message: 'Dublikatsiya oldi olindi (allaqachon muvaffaqiyatli yuborilgan)',
-      };
-      try {
-        await supabase.from('sms_queue').update(skipUpdates).eq('id', item.id);
-      } catch (_) {}
-      localStore.updateSmsQueueItem(item.id, skipUpdates);
-      continue;
-    }
-
-    let activeDevice = primaryDevice;
-    let delivered = false;
-    let lastError = null;
-
-    onProgress({
-      current: i + 1,
-      total: pendingItems.length,
-      item,
-      device: activeDevice?.name,
-    });
-
-    // 1. Mark as processing
-    localStore.updateSmsQueueItem(item.id, { status: 'processing', last_attempt_at: new Date().toISOString() });
-
-    // 2. Try Primary Device first
-    if (activeDevice) {
-      try {
-        await sendSmsViaGateway(activeDevice, {
-          to: item.recipient_phone,
-          message: item.message_text,
-          forceSend: true,
-        });
-        delivered = true;
-      } catch (err) {
-        lastError = `Primary xatosi: ${err.message}`;
-        console.warn(`Primary device failed for ${item.recipient_phone}, switching to Backup:`, err.message);
+      if (alreadySentItem || itemAlreadyDelivered) {
+        console.warn(`[smsService] Dublikatsiya oldi olindi: ${item.recipient_phone} (${item.idempotency_key})`);
+        const skipUpdates = {
+          status: itemAlreadyDelivered ? itemAlreadyDelivered.status : 'CANCELLED',
+          error_message: 'Dublikatsiya oldi olindi (allaqachon yuborilgan)',
+        };
+        try {
+          await supabase.from('sms_queue').update(skipUpdates).eq('id', item.id);
+        } catch (_) {}
+        localStore.updateSmsQueueItem(item.id, skipUpdates);
+        continue;
       }
-    }
 
-    // 3. Failover to Backup Device if Primary failed
-    if (!delivered && backupDevice) {
-      activeDevice = backupDevice;
-      try {
-        await sendSmsViaGateway(backupDevice, {
-          to: item.recipient_phone,
-          message: item.message_text,
-          forceSend: true,
-        });
-        delivered = true;
-        lastError = null; // Cleared on successful backup send
-      } catch (backupErr) {
-        lastError = `${lastError || ''} | Backup xatosi: ${backupErr.message}`;
-        console.error(`Backup device also failed for ${item.recipient_phone}:`, backupErr.message);
-      }
-    }
+      let activeDevice = primaryDevice;
+      let delivered = false;
+      let sendResult = null;
+      let lastError = null;
 
-    // 4. Update queue status and write log
-    if (delivered) {
-      sentCount++;
-      if (item._batchRetries) {
-        failedCount = Math.max(0, failedCount - 1);
-      }
-      const updates = {
-        status: 'sent',
-        device_id: activeDevice.id,
-        sent_at: new Date().toISOString(),
-        error_message: null,
-      };
-      try {
-        await supabase.from('sms_queue').update(updates).eq('id', item.id);
-      } catch (_) {}
-      localStore.updateSmsQueueItem(item.id, updates);
-
-      localStore.addSmsLog({
-        queue_id: item.id,
-        device_id: activeDevice.id,
-        recipient_phone: item.recipient_phone,
-        recipient_name: item.recipient_name,
-        status: 'sent',
-        response_payload: { delivered_via: activeDevice.name, role: activeDevice.device_role },
-      });
-    } else {
-      failedCount++;
-      const newAttempts = (item.attempts || 0) + 1;
-      // Allow up to 10 retries so no message is lost until delivered!
-      const maxRetries = item.max_attempts || settings.max_retries || 10;
-      const willRetry = newAttempts < maxRetries;
-
-      const updates = {
-        status: willRetry ? 'pending' : 'failed',
-        attempts: newAttempts,
-        error_message: lastError,
-        last_attempt_at: new Date().toISOString(),
-        // Push failed item to the end of the queue with 15s delay so other students proceed first
-        scheduled_at: new Date(Date.now() + 15000).toISOString(),
-      };
-      try {
-        await supabase.from('sms_queue').update(updates).eq('id', item.id);
-      } catch (_) {}
-      localStore.updateSmsQueueItem(item.id, updates);
-
-      localStore.addSmsLog({
-        queue_id: item.id,
-        device_id: activeDevice?.id || null,
-        recipient_phone: item.recipient_phone,
-        recipient_name: item.recipient_name,
-        status: willRetry ? 'retrying' : 'failed',
-        error_details: `${lastError} (Urinish: ${newAttempts}/${maxRetries}, navbat oxiriga surildi)`,
+      onProgress({
+        current: i + 1,
+        total: pendingItems.length,
+        item,
+        device: activeDevice?.name,
       });
 
-      // User requirement: Push to the very end of current batch so it retries after all other students
-      const batchRetries = (item._batchRetries || 0) + 1;
-      if (willRetry && batchRetries <= 2) {
-        pendingItems.push({
-          ...item,
+      // 1. Mark as DISPATCHING with exact dispatched_at timestamp
+      const dispatchIso = new Date().toISOString();
+      localStore.updateSmsQueueItem(item.id, {
+        status: SMS_STATUS.DISPATCHING,
+        dispatched_at: dispatchIso,
+        last_attempt_at: dispatchIso,
+      });
+
+      // 2. Try Primary Device first
+      if (activeDevice) {
+        try {
+          sendResult = await sendSmsViaGateway(activeDevice, {
+            to: item.recipient_phone,
+            message: item.message_text,
+            forceSend: true,
+          });
+          delivered = true;
+        } catch (err) {
+          lastError = `Primary xatosi: ${err.message}`;
+          console.warn(`Primary device failed for ${item.recipient_phone}, switching to Backup:`, err.message);
+        }
+      }
+
+      // 3. Failover to Backup Device if Primary failed
+      if (!delivered && backupDevice) {
+        activeDevice = backupDevice;
+        try {
+          sendResult = await sendSmsViaGateway(backupDevice, {
+            to: item.recipient_phone,
+            message: item.message_text,
+            forceSend: true,
+          });
+          delivered = true;
+          lastError = null; // Cleared on successful backup send
+        } catch (backupErr) {
+          lastError = `${lastError || ''} | Backup xatosi: ${backupErr.message}`;
+          console.error(`Backup device also failed for ${item.recipient_phone}:`, backupErr.message);
+        }
+      }
+
+      // 4. Update queue status with stage latencies & write audit log
+      if (delivered && sendResult) {
+        const finalStatus = sendResult.status || SMS_STATUS.SUBMITTED;
+        if (finalStatus === SMS_STATUS.DELIVERED) {
+          deliveredCount++;
+        } else {
+          submittedCount++;
+        }
+
+        if (item._batchRetries) {
+          failedCount = Math.max(0, failedCount - 1);
+        }
+
+        const queuedAt = item.queued_at || item.created_at || dispatchIso;
+        const lmsLatency = Math.max(0, new Date(dispatchIso).getTime() - new Date(queuedAt).getTime());
+        const androidLatency = sendResult.android_sent_at
+          ? Math.max(0, new Date(sendResult.android_sent_at).getTime() - new Date(dispatchIso).getTime())
+          : null;
+        const carrierLatency = sendResult.delivered_at && sendResult.android_sent_at
+          ? Math.max(0, new Date(sendResult.delivered_at).getTime() - new Date(sendResult.android_sent_at).getTime())
+          : null;
+        const totalLatency = sendResult.delivered_at
+          ? Math.max(0, new Date(sendResult.delivered_at).getTime() - new Date(queuedAt).getTime())
+          : null;
+
+        const updates = {
+          tracking_id: sendResult.tracking_id || item.tracking_id || null,
+          status: finalStatus,
+          device_id: activeDevice.id,
+          dispatched_at: sendResult.dispatched_at || dispatchIso,
+          android_sent_at: sendResult.android_sent_at || null,
+          delivered_at: sendResult.delivered_at || null,
+          sent_at: sendResult.android_sent_at || dispatchIso,
+          lms_latency_ms: lmsLatency,
+          android_latency_ms: androidLatency,
+          carrier_latency_ms: carrierLatency,
+          total_latency_ms: totalLatency,
+          error_message: null,
+        };
+
+        try {
+          await supabase.from('sms_queue').update(updates).eq('id', item.id);
+        } catch (_) {}
+        localStore.updateSmsQueueItem(item.id, updates);
+
+        localStore.addSmsLog({
+          queue_id: item.id,
+          tracking_id: sendResult.tracking_id || null,
+          device_id: activeDevice.id,
+          recipient_phone: item.recipient_phone,
+          recipient_name: item.recipient_name,
+          status: finalStatus,
+          dispatched_at: updates.dispatched_at,
+          android_sent_at: updates.android_sent_at,
+          delivered_at: updates.delivered_at,
+          response_payload: {
+            delivered_via: activeDevice.name,
+            role: activeDevice.device_role,
+            tracking_id: sendResult.tracking_id || null,
+            status: finalStatus,
+            lms_latency_ms: lmsLatency,
+            android_latency_ms: androidLatency,
+            carrier_latency_ms: carrierLatency,
+            total_latency_ms: totalLatency,
+          },
+        });
+      } else {
+        failedCount++;
+        const newAttempts = (item.attempts || 0) + 1;
+        const maxRetries = item.max_attempts || settings.max_retries || 10;
+        const willRetry = newAttempts < maxRetries;
+        const failIso = new Date().toISOString();
+
+        const updates = {
+          status: willRetry ? SMS_STATUS.PENDING : SMS_STATUS.FAILED,
           attempts: newAttempts,
-          _batchRetries: batchRetries,
+          error_message: lastError,
+          failed_at: willRetry ? null : failIso,
+          last_attempt_at: failIso,
+          scheduled_at: new Date(Date.now() + 15000).toISOString(),
+        };
+        try {
+          await supabase.from('sms_queue').update(updates).eq('id', item.id);
+        } catch (_) {}
+        localStore.updateSmsQueueItem(item.id, updates);
+
+        localStore.addSmsLog({
+          queue_id: item.id,
+          tracking_id: item.tracking_id || null,
+          device_id: activeDevice?.id || null,
+          recipient_phone: item.recipient_phone,
+          recipient_name: item.recipient_name,
+          status: willRetry ? 'retrying' : SMS_STATUS.FAILED,
+          failed_at: failIso,
+          error_details: `${lastError} (Urinish: ${newAttempts}/${maxRetries})`,
         });
+
+        const batchRetries = (item._batchRetries || 0) + 1;
+        if (willRetry && batchRetries <= 2) {
+          pendingItems.push({
+            ...item,
+            attempts: newAttempts,
+            _batchRetries: batchRetries,
+          });
+        }
+      }
+
+      // Telecom operator safe rate-limiting delay between messages
+      if (i < pendingItems.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, intervalMs));
       }
     }
 
-    // Rate-limiting delay between messages to protect SIM card from telco spam block
-    if (i < pendingItems.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, intervalMs));
-    }
-  }
+    // After batch dispatch, trigger status reconciliation for in-flight cloud messages
+    reconcileSmsDeliveryStatuses().catch(() => {});
 
     return {
       processed: pendingItems.length,
-      sent: sentCount,
+      submitted: submittedCount,
+      delivered: deliveredCount,
+      sent: submittedCount + deliveredCount,
       failed: failedCount,
     };
   } finally {
@@ -1184,20 +1363,188 @@ export async function cancelQueueItem(id) {
   return localStore.updateSmsQueueItem(id, updates);
 }
 
+/**
+ * Reconciles SMS delivery reports with Android Gateway / Cloud in real time.
+ * Translates Gateway States into canonical LMS statuses:
+ *   - 'Pending' / 'Process' -> DISPATCHING (or UNKNOWN if > 30 mins)
+ *   - 'Sent' -> SUBMITTED (SmsManager confirmed handover to operator)
+ *   - 'Delivered' -> DELIVERED (Operator confirmed delivery report received)
+ *   - 'Failed' -> FAILED
+ */
+export async function reconcileSmsDeliveryStatuses(options = {}) {
+  const devices = await getSmsDevices();
+  const primary = devices.find((d) => d.device_role === 'primary' && d.is_active) || devices[0];
+  if (!primary || !primary.gateway_url) {
+    return { reconciled: 0, reconciledCount: 0, checked: 0 };
+  }
+
+  // Demo gateway simulation reconciliation
+  if (isDemoGateway(primary)) {
+    const queue = localStore.getSmsQueue();
+    let simulatedReconciled = 0;
+    const now = Date.now();
+
+    for (const q of queue) {
+      const norm = normalizeSmsStatus(q.status);
+      if (norm === SMS_STATUS.DISPATCHING) {
+        const dispatchedTime = new Date(q.dispatched_at || q.created_at || now).getTime();
+        if (now - dispatchedTime > 300) {
+          const sentIso = new Date(dispatchedTime + 250).toISOString();
+          const deliveredIso = new Date(dispatchedTime + 850).toISOString();
+          const updates = {
+            status: SMS_STATUS.DELIVERED,
+            android_sent_at: sentIso,
+            delivered_at: deliveredIso,
+            lms_latency_ms: 120,
+            android_latency_ms: 250,
+            carrier_latency_ms: 600,
+            total_latency_ms: 970,
+          };
+          localStore.updateSmsQueueItem(q.id, updates);
+          simulatedReconciled++;
+        }
+      }
+    }
+    return { reconciled: simulatedReconciled, reconciledCount: simulatedReconciled, checked: queue.length, simulated: true };
+  }
+
+  // Real Gateway reconciliation via Capcom6 SMS Gate Cloud
+  let url = primary.gateway_url.trim().replace(/\/+$/, '');
+  if (url.includes('api.sms-gate.app')) {
+    url = 'https://api.sms-gate.app/3rdparty/v1/messages?limit=100';
+  } else {
+    url = `${url}/messages?limit=100`;
+  }
+  const headers = buildGatewayHeaders(primary);
+
+  try {
+    const res = await executeGatewayRequest(url, 'GET', headers, null);
+    if (!res.ok || !Array.isArray(res.data)) {
+      return { reconciled: 0, checked: 0 };
+    }
+
+    const gatewayMessages = res.data;
+    const queue = localStore.getSmsQueue();
+    let reconciledCount = 0;
+
+    for (const gwMsg of gatewayMessages) {
+      if (!gwMsg.id) continue;
+      const phoneClean = normalizePhone(gwMsg.recipients?.[0]?.phoneNumber);
+      const queueItem = queue.find(
+        (q) => q.tracking_id === gwMsg.id ||
+          (phoneClean && q.recipient_phone === phoneClean &&
+            (normalizeSmsStatus(q.status) === SMS_STATUS.DISPATCHING ||
+             normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED ||
+             q.status === 'pending' ||
+             q.status === 'processing' ||
+             q.status === 'sent'))
+      );
+
+      if (!queueItem) continue;
+
+      const currentState = gwMsg.state || gwMsg.recipients?.[0]?.state || 'Pending';
+      const statesObj = gwMsg.states || {};
+      const sentTime = statesObj.Sent || gwMsg.sentAt || null;
+      const deliveredTime = statesObj.Delivered || gwMsg.deliveredAt || null;
+
+      let newStatus = null;
+      const updates = {};
+
+      if (currentState === 'Delivered') {
+        newStatus = SMS_STATUS.DELIVERED;
+        updates.delivered_at = deliveredTime || new Date().toISOString();
+        if (sentTime) updates.android_sent_at = sentTime;
+      } else if (currentState === 'Sent') {
+        newStatus = SMS_STATUS.SUBMITTED;
+        updates.android_sent_at = sentTime || new Date().toISOString();
+      } else if (currentState === 'Failed') {
+        newStatus = SMS_STATUS.FAILED;
+        updates.failed_at = new Date().toISOString();
+      } else if (currentState === 'Pending' || currentState === 'Process') {
+        const createdTime = new Date(gwMsg.createdAt || queueItem.dispatched_at || 0).getTime();
+        // If pending on cloud for more than 30 minutes without operator handover -> UNKNOWN
+        if (Date.now() - createdTime > 30 * 60 * 1000) {
+          newStatus = SMS_STATUS.UNKNOWN;
+          updates.error_message = 'Yetkazilganlik hisoboti kelmagan (Gateway kutish vaqti 30 daqiqadan oshdi)';
+        } else {
+          newStatus = SMS_STATUS.DISPATCHING;
+        }
+      }
+
+      const currentNorm = normalizeSmsStatus(queueItem.status);
+      if (newStatus && (newStatus !== currentNorm || !queueItem.android_sent_at || (!queueItem.delivered_at && newStatus === SMS_STATUS.DELIVERED))) {
+        updates.status = newStatus;
+        updates.tracking_id = gwMsg.id;
+
+        // Calculate granular stage latencies
+        const queuedAt = queueItem.queued_at || queueItem.created_at;
+        const dispatchedAt = queueItem.dispatched_at || gwMsg.createdAt;
+        const androidSentAt = updates.android_sent_at || queueItem.android_sent_at;
+        const deliveredAt = updates.delivered_at || queueItem.delivered_at;
+
+        if (queuedAt && dispatchedAt) {
+          updates.lms_latency_ms = Math.max(0, new Date(dispatchedAt).getTime() - new Date(queuedAt).getTime());
+        }
+        if (dispatchedAt && androidSentAt) {
+          updates.android_latency_ms = Math.max(0, new Date(androidSentAt).getTime() - new Date(dispatchedAt).getTime());
+        }
+        if (androidSentAt && deliveredAt) {
+          updates.carrier_latency_ms = Math.max(0, new Date(deliveredAt).getTime() - new Date(androidSentAt).getTime());
+        }
+        if (queuedAt && deliveredAt) {
+          updates.total_latency_ms = Math.max(0, new Date(deliveredAt).getTime() - new Date(queuedAt).getTime());
+        }
+
+        localStore.updateSmsQueueItem(queueItem.id, updates);
+        try {
+          await supabase.from('sms_queue').update(updates).eq('id', queueItem.id);
+        } catch (_) {}
+
+        localStore.addSmsLog({
+          queue_id: queueItem.id,
+          tracking_id: gwMsg.id,
+          recipient_phone: queueItem.recipient_phone,
+          recipient_name: queueItem.recipient_name,
+          status: newStatus,
+          dispatched_at: dispatchedAt,
+          android_sent_at: androidSentAt,
+          delivered_at: deliveredAt,
+          response_payload: {
+            reconciled: true,
+            gateway_state: currentState,
+            states: statesObj,
+          },
+        });
+        reconciledCount++;
+      }
+    }
+
+    return { reconciled: reconciledCount, reconciledCount, checked: gatewayMessages.length };
+  } catch (err) {
+    console.warn('[reconcileSmsDeliveryStatuses] error:', err.message);
+    return { reconciled: 0, reconciledCount: 0, error: err.message };
+  }
+}
+
 let schedulerTimer = null;
 let lastProcessedMinuteKey = null;
+let reconciliationCounter = 0;
 
 /**
- * Starts automated background worker that checks schedule every 10 seconds.
- * When settings.is_enabled is true, today's day is in schedule_days,
- * and current time matches schedule_time:
- * It automatically triggers generateDebtorQueue() and processQueueBatch()!
+ * Starts automated background worker that checks schedule every 10 seconds
+ * and reconciles SMS delivery status reports every 20 seconds.
  */
 export function startSmsAutomationWorker({ onScheduledTrigger = () => {} } = {}) {
   if (schedulerTimer) return () => clearInterval(schedulerTimer);
 
   const checkAndRun = async () => {
     try {
+      reconciliationCounter++;
+      // Auto-reconcile delivery status reports every 2 iterations (20s)
+      if (reconciliationCounter % 2 === 0) {
+        reconcileSmsDeliveryStatuses().catch(() => {});
+      }
+
       const settings = await getSmsSettings();
       if (!settings || !settings.is_enabled) return;
 
@@ -1263,4 +1610,8 @@ export default {
   normalizePhone,
   isDemoGateway,
   startSmsAutomationWorker,
+  reconcileSmsDeliveryStatuses,
+  calculateSmsLatencies,
+  normalizeSmsStatus,
+  SMS_STATUS,
 };

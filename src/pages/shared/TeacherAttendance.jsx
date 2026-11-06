@@ -67,16 +67,18 @@ export default function TeacherAttendance() {
   const [savingNote, setSavingNote] = useState(false);
 
   // Fetch Teacher Attendance
-  const fetchRecords = useCallback(async () => {
-    setLoading(true);
+  const fetchRecords = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     try {
       const data = await getTeacherAttendance({ date });
       setRecords(data || []);
     } catch (err) {
       console.error('Fetch teacher attendance error:', err);
-      toast.error('O‘qituvchilar davomatini yuklashda xatolik yuz berdi');
+      if (!isSilent) {
+        toast.error('O‘qituvchilar davomatini yuklashda xatolik yuz berdi');
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, [date]);
 
@@ -86,7 +88,7 @@ export default function TeacherAttendance() {
 
   // Real-time synchronization across devices (when another device marks attendance)
   useEffect(() => {
-    const handleSync = () => fetchRecords();
+    const handleSync = () => fetchRecords(true);
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);
   }, [fetchRecords]);

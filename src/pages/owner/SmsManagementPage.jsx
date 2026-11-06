@@ -67,6 +67,10 @@ import smsService, {
   formatSmsMessage,
   normalizePhone,
   startSmsAutomationWorker,
+  reconcileSmsDeliveryStatuses,
+  calculateSmsLatencies,
+  normalizeSmsStatus,
+  SMS_STATUS,
 } from '@/services/smsService';
 
 export default function SmsManagementPage() {
@@ -204,11 +208,40 @@ export default function SmsManagementPage() {
     return () => stopWorker?.();
   }, []);
 
+  const [reconcilingStatus, setReconcilingStatus] = useState(false);
+
+  // Reconcile delivery status reports with Gateway
+  const handleReconcileDeliveryStatus = async () => {
+    try {
+      setReconcilingStatus(true);
+      const res = await reconcileSmsDeliveryStatuses();
+      const [updatedQueue, updatedLogs] = await Promise.all([getSmsQueue(), getSmsLogs(100)]);
+      setQueue(updatedQueue);
+      setLogs(updatedLogs);
+      if (res.reconciled > 0) {
+        toast.success(`Haqiqiy statuslar yangilandi: ${res.reconciled} ta SMS yetkazilishi tasdiqlandi!`);
+      } else {
+        toast.info(`Gateway tekshirildi: xabarlar holati dolzarb.`);
+      }
+    } catch (err) {
+      toast.error(`Status tekshirishda xatolik: ${err.message}`);
+    } finally {
+      setReconcilingStatus(false);
+    }
+  };
+
   // Filtered Queue
   const filteredQueue = useMemo(() => {
     let list = queue;
     if (queueStatusFilter !== 'ALL') {
-      list = list.filter((q) => q.status === queueStatusFilter);
+      if (queueStatusFilter === 'PENDING') {
+        list = list.filter((q) => {
+          const st = normalizeSmsStatus(q.status);
+          return st === SMS_STATUS.PENDING || st === SMS_STATUS.DISPATCHING;
+        });
+      } else {
+        list = list.filter((q) => normalizeSmsStatus(q.status) === queueStatusFilter);
+      }
     }
     if (queueSearch.trim()) {
       const q = queueSearch.toLowerCase().trim();
@@ -217,27 +250,33 @@ export default function SmsManagementPage() {
         (item) =>
           (item.recipient_name && item.recipient_name.toLowerCase().includes(q)) ||
           (item.recipient_phone && (item.recipient_phone.includes(q) || (rawDigits && item.recipient_phone.includes(rawDigits)))) ||
-          (item.message_text && item.message_text.toLowerCase().includes(q))
+          (item.message_text && item.message_text.toLowerCase().includes(q)) ||
+          (item.tracking_id && item.tracking_id.toLowerCase().includes(q))
       );
     }
     return list;
   }, [queue, queueStatusFilter, queueSearch]);
 
-  // Statistics
+  // Statistics reflecting all 6 distinct lifecycle statuses
   const stats = useMemo(() => {
-    const pending = queue.filter((q) => q.status === 'pending').length;
-    const sent = queue.filter((q) => q.status === 'sent').length;
-    const failed = queue.filter((q) => q.status === 'failed').length;
-    const processing = queue.filter((q) => q.status === 'processing').length;
+    const pending = queue.filter((q) => normalizeSmsStatus(q.status) === SMS_STATUS.PENDING).length;
+    const dispatching = queue.filter((q) => normalizeSmsStatus(q.status) === SMS_STATUS.DISPATCHING).length;
+    const submitted = queue.filter((q) => normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED).length;
+    const delivered = queue.filter((q) => normalizeSmsStatus(q.status) === SMS_STATUS.DELIVERED).length;
+    const unknown = queue.filter((q) => normalizeSmsStatus(q.status) === SMS_STATUS.UNKNOWN).length;
+    const failed = queue.filter((q) => normalizeSmsStatus(q.status) === SMS_STATUS.FAILED).length;
 
     const primaryDevice = devices.find((d) => d.device_role === 'primary');
     const backupDevice = devices.find((d) => d.device_role === 'backup');
 
     return {
       pending,
-      sent,
+      dispatching,
+      submitted,
+      delivered,
+      unknown,
       failed,
-      processing,
+      sent: submitted + delivered,
       total: queue.length,
       primaryOnline: primaryDevice?.status === 'online',
       backupOnline: backupDevice?.status === 'online',
@@ -651,6 +690,90 @@ export default function SmsManagementPage() {
     setTimeout(() => setCopiedTextId(null), 1500);
   };
 
+  // Render Granular Lifecycle Status Badge (6 distinct states)
+  const renderStatusBadge = (rawStatus) => {
+    const status = normalizeSmsStatus(rawStatus);
+    switch (status) {
+      case SMS_STATUS.DELIVERED:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+            <span>Yetkazildi</span>
+          </span>
+        );
+      case SMS_STATUS.SUBMITTED:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-800 dark:bg-sky-950/70 dark:text-sky-300 border border-sky-300 dark:border-sky-700">
+            <Send className="w-3 h-3 text-sky-600 dark:text-sky-400" />
+            <span>Operatorga berildi</span>
+          </span>
+        );
+      case SMS_STATUS.DISPATCHING:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-300 dark:border-blue-700 animate-pulse">
+            <RefreshCw className="w-3 h-3 text-blue-600 dark:text-blue-400 animate-spin" />
+            <span>Uzatilmoqda...</span>
+          </span>
+        );
+      case SMS_STATUS.PENDING:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+            <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+            <span>Kutilmoqda</span>
+          </span>
+        );
+      case SMS_STATUS.UNKNOWN:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+            <HelpCircle className="w-3 h-3 text-slate-600 dark:text-slate-400" />
+            <span>Tasdiqsiz</span>
+          </span>
+        );
+      case SMS_STATUS.FAILED:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-300 dark:border-rose-700">
+            <XCircle className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+            <span>Xatolik</span>
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            {rawStatus}
+          </span>
+        );
+    }
+  };
+
+  // Render Granular Stage Latencies & Timestamps
+  const renderLatencyInfo = (item) => {
+    const hasLatencies = item.lms_latency_ms != null || item.android_latency_ms != null || item.carrier_latency_ms != null || item.total_latency_ms != null;
+    if (!hasLatencies && !item.dispatched_at && !item.android_sent_at && !item.delivered_at) {
+      return <span className="text-gray-400 font-mono text-[10px]">—</span>;
+    }
+    return (
+      <div className="flex flex-col gap-0.5 text-[10px] font-mono leading-tight">
+        {item.total_latency_ms != null ? (
+          <span className="font-bold text-gray-800 dark:text-gray-200">
+            Jami: {(item.total_latency_ms / 1000).toFixed(1)}s
+          </span>
+        ) : item.delivered_at ? (
+          <span className="font-bold text-emerald-600 dark:text-emerald-400">Yetkazilgan</span>
+        ) : null}
+        <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400">
+          {item.lms_latency_ms != null && <span>LMS: {(item.lms_latency_ms / 1000).toFixed(1)}s</span>}
+          {item.android_latency_ms != null && <span>• App: {(item.android_latency_ms / 1000).toFixed(1)}s</span>}
+          {item.carrier_latency_ms != null && <span>• GSM: {(item.carrier_latency_ms / 1000).toFixed(1)}s</span>}
+        </div>
+        {item.tracking_id && (
+          <span className="text-[9px] text-gray-400 truncate max-w-[120px]" title={item.tracking_id}>
+            ID: {item.tracking_id}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Page Header Banner */}
@@ -702,8 +825,20 @@ export default function SmsManagementPage() {
           <Button
             variant="outline"
             size="md"
+            icon={RefreshCw}
+            isLoading={reconcilingStatus}
+            disabled={reconcilingStatus || generatingQueue}
+            onClick={handleReconcileDeliveryStatus}
+            className="cursor-pointer font-bold justify-center text-xs sm:text-sm w-full sm:w-auto text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+          >
+            {reconcilingStatus ? 'Tekshirilmoqda...' : 'Hisobotlarni tekshirish'}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="md"
             icon={Send}
-            disabled={generatingQueue || togglingSystem}
+            disabled={generatingQueue || togglingSystem || reconcilingStatus}
             onClick={() => setIsTestModalOpen(true)}
             className="cursor-pointer font-bold justify-center text-xs sm:text-sm w-full sm:w-auto"
           >
@@ -715,7 +850,7 @@ export default function SmsManagementPage() {
             size="md"
             icon={RefreshCw}
             isLoading={generatingQueue}
-            disabled={generatingQueue || togglingSystem}
+            disabled={generatingQueue || togglingSystem || reconcilingStatus}
             onClick={handleGenerateQueue}
             className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white shadow-sm font-bold cursor-pointer justify-center text-xs sm:text-sm w-full sm:w-auto"
           >
@@ -728,116 +863,167 @@ export default function SmsManagementPage() {
         </div>
       </div>
 
-      {/* Live Metrics Ribbon */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Metric 1: Pending */}
-        <Card noPadding className="hover:shadow-card-hover transition-all">
-          <div className="p-3.5 sm:p-5 flex flex-col justify-between h-full">
+      {/* Live Metrics Ribbon - 6 Distinct Lifecycle Counters */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
+        {/* Metric 1: Kutilmoqda (Pending / Dispatching) */}
+        <Card noPadding className="hover:shadow-card-hover transition-all border-amber-200/50 dark:border-amber-900/30">
+          <div className="p-3 sm:p-4 flex flex-col justify-between h-full">
             <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                  <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 </div>
-                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
-                  {stats.pending > 0 && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
-                  {stats.pending > 0 ? 'Navbatda' : 'Rejada'}
+                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+                  {(stats.pending > 0 || stats.dispatching > 0) && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  )}
+                  Kutilmoqda
                 </span>
               </div>
-              <span className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-amber-600 dark:text-amber-400 block">
-                {stats.pending > 0 ? `${stats.pending} ta` : `${prospectiveStats.debtorsCount} ta`}
+              <span className="text-lg sm:text-2xl font-black tracking-tight text-amber-600 dark:text-amber-400 block">
+                {stats.pending + stats.dispatching} ta
               </span>
-              <h4 className="text-[11px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
-                {stats.pending > 0 ? 'Navbatdagi xabarlar' : 'Rejadagi Qarzdorlar'}
+              <h4 className="text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
+                Kutilmoqda
               </h4>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-2">
-              {stats.pending > 0
-                ? 'Reja bo‘yicha yuborilishi kutilmoqda'
-                : `Bugungi ro‘yxatda ${prospectiveStats.debtorsCount} ta qarzdorga SMS rejalashtirilgan`}
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-1.5">
+              {stats.dispatching > 0 ? `${stats.dispatching} tasi qurilmaga uzatilmoqda` : 'Hali yuborilmagan navbat'}
             </p>
           </div>
         </Card>
 
-        {/* Metric 2: Sent */}
-        <Card noPadding className="hover:shadow-card-hover transition-all">
-          <div className="p-3.5 sm:p-5 flex flex-col justify-between h-full">
+        {/* Metric 2: Yuborilgan (Submitted to Operator via SmsManager) */}
+        <Card noPadding className="hover:shadow-card-hover transition-all border-sky-200/50 dark:border-sky-900/30">
+          <div className="p-3 sm:p-4 flex flex-col justify-between h-full">
             <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                  <Send className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 </div>
-                <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                  Operatorga berildi
+                </span>
+              </div>
+              <span className="text-lg sm:text-2xl font-black tracking-tight text-sky-600 dark:text-sky-400 block">
+                {stats.submitted} ta
+              </span>
+              <h4 className="text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
+                Yuborilgan (SMS_SENT)
+              </h4>
+            </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-1.5">
+              Operator tarmog‘iga topshirilgan
+            </p>
+          </div>
+        </Card>
+
+        {/* Metric 3: Yetkazilgan (Delivered confirmed with Delivery Report) */}
+        <Card noPadding className="hover:shadow-card-hover transition-all border-emerald-200/50 dark:border-emerald-900/30">
+          <div className="p-3 sm:p-4 flex flex-col justify-between h-full">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                </div>
+                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Yetkazildi
+                  Tasdiqlangan
                 </span>
               </div>
-              <span className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400 block">
-                {stats.sent} ta
+              <span className="text-lg sm:text-2xl font-black tracking-tight text-emerald-600 dark:text-emerald-400 block">
+                {stats.delivered} ta
               </span>
-              <h4 className="text-[11px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
-                Muvaffaqiyatli ketgan
+              <h4 className="text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
+                Yetkazilgan
               </h4>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-2">
-              SIM-karta orqali yetkazildi
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-1.5">
+              Delivery report bilan tasdiqlangan
             </p>
           </div>
         </Card>
 
-        {/* Metric 3: Failed */}
-        <Card noPadding className="hover:shadow-card-hover transition-all">
-          <div className="p-3.5 sm:p-5 flex flex-col justify-between h-full">
+        {/* Metric 4: Tasdiqlanmagan (Unknown / Timeout / Pending Carrier Ack) */}
+        <Card noPadding className="hover:shadow-card-hover transition-all border-slate-200/50 dark:border-slate-800/50">
+          <div className="p-3 sm:p-4 flex flex-col justify-between h-full">
             <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
-                  <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-500/15 text-slate-600 dark:text-slate-400 flex items-center justify-center shrink-0">
+                  <HelpCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 </div>
-                <span className={`inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full ${stats.failed > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
+                <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  Tasdiqsiz
+                </span>
+              </div>
+              <span className="text-lg sm:text-2xl font-black tracking-tight text-slate-600 dark:text-slate-400 block">
+                {stats.unknown} ta
+              </span>
+              <h4 className="text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
+                Tasdiqlanmagan
+              </h4>
+            </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-1.5">
+              Yetkazilganlik hisoboti kelmagan
+            </p>
+          </div>
+        </Card>
+
+        {/* Metric 5: Xatolik (Failed) */}
+        <Card noPadding className="hover:shadow-card-hover transition-all border-rose-200/50 dark:border-rose-900/30">
+          <div className="p-3 sm:p-4 flex flex-col justify-between h-full">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                  <XCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                </div>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full ${stats.failed > 0 ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
                   {stats.failed > 0 && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
                   {stats.failed > 0 ? 'Xatolik' : 'Xatosiz'}
                 </span>
               </div>
-              <span className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-rose-600 dark:text-rose-400 block">
+              <span className="text-lg sm:text-2xl font-black tracking-tight text-rose-600 dark:text-rose-400 block">
                 {stats.failed} ta
               </span>
-              <h4 className="text-[11px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
-                Yetib bormagan (Xato)
+              <h4 className="text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">
+                Xatolik (Yetib bormagan)
               </h4>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-2">
-              Telefon o‘chiq yoki xato raqam
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-1.5">
+              Qurilma yoki raqam xatosi
             </p>
           </div>
         </Card>
 
-        {/* Metric 4: Dual-Phone Gateways */}
-        <Card noPadding className="hover:shadow-card-hover transition-all">
-          <div className="p-3.5 sm:p-5 flex flex-col justify-between h-full">
+        {/* Metric 6: Dual-Phone Gateways */}
+        <Card noPadding className="hover:shadow-card-hover transition-all border-blue-200/50 dark:border-blue-900/30">
+          <div className="p-3 sm:p-4 flex flex-col justify-between h-full">
             <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                  <Radio className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <Radio className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 </div>
-                <span className={`inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full ${stats.primaryOnline ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'}`}>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full ${stats.primaryOnline ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300'}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${stats.primaryOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                  {stats.primaryOnline ? 'Faol' : 'Nofaol'}
+                  {stats.primaryOnline ? 'Onlayn' : 'Oflayn'}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded ${stats.primaryOnline ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded ${stats.primaryOnline ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
                   <span className={`w-1 h-1 rounded-full ${stats.primaryOnline ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
-                  Asosiy: {stats.primaryOnline ? 'Onlayn' : 'Oflayn'}
+                  1: {stats.primaryOnline ? 'On' : 'Off'}
                 </span>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded ${stats.backupOnline ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded ${stats.backupOnline ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
                   <span className={`w-1 h-1 rounded-full ${stats.backupOnline ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                  Zaxira: {stats.backupOnline ? 'Onlayn' : 'Oflayn'}
+                  2: {stats.backupOnline ? 'On' : 'Off'}
                 </span>
               </div>
-              <h4 className="text-[11px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-2">
+              <h4 className="text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1.5">
                 Gateway holati
               </h4>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-2">
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2 line-clamp-1 border-t border-gray-100 dark:border-gray-800/80 pt-1.5">
               Avtomatik failover bilan
             </p>
           </div>
@@ -2022,19 +2208,21 @@ export default function SmsManagementPage() {
                   />
                 </div>
 
-                {/* 2. Status Filter Segmented Pills (Exact h-10 / 40px seamless full-height) */}
-                <div className="inline-flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-surface-dark-secondary text-xs h-10 min-h-[40px] max-h-[40px] p-0 overflow-hidden divide-x divide-gray-200 dark:divide-gray-700 shrink-0 shadow-2xs">
+                {/* 2. Status Filter Segmented Pills (Exact h-10 / 40px seamless full-height with 6 distinct states) */}
+                <div className="inline-flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-surface-dark-secondary text-xs h-10 min-h-[40px] max-h-[40px] p-0 overflow-x-auto no-scrollbar divide-x divide-gray-200 dark:divide-gray-700 shrink-0 shadow-2xs">
                   {[
                     { key: 'ALL', label: 'Barchasi', count: queue.length },
-                    { key: 'pending', label: 'Kutilmoqda', count: stats.pending },
-                    { key: 'sent', label: 'Yuborildi', count: stats.sent },
-                    { key: 'failed', label: 'Xatolik', count: stats.failed },
+                    { key: 'PENDING', label: 'Kutilmoqda', count: stats.pending + stats.dispatching },
+                    { key: SMS_STATUS.SUBMITTED, label: 'Operatorga berildi', count: stats.submitted },
+                    { key: SMS_STATUS.DELIVERED, label: 'Yetkazildi', count: stats.delivered },
+                    { key: SMS_STATUS.UNKNOWN, label: 'Tasdiqsiz', count: stats.unknown },
+                    { key: SMS_STATUS.FAILED, label: 'Xatolik', count: stats.failed },
                   ].map((st) => (
                     <button
                       key={st.key}
                       type="button"
                       onClick={() => setQueueStatusFilter(st.key)}
-                      className={`h-full min-h-[40px] max-h-[40px] flex items-center justify-center gap-1.5 px-3.5 sm:px-4 font-bold transition-all cursor-pointer whitespace-nowrap text-xs ${
+                      className={`h-full min-h-[40px] max-h-[40px] flex items-center justify-center gap-1.5 px-3 sm:px-3.5 font-bold transition-all cursor-pointer whitespace-nowrap text-xs ${
                         queueStatusFilter === st.key
                           ? 'bg-blue-600 dark:bg-emerald-600 text-white font-black shadow-xs'
                           : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
@@ -2057,6 +2245,17 @@ export default function SmsManagementPage() {
 
               {/* Right Group: Action Buttons (Exact h-10 / 40px) */}
               <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={RefreshCw}
+                  isLoading={reconcilingStatus}
+                  disabled={reconcilingStatus || processingQueue}
+                  onClick={handleReconcileDeliveryStatus}
+                  className="!h-10 !min-h-[40px] !max-h-[40px] !py-0 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-3.5 rounded-xl"
+                >
+                  {reconcilingStatus ? 'Tekshirilmoqda...' : 'Hisobotlarni tekshirish'}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -2086,13 +2285,13 @@ export default function SmsManagementPage() {
                   size="sm"
                   icon={Play}
                   isLoading={processingQueue}
-                  disabled={stats.pending === 0 || processingQueue}
+                  disabled={(stats.pending + stats.dispatching) === 0 || processingQueue}
                   onClick={handleProcessQueue}
                   className="!h-10 !min-h-[40px] !max-h-[40px] !py-0 bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer justify-center text-xs w-full sm:w-auto px-4 rounded-xl"
                 >
                   {processingQueue
                     ? 'Tarqatilmoqda... (kuting)'
-                    : `Navbatdagi xabarlarni yuborish (${stats.pending})`}
+                    : `Navbatdagi xabarlarni yuborish (${stats.pending + stats.dispatching})`}
                 </Button>
               </div>
             </div>
@@ -2104,19 +2303,20 @@ export default function SmsManagementPage() {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-gray-50/90 dark:bg-surface-dark-tertiary border-b border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 uppercase font-bold text-[11px] tracking-wider">
-                    <th className="py-3.5 pl-6 pr-4 min-w-[180px]">Qabul qiluvchi</th>
-                    <th className="py-3.5 px-4 min-w-[140px]">Telefon</th>
-                    <th className="py-3.5 px-4 min-w-[130px]">Qarzdorlik</th>
-                    <th className="py-3.5 px-4 min-w-[260px]">SMS Matni</th>
-                    <th className="py-3.5 px-4 min-w-[120px]">Holat</th>
-                    <th className="py-3.5 px-4 min-w-[90px]">Urinish</th>
-                    <th className="py-3.5 pr-6 pl-4 text-right min-w-[120px]">Amal</th>
+                    <th className="py-3.5 pl-6 pr-4 min-w-[170px]">Qabul qiluvchi</th>
+                    <th className="py-3.5 px-4 min-w-[130px]">Telefon</th>
+                    <th className="py-3.5 px-4 min-w-[120px]">Qarzdorlik</th>
+                    <th className="py-3.5 px-4 min-w-[240px]">SMS Matni</th>
+                    <th className="py-3.5 px-4 min-w-[140px]">Holat</th>
+                    <th className="py-3.5 px-4 min-w-[140px]">Kechikish / Bosqichlar</th>
+                    <th className="py-3.5 px-4 min-w-[80px]">Urinish</th>
+                    <th className="py-3.5 pr-6 pl-4 text-right min-w-[110px]">Amal</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredQueue.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-14 text-center text-gray-400">
+                      <td colSpan={8} className="py-14 text-center text-gray-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <ListOrdered className="w-8 h-8 text-gray-300 dark:text-gray-600" />
                           <span className="font-medium text-sm text-gray-600 dark:text-gray-300">Navbatda SMS xabarlari mavjud emas</span>
@@ -2136,29 +2336,25 @@ export default function SmsManagementPage() {
                         <td className="py-3.5 px-4 font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap font-mono">
                           {formatCurrency(item.amount_due)}
                         </td>
-                        <td className="py-3.5 px-4 max-w-sm truncate text-gray-600 dark:text-gray-300 font-sans" title={item.message_text}>
-                          {item.message_text}
+                        <td className="py-3.5 px-4 max-w-xs truncate text-gray-600 dark:text-gray-300 font-sans" title={item.message_text}>
+                          <div className="truncate">{item.message_text}</div>
+                          {item.tracking_id && (
+                            <div className="text-[10px] font-mono text-blue-600/80 dark:text-blue-400/80 truncate">
+                              ID: {item.tracking_id}
+                            </div>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              item.status === 'sent'
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                                : item.status === 'failed'
-                                ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
-                                : item.status === 'processing'
-                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 animate-pulse'
-                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                            }`}
-                          >
-                            {item.status === 'sent' ? 'Yuborildi' : item.status === 'failed' ? 'Xatolik' : item.status === 'processing' ? 'Yuborilmoqda...' : 'Kutilmoqda'}
-                          </span>
+                          {renderStatusBadge(item.status)}
+                        </td>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {renderLatencyInfo(item)}
                         </td>
                         <td className="py-3.5 px-4 font-mono text-gray-500 whitespace-nowrap">
                           {item.attempts || 0} / {item.max_attempts || 3}
                         </td>
                         <td className="py-3.5 pr-6 pl-4 text-right whitespace-nowrap space-x-1">
-                          {item.status === 'failed' && (
+                          {(normalizeSmsStatus(item.status) === SMS_STATUS.FAILED || normalizeSmsStatus(item.status) === SMS_STATUS.UNKNOWN) && (
                             <button
                               type="button"
                               disabled={retryingId === item.id}
@@ -2170,7 +2366,7 @@ export default function SmsManagementPage() {
                               <span>{retryingId === item.id ? 'Yuborilmoqda...' : 'Qayta yuborish'}</span>
                             </button>
                           )}
-                          {item.status === 'pending' && (
+                          {(normalizeSmsStatus(item.status) === SMS_STATUS.PENDING || normalizeSmsStatus(item.status) === SMS_STATUS.DISPATCHING) && (
                             <button
                               type="button"
                               disabled={cancellingId === item.id}
@@ -2222,19 +2418,9 @@ export default function SmsManagementPage() {
                         <span>{item.recipient_phone}</span>
                       </a>
                     </div>
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
-                        item.status === 'sent'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : item.status === 'failed'
-                          ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
-                          : item.status === 'processing'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 animate-pulse'
-                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                      }`}
-                    >
-                      {item.status === 'sent' ? 'Yuborildi' : item.status === 'failed' ? 'Xatolik' : item.status === 'processing' ? 'Yuborilmoqda...' : 'Kutilmoqda'}
-                    </span>
+                    <div>
+                      {renderStatusBadge(item.status)}
+                    </div>
                   </div>
 
                   {/* Card Debt Amount */}
@@ -2245,11 +2431,23 @@ export default function SmsManagementPage() {
                     </span>
                   </div>
 
-                  {/* Card SMS Message preview */}
-                  <div className="p-3 bg-blue-50/40 dark:bg-gray-800/60 rounded-xl text-xs text-gray-700 dark:text-gray-300 leading-relaxed border border-blue-100/50 dark:border-gray-700/60">
-                    <span className="block text-[10px] font-bold uppercase text-gray-400 mb-1">SMS Matni:</span>
+                  {/* Card SMS Message preview & Tracking ID */}
+                  <div className="p-3 bg-blue-50/40 dark:bg-gray-800/60 rounded-xl text-xs text-gray-700 dark:text-gray-300 leading-relaxed border border-blue-100/50 dark:border-gray-700/60 space-y-1">
+                    <span className="block text-[10px] font-bold uppercase text-gray-400">SMS Matni:</span>
                     <p className="line-clamp-3 font-sans">{item.message_text}</p>
+                    {item.tracking_id && (
+                      <div className="text-[10px] font-mono text-blue-600/80 dark:text-blue-400/80 pt-1 border-t border-blue-100 dark:border-gray-700/60">
+                        ID: {item.tracking_id}
+                      </div>
+                    )}
                   </div>
+
+                  {/* Card Latency Breakdown */}
+                  {(item.total_latency_ms != null || item.lms_latency_ms != null || item.android_latency_ms != null) && (
+                    <div className="py-1 px-2.5 bg-gray-50/80 dark:bg-surface-dark-tertiary rounded-lg border border-gray-100 dark:border-gray-800/60">
+                      {renderLatencyInfo(item)}
+                    </div>
+                  )}
 
                   {/* Card Footer: Attempts & Action Buttons */}
                   <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800/80 text-xs">
@@ -2258,7 +2456,7 @@ export default function SmsManagementPage() {
                     </span>
 
                     <div className="flex items-center gap-1.5">
-                      {item.status === 'failed' && (
+                      {(normalizeSmsStatus(item.status) === SMS_STATUS.FAILED || normalizeSmsStatus(item.status) === SMS_STATUS.UNKNOWN) && (
                         <button
                           type="button"
                           disabled={retryingId === item.id}
@@ -2269,7 +2467,7 @@ export default function SmsManagementPage() {
                           <span>Qayta yuborish</span>
                         </button>
                       )}
-                      {item.status === 'pending' && (
+                      {(normalizeSmsStatus(item.status) === SMS_STATUS.PENDING || normalizeSmsStatus(item.status) === SMS_STATUS.DISPATCHING) && (
                         <button
                           type="button"
                           disabled={cancellingId === item.id}
@@ -2342,15 +2540,7 @@ export default function SmsManagementPage() {
                           {log.response_payload?.delivered_via || 'SIM Gateway'}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              log.status === 'sent'
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                            }`}
-                          >
-                            {log.status === 'sent' ? 'Yuborildi' : 'Xatolik'}
-                          </span>
+                          {renderStatusBadge(log.status)}
                         </td>
                         <td className="py-3.5 pr-6 pl-4 text-gray-500 truncate max-w-xs">
                           {log.error_details || 'Muvaffaqiyatli yetkazildi'}
@@ -2394,15 +2584,9 @@ export default function SmsManagementPage() {
                         {log.recipient_phone}
                       </span>
                     </div>
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
-                        log.status === 'sent'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                          : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                      }`}
-                    >
-                      {log.status === 'sent' ? 'Yuborildi' : 'Xatolik'}
-                    </span>
+                    <div>
+                      {renderStatusBadge(log.status)}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between text-xs py-1.5 px-3 bg-gray-50 dark:bg-surface-dark-tertiary rounded-xl border border-gray-100 dark:border-gray-800/60">

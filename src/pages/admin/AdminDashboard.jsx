@@ -53,13 +53,15 @@ export default function AdminDashboard() {
     user?.email?.split('@')[0] ||
     'Administrator';
 
-  const loadData = async (isManual = false) => {
+  const loadData = async (isManual = false, isSilent = false) => {
     try {
       if (isManual) setRefreshing(true);
-      else setLoading(true);
+      else if (!isSilent) setLoading(true);
       setError(null);
 
-      await localStore.syncWithServer(isManual).catch(() => {});
+      if (!isSilent) {
+        await localStore.syncWithServer(isManual).catch(() => {});
+      }
 
       const [adminStats, lessons, enrollments] = await Promise.all([
         dashboardService.getAdminStats(),
@@ -72,9 +74,11 @@ export default function AdminDashboard() {
       setRecentEnrollments(enrollments);
     } catch (err) {
       console.error('Admin dashboard error:', err);
-      setError(err.message || 'Failed to load administrator metrics');
+      if (!isSilent) {
+        setError(err.message || 'Failed to load administrator metrics');
+      }
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
       setRefreshing(false);
     }
   };
@@ -85,7 +89,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const handleSync = () => {
-      loadData(false);
+      loadData(false, true);
     };
     window.addEventListener('educo-data-sync', handleSync);
     return () => window.removeEventListener('educo-data-sync', handleSync);
@@ -142,7 +146,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header Banner with Rich Blue Gradient in Light Mode, Emerald in Dark Mode */}
-      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20">
+      <div className="dashboard-banner select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#123D78] via-[#1b4b8a] to-[#2563EB] dark:from-[#072228] dark:via-[#092e27] dark:to-[#04241b] text-white shadow-xl relative overflow-hidden border border-blue-400/20 dark:border-emerald-500/20 animate-slide-up-soft">
         {/* Decorative ambient blur glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 dark:bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-sky-400/10 dark:bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -198,7 +202,7 @@ export default function AdminDashboard() {
       )}
 
       {/* Quick Action Buttons for Admin */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5">
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5 animate-slide-up-soft [animation-delay:80ms]">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-emerald-400 mr-1 shrink-0 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5" />
           {t('dashboard.adminQuickActions', 'Tezkor amallar:')}
@@ -245,16 +249,20 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* 4 Stats Cards */}
+      {/* 4 Stats Cards - Staggered Slide In */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {statCards.map((item, idx) => {
           const Icon = item.icon;
+          const isLeft = idx < 2;
+          const animClass = isLeft ? 'animate-slide-left-soft' : 'animate-slide-right-soft';
+          const delayMs = ((idx % 2) + 1) * 85;
           return (
             <Card
               key={idx}
               noPadding
               onClick={item.onClick}
-              className="p-4 sm:p-5 flex flex-col justify-between hover:shadow-card-hover hover:border-brand-navy/30 transition-all cursor-pointer group"
+              style={{ animationDelay: `${delayMs}ms` }}
+              className={`p-4 sm:p-5 flex flex-col justify-between hover:shadow-card-hover hover:border-brand-navy/30 transition-all cursor-pointer group ${animClass}`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-10 h-10 rounded-xl ${item.bgColor} ${item.color} flex items-center justify-center transition-transform group-hover:scale-105 shrink-0`}>
@@ -281,8 +289,8 @@ export default function AdminDashboard() {
 
       {/* Main Grid: Today's Schedule & Recent Enrollments */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Today's Schedule (2 cols) */}
-        <div className="lg:col-span-2 space-y-4">
+        {/* Today's Schedule (2 cols) - Glides in from Left */}
+        <div className="lg:col-span-2 space-y-4 animate-slide-left-soft [animation-delay:150ms]">
           <Card
             title={t('dashboard.todayLessons', 'Bugungi darslar')}
             subtitle={t('dashboard.todayTimelineSubtitle', 'Bugungi kunda o‘tkaziladigan darslar grafigi')}
@@ -361,8 +369,8 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Recent Enrollments (1 col) */}
-        <div>
+        {/* Recent Enrollments (1 col) - Glides in from Right */}
+        <div className="animate-slide-right-soft [animation-delay:150ms]">
           <Card
             title={t('dashboard.recentEnrollments', 'So‘nggi qabullar')}
             subtitle={t('dashboard.enrollmentSubtitle', 'Guruhlarga qabul qilingan so‘nggi o‘quvchilar')}
