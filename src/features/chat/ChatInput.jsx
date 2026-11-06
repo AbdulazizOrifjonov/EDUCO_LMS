@@ -63,7 +63,7 @@ export default function ChatInput({
         setShowAttachMenu(false);
       }
     };
-    const handleKeyDown = (e) => {
+    const handleAttachMenuKeyDown = (e) => {
       if (e.key === 'Escape') {
         setShowAttachMenu(false);
         setShowEmojiPicker(false);
@@ -72,12 +72,12 @@ export default function ChatInput({
     if (showAttachMenu) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keydown', handleAttachMenuKeyDown);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleAttachMenuKeyDown);
     };
   }, [showAttachMenu]);
 
@@ -242,6 +242,13 @@ export default function ChatInput({
     });
 
     onCancelReply?.();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   const handleAudioRecordingDone = async (audioFile) => {

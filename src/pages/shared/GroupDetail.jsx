@@ -26,6 +26,7 @@ import {
   Edit3,
   Split,
   AlertTriangle,
+  Plus,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';

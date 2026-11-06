@@ -143,6 +143,56 @@ export function inferMimeType(fileName = '', fallbackType = '') {
   return fallbackType || 'application/octet-stream';
 }
 
+export async function getSignedUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('blob:') || path.startsWith('data:') || path.startsWith('http') || path.startsWith('/api/')) {
+    return path;
+  }
+  if (path.startsWith('idb://')) {
+    if (memoryMediaUrls.has(path)) {
+      return memoryMediaUrls.get(path);
+    }
+    const blob = await getBlobFromIDB(path);
+    if (blob) {
+      const url = URL.createObjectURL(blob);
+      memoryMediaUrls.set(path, url);
+      return url;
+    }
+  }
+  return path;
+}
+
+/**
+ * Get unread message count for a group and user
+ */
+export async function getUnreadCount(groupId, userId) {
+  try {
+    const normalizedUserId = localStore.normalizeUserId(userId);
+    const storageKey = `educo_chat_last_read_${normalizedUserId}_${groupId}`;
+    const lastReadIso = localStorage.getItem(storageKey);
+
+    const msgs = localStore
+      .getChatMessages(groupId)
+      .filter((m) => localStore.normalizeUserId(m.sender_id) !== normalizedUserId);
+
+    if (!lastReadIso) return 0;
+    const lastReadTime = new Date(lastReadIso).getTime();
+    return msgs.filter((m) => new Date(m.created_at).getTime() > lastReadTime).length;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Mark a group's chat as read for the user
+ */
+export async function markAsRead(groupId, userId) {
+  if (!groupId || !userId) return;
+  const normalizedUserId = localStore.normalizeUserId(userId);
+  const storageKey = `educo_chat_last_read_${normalizedUserId}_${groupId}`;
+  localStorage.setItem(storageKey, new Date().toISOString());
+}
+
 /**
  * Fetch group chats accessible to current user based on their role.
  * Includes the general Staff Chat ("Xodimlar chati") for Owner, Admin, and Teacher roles.
@@ -697,56 +747,6 @@ export async function uploadAttachment(groupId, file, customFileName = null, onP
     console.error('uploadAttachment error:', error);
     throw error;
   }
-}
-
-export async function getSignedUrl(path) {
-  if (!path) return '';
-  if (path.startsWith('blob:') || path.startsWith('data:') || path.startsWith('http') || path.startsWith('/api/')) {
-    return path;
-  }
-  if (path.startsWith('idb://')) {
-    if (memoryMediaUrls.has(path)) {
-      return memoryMediaUrls.get(path);
-    }
-    const blob = await getBlobFromIDB(path);
-    if (blob) {
-      const url = URL.createObjectURL(blob);
-      memoryMediaUrls.set(path, url);
-      return url;
-    }
-  }
-  return path;
-}
-
-/**
- * Get unread message count for a group and user
- */
-export async function getUnreadCount(groupId, userId) {
-  try {
-    const normalizedUserId = localStore.normalizeUserId(userId);
-    const storageKey = `educo_chat_last_read_${normalizedUserId}_${groupId}`;
-    const lastReadIso = localStorage.getItem(storageKey);
-
-    const msgs = localStore
-      .getChatMessages(groupId)
-      .filter((m) => localStore.normalizeUserId(m.sender_id) !== normalizedUserId);
-
-    if (!lastReadIso) return 0;
-    const lastReadTime = new Date(lastReadIso).getTime();
-    return msgs.filter((m) => new Date(m.created_at).getTime() > lastReadTime).length;
-  } catch {
-    return 0;
-  }
-}
-
-/**
- * Mark a group's chat as read for the user
- */
-export async function markAsRead(groupId, userId) {
-  if (!groupId || !userId) return;
-  const normalizedUserId = localStore.normalizeUserId(userId);
-  const storageKey = `educo_chat_last_read_${normalizedUserId}_${groupId}`;
-  localStorage.setItem(storageKey, new Date().toISOString());
 }
 
 /**

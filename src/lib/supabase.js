@@ -349,6 +349,7 @@ function createMockTable(tableName) {
         });
 
         if (rows.length === 0) {
+          const todayStr = new Date().toISOString().split('T')[0];
           groups.filter((g) => g.status === 'active').forEach((g) => {
             const c = courses.find((crs) => crs.id === g.course_id);
             rows.push({
@@ -356,7 +357,7 @@ function createMockTable(tableName) {
               group_id: g.id,
               title: `${g.name} — Dars mashgʻuloti`,
               description: 'Rejali dars mashgʻuloti',
-              lesson_date: today,
+              lesson_date: todayStr,
               start_time: '18:00',
               end_time: '20:00',
               status: 'scheduled',

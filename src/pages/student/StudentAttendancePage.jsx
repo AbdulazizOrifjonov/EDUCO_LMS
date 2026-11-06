@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Sun,
   Coffee,
+  AlertCircle,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { localStore } from '@/lib/localStore';

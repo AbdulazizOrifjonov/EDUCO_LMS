@@ -39,6 +39,7 @@ import { getCourses } from '@/services/courseService';
 import { getTeachers } from '@/services/userService';
 import { useSearch } from '@/context/SearchContext';
 import { useTwoStepConfirm } from '@/context/ConfirmContext';
+import { localStore } from '@/lib/localStore';
 
 export default function GroupManagement() {
   const { t } = useTranslation();

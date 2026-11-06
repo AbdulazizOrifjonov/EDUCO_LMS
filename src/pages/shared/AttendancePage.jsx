@@ -55,6 +55,7 @@ import {
 } from '@/services/attendanceService';
 import { ROLES } from '@/lib/constants';
 import { useSearch } from '@/context/SearchContext';
+import { localStore } from '@/lib/localStore';
 
 const TeacherAttendance = React.lazy(() => import('./TeacherAttendance'));
 const AttendanceReport = React.lazy(() => import('./AttendanceReport'));

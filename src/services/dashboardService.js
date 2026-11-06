@@ -647,6 +647,7 @@ export const dashboardService = {
       const allSchedules = localStore.getSchedules();
       const currentDayOfWeek = new Date().getDay() || 7; // 1 (Mon) to 7 (Sun)
       const groups = localStore.getGroups();
+      const courses = localStore.getCourses ? localStore.getCourses() : [];
 
       let allowedGroupIds = [];
       if (role === 'student') {

@@ -1,6 +1,29 @@
 import * as XLSX from 'xlsx';
 import { formatUzPhone } from '@/utils/phoneFormat';
 
+function triggerDownload(blob, filename) {
+  if (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined' &&
+    typeof URL !== 'undefined' &&
+    typeof URL.createObjectURL === 'function' &&
+    document.createElement
+  ) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => {
+      if (typeof URL.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(url);
+      }
+    }, 1000);
+  }
+}
+
 /**
  * Exports data to a genuine Microsoft Excel (.xlsx) workbook and triggers browser download.
  * Ensures clean multi-column layouts, proper cell data types, and auto-adjusted column widths.
@@ -413,29 +436,6 @@ export function exportUsersMasterExcel(users = [], options = {}) {
   triggerDownload(blob, cleanFilename);
 
   return blob;
-}
-
-function triggerDownload(blob, filename) {
-  if (
-    typeof window !== 'undefined' &&
-    typeof document !== 'undefined' &&
-    typeof URL !== 'undefined' &&
-    typeof URL.createObjectURL === 'function' &&
-    document.createElement
-  ) {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => {
-      if (typeof URL.revokeObjectURL === 'function') {
-        URL.revokeObjectURL(url);
-      }
-    }, 1000);
-  }
 }
 
 export default {

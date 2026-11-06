@@ -1435,7 +1435,7 @@ export default function UserManagement() {
 
                     {/* Groups Row for Mobile */}
                     {(() => {
-                      const studentGroups = getStudentEnrolledGroups(row);
+                      const studentGroups = getStudentGroups(row);
                       if (row.role !== 'student' || studentGroups.length === 0) return null;
                       return (
                         <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center gap-1.5 flex-wrap">

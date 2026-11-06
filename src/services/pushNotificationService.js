@@ -69,27 +69,6 @@ export function getNotificationPermission() {
 }
 
 /**
- * Requests notification permission from the user
- */
-export async function requestNotificationPermission() {
-  if (!isPushSupported()) {
-    throw new Error('Brauzeringiz tizim bildirishnomalarini qo‘llab-quvvatlamaydi');
-  }
-
-  const permission = await Notification.requestPermission();
-  if (permission === 'granted') {
-    // Send immediate confirmation notification
-    await showPushNotification({
-      title: 'EDUCO LMS — Bildirishnomalar faol! 🔔',
-      body: 'Endi yangi chat xabarlari va markaz e‘lonlari telefoningiz tepasida darhol ko‘rinadi!',
-      tag: 'welcome-notification',
-      url: '/',
-    });
-  }
-  return permission;
-}
-
-/**
  * Displays a system notification at the top of the phone / desktop
  */
 export async function showPushNotification({
@@ -153,6 +132,27 @@ export async function showPushNotification({
     console.warn('[pushNotificationService] Fallback Notification error:', err);
     return false;
   }
+}
+
+/**
+ * Requests notification permission from the user
+ */
+export async function requestNotificationPermission() {
+  if (!isPushSupported()) {
+    throw new Error('Brauzeringiz tizim bildirishnomalarini qo‘llab-quvvatlamaydi');
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    // Send immediate confirmation notification
+    await showPushNotification({
+      title: 'EDUCO LMS — Bildirishnomalar faol! 🔔',
+      body: 'Endi yangi chat xabarlari va markaz e‘lonlari telefoningiz tepasida darhol ko‘rinadi!',
+      tag: 'welcome-notification',
+      url: '/',
+    });
+  }
+  return permission;
 }
 
 /**

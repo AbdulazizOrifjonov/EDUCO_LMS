@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Pencil,
   Eye,
+  X,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';

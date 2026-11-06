@@ -55,6 +55,7 @@ import Input from '@/components/ui/Input';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import { toast } from '@/components/ui/Toast';
 import websiteService, { getImageTransformStyle } from '@/services/websiteService';
+import { localStore } from '@/lib/localStore';
 
 const SUB_MODULES = [
   { id: 'overview', label: 'Umumiy hisobot', icon: Layers, targetHash: '' },

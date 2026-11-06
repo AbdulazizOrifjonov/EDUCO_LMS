@@ -46,6 +46,8 @@ export default function SalaryPeriodForm({ onSubmit, onCancel, isLoading }) {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(salaryPeriodSchema),
