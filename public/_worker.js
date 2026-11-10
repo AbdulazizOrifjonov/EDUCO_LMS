@@ -2332,7 +2332,21 @@ export default {
 
       
       // --- API: TELEGRAM BOT WEBHOOK (/api/telegram-webhook) ---
-      if (url.pathname === '/api/telegram-webhook' || url.pathname === '/api/telegram-webhook/') {
+      if (url.pathname === '/api/version') {
+        return jsonResponse({
+          version: '2026-11-10-tg-bot-v1',
+          routes: ['/api/telegram-webhook', '/api/tg-bot', '/api/bot', '/api/sync-store'],
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // --- API: TELEGRAM BOT WEBHOOK (/api/telegram-webhook, /api/tg-bot, /api/bot) ---
+      if (
+        url.pathname === '/api/telegram-webhook' ||
+        url.pathname === '/api/telegram-webhook/' ||
+        url.pathname === '/api/tg-bot' ||
+        url.pathname === '/api/bot'
+      ) {
         const botToken = env.TELEGRAM_BOT_TOKEN || BOT_TOKEN;
 
         // GET: Status & Management (setWebhook, deleteWebhook, getWebhookInfo)
