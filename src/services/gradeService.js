@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { localStore } from '@/lib/localStore';
+import { notifyStudentGrade } from './telegramBotService';
 
 const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
 
@@ -142,6 +143,25 @@ export async function saveGrade({
     feedback,
     graded_by: gradedBy,
   });
+
+  // Real-time Telegram notification to Student & Parent
+  try {
+    const allGroups = typeof localStore.getGroups === 'function' ? localStore.getGroups() : [];
+    const group = allGroups.find((g) => g.id === resolvedGroupId);
+    const courseName = group?.course_name || group?.name || 'Dars';
+    const teacherName = group?.teacher_name || 'Fan mentori';
+
+    notifyStudentGrade({
+      studentId,
+      studentName,
+      courseName,
+      gradeValue: numericGrade,
+      topic,
+      feedback,
+      teacherName,
+    }).catch(() => {});
+  } catch (_) {}
+
   return saved;
 }
 

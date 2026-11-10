@@ -583,6 +583,10 @@ export async function transferStudent(fromGroupId, toGroupId, studentId) {
   return { success: true };
 }
 
+// Aliases for comprehensive API consistency
+export const addStudentToGroup = enrollStudent;
+export const removeStudentFromGroup = removeStudent;
+
 /**
  * Save weekly lesson schedule for group
  */

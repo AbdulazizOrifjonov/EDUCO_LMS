@@ -62,3 +62,13 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: () => false,
   }),
 });
+
+// Mock window.scrollTo and window.resizeTo for jsdom
+if (typeof window !== 'undefined') {
+  window.scrollTo = () => {};
+  window.resizeTo = (width, height) => {
+    window.innerWidth = width || window.innerWidth;
+    window.innerHeight = height || window.innerHeight;
+    window.dispatchEvent(new Event('resize'));
+  };
+}

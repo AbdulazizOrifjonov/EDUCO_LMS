@@ -26,7 +26,9 @@ function createMockTable(tableName) {
 
   const builder = {
     select(fields = '*', opts = {}) {
-      operation = 'select';
+      if (operation === 'select') {
+        operation = 'select';
+      }
       selectedFields = fields;
       return builder;
     },
@@ -425,6 +427,24 @@ function createMockTable(tableName) {
               }
             }
             saved.push(item);
+          } else if (tableName === 'homework') {
+            const newItem = { id: item.id || `hw-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...item, created_at: new Date().toISOString() };
+            const list = localStore.getItem('educo_db_homework', []);
+            list.push(newItem);
+            localStore.setItem('educo_db_homework', list);
+            saved.push(newItem);
+          } else if (tableName === 'homework_submissions') {
+            const newItem = { id: item.id || `sub-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...item, created_at: new Date().toISOString() };
+            const list = localStore.getItem('educo_db_submissions', []);
+            list.push(newItem);
+            localStore.setItem('educo_db_submissions', list);
+            saved.push(newItem);
+          } else if (tableName === 'materials') {
+            const newItem = { id: item.id || `mat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...item, created_at: new Date().toISOString() };
+            const list = localStore.getItem('educo_db_materials', []);
+            list.push(newItem);
+            localStore.setItem('educo_db_materials', list);
+            saved.push(newItem);
           } else {
             saved.push({ id: `mock-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...item });
           }
@@ -579,6 +599,18 @@ export const supabase = {
         } catch {}
       }
       return { data: { subscription: { unsubscribe: () => {} } } };
+    },
+    getUser: async () => {
+      if (clientInstance) {
+        try {
+          return await clientInstance.auth.getUser();
+        } catch {}
+      }
+      const currentUser = localStore.getCurrentUser ? localStore.getCurrentUser() : null;
+      return {
+        data: { user: currentUser || { id: 'mock-user-id', email: 'owner@educo.app', role: 'owner' } },
+        error: null,
+      };
     },
     resetPasswordForEmail: async (email) => {
       return { data: {}, error: null };

@@ -42,20 +42,27 @@ export function normalizeSmsStatus(status) {
 export function calculateSmsLatencies(item) {
   const queued = item?.queued_at || item?.created_at ? new Date(item.queued_at || item.created_at).getTime() : null;
   const dispatched = item?.dispatched_at ? new Date(item.dispatched_at).getTime() : null;
+  const androidReceived = item?.android_received_at || item?.processed_at ? new Date(item.android_received_at || item.processed_at).getTime() : null;
   const androidSent = item?.android_sent_at ? new Date(item.android_sent_at).getTime() : null;
   const delivered = item?.delivered_at ? new Date(item.delivered_at).getTime() : null;
 
   const lmsLatencyMs = dispatched && queued ? Math.max(0, dispatched - queued) : null;
+  const cloudToPhoneMs = androidReceived && dispatched ? Math.max(0, androidReceived - dispatched) : null;
+  const phoneToCarrierMs = androidSent && androidReceived ? Math.max(0, androidSent - androidReceived) : null;
   const androidLatencyMs = androidSent && dispatched ? Math.max(0, androidSent - dispatched) : null;
   const carrierLatencyMs = delivered && androidSent ? Math.max(0, delivered - androidSent) : null;
   const totalLatencyMs = delivered && queued ? Math.max(0, delivered - queued) : null;
 
   return {
     lms_latency_ms: item?.lms_latency_ms ?? lmsLatencyMs,
+    cloud_to_phone_latency_ms: item?.cloud_to_phone_latency_ms ?? cloudToPhoneMs,
+    phone_to_carrier_latency_ms: item?.phone_to_carrier_latency_ms ?? phoneToCarrierMs,
     android_latency_ms: item?.android_latency_ms ?? androidLatencyMs,
     carrier_latency_ms: item?.carrier_latency_ms ?? carrierLatencyMs,
     total_latency_ms: item?.total_latency_ms ?? totalLatencyMs,
     lmsLatencyMs: item?.lms_latency_ms ?? lmsLatencyMs,
+    cloudToPhoneLatencyMs: item?.cloud_to_phone_latency_ms ?? cloudToPhoneMs,
+    phoneToCarrierLatencyMs: item?.phone_to_carrier_latency_ms ?? phoneToCarrierMs,
     androidLatencyMs: item?.android_latency_ms ?? androidLatencyMs,
     carrierLatencyMs: item?.carrier_latency_ms ?? carrierLatencyMs,
     totalLatencyMs: item?.total_latency_ms ?? totalLatencyMs,
@@ -302,16 +309,32 @@ async function executeGatewayRequest(targetUrl, method, headers, payload) {
     throw new Error('Brauzer xavfsizlik cheklovi (Mixed Content): HTTPS saytdan lokal HTTP (192.168.x.x) manziliga so‘rov yuborib bo‘lmaydi. Android ilovada Cloud server (SMS Gate Cloud) rejimini yoqing.');
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 12000);
+  let timer = null;
+  const fetchOpts = {
+    method,
+    headers,
+    body: payload ? JSON.stringify(payload) : undefined,
+  };
+
   try {
-    const res = await fetch(targetUrl, {
-      method,
-      headers,
-      body: payload ? JSON.stringify(payload) : undefined,
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
+    const controller = new AbortController();
+    fetchOpts.signal = controller.signal;
+    timer = setTimeout(() => controller.abort(), 12000);
+  } catch (_) {}
+
+  try {
+    let res;
+    try {
+      res = await fetch(targetUrl, fetchOpts);
+    } catch (fetchErr) {
+      if (fetchErr.message && fetchErr.message.includes('Expected signal')) {
+        delete fetchOpts.signal;
+        res = await fetch(targetUrl, fetchOpts);
+      } else {
+        throw fetchErr;
+      }
+    }
+    if (timer) clearTimeout(timer);
     const data = await res.json().catch(() => ({ success: res.ok }));
     return { ok: res.ok, status: res.status, data };
   } catch (netErr) {
@@ -378,10 +401,26 @@ export async function pingDevice(device) {
     const isOnline = res.ok || res.status === 200 || res.status === 204 || res.status === 401 || res.status === 405;
 
     const devInfo = Array.isArray(res.data) ? res.data[0] : res.data;
+    const isCloud = pingUrl.includes('api.sms-gate.app');
+    let isDeviceActive = isOnline;
+    let deviceError = isOnline ? null : `HTTP Status: ${res.status}`;
+
+    // On Cloud server, check the physical Android phone's lastSeen timestamp
+    if (isOnline && isCloud && devInfo?.lastSeen) {
+      const lastSeenMs = new Date(devInfo.lastSeen).getTime();
+      const diffMs = Date.now() - lastSeenMs;
+      // If phone hasn't communicated in over 3 minutes (180s), physical device is sleeping or disconnected
+      if (diffMs > 180000) {
+        const mins = Math.max(1, Math.round(diffMs / 60000));
+        isDeviceActive = false;
+        deviceError = `Qurilma uyqu rejimida (${mins} daqiqa oldin ko‘rilgan). Xiaomi telefoningizda SMS Gate ilovasini oching yoki fonda ishlash cheklovlarini olib tashlang.`;
+      }
+    }
+
     const updates = {
-      status: isOnline ? 'online' : 'error',
-      last_seen_at: isOnline ? (devInfo?.lastSeen || devInfo?.updatedAt || now) : device.last_seen_at,
-      last_error: isOnline ? null : `HTTP Status: ${res.status}`,
+      status: isDeviceActive ? 'online' : (isOnline ? 'sleeping' : 'error'),
+      last_seen_at: devInfo?.lastSeen || devInfo?.updatedAt || (isOnline ? now : device.last_seen_at),
+      last_error: deviceError,
     };
 
     // Auto-optimize Cloud settings: keep polling interval ultra-fast (5s) instead of default 15min
@@ -397,7 +436,7 @@ export async function pingDevice(device) {
     localStore.saveSmsDevice({ ...device, ...updates });
 
     return {
-      success: isOnline,
+      success: isDeviceActive,
       status: updates.status,
       last_seen_at: updates.last_seen_at,
       error: updates.last_error,
@@ -535,6 +574,11 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
       };
 
   const sendExecution = (async () => {
+    // Safety auto-expiration timer for inFlight dedupe key
+    const flightTimer = setTimeout(() => {
+      inFlightSmsRequests.delete(dedupeKey);
+    }, 15000);
+
     try {
       const res = await executeGatewayRequest(cleanUrl, 'POST', headers, payload);
       if (!res.ok && res.status !== 200 && res.status !== 201 && res.status !== 202) {
@@ -596,6 +640,7 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
       const errorMsg = err.name === 'AbortError' ? 'Qurilma bilan aloqa uzildi (Timeout 10s)' : err.message;
       throw new Error(errorMsg);
     } finally {
+      clearTimeout(flightTimer);
       inFlightSmsRequests.delete(dedupeKey);
     }
   })();
@@ -1080,7 +1125,10 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     const pendingItems = allQueue
       .filter((q) => {
         const norm = normalizeSmsStatus(q.status);
-        return norm === SMS_STATUS.PENDING || norm === SMS_STATUS.DISPATCHING;
+        if (norm === SMS_STATUS.PENDING) return true;
+        // If DISPATCHING but has no tracking_id, it failed to dispatch earlier and should be retried
+        if (norm === SMS_STATUS.DISPATCHING && !q.tracking_id) return true;
+        return false;
       })
       .sort((a, b) => {
         const timeA = new Date(a.scheduled_at || a.queued_at || a.created_at || 0).getTime();
@@ -1107,29 +1155,36 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     for (let i = 0; i < pendingItems.length; i++) {
       const item = pendingItems[i];
 
-      // 0. Strict Anti-Duplicate Check: verify if this item was already delivered or submitted
-      const currentQueue = localStore.getSmsQueue();
-      const alreadySentItem = currentQueue.find(
-        (q) => q.id !== item.id &&
-          q.idempotency_key === item.idempotency_key &&
-          (normalizeSmsStatus(q.status) === SMS_STATUS.DELIVERED || normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED)
-      );
-      const itemAlreadyDelivered = currentQueue.find(
-        (q) => q.id === item.id && (normalizeSmsStatus(q.status) === SMS_STATUS.DELIVERED || normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED)
-      );
+      try {
+        // 0. Strict Anti-Duplicate Check: verify if this item was already delivered, submitted, or in-flight dispatching
+        const currentQueue = localStore.getSmsQueue();
+        const alreadySentItem = currentQueue.find(
+          (q) => q.id !== item.id &&
+            q.idempotency_key === item.idempotency_key &&
+            (normalizeSmsStatus(q.status) === SMS_STATUS.DELIVERED ||
+             normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED ||
+             (normalizeSmsStatus(q.status) === SMS_STATUS.DISPATCHING && q.tracking_id))
+        );
+        const itemAlreadyDelivered = currentQueue.find(
+          (q) => q.id === item.id && (
+            normalizeSmsStatus(q.status) === SMS_STATUS.DELIVERED ||
+            normalizeSmsStatus(q.status) === SMS_STATUS.SUBMITTED ||
+            (normalizeSmsStatus(q.status) === SMS_STATUS.DISPATCHING && q.tracking_id)
+          )
+        );
 
-      if (alreadySentItem || itemAlreadyDelivered) {
-        console.warn(`[smsService] Dublikatsiya oldi olindi: ${item.recipient_phone} (${item.idempotency_key})`);
-        const skipUpdates = {
-          status: itemAlreadyDelivered ? itemAlreadyDelivered.status : 'CANCELLED',
-          error_message: 'Dublikatsiya oldi olindi (allaqachon yuborilgan)',
-        };
-        try {
-          await supabase.from('sms_queue').update(skipUpdates).eq('id', item.id);
-        } catch (_) {}
-        localStore.updateSmsQueueItem(item.id, skipUpdates);
-        continue;
-      }
+        if (alreadySentItem || itemAlreadyDelivered) {
+          console.warn(`[smsService] Dublikatsiya oldi olindi: ${item.recipient_phone} (${item.idempotency_key})`);
+          const skipUpdates = {
+            status: itemAlreadyDelivered ? itemAlreadyDelivered.status : 'CANCELLED',
+            error_message: 'Dublikatsiya oldi olindi (allaqachon yuborilgan yoki qabul qilingan)',
+          };
+          try {
+            await supabase.from('sms_queue').update(skipUpdates).eq('id', item.id);
+          } catch (_) {}
+          localStore.updateSmsQueueItem(item.id, skipUpdates);
+          continue;
+        }
 
       let activeDevice = primaryDevice;
       let delivered = false;
@@ -1279,16 +1334,21 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
           failed_at: failIso,
           error_details: `${lastError} (Urinish: ${newAttempts}/${maxRetries})`,
         });
-
-        const batchRetries = (item._batchRetries || 0) + 1;
-        if (willRetry && batchRetries <= 2) {
-          pendingItems.push({
-            ...item,
-            attempts: newAttempts,
-            _batchRetries: batchRetries,
-          });
-        }
       }
+    } catch (itemErr) {
+      failedCount++;
+      console.error(`[smsService] Xatolik navbatdagi element uchun (${item?.recipient_phone}):`, itemErr);
+      const failIso = new Date().toISOString();
+      const failUpdates = {
+        status: SMS_STATUS.FAILED,
+        error_message: itemErr.message || 'Kutilmagan xatolik',
+        failed_at: failIso,
+      };
+      try {
+        await supabase.from('sms_queue').update(failUpdates).eq('id', item.id);
+      } catch (_) {}
+      localStore.updateSmsQueueItem(item.id, failUpdates);
+    }
 
       // Telecom operator safe rate-limiting delay between messages
       if (i < pendingItems.length - 1) {
@@ -1446,9 +1506,11 @@ export async function reconcileSmsDeliveryStatuses(options = {}) {
       const statesObj = gwMsg.states || {};
       const sentTime = statesObj.Sent || gwMsg.sentAt || null;
       const deliveredTime = statesObj.Delivered || gwMsg.deliveredAt || null;
+      const processedTime = statesObj.Processed || null;
 
       let newStatus = null;
       const updates = {};
+      if (processedTime) updates.android_received_at = processedTime;
 
       if (currentState === 'Delivered') {
         newStatus = SMS_STATUS.DELIVERED;
@@ -1479,11 +1541,18 @@ export async function reconcileSmsDeliveryStatuses(options = {}) {
         // Calculate granular stage latencies
         const queuedAt = queueItem.queued_at || queueItem.created_at;
         const dispatchedAt = queueItem.dispatched_at || gwMsg.createdAt;
+        const androidReceivedAt = updates.android_received_at || queueItem.android_received_at;
         const androidSentAt = updates.android_sent_at || queueItem.android_sent_at;
         const deliveredAt = updates.delivered_at || queueItem.delivered_at;
 
         if (queuedAt && dispatchedAt) {
           updates.lms_latency_ms = Math.max(0, new Date(dispatchedAt).getTime() - new Date(queuedAt).getTime());
+        }
+        if (dispatchedAt && androidReceivedAt) {
+          updates.cloud_to_phone_latency_ms = Math.max(0, new Date(androidReceivedAt).getTime() - new Date(dispatchedAt).getTime());
+        }
+        if (androidReceivedAt && androidSentAt) {
+          updates.phone_to_carrier_latency_ms = Math.max(0, new Date(androidSentAt).getTime() - new Date(androidReceivedAt).getTime());
         }
         if (dispatchedAt && androidSentAt) {
           updates.android_latency_ms = Math.max(0, new Date(androidSentAt).getTime() - new Date(dispatchedAt).getTime());
@@ -1507,12 +1576,18 @@ export async function reconcileSmsDeliveryStatuses(options = {}) {
           recipient_name: queueItem.recipient_name,
           status: newStatus,
           dispatched_at: dispatchedAt,
+          android_received_at: androidReceivedAt,
           android_sent_at: androidSentAt,
           delivered_at: deliveredAt,
           response_payload: {
             reconciled: true,
             gateway_state: currentState,
             states: statesObj,
+            lms_latency_ms: updates.lms_latency_ms,
+            cloud_to_phone_latency_ms: updates.cloud_to_phone_latency_ms,
+            phone_to_carrier_latency_ms: updates.phone_to_carrier_latency_ms,
+            carrier_latency_ms: updates.carrier_latency_ms,
+            total_latency_ms: updates.total_latency_ms,
           },
         });
         reconciledCount++;

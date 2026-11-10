@@ -167,6 +167,14 @@ export async function getTuitionSummary(filters = {}) {
 }
 
 /**
+ * Gets list of students with outstanding debt balances
+ */
+export async function getDebtors(filters = {}) {
+  const summary = await getTuitionSummary({ ...filters, status: 'ALL' });
+  return summary.filter((item) => Number(item.balance || 0) > 0);
+}
+
+/**
  * Gets payment transaction records.
  */
 export async function getTuitionPayments(filters = {}) {
@@ -250,6 +258,9 @@ export async function recordPayment(paymentData) {
     throw err;
   }
 }
+
+// Alias for API consistency
+export const createPayment = recordPayment;
 
 /**
  * Exports tuition records to CSV.

@@ -139,16 +139,16 @@ export async function getHomeworkById(id) {
 /**
  * Create homework
  */
-export async function createHomework({
-  groupId,
-  lessonId = null,
-  teacherId,
-  title,
-  description,
-  dueDate,
-  maxScore = 100,
-  attachments = [],
-}) {
+export async function createHomework(params = {}) {
+  const groupId = params.groupId || params.group_id;
+  const lessonId = params.lessonId || params.lesson_id || null;
+  const teacherId = params.teacherId || params.teacher_id;
+  const title = params.title;
+  const description = params.description || '';
+  const dueDate = params.dueDate || params.due_date;
+  const maxScore = Number(params.maxScore || params.max_score || 100);
+  const attachments = params.attachments || [];
+
   try {
     const { data, error } = await supabase
       .from('homework')
@@ -159,8 +159,8 @@ export async function createHomework({
         title,
         description,
         due_date: dueDate,
-        max_score: Number(maxScore) || 100,
-        attachments: attachments || [],
+        max_score: maxScore,
+        attachments,
       })
       .select()
       .single();

@@ -286,11 +286,16 @@ export async function createUser({
     throw new Error('Tizimda faqat 1 ta Boshliq (Owner) bo‘lishi mumkin!');
   }
 
+  const rawFullName = (fullName || full_name || '').trim();
+  const rawFirst = (firstName || '').trim();
+  if (!rawFullName && !rawFirst && !(username && username.trim())) {
+    throw new Error('Foydalanuvchi ismi yoki to‘liq ismi kiritilishi shart');
+  }
+
   let resolvedFirst = firstName;
   let resolvedLast = lastName;
-  const rawFullName = fullName || full_name;
   if (!resolvedFirst && rawFullName) {
-    const parts = rawFullName.trim().split(/\s+/);
+    const parts = rawFullName.split(/\s+/);
     resolvedFirst = parts[0] || '';
     resolvedLast = parts.slice(1).join(' ') || '';
   }
@@ -550,7 +555,10 @@ export async function toggleUserStatus(id, isActive) {
  * Delete user
  */
 export async function deleteUser(id) {
-  localStore.deleteUser(id);
+  const result = localStore.deleteUser(id);
+  if (result === false) {
+    throw new Error('Root owner account cannot be deleted');
+  }
   return { success: true };
 }
 

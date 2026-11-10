@@ -121,6 +121,7 @@ export default function GradesPage() {
   const { profile } = useAuth();
   const { confirmDelete } = useTwoStepConfirm();
   const isStudent = profile?.role === ROLES.STUDENT;
+  const isOwnerOrAdmin = profile?.role === ROLES.OWNER || profile?.role === ROLES.ADMIN;
 
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState('');
@@ -338,6 +339,32 @@ export default function GradesPage() {
     return displayedStudents.filter((st) => inlineGrades[st.id]?.gradeValue).length;
   }, [displayedStudents, inlineGrades]);
 
+  const selectedGroup = useMemo(
+    () => groups.find((g) => g.id === selectedGroupId),
+    [groups, selectedGroupId]
+  );
+
+  const gradeLessonTimeInfo = useMemo(() => {
+    if (!selectedGroup) return { isBeforeStart: false };
+    const startTimeStr = selectedGroup.start_time || (selectedGroup.schedule?.match(/(\d{1,2}:\d{2})/)?.[1] ? `${selectedGroup.schedule.match(/(\d{1,2}:\d{2})/)[1]}:00` : null);
+    if (!startTimeStr) return { isBeforeStart: false };
+    const [h, m] = startTimeStr.split(':').map(Number);
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const startMins = h * 60 + m;
+    const hasAnyTodayGrade = grades.some((g) => g.group_id === selectedGroupId && (g.date === new Date().toISOString().split('T')[0] || g.created_at?.startsWith(new Date().toISOString().split('T')[0])));
+    if (currentMins < startMins && !hasAnyTodayGrade) {
+      const diff = startMins - currentMins;
+      return {
+        isBeforeStart: true,
+        startTime: startTimeStr.slice(0, 5),
+        diffHours: Math.floor(diff / 60),
+        diffMins: diff % 60,
+      };
+    }
+    return { isBeforeStart: false };
+  }, [selectedGroup, grades, selectedGroupId]);
+
   // Quick Action: Mark all students as present in 1 click
   const handleQuickMarkAllPresent = async () => {
     if (students.length === 0) return;
@@ -408,6 +435,11 @@ export default function GradesPage() {
 
   // Handle grade button click (1-5)
   const handleSelectGrade = (studentId, val) => {
+    if (gradeLessonTimeInfo.isBeforeStart && !isOwnerOrAdmin) {
+      toast.warning(`⏳ Dars hali boshlanmadi (${gradeLessonTimeInfo.startTime} da boshlanadi).`);
+      return;
+    }
+
     setInlineGrades((prev) => {
       const current = prev[studentId] || {};
       const currentFb = (current.feedback || '').trim();
@@ -473,6 +505,11 @@ export default function GradesPage() {
 
   // Bulk set grade for all displayed students
   const handleBulkSetGrade = (val) => {
+    if (gradeLessonTimeInfo.isBeforeStart && !isOwnerOrAdmin) {
+      toast.warning(`⏳ Dars hali boshlanmadi (${gradeLessonTimeInfo.startTime} da boshlanadi).`);
+      return;
+    }
+
     setInlineGrades((prev) => {
       const next = { ...prev };
       displayedStudents.forEach((st) => {
@@ -501,6 +538,10 @@ export default function GradesPage() {
 
   // FINAL COMPLETE & SAVE ALL ACTION ("Baholashni yakunlash")
   const handleCompleteAndSaveAll = async () => {
+    if (gradeLessonTimeInfo.isBeforeStart && !isOwnerOrAdmin) {
+      toast.warning(`⏳ Dars hali boshlanmadi (${gradeLessonTimeInfo.startTime} da boshlanadi).`);
+      return;
+    }
     if (bulkSaving) return;
     const readyStudents = displayedStudents.filter(
       (st) => inlineGrades[st.id]?.gradeValue
@@ -1018,6 +1059,29 @@ export default function GradesPage() {
               </div>
             )}
           </div>
+
+          {gradeLessonTimeInfo.isBeforeStart && (
+            <div className="p-3.5 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0">
+                  <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm text-amber-950 dark:text-amber-100">
+                      ⏳ Dars hali boshlanmadi ({gradeLessonTimeInfo.startTime} da boshlanadi)
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500 text-white shadow-xs">
+                      Kutilmoqda
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
+                    Dars boshlanishiga {gradeLessonTimeInfo.diffHours > 0 ? `${gradeLessonTimeInfo.diffHours} soat ` : ''}{gradeLessonTimeInfo.diffMins} daqiqa qoldi. O‘quvchilarni baholash dars rasman boshlangach ochiladi.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {loading ? (
             <div className="py-20 text-center bg-white dark:bg-surface-dark-secondary rounded-2xl border border-gray-200 dark:border-gray-800">

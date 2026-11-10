@@ -377,82 +377,21 @@ class LocalStore {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
 
-    const deviceId = this._getDeviceId();
-    const payload = {
-      type: 'STORE_UPDATE',
-      key,
-      val: value,
-      deletedId: deletedId || null,
-      deviceId,
-      ts: Date.now(),
-    };
-
-    // 1. Broadcast to real-time pub/sub bus (delivered to all listening phones/PCs within 50ms)
-    try {
-      fetch('https://ntfy.sh/educo_lms_sync_bus_8899', {
-        method: 'POST',
-        headers: {
-          'Title': 'STORE_UPDATE',
-          'Tags': 'sync',
-        },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    } catch (_) {}
-
-    // 2. Persistent cloud backup for vital website settings
-    if (key === STORAGE_KEYS.WEBSITE_SETTINGS || key === 'educo_db_website_settings') {
-      try {
-        fetch('https://api.restful-api.dev/objects/ff808181a09d98f701a19d362ce9125c', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'EDUCO_SETTINGS_SYNC',
-            data: {
-              json_content: JSON.stringify(value),
-              updated_at: Date.now(),
-            },
-          }),
-        }).catch(() => {});
-      } catch (_) {}
-    }
+    // Cross-tab broadcast is already executed natively via BroadcastChannel (__educoBroadcastChannel).
+    // Cloud synchronization is executed via pushToServer() to /api/sync-store.
+    // External third-party unauthenticated calls (ntfy.sh, restful-api.dev) removed to eliminate
+    // net::ERR_CONNECTION_RESET and socket drops.
   }
 
   connectCloudSSE() {
-    if (typeof window === 'undefined' || typeof EventSource === 'undefined') return;
-    if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
-    if (this._cloudEventSource) return;
-
-    try {
-      const es = new EventSource('https://ntfy.sh/educo_lms_sync_bus_8899/sse');
-      this._cloudEventSource = es;
-
-      es.onmessage = async (event) => {
-        try {
-          const raw = JSON.parse(event.data);
-          if (raw.event === 'message') {
-            let data = null;
-            if (raw.attachment?.url) {
-              try {
-                const res = await fetch(raw.attachment.url);
-                data = await res.json();
-              } catch (_) {}
-            } else if (raw.message) {
-              try {
-                data = JSON.parse(raw.message);
-              } catch (_) {}
-            }
-            const myDevId = this._getDeviceId();
-            if (data && data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
-              this.applyIncomingCloudKey(data.key, data.val, data.deletedId || null);
-            }
-          }
-        } catch (_) {}
-      };
-
-      es.onerror = () => {
-        // Auto-reconnect handled by browser EventSource
-      };
-    } catch (_) {}
+    // Disabled external EventSource to eliminate ERR_CONNECTION_RESET socket hang-ups.
+    // Browser tabs stay synchronized in real time via BroadcastChannel and scheduled ETag-based /api/sync-store.
+    if (this._cloudEventSource) {
+      try {
+        this._cloudEventSource.close();
+      } catch (_) {}
+      this._cloudEventSource = null;
+    }
   }
 
   applyIncomingCloudKey(key, val, deletedId = null) {
@@ -486,63 +425,9 @@ class LocalStore {
     if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
     if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'test' || process.env?.VITEST)) return;
 
+    // Direct synchronization with EDUCO LMS Edge Worker (/api/sync-store)
     try {
-      // 1. Fetch latest website settings from persistent cloud store
-      fetch('https://api.restful-api.dev/objects/ff808181a09d98f701a19d362ce9125c')
-        .then((r) => r.json())
-        .then((res) => {
-          if (res?.data?.json_content) {
-            const cloudSettings = JSON.parse(res.data.json_content);
-            if (cloudSettings && typeof cloudSettings === 'object') {
-              const local = this.getItem(STORAGE_KEYS.WEBSITE_SETTINGS, null);
-              const localTs = new Date(local?.updated_at || 0).getTime();
-              const cloudTs = new Date(cloudSettings.updated_at || res.data.updated_at || 0).getTime();
-              if (!local || cloudTs >= localTs) {
-                this.memoryStore[STORAGE_KEYS.WEBSITE_SETTINGS] = cloudSettings;
-                try {
-                  window.localStorage.setItem(STORAGE_KEYS.WEBSITE_SETTINGS, JSON.stringify(cloudSettings));
-                } catch (_) {}
-                window.dispatchEvent(new CustomEvent('educo-website-update'));
-              }
-            }
-          }
-        })
-        .catch(() => {});
-
-      // 2. Poll recent sync events across all gadgets
-      const res = await fetch('https://ntfy.sh/educo_lms_sync_bus_8899/json?poll=1&since=all');
-      if (!res.ok) return;
-      const text = await res.text();
-      const lines = text.trim().split('\n').filter(Boolean);
-      const myDevId = this._getDeviceId();
-      let hasUpdates = false;
-
-      for (const line of lines) {
-        try {
-          const item = JSON.parse(line);
-          let data = null;
-          if (item.attachment?.url) {
-            try {
-              const fetchRes = await fetch(item.attachment.url);
-              data = await fetchRes.json();
-            } catch (_) {}
-          } else if (item.message) {
-            try {
-              data = JSON.parse(item.message);
-            } catch (_) {}
-          }
-          if (data && data.deviceId && data.deviceId !== myDevId && data.key && data.val !== undefined) {
-            this.applyIncomingCloudKey(data.key, data.val, data.deletedId || null);
-            hasUpdates = true;
-          }
-        } catch (_) {}
-      }
-
-      if (hasUpdates && typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('educo-data-sync'));
-        window.dispatchEvent(new CustomEvent('educo-store-update'));
-        window.dispatchEvent(new CustomEvent('educo-website-update'));
-      }
+      await this.syncWithServer();
     } catch (_) {}
   }
 
@@ -1698,7 +1583,17 @@ class LocalStore {
     const list = this.getGroups().filter((g) => g.id !== id);
     this.setItem(STORAGE_KEYS.GROUPS, list, id);
     this.broadcastToCloud(STORAGE_KEYS.GROUPS, list, id);
-    this.pushToServer({ [STORAGE_KEYS.GROUPS]: list, deletedId: id }).catch(() => {});
+
+    // Cascade delete schedules for this group
+    const schedules = this.getSchedules().filter((s) => s.group_id !== id);
+    this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, schedules);
+    this.broadcastToCloud(STORAGE_KEYS.LESSON_SCHEDULES, schedules);
+
+    this.pushToServer({
+      [STORAGE_KEYS.GROUPS]: list,
+      [STORAGE_KEYS.LESSON_SCHEDULES]: schedules,
+      deletedId: id
+    }).catch(() => {});
     try {
       if (typeof window !== 'undefined' && (typeof process === 'undefined' || process.env?.NODE_ENV !== 'test')) {
         window.dispatchEvent(new CustomEvent('educo-data-sync', { detail: { key: STORAGE_KEYS.GROUPS } }));
@@ -2817,6 +2712,7 @@ class LocalStore {
       scheduled_at: item.scheduled_at || new Date().toISOString(),
       queued_at: item.queued_at || item.created_at || new Date().toISOString(),
       dispatched_at: item.dispatched_at || null,
+      android_received_at: item.android_received_at || item.processed_at || null,
       android_sent_at: item.android_sent_at || null,
       delivered_at: item.delivered_at || null,
       failed_at: item.failed_at || null,
@@ -2881,6 +2777,7 @@ class LocalStore {
       recipient_name: logData.recipient_name || '',
       status: logData.status || 'SUBMITTED',
       dispatched_at: logData.dispatched_at || null,
+      android_received_at: logData.android_received_at || logData.processed_at || null,
       android_sent_at: logData.android_sent_at || null,
       delivered_at: logData.delivered_at || null,
       failed_at: logData.failed_at || null,

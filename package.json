@@ -9,6 +9,10 @@
   "scripts": {
     "dev": "vite",
     "sms:daemon": "node scripts/sms-daemon.js",
+    "bot": "node scripts/telegram-bot.js",
+    "bot:webhook": "node scripts/set-telegram-webhook.js set",
+    "bot:webhook:info": "node scripts/set-telegram-webhook.js info",
+    "bot:webhook:delete": "node scripts/set-telegram-webhook.js delete",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

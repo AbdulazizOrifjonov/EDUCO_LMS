@@ -43,7 +43,7 @@ export const getRoleLabel = (roleKey, isMentor, lang = 'uz') => {
     return 'ADMIN';
   }
   if (roleKey === ROLES.TEACHER || roleKey === 'teacher') {
-    if (l.startsWith('en')) return 'TEACHER';
+    if (l.startsWith('en')) return 'MENTOR';
     if (l.startsWith('ru')) return 'УЧИТЕЛЬ';
     return 'USTOZ';
   }

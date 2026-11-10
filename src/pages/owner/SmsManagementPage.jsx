@@ -745,31 +745,93 @@ export default function SmsManagementPage() {
     }
   };
 
-  // Render Granular Stage Latencies & Timestamps
+  // Render Granular Stage Latencies & 5-Step Exact Timestamps
   const renderLatencyInfo = (item) => {
     const hasLatencies = item.lms_latency_ms != null || item.android_latency_ms != null || item.carrier_latency_ms != null || item.total_latency_ms != null;
-    if (!hasLatencies && !item.dispatched_at && !item.android_sent_at && !item.delivered_at) {
+    const hasTimestamps = item.queued_at || item.dispatched_at || item.android_received_at || item.android_sent_at || item.delivered_at;
+    if (!hasLatencies && !hasTimestamps) {
       return <span className="text-gray-400 font-mono text-[10px]">—</span>;
     }
+
+    const fmtTime = (iso) => {
+      if (!iso) return '—';
+      try {
+        const d = new Date(iso);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      } catch (_) {
+        return '—';
+      }
+    };
+
     return (
-      <div className="flex flex-col gap-0.5 text-[10px] font-mono leading-tight">
-        {item.total_latency_ms != null ? (
-          <span className="font-bold text-gray-800 dark:text-gray-200">
-            Jami: {(item.total_latency_ms / 1000).toFixed(1)}s
-          </span>
-        ) : item.delivered_at ? (
-          <span className="font-bold text-emerald-600 dark:text-emerald-400">Yetkazilgan</span>
-        ) : null}
-        <div className="flex items-center gap-1 text-[9px] text-gray-500 dark:text-gray-400">
-          {item.lms_latency_ms != null && <span>LMS: {(item.lms_latency_ms / 1000).toFixed(1)}s</span>}
-          {item.android_latency_ms != null && <span>• App: {(item.android_latency_ms / 1000).toFixed(1)}s</span>}
-          {item.carrier_latency_ms != null && <span>• GSM: {(item.carrier_latency_ms / 1000).toFixed(1)}s</span>}
+      <div className="flex flex-col gap-1 text-[10px] font-mono leading-tight min-w-[150px]">
+        {/* Total Latency Header */}
+        <div className="flex items-center justify-between gap-1 border-b border-gray-100 dark:border-gray-800 pb-0.5">
+          {item.total_latency_ms != null ? (
+            <span className="font-bold text-gray-800 dark:text-gray-200">
+              Jami: {(item.total_latency_ms / 1000).toFixed(1)}s
+            </span>
+          ) : item.delivered_at ? (
+            <span className="font-bold text-emerald-600 dark:text-emerald-400">Yetkazilgan</span>
+          ) : (
+            <span className="font-semibold text-gray-400">Jarayonda...</span>
+          )}
+          {item.tracking_id && (
+            <span className="text-[9px] text-blue-600 dark:text-blue-400 truncate max-w-[85px]" title={item.tracking_id}>
+              {item.tracking_id}
+            </span>
+          )}
         </div>
-        {item.tracking_id && (
-          <span className="text-[9px] text-gray-400 truncate max-w-[120px]" title={item.tracking_id}>
-            ID: {item.tracking_id}
-          </span>
-        )}
+
+        {/* 5-Step Stage Latencies & Exact Timestamps */}
+        <div className="space-y-0.5 text-[9px]">
+          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="LMS navbatiga qo‘yilgan vaqt">
+            <span>1. Navbat:</span>
+            <span className="text-gray-700 dark:text-gray-300">{fmtTime(item.queued_at || item.created_at)}</span>
+          </div>
+
+          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Cloud server qabul qilgan vaqt">
+            <span>2. Cloud:</span>
+            <span className="text-gray-700 dark:text-gray-300">
+              {fmtTime(item.dispatched_at)}
+              {item.lms_latency_ms != null && <span className="text-gray-400 ml-1">({(item.lms_latency_ms / 1000).toFixed(1)}s)</span>}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Android telefon qabul qilgan vaqt">
+            <span>3. Android:</span>
+            <span className="text-gray-700 dark:text-gray-300">
+              {fmtTime(item.android_received_at || item.android_sent_at)}
+              {item.cloud_to_phone_latency_ms != null ? (
+                <span className={`ml-1 font-bold ${item.cloud_to_phone_latency_ms > 30000 ? 'text-rose-500' : 'text-emerald-600'}`}>
+                  ({(item.cloud_to_phone_latency_ms / 1000).toFixed(1)}s)
+                </span>
+              ) : item.android_latency_ms != null ? (
+                <span className="text-gray-400 ml-1">({(item.android_latency_ms / 1000).toFixed(1)}s)</span>
+              ) : null}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Operatorga topshirilgan vaqt (SMS_SENT)">
+            <span>4. Operator:</span>
+            <span className="text-gray-700 dark:text-gray-300">
+              {fmtTime(item.android_sent_at)}
+              {item.phone_to_carrier_latency_ms != null && <span className="text-gray-400 ml-1">({(item.phone_to_carrier_latency_ms / 1000).toFixed(1)}s)</span>}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Ota-onaga yetkazilgan vaqt (SMS_DELIVERED)">
+            <span>5. Yetkazildi:</span>
+            <span className="text-gray-700 dark:text-gray-300">
+              {fmtTime(item.delivered_at)}
+              {item.carrier_latency_ms != null && (
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold ml-1">
+                  ({(item.carrier_latency_ms / 1000).toFixed(1)}s)
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
       </div>
     );
   };

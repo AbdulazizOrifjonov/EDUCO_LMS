@@ -309,9 +309,11 @@ export default function AttendancePage() {
           .filter((t) => !isNaN(t));
         const subTime = timestamps.length > 0 ? Math.min(...timestamps) : Date.now();
         recordTime = new Date(subTime).toISOString();
+        const isToday = selectedDate === todayStr;
         const diffMinutes = Math.floor((Date.now() - subTime) / (60 * 1000));
-        isWithin = diffMinutes < 30;
-        left = Math.max(0, 30 - diffMinutes);
+        // Bugungi dars davomatini dars tugagunicha bemalol yangilash mumkin:
+        isWithin = isToday || diffMinutes < 180 || isOwnerOrAdmin;
+        left = isToday ? 180 : Math.max(0, 30 - diffMinutes);
         locked = !isWithin;
       }
 
@@ -319,6 +321,7 @@ export default function AttendancePage() {
         hasAttendance: hasRecords,
         isWithin30Min: isWithin,
         isLocked: locked,
+        isToday: selectedDate === todayStr,
         minutesLeft: left,
         submittedAt: recordTime,
       });
@@ -373,9 +376,40 @@ export default function AttendancePage() {
     }
   };
 
+  const currentRosterGroup = useMemo(
+    () => groups.find((g) => g.id === selectedRosterGroupId),
+    [groups, selectedRosterGroupId]
+  );
+
+  const lessonTimeInfo = useMemo(() => {
+    if (!currentRosterGroup || selectedDate !== todayStr) return { isBeforeStart: false };
+    const startTimeStr = currentRosterGroup.start_time || (currentRosterGroup.schedule?.match(/(\d{1,2}:\d{2})/)?.[1] ? `${currentRosterGroup.schedule.match(/(\d{1,2}:\d{2})/)[1]}:00` : null);
+    if (!startTimeStr) return { isBeforeStart: false };
+    const [h, m] = startTimeStr.split(':').map(Number);
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const startMins = h * 60 + m;
+    if (currentMins < startMins && !attendanceStatus.hasAttendance) {
+      const diff = startMins - currentMins;
+      return {
+        isBeforeStart: true,
+        startTime: startTimeStr.slice(0, 5),
+        diffHours: Math.floor(diff / 60),
+        diffMins: diff % 60,
+      };
+    }
+    return { isBeforeStart: false };
+  }, [currentRosterGroup, selectedDate, todayStr, attendanceStatus.hasAttendance]);
+
+  const canEdit = (!attendanceStatus.isLocked || selectedDate === todayStr || isOwnerOrAdmin) && (!lessonTimeInfo.isBeforeStart || isOwnerOrAdmin);
+
   const setStatus = (studentId, status) => {
-    if (attendanceStatus.isLocked) {
-      toast.warning('Davomat yopilgan. 30 daqiqalik tahrirlash muddati tugagan.');
+    if (!canEdit) {
+      if (lessonTimeInfo.isBeforeStart) {
+        toast.warning(`⏳ Dars hali boshlanmadi (${lessonTimeInfo.startTime} da boshlanadi).`);
+      } else {
+        toast.warning('Eski sanadagi davomat yopilgan.');
+      }
       return;
     }
     setAttendanceMap((prev) => ({
@@ -388,7 +422,7 @@ export default function AttendancePage() {
   };
 
   const setRemark = (studentId, remark) => {
-    if (attendanceStatus.isLocked) return;
+    if (!canEdit) return;
     setAttendanceMap((prev) => ({
       ...prev,
       [studentId]: {
@@ -399,8 +433,8 @@ export default function AttendancePage() {
   };
 
   const handleMarkAll = (status) => {
-    if (attendanceStatus.isLocked) {
-      toast.warning('Davomat yopilgan. 30 daqiqalik tahrirlash muddati tugagan.');
+    if (!canEdit) {
+      toast.warning('Eski sanadagi davomat yopilgan.');
       return;
     }
     setAttendanceMap((prev) => {
@@ -415,8 +449,8 @@ export default function AttendancePage() {
   const handleSaveRoster = async () => {
     if (savingRoster) return;
     if (!currentLesson?.id) return;
-    if (attendanceStatus.isLocked) {
-      toast.error('Davomat yopilgan. 30 daqiqalik tahrirlash muddati tugagan.');
+    if (!canEdit) {
+      toast.error('Eski sanadagi davomat yopilgan.');
       return;
     }
     setSavingRoster(true);
@@ -449,6 +483,22 @@ export default function AttendancePage() {
       setSavingRoster(false);
     }
   };
+
+  // Live 3-State Statistics (🟢 Bor, 🟡 Kech qoldi, 🔴 Kelmadi)
+  const liveStats = useMemo(() => {
+    let present = 0;
+    let late = 0;
+    let absent = 0;
+    let excused = 0;
+    rosterStudents.forEach((st) => {
+      const stAtt = attendanceMap[st.id]?.status || 'present';
+      if (stAtt === 'present') present++;
+      else if (stAtt === 'late') late++;
+      else if (stAtt === 'absent') absent++;
+      else if (stAtt === 'excused') excused++;
+    });
+    return { present, late, absent, excused, total: rosterStudents.length };
+  }, [rosterStudents, attendanceMap]);
 
   // URL-driven Navigation helpers (Google Chrome back/forward button support!)
   const selectTeacherDrill = (teacher) => {
@@ -757,7 +807,7 @@ export default function AttendancePage() {
             <Button variant="outline" size="md" icon={History} onClick={loadHistory}>
               {viewHistory ? t('attendance.hideHistory', 'Tarixni yashirish') : t('attendance.viewHistory', 'Darslar tarixi')}
             </Button>
-            {attendanceStatus.isLocked ? (
+            {!canEdit ? (
               <Button
                 variant="outline"
                 size="md"
@@ -1768,20 +1818,20 @@ export default function AttendancePage() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    disabled={attendanceStatus.isLocked}
+                    disabled={!canEdit}
                     onClick={() => handleMarkAll('present')}
                     className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 transition-colors ${
-                      attendanceStatus.isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:bg-emerald-200 cursor-pointer'
+                      !canEdit ? 'opacity-50 cursor-not-allowed' : 'hover:bg-emerald-200 cursor-pointer'
                     }`}
                   >
                     {t('attendance.allPresent', 'Hammasi keldi')}
                   </button>
                   <button
                     type="button"
-                    disabled={attendanceStatus.isLocked}
+                    disabled={!canEdit}
                     onClick={() => handleMarkAll('absent')}
                     className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-100 dark:bg-red-950/60 text-brand-red dark:text-red-300 transition-colors ${
-                      attendanceStatus.isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-200 cursor-pointer'
+                      !canEdit ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-200 cursor-pointer'
                     }`}
                   >
                     {t('attendance.allAbsent', 'Hammasi kelmadi')}
@@ -1821,8 +1871,79 @@ export default function AttendancePage() {
             </Card>
           )}
 
-          {/* 30-Minute Attendance Locking & Status Banner */}
-          {attendanceStatus.isLocked ? (
+          {/* Live 3-State Statistics Banner (Bor, Kech qoldi, Kelmadi) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between shadow-xs">
+              <div>
+                <span className="text-[11px] uppercase font-bold text-emerald-700 dark:text-emerald-300 block">🟢 Darsda Bor (Qatnashgan)</span>
+                <span className="text-2xl font-black text-emerald-800 dark:text-emerald-100">{liveStats.present} nafar</span>
+              </div>
+              <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400 opacity-80" />
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-between shadow-xs">
+              <div>
+                <span className="text-[11px] uppercase font-bold text-amber-700 dark:text-amber-300 block">🟡 Darsga Kechikkan</span>
+                <span className="text-2xl font-black text-amber-800 dark:text-amber-100">{liveStats.late} nafar</span>
+              </div>
+              <Clock className="w-8 h-8 text-amber-600 dark:text-amber-400 opacity-80" />
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 flex items-center justify-between shadow-xs">
+              <div>
+                <span className="text-[11px] uppercase font-bold text-rose-700 dark:text-rose-300 block">🔴 Darsga Kelmagan</span>
+                <span className="text-2xl font-black text-rose-800 dark:text-rose-100">{liveStats.absent} nafar</span>
+              </div>
+              <XCircle className="w-8 h-8 text-rose-600 dark:text-rose-400 opacity-80" />
+            </div>
+          </div>
+
+          {/* Active Lesson / Edit Window Banner */}
+          {selectedDate === todayStr ? (
+            lessonTimeInfo.isBeforeStart ? (
+              <div className="p-3.5 rounded-2xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 flex items-center justify-center text-amber-700 dark:text-amber-300 shrink-0">
+                    <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-amber-950 dark:text-amber-100">
+                        ⏳ Dars hali boshlanmadi ({lessonTimeInfo.startTime} da boshlanadi)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500 text-white shadow-xs">
+                        Kutilmoqda
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
+                      Dars boshlanishiga {lessonTimeInfo.diffHours > 0 ? `${lessonTimeInfo.diffHours} soat ` : ''}{lessonTimeInfo.diffMins} daqiqa qoldi. Davomat dars boshlanganidan so‘ng to‘liq ochiladi.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center text-emerald-700 dark:text-emerald-300 shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-emerald-950 dark:text-emerald-100">
+                        Dars jarayoni faol (Davomat ochiq)
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-600 text-white shadow-xs">
+                        Jonli Tahrirlash
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">
+                      Talabalar kelishi bilan ularning holatini belgilang. Dars tugagunicha istalgan vaqtda erkin yangilashingiz mumkin.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
+          ) : attendanceStatus.isLocked ? (
             <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
@@ -1831,62 +1952,19 @@ export default function AttendancePage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                      Davomat qilib bo‘lingan va yopilgan
+                      Eski sanadagi davomat yopilgan
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
                       Qulflangan
                     </span>
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                    Ushbu dars uchun davomat olinganidan keyingi 30 daqiqalik tahrirlash muddati tugagan. Natijalar qulflangan.
+                    Ushbu dars sanasi o‘tib ketgan. Faqat administratorlar o‘zgartirish kiritishi mumkin.
                   </p>
                 </div>
               </div>
-              {attendanceStatus.submittedAt && (
-                <div className="shrink-0 text-xs text-slate-500 font-mono flex items-center gap-1.5 self-end sm:self-center">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Qabul qilingan: {new Date(attendanceStatus.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-              )}
             </div>
-          ) : attendanceStatus.hasAttendance && attendanceStatus.isWithin30Min ? (
-            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300/80 dark:border-emerald-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center text-emerald-700 dark:text-emerald-300 shrink-0">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-emerald-950 dark:text-emerald-100">
-                      Davomat qilib bo‘lingan (Qabul qilingan)
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-600 text-white shadow-xs">
-                      Tahrirlash ochiq
-                    </span>
-                  </div>
-                  <p className="text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">
-                    Kechikkan yoki sababli kelgan talabalarni kiritishingiz mumkin. O‘zgarishlarni kiritib "O‘zgarishlarni saqlash" tugmasini bosing.
-                  </p>
-                </div>
-              </div>
-              <div className="shrink-0 flex items-center gap-2 self-start sm:self-center">
-                <div className="px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 text-xs font-bold border border-emerald-300/60 flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>{attendanceStatus.minutesLeft} daqiqa qoldi</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/50 flex items-center gap-3">
-              <Clock className="w-5 h-5 text-brand-navy dark:text-blue-400 shrink-0" />
-              <div className="text-xs text-gray-700 dark:text-gray-300">
-                <span className="font-bold text-gray-900 dark:text-white mr-1.5">
-                  Bugungi davomat hali olinmagan.
-                </span>
-                Dars boshlangach talabalar qatnashuvini belgilang va <b>"Davomatni saqlash"</b> tugmasini bosing. Saqlanganidan so‘ng 30 daqiqa davomida tahrirlash mumkin bo‘ladi.
-              </div>
-            </div>
-          )}
+          ) : null}
 
           {/* Student Attendance List */}
           <Card noPadding>
@@ -1937,17 +2015,17 @@ export default function AttendancePage() {
                             <button
                               key={btn.status}
                               type="button"
-                              disabled={attendanceStatus.isLocked}
+                              disabled={!canEdit}
                               onClick={() => setStatus(student.id, btn.status)}
                               className={`
                                 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all
                                 ${isSelected ? btn.activeClass : btn.idleClass}
-                                ${attendanceStatus.isLocked ? (isSelected ? 'cursor-default ring-1 ring-slate-400' : 'opacity-40 cursor-not-allowed') : 'cursor-pointer'}
+                                ${!canEdit ? (isSelected ? 'cursor-default ring-1 ring-slate-400' : 'opacity-40 cursor-not-allowed') : 'cursor-pointer'}
                               `}
                             >
                               <Icon className="w-3.5 h-3.5 shrink-0" />
                               <span>{btn.label}</span>
-                              {attendanceStatus.isLocked && isSelected && (
+                              {!canEdit && isSelected && (
                                 <Lock className="w-3 h-3 ml-1 opacity-75" />
                               )}
                             </button>
@@ -1959,7 +2037,7 @@ export default function AttendancePage() {
                       <div className="w-full md:w-64">
                         <input
                           type="text"
-                          disabled={attendanceStatus.isLocked}
+                          disabled={!canEdit}
                           placeholder={
                             currentStatus === 'absent' || currentStatus === 'excused'
                               ? t('attendance.reasonPlaceholder', 'Kelmaganlik sababi...')
@@ -1969,9 +2047,9 @@ export default function AttendancePage() {
                           onChange={(e) => setRemark(student.id, e.target.value)}
                           className={`
                             w-full text-xs rounded-lg border py-1.5 px-2.5 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-brand-navy
-                            ${attendanceStatus.isLocked ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700' : ''}
+                            ${!canEdit ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700' : ''}
                             ${
-                              currentStatus === 'absent' && !currentRemark && !attendanceStatus.isLocked
+                              currentStatus === 'absent' && !currentRemark && canEdit
                                 ? 'border-amber-300 dark:border-amber-700'
                                 : 'border-gray-200 dark:border-gray-700'
                             }

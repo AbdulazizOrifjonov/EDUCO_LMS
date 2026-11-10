@@ -55,6 +55,9 @@ export default [
         Buffer: 'readonly',
         process: 'readonly',
         __dirname: 'readonly',
+        self: 'readonly',
+        clients: 'readonly',
+        global: 'readonly',
       },
     },
     rules: {

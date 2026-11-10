@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { localStore } from '@/lib/localStore';
+import { notifyStudentAttendance } from './telegramBotService';
 
 const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
 
@@ -164,16 +165,19 @@ export async function getGroupAttendanceStatus(groupId, date = null) {
   const lastUpdatedAt = recordTimestamps.length > 0 ? Math.max(...recordTimestamps) : Date.now();
 
   const now = Date.now();
-  // 30 minute edit window from initial submission:
+  const todayDateStr = new Date().toISOString().split('T')[0];
+  const isToday = targetDate === todayDateStr;
   const diffMinutes = Math.floor((now - submittedAt) / (60 * 1000));
-  const isWithin30Min = diffMinutes < 30;
-  const minutesLeft = Math.max(0, 30 - diffMinutes);
+  // Today's lessons can always be updated by the teacher until the lesson/day ends:
+  const isWithin30Min = isToday || diffMinutes < 180;
+  const minutesLeft = isToday ? 180 : Math.max(0, 30 - diffMinutes);
   const isLocked = !isWithin30Min;
 
   return {
     hasAttendance: true,
     isWithin30Min,
     isLocked,
+    isToday,
     minutesLeft,
     submittedAt: new Date(submittedAt).toISOString(),
     lastUpdatedAt: new Date(lastUpdatedAt).toISOString(),
@@ -223,6 +227,30 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
     updated_at: now,
   }));
   localStore.saveAttendance(payload);
+
+  // Trigger real-time Telegram notification to Students and Parents
+  try {
+    const allLessons = typeof localStore.getLessons === 'function' ? localStore.getLessons() : [];
+    const lesson = allLessons.find((l) => l.id === lessonId);
+    const allGroups = typeof localStore.getGroups === 'function' ? localStore.getGroups() : [];
+    const group = allGroups.find((g) => g.id === lesson?.group_id);
+    const courseName = group?.course_name || group?.name || 'Dars';
+    const teacherName = group?.teacher_name || 'Fan mentori';
+    const lessonTime = lesson ? `${lesson.start_time?.slice(0, 5) || '09:30'} - ${lesson.end_time?.slice(0, 5) || '10:50'}` : 'Dars vaqtida';
+
+    records.forEach((r) => {
+      notifyStudentAttendance({
+        studentId: r.student_id,
+        courseName,
+        lessonTime,
+        teacherName,
+        status: r.status,
+        date: lesson?.lesson_date || null,
+        remark: r.remark || '',
+      }).catch(() => {});
+    });
+  } catch (_) {}
+
   return payload;
 }
 

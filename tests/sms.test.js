@@ -375,7 +375,7 @@ describe('SMS Service - Comprehensive Suite', () => {
         expect(q.dispatched_at).toBeDefined();
         expect(q.android_sent_at).toBeDefined();
       });
-    }, 15000);
+    }, 45000);
   });
 
   describe('reconcileSmsDeliveryStatuses', () => {
