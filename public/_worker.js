@@ -2332,7 +2332,7 @@ export default {
 
       
       // --- API: TELEGRAM BOT WEBHOOK (/api/telegram-webhook) ---
-      if (url.pathname === '/api/telegram-webhook') {
+      if (url.pathname === '/api/telegram-webhook' || url.pathname === '/api/telegram-webhook/') {
         const botToken = env.TELEGRAM_BOT_TOKEN || BOT_TOKEN;
 
         // GET: Status & Management (setWebhook, deleteWebhook, getWebhookInfo)
