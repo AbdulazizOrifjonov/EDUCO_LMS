@@ -2705,7 +2705,7 @@ export default function SmsManagementPage() {
         >
           <form onSubmit={handleSendTestSms} className="space-y-4">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Telefon raqamingizni kiriting va tanlangan Android Gateway orqali real SMS borishini tekshirib ko‘ring.
+              Telefon raqamingizni kiriting va <strong>Eskiz.uz</strong> orqali real SMS borishini tekshirib ko‘ring.
             </p>
 
             {sendingTest && (
@@ -2714,34 +2714,11 @@ export default function SmsManagementPage() {
                 <div className="min-w-0">
                   <strong className="block font-semibold">SMS yuborilmoqda...</strong>
                   <span className="text-[11px] text-blue-600 dark:text-blue-400">
-                    Android Gateway orqali telefon tarmog‘iga uzatilmoqda. Iltimos, xabar ketgunicha kuting!
+                    Eskiz.uz rasmiy shlyuzi orqali yuborilmoqda. Iltimos, xabar ketgunicha kuting!
                   </span>
                 </div>
               </div>
             )}
-
-            <div>
-              <Select
-                label="Qaysi qurilma orqali yuborilsin"
-                value={selectedTestDevice}
-                disabled={sendingTest}
-                onChange={(e) => setSelectedTestDevice(e.target.value)}
-                headerTitle="Gateway qurilmasini tanlang"
-                options={[
-                  {
-                    value: '',
-                    label: 'Avtomatik (Asosiy, bo‘lmasa Zaxira)',
-                    subtitle: 'Tizim avtomatik onlayn qurilmani tanlaydi',
-                  },
-                  ...devices.map((d) => ({
-                    value: d.id,
-                    label: `${d.name} (${d.device_role === 'primary' ? 'Asosiy' : 'Zaxira'})`,
-                    subtitle: d.gateway_url || 'URL kiritilgan',
-                    badge: d.status === 'online' ? 'Onlayn' : 'Oflayn',
-                  })),
-                ]}
-              />
-            </div>
 
             <div>
               <Input
