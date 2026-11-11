@@ -8342,28 +8342,28 @@
       "name": "Asosiy Android Gateway (SMS Gate Cloud)",
       "device_role": "primary",
       "gateway_url": "https://api.sms-gate.app/3rdparty/v1/messages",
-      "api_token": "SXP6_F:_8_-fv9uvdsyrp",
+      "api_token": "EMTIDA:3x7k46xkpavev_",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-11-06T09:08:26.501Z",
+      "last_seen_at": "2026-11-11T05:51:14.966Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
       "created_at": "2026-10-31T16:24:07.129Z",
-      "battery_level": null,
-      "updated_at": "2026-11-06T09:08:26.502Z"
+      "updated_at": "2026-11-11T05:51:14.966Z"
     },
     {
       "id": "dev-backup-2",
       "name": "Zaxira Android Gateway (SMS Gate Cloud)",
       "device_role": "backup",
       "gateway_url": "https://api.sms-gate.app/3rdparty/v1/messages",
-      "api_token": "SXP6_F:_8_-fv9uvdsyrp",
+      "api_token": "EMTIDA:3x7k46xkpavev_",
       "is_active": false,
       "status": "offline",
       "last_seen_at": null,
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
-      "created_at": "2026-10-31T16:24:07.129Z"
+      "created_at": "2026-10-31T16:24:07.129Z",
+      "updated_at": "2026-11-11T05:51:14.966Z"
     }
   ],
   "educo_db_materials": [],
@@ -9195,7 +9195,7 @@
     "anti_duplicate_days": 15,
     "sender_name": "EDUCO",
     "notify_owner_on_failure": true,
-    "updated_at": "2026-11-06T09:07:35.318Z"
+    "updated_at": "2026-11-11T05:51:14.966Z"
   },
   "test": true,
   "educo_db_website_courses": [
