@@ -337,7 +337,11 @@ export default function SmsManagementPage() {
       setPingingDeviceId(device.id);
       const res = await pingDevice(device);
       if (res.success) {
-        toast.success(`"${device.name}" onlayn va tayyor!`);
+        if ((device.gateway_url || '').includes('eskiz.uz') && res.battery_level !== undefined && res.battery_level !== null) {
+          toast.success(`"${device.name}" onlayn! Eskiz balansi: ${res.battery_level} so‘m`);
+        } else {
+          toast.success(`"${device.name}" onlayn va tayyor!`);
+        }
       } else {
         toast.warning(`"${device.name}" bilan aloqa yo‘q: ${res.error || 'Oflayn'}`);
       }
@@ -2011,10 +2015,19 @@ export default function SmsManagementPage() {
                         {dev.gateway_url || 'Kiritilmagan'}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500 font-medium">SIM Raqami:</span>
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">{dev.phone_number || 'SIM 1'}</span>
-                    </div>
+                    {dev.gateway_url?.includes('eskiz.uz') ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 font-medium">Eskiz Hisob Balansi:</span>
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                          {dev.battery_level !== undefined && dev.battery_level !== null ? `${dev.battery_level} so‘m` : 'Tekshirilmoqda'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 font-medium">SIM Raqami:</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{dev.phone_number || 'SIM 1'}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 font-medium">Oxirgi aloqa:</span>
                       <span className="text-gray-700 dark:text-gray-300 font-mono">
@@ -2107,10 +2120,19 @@ export default function SmsManagementPage() {
                         {dev.gateway_url || 'Kiritilmagan'}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500 font-medium">SIM Raqami:</span>
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">{dev.phone_number || 'SIM 1'}</span>
-                    </div>
+                    {dev.gateway_url?.includes('eskiz.uz') ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 font-medium">Eskiz Hisob Balansi:</span>
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                          {dev.battery_level !== undefined && dev.battery_level !== null ? `${dev.battery_level} so‘m` : 'Tekshirilmoqda'}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500 font-medium">SIM Raqami:</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{dev.phone_number || 'SIM 1'}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-gray-500 font-medium">Oxirgi aloqa:</span>
                       <span className="text-gray-700 dark:text-gray-300 font-mono">
@@ -2780,13 +2802,56 @@ export default function SmsManagementPage() {
           maxWidth="lg"
         >
           <form onSubmit={handleSaveDevice} className="space-y-4">
+            {/* Quick Provider Presets */}
+            <div className="p-3 bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-200 dark:border-gray-700">
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 block mb-2">
+                Tezkor Shlyuz Shablonini Tanlang:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingDevice({
+                    ...editingDevice,
+                    name: 'Eskiz.uz Rasmiy SMS Shlyuz',
+                    gateway_url: 'https://notify.eskiz.uz/api/message/sms/send',
+                    phone_number: '4546',
+                  })}
+                  className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 hover:bg-red-200 border border-red-300 dark:border-red-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>🔴 Eskiz.uz (Rasmiy SMS)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingDevice({
+                    ...editingDevice,
+                    name: 'Capcom6 SMS Gate (Cloud)',
+                    gateway_url: 'https://api.sms-gate.app/3rdparty/v1/messages',
+                  })}
+                  className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-200 border border-blue-300 dark:border-blue-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>☁️ SMS Gate (Cloud)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingDevice({
+                    ...editingDevice,
+                    name: 'Android Telefon (Mahalliy Wi-Fi)',
+                    gateway_url: 'http://192.168.1.150:8080/message',
+                  })}
+                  className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 border border-emerald-300 dark:border-emerald-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>📱 Mahalliy Wi-Fi</span>
+                </button>
+              </div>
+            </div>
+
             <div>
               <Input
                 label="Qurilma Nomi"
                 type="text"
                 value={editingDevice.name || ''}
                 onChange={(e) => setEditingDevice({ ...editingDevice, name: e.target.value })}
-                placeholder="Masalan: Boshliq Samsung A54"
+                placeholder="Masalan: Eskiz.uz yoki Boshliq Samsung A54"
                 required
               />
             </div>
@@ -2797,22 +2862,22 @@ export default function SmsManagementPage() {
                 type="url"
                 value={editingDevice.gateway_url || ''}
                 onChange={(e) => setEditingDevice({ ...editingDevice, gateway_url: e.target.value })}
-                placeholder="http://192.168.1.150:8080/send yoki https://gateway.domen.uz/v1/sms"
-                helperText="Telefondagi SMS Gateway ilovasi ko‘rsatgan HTTP POST so‘rov manzili"
+                placeholder="https://notify.eskiz.uz/api/message/sms/send"
+                helperText={(editingDevice.gateway_url || '').includes('eskiz.uz') ? 'Eskiz.uz rasmiy SMS shlyuzi API manzili' : 'Telefondagi SMS Gateway ilovasi ko‘rsatgan HTTP POST so‘rov manzili'}
                 required
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
-                Maxfiy API Token (ixtiyoriy)
+                {(editingDevice.gateway_url || '').includes('eskiz.uz') ? 'Eskiz API Bearer Token yoki (email:parol)' : 'Maxfiy API Token (ixtiyoriy)'}
               </label>
               <div className="relative">
                 <input
                   type={showToken ? 'text' : 'password'}
                   value={editingDevice.api_token || ''}
                   onChange={(e) => setEditingDevice({ ...editingDevice, api_token: e.target.value })}
-                  placeholder="Maxfiy parolingiz yoki kalit"
+                  placeholder={(editingDevice.gateway_url || '').includes('eskiz.uz') ? 'Bearer token yoki login:parol' : 'Maxfiy parolingiz yoki kalit'}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm font-mono pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-emerald-500"
                 />
                 <button
@@ -2823,16 +2888,21 @@ export default function SmsManagementPage() {
                   {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {(editingDevice.gateway_url || '').includes('eskiz.uz') && (
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+                  Eskiz.uz shaxsiy kabinetingizdagi 30 kunlik Bearer tokenni yoki to‘g‘ridan-to‘g‘ri <span className="font-mono">pochta@eskiz.uz:parol</span> shaklida kiritsangiz bo‘ladi.
+                </p>
+              )}
             </div>
 
             <div>
               <Input
-                label="SIM Karta Telefon Raqami"
-                isPhone
-                type="tel"
+                label={(editingDevice.gateway_url || '').includes('eskiz.uz') ? 'Yuboruvchi Nick/Nomer (Sender ID)' : 'SIM Karta Telefon Raqami'}
+                type="text"
                 value={editingDevice.phone_number || ''}
                 onChange={(e) => setEditingDevice({ ...editingDevice, phone_number: e.target.value })}
-                placeholder="+998 90 123 45 67"
+                placeholder={(editingDevice.gateway_url || '').includes('eskiz.uz') ? '4546' : '+998 90 123 45 67'}
+                helperText={(editingDevice.gateway_url || '').includes('eskiz.uz') ? 'Test rejimida "4546" qo‘yiladi' : undefined}
               />
             </div>
 

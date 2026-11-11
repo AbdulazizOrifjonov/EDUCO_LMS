@@ -236,7 +236,10 @@ function buildGatewayHeaders(device) {
   };
   if (device && device.api_token) {
     const token = device.api_token.trim();
-    if (token.includes(':')) {
+    const isEskiz = (device?.gateway_url || '').includes('eskiz.uz') || device?.provider === 'eskiz';
+    if (isEskiz) {
+      headers['Authorization'] = `Bearer ${token.replace(/^Bearer\s+/i, '')}`;
+    } else if (token.includes(':')) {
       let b64 = '';
       try {
         if (typeof btoa === 'function') {
@@ -254,6 +257,35 @@ function buildGatewayHeaders(device) {
     }
   }
   return headers;
+}
+
+/**
+ * Helper: Resolves Eskiz.uz JWT Bearer token from token string or email:password
+ */
+export async function getEskizToken(device) {
+  if (!device) return null;
+  const token = (device.api_token || '').trim();
+  if (token.startsWith('eyJ') || token.length > 50) {
+    return token.replace(/^Bearer\s+/i, '');
+  }
+  let email = device.email;
+  let password = device.password;
+  if (!email && token.includes(':')) {
+    const parts = token.split(':');
+    email = parts[0].trim();
+    password = parts.slice(1).join(':').trim();
+  }
+  if (email && password) {
+    try {
+      const res = await executeGatewayRequest('https://notify.eskiz.uz/api/auth/login', 'POST', {
+        'Content-Type': 'application/json',
+      }, { email, password });
+      if (res.data?.data?.token) {
+        return res.data.data.token;
+      }
+    } catch (_) {}
+  }
+  return token.replace(/^Bearer\s+/i, '');
 }
 
 /**
@@ -389,12 +421,19 @@ export async function pingDevice(device) {
 
   // 2. Real Gateway Ping
   let pingUrl = device.gateway_url.trim().replace(/\/+$/, '');
-  if (pingUrl.includes('api.sms-gate.app')) {
+  const isEskiz = pingUrl.includes('eskiz.uz') || device?.provider === 'eskiz';
+  if (isEskiz) {
+    pingUrl = 'https://notify.eskiz.uz/api/auth/user';
+  } else if (pingUrl.includes('api.sms-gate.app')) {
     pingUrl = 'https://api.sms-gate.app/3rdparty/v1/device';
   } else if (!/\/(message|messages|device|status|ping|health)/i.test(pingUrl)) {
     pingUrl = `${pingUrl}/message`;
   }
   const headers = buildGatewayHeaders(device);
+  if (isEskiz && (!headers['Authorization'] || !headers['Authorization'].startsWith('Bearer eyJ'))) {
+    const eskizToken = await getEskizToken(device);
+    if (eskizToken) headers['Authorization'] = `Bearer ${eskizToken}`;
+  }
 
   try {
     const res = await executeGatewayRequest(pingUrl, 'GET', headers, null);
@@ -404,6 +443,17 @@ export async function pingDevice(device) {
     const isCloud = pingUrl.includes('api.sms-gate.app');
     let isDeviceActive = isOnline;
     let deviceError = isOnline ? null : `HTTP Status: ${res.status}`;
+
+    // On Eskiz gateway, extract balance and user info
+    let eskizBalance = null;
+    if (isOnline && isEskiz && devInfo) {
+      const uData = devInfo.data || devInfo;
+      eskizBalance = uData?.balance !== undefined ? uData.balance : null;
+      if (res.status === 401) {
+        isDeviceActive = false;
+        deviceError = 'Eskiz API autentifikatsiya xatosi (Login yoki parol noto‘g‘ri)';
+      }
+    }
 
     // On Cloud server, check the physical Android phone's lastSeen timestamp
     if (isOnline && isCloud && devInfo?.lastSeen) {
@@ -421,6 +471,7 @@ export async function pingDevice(device) {
       status: isDeviceActive ? 'online' : (isOnline ? 'sleeping' : 'error'),
       last_seen_at: devInfo?.lastSeen || devInfo?.updatedAt || (isOnline ? now : device.last_seen_at),
       last_error: deviceError,
+      battery_level: eskizBalance !== null ? eskizBalance : device.battery_level,
     };
 
     // Auto-optimize Cloud settings: keep polling interval ultra-fast (5s) instead of default 15min
@@ -509,7 +560,10 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
   }
 
   let cleanUrl = device.gateway_url.trim();
-  if (cleanUrl.includes('api.sms-gate.app')) {
+  const isEskizGateway = cleanUrl.includes('eskiz.uz') || device?.provider === 'eskiz';
+  if (isEskizGateway) {
+    cleanUrl = 'https://notify.eskiz.uz/api/message/sms/send';
+  } else if (cleanUrl.includes('api.sms-gate.app')) {
     cleanUrl = 'https://api.sms-gate.app/3rdparty/v1/messages';
   } else if (!/\/(message|messages|send|v1)/i.test(cleanUrl)) {
     cleanUrl = `${cleanUrl.replace(/\/+$/, '')}/message`;
@@ -559,19 +613,34 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
 
   const headers = buildGatewayHeaders(device);
 
-  // Exact payload format strictly conforming to Capcom6 SMS Gate Cloud or Local Gateway
+  // Exact payload format strictly conforming to Capcom6 SMS Gate Cloud, Local Gateway, or Eskiz.uz
   const isCloudGateway = cleanUrl.includes('api.sms-gate.app');
-  const payload = isCloudGateway
-    ? {
-        phoneNumbers: [normalizedPhone],
-        textMessage: {
-          text: cleanMsg,
-        },
-      }
-    : {
-        message: cleanMsg,
-        phoneNumbers: [normalizedPhone],
-      };
+  let payload;
+  if (isEskizGateway) {
+    const eskizToken = await getEskizToken(device);
+    if (eskizToken) {
+      headers['Authorization'] = `Bearer ${eskizToken}`;
+    }
+    const cleanPhone = normalizedPhone.replace(/^\+/, '');
+    payload = {
+      mobile_phone: cleanPhone,
+      message: cleanMsg,
+      from: device.sender_name || '4546',
+      user_sms_id: `educo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    };
+  } else if (isCloudGateway) {
+    payload = {
+      phoneNumbers: [normalizedPhone],
+      textMessage: {
+        text: cleanMsg,
+      },
+    };
+  } else {
+    payload = {
+      message: cleanMsg,
+      phoneNumbers: [normalizedPhone],
+    };
+  }
 
   const sendExecution = (async () => {
     // Safety auto-expiration timer for inFlight dedupe key
@@ -607,18 +676,18 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
       }
 
       // Extract tracking ID and granular status from Gateway response
-      const trackingId = res.data?.id || res.data?.messageId || `tr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      const rawState = res.data?.state || res.data?.recipients?.[0]?.state || 'Pending';
+      const trackingId = res.data?.id || res.data?.messageId || res.data?.user_sms_id || `tr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const rawState = res.data?.state || res.data?.status || res.data?.recipients?.[0]?.state || 'Pending';
 
       let mappedStatus = SMS_STATUS.DISPATCHING;
       let androidSentAt = null;
       let deliveredAt = null;
 
-      if (rawState === 'Delivered') {
+      if (rawState === 'Delivered' || rawState === 'DELIVRD') {
         mappedStatus = SMS_STATUS.DELIVERED;
         androidSentAt = isoNow;
         deliveredAt = isoNow;
-      } else if (rawState === 'Sent') {
+      } else if (rawState === 'Sent' || rawState === 'waiting' || rawState === 'ACCEPTED') {
         mappedStatus = SMS_STATUS.SUBMITTED;
         androidSentAt = isoNow;
       } else {
