@@ -395,19 +395,15 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .public-navbar-header {
-  padding-top: max(env(safe-area-inset-top, 0px), 8px);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* iOS WebKit Notch & Status Bar Protection (Safari, Chrome iOS, in-app webviews, PWA) */
+/* iOS WebKit Notch & Status Bar Protection (Safari, Chrome iOS, in-app webviews, iOS PWA only) */
 @supports (-webkit-touch-callout: none) {
-  .public-navbar-header {
-    padding-top: max(env(safe-area-inset-top, 44px), 44px) !important;
-  }
-}
-
-@media all and (display-mode: standalone) {
-  .public-navbar-header {
-    padding-top: max(env(safe-area-inset-top, 44px), 44px) !important;
+  @media all and (display-mode: standalone) {
+    .public-navbar-header {
+      padding-top: max(env(safe-area-inset-top, 44px), 44px) !important;
+    }
   }
 }
 

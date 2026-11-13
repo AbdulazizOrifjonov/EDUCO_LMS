@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import { spawn } from 'child_process';
 
 function syncStoragePlugin() {
   const dataDir = path.resolve(__dirname, './.data');
@@ -429,107 +430,38 @@ function syncStoragePlugin() {
         next();
       });
 
-      // 6. Autonomous 24/7 SMS Background Scheduler
-      let isProcessingQueue = false;
-      const smsScheduler = setInterval(async () => {
-        if (isProcessingQueue) return;
-        try {
-          const db = getDb();
-          if (!db) return;
-          const settings = db.educo_db_sms_settings;
-          if (!settings || !settings.is_enabled) return;
+      // 6. Autonomous EDUCO Telegram & SMS Gateway Daemon (bot.js) Auto-Starter
+      let botChild = null;
+      try {
+        const botPath = path.resolve(__dirname, 'bot.js');
+        if (fs.existsSync(botPath) && !process.env.VITE_NO_BOT && !global.__educo_bot_started) {
+          global.__educo_bot_started = true;
+          botChild = spawn(process.execPath, [botPath], {
+            stdio: 'inherit',
+            cwd: __dirname,
+            env: { ...process.env, EDUCO_SPAWNED_BY_VITE: '1' },
+          });
 
-          const devices = db.educo_db_sms_devices || [];
-          const activeDevice =
-            devices.find((d) => d.device_role === 'primary' && d.is_active) ||
-            devices.find((d) => d.device_role === 'backup' && d.is_active);
-          if (!activeDevice || !activeDevice.gateway_url) return;
+          botChild.on('error', (err) => {
+            console.error('[EDUCO Bot Auto-Start Xatosi]:', err.message);
+          });
 
-          // 1. Process Pending Queue Items
-          const queue = db.educo_db_sms_queue || [];
-          const nextItemIndex = queue.findIndex((q) => q.status === 'pending');
-          if (nextItemIndex >= 0) {
-            isProcessingQueue = true;
-            const item = queue[nextItemIndex];
-            item.status = 'processing';
-            item.last_attempt_at = new Date().toISOString();
-            saveDb(db);
-
-            let targetUrl = activeDevice.gateway_url.trim();
-            if (!/\/(message|messages|send|v1)/i.test(targetUrl)) {
-              targetUrl = `${targetUrl.replace(/\/+$/, '')}/message`;
+          const cleanup = () => {
+            if (botChild && !botChild.killed) {
+              try {
+                botChild.kill('SIGINT');
+              } catch (_) {}
             }
+          };
 
-            const headers = { 'Content-Type': 'application/json' };
-            if (activeDevice.api_token) {
-              const token = activeDevice.api_token.trim();
-              if (token.includes(':')) {
-                headers['Authorization'] = `Basic ${Buffer.from(token).toString('base64')}`;
-              } else {
-                headers['Authorization'] = `Bearer ${token}`;
-              }
-            }
-
-            const isCloud = targetUrl.includes('api.sms-gate.app');
-            const payload = isCloud
-              ? {
-                  phoneNumbers: [item.recipient_phone],
-                  textMessage: { text: item.message_text },
-                }
-              : {
-                  message: item.message_text,
-                  phoneNumbers: [item.recipient_phone],
-                };
-
-            const controller = new AbortController();
-            const fetchTimer = setTimeout(() => controller.abort(), 12000);
-            try {
-              const res = await fetch(targetUrl, {
-                method: 'POST',
-                headers,
-                body: JSON.stringify(payload),
-                signal: controller.signal,
-              });
-              clearTimeout(fetchTimer);
-
-              if (res.ok || res.status === 200 || res.status === 201 || res.status === 202) {
-                item.status = 'sent';
-                item.sent_at = new Date().toISOString();
-                item.error_message = null;
-                db.educo_db_sms_logs = db.educo_db_sms_logs || [];
-                db.educo_db_sms_logs.unshift({
-                  id: `log-${Date.now()}`,
-                  queue_id: item.id,
-                  device_id: activeDevice.id,
-                  device_name: activeDevice.name,
-                  recipient_phone: item.recipient_phone,
-                  recipient_name: item.recipient_name,
-                  message_text: item.message_text,
-                  status: 'sent',
-                  sent_at: new Date().toISOString(),
-                });
-                console.log(`[SMS Gateway] ✅ SMS yuborildi: ${item.recipient_phone} (${item.recipient_name})`);
-              } else {
-                throw new Error(`HTTP ${res.status}`);
-              }
-            } catch (postErr) {
-              item.attempts = (item.attempts || 0) + 1;
-              const maxRetries = settings.max_retries || 3;
-              item.status = item.attempts >= maxRetries ? 'failed' : 'pending';
-              item.error_message = postErr.message;
-              console.warn(`[SMS Gateway] ⚠️ Xatolik (${item.recipient_phone}):`, postErr.message);
-            } finally {
-              clearTimeout(fetchTimer);
-              saveDb(db);
-              broadcastRealtime({ type: 'SMS_UPDATE', timestamp: Date.now() });
-              isProcessingQueue = false;
-            }
-          }
-        } catch (_) {
-          isProcessingQueue = false;
+          server.httpServer?.on('close', cleanup);
+          process.on('SIGINT', cleanup);
+          process.on('SIGTERM', cleanup);
+          process.on('exit', cleanup);
         }
-      }, 5000);
-      if (smsScheduler.unref) smsScheduler.unref();
+      } catch (err) {
+        console.warn('[Vite Dev] bot.js avto-ishga tushirishda ogohlantirish:', err.message);
+      }
     },
   };
 }

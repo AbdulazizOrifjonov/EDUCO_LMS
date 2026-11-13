@@ -278,7 +278,7 @@ export default function PublicNavbar({ settings }) {
       style={{
         paddingTop: isIos
           ? 'max(env(safe-area-inset-top, 44px), 44px)'
-          : 'max(env(safe-area-inset-top, 0px), 8px)',
+          : 'env(safe-area-inset-top, 0px)',
       }}
     >
       <div className="w-full max-w-[1540px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2 sm:py-2.5">

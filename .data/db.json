@@ -1,92 +1,6 @@
 {
   "educo_db_users": [
     {
-      "id": "usr-1793622773288",
-      "username": "fayoza_karimberdiyeva",
-      "first_name": "Fayoza",
-      "last_name": "Karimberdiyeva",
-      "fullName": "Fayoza Karimberdiyeva",
-      "full_name": "Fayoza Karimberdiyeva",
-      "avatar_url": "",
-      "role": "teacher",
-      "email": "fayoza_karimberdiyeva@educo.app",
-      "phone": "+998 90 668 56 79",
-      "father_phone": "",
-      "mother_phone": "",
-      "password": "Fayoza#5679",
-      "password_updated_at": "2026-11-04T03:15:47.296Z",
-      "is_active": true,
-      "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z",
-      "subject": "Mental Arifmetika",
-      "course_ids": [
-        "crs-1793623377912"
-      ],
-      "group_ids": [
-        "grp-mental",
-        "grp-1793623583736"
-      ]
-    },
-    {
-      "id": "usr-1793622233829",
-      "username": "shaxnoza_ismatova",
-      "first_name": "Shaxnoza",
-      "last_name": "Ismatova",
-      "fullName": "Ismatova Shaxnoza",
-      "full_name": "Ismatova Shaxnoza",
-      "avatar_url": "",
-      "role": "teacher",
-      "email": "shaxnoza_ismatova@educo.app",
-      "phone": "+998 94 614 29 96",
-      "father_phone": "",
-      "mother_phone": "",
-      "password": "Shaxnoza#2996",
-      "password_updated_at": "2026-11-04T03:15:47.296Z",
-      "is_active": true,
-      "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z",
-      "subject": "Rus tili",
-      "course_ids": [
-        "crs-rus-tili"
-      ],
-      "group_ids": [
-        "grp-rus-tili",
-        "grp-rus-tili-2",
-        "grp-1793622453272",
-        "grp-rus-tili-4"
-      ]
-    },
-    {
-      "id": "usr-1793603060709",
-      "username": "bexruz_beknazarov",
-      "first_name": "Bexruz",
-      "last_name": "Beknazarov",
-      "fullName": "Beknazarov Bexruz",
-      "full_name": "Beknazarov Bexruz",
-      "avatar_url": "",
-      "role": "teacher",
-      "email": "bexruz_beknazarov@educo.app",
-      "phone": "+998 93 377 22 23",
-      "father_phone": "",
-      "mother_phone": "",
-      "password": "Bexruz#2223",
-      "password_updated_at": "2026-11-04T03:15:47.296Z",
-      "is_active": true,
-      "created_at": "2026-11-04T03:15:47.296Z",
-      "updated_at": "2026-11-04T03:15:47.296Z",
-      "subject": "Matematika",
-      "course_ids": [
-        "crs-matematika"
-      ],
-      "group_ids": [
-        "grp-matematika",
-        "grp-1793615416295",
-        "grp-matematika-3",
-        "grp-matematika-4",
-        "grp-matematika-5"
-      ]
-    },
-    {
       "id": "usr-1793466843425",
       "username": "abdulazizbek_orifjonov",
       "first_name": "Abdulazizbek",
@@ -113,7 +27,10 @@
       "subject": "Full Stack",
       "specialty": "Full Stack",
       "telegram_chat_id": 1594150529,
-      "telegram_username": "AbdulazizbekITMentor"
+      "telegram_username": "AbdulazizbekITMentor",
+      "is_mentor": true,
+      "title": "Mentor",
+      "display_role": "mentor"
     },
     {
       "id": "usr-owner-1",
@@ -252,13 +169,22 @@
       "group_id": "grp-matematika",
       "group_ids": [
         "grp-matematika",
-        "grp-ingliz-tili-2",
         "grp-fullstack"
       ],
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-12T04:51:19.383Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-12T04:51:19.382Z",
+      "father_phone": "",
+      "mother_phone": "",
+      "custom_price": null,
+      "discount_percent": 0,
+      "discount_amount": 0,
+      "discount_type": null,
+      "discount_reason": "",
+      "is_mentor": false
     },
     {
       "id": "usr-student-901236463",
@@ -283,7 +209,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998580121",
@@ -308,7 +236,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998580121-abdula",
@@ -333,7 +263,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998822309",
@@ -361,7 +293,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-977608589",
@@ -386,7 +320,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-903494929",
@@ -411,7 +347,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-908189959",
@@ -436,7 +374,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935436617",
@@ -463,7 +403,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-903333554",
@@ -488,7 +430,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-939019588",
@@ -515,7 +459,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-939069588-shoxru",
@@ -540,7 +486,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-909474123",
@@ -567,7 +515,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-909474123-azamjo",
@@ -592,7 +542,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-977221252",
@@ -619,7 +571,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-977221252-salohi",
@@ -646,7 +600,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-975190011",
@@ -675,7 +631,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-948434905",
@@ -700,7 +658,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-992223052-malika",
@@ -725,7 +685,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-999163660",
@@ -752,7 +714,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-957737392",
@@ -779,7 +743,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-999163660-firdav",
@@ -806,7 +772,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-992778855",
@@ -831,7 +799,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-932901750-solixa",
@@ -858,7 +828,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-946142213",
@@ -885,7 +857,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-991091574",
@@ -910,7 +884,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-991091574-mirey",
@@ -935,7 +911,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-909332088",
@@ -960,7 +938,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935066822",
@@ -985,7 +965,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998528047",
@@ -1010,7 +992,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-997249967",
@@ -1035,7 +1019,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-936105518",
@@ -1062,7 +1048,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998559245",
@@ -1087,7 +1075,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935755104",
@@ -1112,7 +1102,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-944288894",
@@ -1137,7 +1129,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998559245-shoxru",
@@ -1162,7 +1156,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998559245-abdull",
@@ -1187,7 +1183,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-995488490",
@@ -1212,7 +1210,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990000001",
@@ -1237,7 +1237,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998250711",
@@ -1262,7 +1264,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998250711-akbar",
@@ -1287,7 +1291,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-770225879",
@@ -1312,7 +1318,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-944307035",
@@ -1337,7 +1345,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990887845",
@@ -1362,7 +1372,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-915600077",
@@ -1387,7 +1399,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-995488490-zarina",
@@ -1412,7 +1426,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-887749485",
@@ -1437,7 +1453,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935278822",
@@ -1462,7 +1480,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935278822-oybek",
@@ -1487,7 +1507,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935278822-odil",
@@ -1512,7 +1534,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-951908080",
@@ -1539,7 +1563,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935399393",
@@ -1564,7 +1590,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935399393-muhamm",
@@ -1589,7 +1617,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998492912",
@@ -1614,7 +1644,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998272687",
@@ -1639,7 +1671,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-956161508-kumush",
@@ -1664,7 +1698,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998352122-firdav",
@@ -1689,7 +1725,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-930789384",
@@ -1716,7 +1754,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990394868",
@@ -1741,7 +1781,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-997948421",
@@ -1766,7 +1808,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-997948421-dildor",
@@ -1791,34 +1835,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
-    },
-    {
-      "id": "usr-1793599332662",
-      "username": "amirbek_inayatov_2906",
-      "first_name": "Amirbek",
-      "last_name": "Inayatov",
-      "fullName": "Inayatov Amirbek",
-      "full_name": "Inayatov Amirbek",
-      "name": "Inayatov Amirbek",
-      "role": "student",
-      "phone": "+998 94 788 29 06",
-      "email": "amirbek_inayatov_2906@educo.app",
-      "password": "Amirbek#2906",
-      "course_id": "crs-ingliz-tili",
-      "course_ids": [
-        "crs-ingliz-tili",
-        "crs-fullstack"
-      ],
-      "group_id": "grp-ingliz-tili-2",
-      "group_ids": [
-        "grp-ingliz-tili-2",
-        "grp-fullstack"
-      ],
-      "is_active": true,
-      "has_temp_phone": false,
-      "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-946914031",
@@ -1843,7 +1862,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-501959806",
@@ -1868,7 +1889,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990577366",
@@ -1893,7 +1916,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-909901059",
@@ -1920,7 +1945,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-770074732",
@@ -1949,7 +1976,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-994886110",
@@ -1974,7 +2003,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998093456",
@@ -1999,7 +2030,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-994340077",
@@ -2024,7 +2057,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-958106969",
@@ -2049,7 +2084,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990019382",
@@ -2074,7 +2111,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990019382-muslim",
@@ -2099,7 +2138,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-946007181",
@@ -2124,7 +2165,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990000002",
@@ -2149,7 +2192,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998822309-diyorb",
@@ -2174,7 +2219,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-933938338",
@@ -2199,7 +2246,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998646396",
@@ -2224,7 +2273,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-946891331",
@@ -2249,7 +2300,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990000003",
@@ -2274,7 +2327,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-946007181-shoman",
@@ -2299,7 +2354,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-883669392",
@@ -2324,7 +2381,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-903565345",
@@ -2349,7 +2408,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-950211252",
@@ -2374,7 +2435,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-950211252-muhamm",
@@ -2399,7 +2462,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-950211252-abror",
@@ -2424,7 +2489,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-945463836",
@@ -2449,7 +2516,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-909588859",
@@ -2474,7 +2543,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-946275090",
@@ -2499,7 +2570,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-933020997",
@@ -2524,7 +2597,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-999005615-zilola",
@@ -2549,7 +2624,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998198187",
@@ -2574,7 +2651,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-996389687",
@@ -2599,7 +2678,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-997640094",
@@ -2624,7 +2705,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-997640094-mahfir",
@@ -2649,7 +2732,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-984074950",
@@ -2674,7 +2759,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-994340077-solixa",
@@ -2699,7 +2786,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-973445313",
@@ -2724,7 +2813,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-933921552",
@@ -2749,7 +2840,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-933921552-ezoza",
@@ -2774,7 +2867,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998352122",
@@ -2799,7 +2894,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-940508780",
@@ -2824,7 +2921,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-947387535",
@@ -2849,7 +2948,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-998161774",
@@ -2874,7 +2975,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-930054773",
@@ -2899,7 +3002,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-952228534",
@@ -2924,7 +3029,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-909709995",
@@ -2949,7 +3056,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-950462692",
@@ -2974,7 +3083,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-902521414",
@@ -2999,7 +3110,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-949214280",
@@ -3024,7 +3137,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935061991",
@@ -3049,7 +3164,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-932901750",
@@ -3074,7 +3191,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990000004",
@@ -3099,7 +3218,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-900095755",
@@ -3124,7 +3245,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-930096441",
@@ -3149,7 +3272,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-930096441-soliha",
@@ -3174,7 +3299,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-930678890",
@@ -3199,7 +3326,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-975479606",
@@ -3224,7 +3353,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-975479606-mustaf",
@@ -3249,7 +3380,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-956161508",
@@ -3274,7 +3407,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-995387215",
@@ -3299,7 +3434,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-946019500",
@@ -3326,7 +3463,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-901594495",
@@ -3351,7 +3490,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-773431899",
@@ -3376,7 +3517,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-943501407",
@@ -3401,7 +3544,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-945373716",
@@ -3426,7 +3571,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-971089595",
@@ -3451,7 +3598,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990000001-muhamm",
@@ -3476,7 +3625,9 @@
       "is_active": true,
       "has_temp_phone": true,
       "created_at": "2026-11-04T12:19:37.240Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-771564545",
@@ -3501,7 +3652,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990202676",
@@ -3526,7 +3679,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-999009996",
@@ -3551,7 +3706,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-999226616",
@@ -3576,7 +3733,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-999220076",
@@ -3601,7 +3760,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-977848807",
@@ -3626,7 +3787,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-990000006",
@@ -3651,7 +3814,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-999005615-g_zal",
@@ -3676,7 +3841,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T12:16:20.693Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-943852253",
@@ -3701,7 +3868,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-992223052",
@@ -3726,7 +3895,9 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
     },
     {
       "id": "usr-student-935286718",
@@ -3751,7 +3922,66 @@
       "is_active": true,
       "has_temp_phone": false,
       "created_at": "2026-11-04T06:03:14.870Z",
-      "updated_at": "2026-11-04T12:19:37.240Z"
+      "updated_at": "2026-11-04T12:19:37.240Z",
+      "avatar_url": "",
+      "password_updated_at": "2026-11-04T12:19:37.240Z"
+    },
+    {
+      "id": "usr-teacher-beknazarov",
+      "username": "bexruz_beknazarov",
+      "first_name": "Bexruz",
+      "last_name": "Beknazarov",
+      "fullName": "Beknazarov Bexruz",
+      "full_name": "Beknazarov Bexruz",
+      "role": "teacher",
+      "specialty": "Matematika",
+      "subject": "Matematika",
+      "email": "bexruz_beknazarov@educo.app",
+      "phone": "+998 93 377 22 23",
+      "password": "Bexruz#2223",
+      "password_updated_at": "2026-11-12T04:50:12.381Z",
+      "is_active": true,
+      "created_at": "2026-11-12T04:50:12.382Z",
+      "updated_at": "2026-11-12T04:50:12.382Z",
+      "avatar_url": ""
+    },
+    {
+      "id": "usr-teacher-ismatova",
+      "username": "shaxnoza_ismatova",
+      "first_name": "Shaxnoza",
+      "last_name": "Ismatova",
+      "fullName": "Ismatova Shaxnoza",
+      "full_name": "Ismatova Shaxnoza",
+      "role": "teacher",
+      "specialty": "Rus tili",
+      "subject": "Rus tili",
+      "email": "shaxnoza_ismatova@educo.app",
+      "phone": "+998 94 614 29 96",
+      "password": "Shaxnoza#2996",
+      "password_updated_at": "2026-11-12T04:50:12.382Z",
+      "is_active": true,
+      "created_at": "2026-11-12T04:50:12.382Z",
+      "updated_at": "2026-11-12T04:50:12.382Z",
+      "avatar_url": ""
+    },
+    {
+      "id": "usr-teacher-karimberdiyeva",
+      "username": "fayoza_karimberdiyeva",
+      "first_name": "Fayoza",
+      "last_name": "Karimberdiyeva",
+      "fullName": "Fayoza Karimberdiyeva",
+      "full_name": "Fayoza Karimberdiyeva",
+      "role": "teacher",
+      "specialty": "Mental arifmetika",
+      "subject": "Mental arifmetika",
+      "email": "fayoza_karimberdiyeva@educo.app",
+      "phone": "+998 90 668 56 79",
+      "password": "Fayoza#5679",
+      "password_updated_at": "2026-11-12T04:50:12.382Z",
+      "is_active": true,
+      "created_at": "2026-11-12T04:50:12.382Z",
+      "updated_at": "2026-11-12T04:50:12.382Z",
+      "avatar_url": ""
     }
   ],
   "educo_db_courses": [
@@ -4259,7 +4489,6 @@
       "monthly_price": 500000,
       "status": "active",
       "student_ids": [
-        "usr-student-930098339",
         "usr-student-998822309",
         "usr-student-932901750-solixa",
         "usr-student-946142213",
@@ -4284,11 +4513,11 @@
         "usr-student-909901059",
         "usr-student-770074732"
       ],
-      "enrolled_count": 24,
+      "enrolled_count": 23,
       "avatar_url": "",
       "image_url": "",
       "created_at": "2026-11-04T05:46:45.897Z",
-      "updated_at": "2026-11-04T12:19:37.240Z",
+      "updated_at": "2026-11-12T04:51:19.187Z",
       "direction": "Ingliz tili",
       "schedule": "Dush-Chor-Jum, 10:30 - 12:00",
       "start_time": "10:30:00",
@@ -4635,7 +4864,7 @@
       "group_name": "Ingliz tili 1.2 (ENG-1.2)",
       "course_id": "crs-ingliz-tili",
       "status": "active",
-      "is_active": true,
+      "is_active": false,
       "joined_at": "2026-11-04T06:03:14.870Z"
     },
     {
@@ -8233,6 +8462,86 @@
       "recorded_by": "usr-1793466843425",
       "finalized": true,
       "updated_at": "2026-11-09T14:57:25.834Z"
+    },
+    {
+      "id": "att-oct-02-1",
+      "lesson_id": "lsn-grp-1-2026-10-02",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "React asoslari darsida juda faol qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-02",
+      "created_at": "2026-10-02T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-05-1",
+      "lesson_id": "lsn-grp-1-2026-10-05",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Uy vazifasini o‘z vaqtida to‘liq topshirdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-05",
+      "created_at": "2026-10-05T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-07-1",
+      "lesson_id": "lsn-grp-1-2026-10-07",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Darsga to‘liq qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-07",
+      "created_at": "2026-10-07T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-09-1",
+      "lesson_id": "lsn-grp-1-2026-10-09",
+      "student_id": "usr-student-1",
+      "status": "late",
+      "remark": "Tirbandlik sababli 10 daqiqa kechikib keldi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-09",
+      "created_at": "2026-10-09T09:25:00.000Z"
+    },
+    {
+      "id": "att-oct-12-1",
+      "lesson_id": "lsn-grp-1-2026-10-12",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Mustaqil amaliy ishni a’lo darajada bajardi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-12",
+      "created_at": "2026-10-12T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-14-1",
+      "lesson_id": "lsn-grp-1-2026-10-14",
+      "student_id": "usr-student-1",
+      "status": "excused",
+      "remark": "Shifokor ko‘rigi sababli maʼmuriyatdan ruxsat so‘ralgan",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-14",
+      "created_at": "2026-10-14T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-16-1",
+      "lesson_id": "lsn-grp-1-2026-10-16",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Darsga o‘z vaqtida keldi va faol qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-16",
+      "created_at": "2026-10-16T09:15:00.000Z"
+    },
+    {
+      "id": "att-oct-19-1",
+      "lesson_id": "lsn-grp-1-2026-10-19",
+      "student_id": "usr-student-1",
+      "status": "present",
+      "remark": "Bugungi darsda faol qatnashdi",
+      "recorded_by": "usr-teacher-1",
+      "date": "2026-10-19",
+      "created_at": "2026-10-19T09:15:00.000Z"
     }
   ],
   "educo_db_grades": [
@@ -8339,31 +8648,31 @@
   "educo_db_sms_devices": [
     {
       "id": "dev-primary-1",
-      "name": "Asosiy Android Gateway (SMS Gate Cloud)",
+      "name": "Android SMS Gateway (EMTIDA)",
       "device_role": "primary",
       "gateway_url": "https://api.sms-gate.app/3rdparty/v1/messages",
       "api_token": "EMTIDA:3x7k46xkpavev_",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-11-11T05:51:14.966Z",
+      "last_seen_at": "2026-11-13T14:17:17.060Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
       "created_at": "2026-10-31T16:24:07.129Z",
-      "updated_at": "2026-11-11T05:51:14.966Z"
+      "updated_at": "2026-11-13T14:17:17.081Z"
     },
     {
       "id": "dev-backup-2",
-      "name": "Zaxira Android Gateway (SMS Gate Cloud)",
+      "name": "Eskiz.uz Zaxira SMS Shlyuz",
       "device_role": "backup",
-      "gateway_url": "https://api.sms-gate.app/3rdparty/v1/messages",
-      "api_token": "EMTIDA:3x7k46xkpavev_",
+      "gateway_url": "https://notify.eskiz.uz/api/message/sms/send",
+      "api_token": "",
       "is_active": false,
       "status": "offline",
       "last_seen_at": null,
       "last_error": null,
-      "phone_number": "+998 93 582 17 74",
+      "phone_number": "4546",
       "created_at": "2026-10-31T16:24:07.129Z",
-      "updated_at": "2026-11-11T05:51:14.966Z"
+      "updated_at": "2026-11-13T14:17:17.081Z"
     }
   ],
   "educo_db_materials": [],
@@ -12026,7 +12335,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 1793779167918,
+  "_sync_version": 1793779167928,
   "_deleted_ids": [
     "usr-test-sync-1",
     "usr-1793596191113",
@@ -12035,7 +12344,8 @@
     "usr-1793622233829",
     "usr-1793603060709",
     "usr-1793599332662",
-    "test_sync_user"
+    "test_sync_user",
+    "sch-it-frontend-mon-1793642706723"
   ],
-  "_updated_at": 1793956106646
+  "_updated_at": 1794459090097
 }

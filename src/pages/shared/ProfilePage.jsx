@@ -788,14 +788,25 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   };
 
   const handleToggleGroupSelection = (groupId) => {
-    setSelectedGroupIds((prev) => {
-      if (prev.includes(groupId)) {
-        return prev.filter((id) => id !== groupId);
-      } else {
-        return [...prev, groupId];
+    const isCurrentlySelected = selectedNewGroupId === groupId || selectedGroupIds.includes(groupId);
+
+    if (isCurrentlySelected) {
+      // Ptichkani qaytarib olish (Uncheck / Deselect)
+      const nextGroupIds = selectedGroupIds.filter((id) => id !== groupId);
+      setSelectedGroupIds(nextGroupIds);
+      if (selectedNewGroupId === groupId) {
+        setSelectedNewGroupId(nextGroupIds.length > 0 ? nextGroupIds[nextGroupIds.length - 1] : '');
       }
-    });
-    setSelectedNewGroupId(groupId);
+    } else {
+      // Ptichka qo'yish (Check / Select)
+      if (transferMode === 'transfer') {
+        setSelectedGroupIds([groupId]);
+        setSelectedNewGroupId(groupId);
+      } else {
+        setSelectedGroupIds((prev) => (prev.includes(groupId) ? prev : [...prev, groupId]));
+        setSelectedNewGroupId(groupId);
+      }
+    }
   };
 
   return (
@@ -1307,7 +1318,11 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                   <div className="flex items-center gap-1.5 p-1 rounded-xl bg-gray-200/70 dark:bg-gray-800">
                     <button
                       type="button"
-                      onClick={() => setTransferMode('add')}
+                      onClick={() => {
+                        setTransferMode('add');
+                        setSelectedNewGroupId('');
+                        setSelectedGroupIds([]);
+                      }}
                       className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                         transferMode === 'add'
                           ? 'bg-emerald-600 text-white shadow-sm'
@@ -1320,7 +1335,11 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
 
                     <button
                       type="button"
-                      onClick={() => setTransferMode('transfer')}
+                      onClick={() => {
+                        setTransferMode('transfer');
+                        setSelectedNewGroupId('');
+                        setSelectedGroupIds([]);
+                      }}
                       className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                         transferMode === 'transfer'
                           ? 'bg-blue-600 text-white shadow-sm'
@@ -1449,10 +1468,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                         return (
                           <div
                             key={g.id}
-                            onClick={() => {
-                              setSelectedNewGroupId(g.id);
-                              handleToggleGroupSelection(g.id);
-                            }}
+                            onClick={() => handleToggleGroupSelection(g.id)}
                             className={`p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
                               isSelected
                                 ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/50 shadow-md ring-2 ring-blue-500/30'
@@ -1555,9 +1571,23 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                         <>
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-blue-200 dark:border-blue-800">
                             <div>
-                              <span className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300 block">
-                                Tanlangan o‘quv guruhi:
-                              </span>
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <span className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300 block">
+                                  Tanlangan o‘quv guruhi:
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedNewGroupId('');
+                                    setSelectedGroupIds([]);
+                                  }}
+                                  className="text-[11px] px-2 py-0.5 rounded-md text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-colors flex items-center gap-1 font-bold cursor-pointer"
+                                  title="Tanlovni bekor qilish"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                  <span>Tanlovni bekor qilish</span>
+                                </button>
+                              </div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-black text-gray-900 dark:text-gray-100 text-sm">
                                   «{selGroup?.name}»

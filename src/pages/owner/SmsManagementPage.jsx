@@ -108,7 +108,7 @@ export default function SmsManagementPage() {
   // Modals
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [testPhone, setTestPhone] = useState('');
-  const [testMessage, setTestMessage] = useState('Bu EDUCO LMS tizimidan sinov SMS xabari!');
+  const [testMessage, setTestMessage] = useState('Bu Eskiz dan test');
   const [selectedTestDevice, setSelectedTestDevice] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
 

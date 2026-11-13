@@ -265,6 +265,9 @@ function buildGatewayHeaders(device) {
 export async function getEskizToken(device) {
   if (!device) return null;
   const token = (device.api_token || '').trim();
+  if (!token || token.startsWith('EMTIDA:')) {
+    return null;
+  }
   if (token.startsWith('eyJ') || token.length > 50) {
     return token.replace(/^Bearer\s+/i, '');
   }
@@ -283,9 +286,14 @@ export async function getEskizToken(device) {
       if (res.data?.data?.token) {
         return res.data.data.token;
       }
-    } catch (_) {}
+      if (res.data?.message) {
+        throw new Error(`Eskiz Login: ${res.data.message}`);
+      }
+    } catch (e) {
+      if (e.message && e.message.includes('Eskiz')) throw e;
+    }
   }
-  return token.replace(/^Bearer\s+/i, '');
+  return token ? token.replace(/^Bearer\s+/i, '') : null;
 }
 
 /**
@@ -618,9 +626,10 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
   let payload;
   if (isEskizGateway) {
     const eskizToken = await getEskizToken(device);
-    if (eskizToken) {
-      headers['Authorization'] = `Bearer ${eskizToken}`;
+    if (!eskizToken) {
+      throw new Error("Eskiz.uz API tokeni kiritilmagan! Iltimos, Qurilmalar bo‘limida 'Tahrirlash'ni bosib, Eskiz SMS shlyuz tokenini yoki (email:parol) ni kiriting.");
     }
+    headers['Authorization'] = `Bearer ${eskizToken}`;
     const cleanPhone = normalizedPhone.replace(/^\+/, '');
     payload = {
       mobile_phone: cleanPhone,
@@ -961,6 +970,105 @@ export async function generateDebtorQueue(options = {}) {
     skippedCount,
     noPhoneCount,
   };
+}
+
+/**
+ * Enqueue attendance notification SMS for students/parents
+ */
+export async function enqueueAttendanceSms({
+  studentId,
+  studentName = '',
+  courseName = 'Dars',
+  lessonTime = 'Dars vaqtida',
+  status = 'absent',
+  date = null,
+  remark = '',
+}) {
+  try {
+    const settings = await getSmsSettings();
+    if (!settings || !settings.is_enabled) return null;
+
+    const users = localStore.getUsers() || [];
+    const student = users.find((u) => u.id === studentId);
+    if (!student) return null;
+
+    const sName =
+      studentName ||
+      student.fullName ||
+      student.name ||
+      `${student.first_name || ''} ${student.last_name || ''}`.trim() ||
+      'Talaba';
+    const dateFormatted = date || new Date().toISOString().split('T')[0];
+
+    // Priority phone resolution based on settings
+    let targetPhone = '';
+    let recipientType = 'parent';
+    const father = student.father_phone;
+    const mother = student.mother_phone;
+    const parent = student.parent_phone;
+    const directPhone = student.phone;
+
+    if (settings.target_recipient === 'mother_first') {
+      targetPhone = mother || father || parent || directPhone;
+      recipientType = mother ? 'mother' : father ? 'father' : parent ? 'parent' : 'student';
+    } else if (settings.target_recipient === 'student_direct') {
+      targetPhone = directPhone || father || mother || parent;
+      recipientType = directPhone ? 'student' : 'parent';
+    } else {
+      targetPhone = father || mother || parent || directPhone;
+      recipientType = father ? 'father' : mother ? 'mother' : parent ? 'parent' : 'student';
+    }
+
+    if (!targetPhone) return null;
+
+    // Idempotency key: prevents duplicate attendance SMS for the same student, date, and status
+    const idempotencyKey = `sms-att-${studentId}-${dateFormatted}-${status}`;
+    const existingQueue = localStore.getSmsQueue() || [];
+    const alreadyQueued = existingQueue.find(
+      (q) => q.idempotency_key === idempotencyKey && q.status !== 'failed' && q.status !== 'cancelled'
+    );
+    if (alreadyQueued) return alreadyQueued;
+
+    let messageText = '';
+    if (status === 'absent') {
+      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateFormatted}) ${courseName} fanidan darsda QATNASHMADI (darsga kelmadi). Dars vaqti: ${lessonTime}. EDUCO`;
+    } else if (status === 'late') {
+      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateFormatted}) ${courseName} fanidan darsga KECH QOLIB keldi. Dars vaqti: ${lessonTime}. EDUCO`;
+    } else {
+      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateFormatted}) ${courseName} fanidagi darsga qatnashdi. EDUCO`;
+    }
+
+    const nowIso = new Date().toISOString();
+    const queueItem = {
+      id: `sms-att-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      student_id: studentId,
+      recipient_phone: normalizePhone(targetPhone),
+      recipient_name: `${sName} (${recipientType === 'father' ? 'Otasi' : recipientType === 'mother' ? 'Onasi' : 'Talaba'})`,
+      recipient_type: recipientType,
+      message_text: messageText,
+      course_name: courseName,
+      status: SMS_STATUS.PENDING,
+      attempts: 0,
+      max_attempts: settings.max_retries || 3,
+      idempotency_key: idempotencyKey,
+      scheduled_at: nowIso,
+      queued_at: nowIso,
+      created_at: nowIso,
+      dispatched_at: null,
+      android_sent_at: null,
+      delivered_at: null,
+      failed_at: null,
+    };
+
+    try {
+      await supabase.from('sms_queue').insert([queueItem]);
+    } catch (_) {}
+    localStore.saveSmsQueueItem(queueItem);
+    return queueItem;
+  } catch (err) {
+    console.warn('[smsService] enqueueAttendanceSms exception:', err.message);
+    return null;
+  }
 }
 
 /**
@@ -1744,6 +1852,7 @@ export default {
   sendTestSms,
   formatSmsMessage,
   generateDebtorQueue,
+  enqueueAttendanceSms,
   getProspectiveRecipients,
   getSmsQueue,
   getSmsLogs,

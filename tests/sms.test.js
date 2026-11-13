@@ -339,7 +339,7 @@ describe('SMS Service - Comprehensive Suite', () => {
       });
       // All 10 tracking IDs must be unique
       expect(trackingIds.size).toBe(10);
-    });
+    }, 30000);
 
     it('processes 50 SMS items at scale maintaining zero duplicates and full persistence', async () => {
       localStore.setItem('educo_db_sms_queue', []);

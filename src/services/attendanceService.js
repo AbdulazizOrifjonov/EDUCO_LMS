@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { localStore } from '@/lib/localStore';
 import { notifyStudentAttendance } from './telegramBotService';
+import { enqueueAttendanceSms } from './smsService';
 
 const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
 
@@ -244,6 +245,16 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
         courseName,
         lessonTime,
         teacherName,
+        status: r.status,
+        date: lesson?.lesson_date || null,
+        remark: r.remark || '',
+      }).catch(() => {});
+
+      // Enqueue Attendance SMS for parent notification
+      enqueueAttendanceSms({
+        studentId: r.student_id,
+        courseName,
+        lessonTime,
         status: r.status,
         date: lesson?.lesson_date || null,
         remark: r.remark || '',
