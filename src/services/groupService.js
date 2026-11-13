@@ -472,6 +472,24 @@ export async function enrollStudent(groupId, studentId, options = {}) {
     target.enrolled_count = target.student_ids.length;
     localStore.saveGroup(target);
   }
+
+  // Ensure user's group_ids array includes this group
+  try {
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    const targetUser = allUsers.find((u) => u.id === studentId);
+    if (targetUser) {
+      const gids = Array.isArray(targetUser.group_ids) ? [...targetUser.group_ids] : (targetUser.group_id ? [targetUser.group_id] : []);
+      if (!gids.includes(groupId)) {
+        gids.push(groupId);
+      }
+      targetUser.group_ids = gids;
+      if (!targetUser.group_id) targetUser.group_id = groupId;
+      if (localStore.saveUser) {
+        localStore.saveUser(targetUser);
+      }
+    }
+  } catch (_) {}
+
   if (localStore.saveMembership) {
     localStore.saveMembership({
       id: `mem-${groupId}-${studentId}`,

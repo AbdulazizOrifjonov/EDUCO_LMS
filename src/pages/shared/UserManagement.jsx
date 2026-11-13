@@ -54,7 +54,7 @@ import {
   deleteUser,
 } from '@/services/userService';
 import { ROLES } from '@/lib/constants';
-import { getGroups } from '@/services/groupService';
+import { getGroups, enrollStudent } from '@/services/groupService';
 import { localStore } from '@/lib/localStore';
 import { formatUzPhone } from '@/utils/phoneFormat';
 import { useSearch } from '@/context/SearchContext';
@@ -107,6 +107,12 @@ export default function UserManagement() {
   const [showModalPassword, setShowModalPassword] = useState(true);
   const [copiedModalPassword, setCopiedModalPassword] = useState(false);
   const [formDefaultRole, setFormDefaultRole] = useState(ROLES.STUDENT);
+
+  // Teacher: Enroll existing student modal state
+  const [isEnrollExistingModalOpen, setIsEnrollExistingModalOpen] = useState(false);
+  const [enrollModalSearch, setEnrollModalSearch] = useState('');
+  const [enrollModalGroupId, setEnrollModalGroupId] = useState('');
+  const [isEnrollingStudent, setIsEnrollingStudent] = useState(false);
 
   // Sync roleFilter if URL changes
   useEffect(() => {
@@ -208,6 +214,75 @@ export default function UserManagement() {
       return false;
     }).length;
   }, [isTeacher, currentUserId, profile, user]);
+
+  const myTeacherGroups = useMemo(() => {
+    if (!isTeacher) return [];
+    const groups = localStore.getGroups ? localStore.getGroups() : [];
+    const normTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(currentUserId) : currentUserId;
+    const teacherUser = profile || user;
+    const teacherName = (teacherUser?.fullName || `${teacherUser?.first_name || ''} ${teacherUser?.last_name || ''}`).trim().toLowerCase();
+    const teacherSpecialty = (teacherUser?.specialty || teacherUser?.subject || '').trim().toLowerCase();
+    const teacherPhoneClean = (teacherUser?.phone || '').replace(/\D/g, '').slice(-9);
+
+    const list = groups.filter((g) => {
+      const gTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(g.teacherId || g.teacher_id) : (g.teacherId || g.teacher_id);
+      const gTeacherName = (g.teacherName || g.teacher_name || '').toLowerCase();
+      const gTeacherPhone = (g.teacherPhone || g.teacher_phone || '').replace(/\D/g, '').slice(-9);
+
+      if (gTeacherId && (gTeacherId === normTeacherId || gTeacherId === currentUserId || (teacherUser && gTeacherId === teacherUser.id))) return true;
+      if (teacherUser?.group_ids && teacherUser.group_ids.includes(g.id)) return true;
+      if (teacherPhoneClean && gTeacherPhone && teacherPhoneClean === gTeacherPhone) return true;
+      if (teacherName && gTeacherName && (gTeacherName.includes(teacherName) || teacherName.includes(gTeacherName))) return true;
+      if (teacherSpecialty && g.name?.toLowerCase().includes(teacherSpecialty)) return true;
+      return false;
+    });
+
+    return list.length > 0 ? list : groups.filter((g) => g.id === 'grp-fullstack' || g.name?.toLowerCase().includes('full stack'));
+  }, [isTeacher, currentUserId, profile, user]);
+
+  const allCenterStudents = useMemo(() => {
+    const list = localStore.getUsers ? localStore.getUsers() : [];
+    return list.filter((u) => u.role === ROLES.STUDENT && u.is_active !== false);
+  }, [users, isEnrollExistingModalOpen]);
+
+  const filteredCenterStudents = useMemo(() => {
+    if (!enrollModalSearch.trim()) return allCenterStudents.slice(0, 35);
+    const q = enrollModalSearch.trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, '');
+    return allCenterStudents.filter((st) => {
+      const name = (st.fullName || `${st.first_name || ''} ${st.last_name || ''}`).toLowerCase();
+      const phoneDigits = (st.phone || '').replace(/\D/g, '');
+      return name.includes(q) || (qDigits && phoneDigits.includes(qDigits));
+    }).slice(0, 35);
+  }, [allCenterStudents, enrollModalSearch]);
+
+  const handleEnrollExistingStudent = async (studentId, groupId, studentName) => {
+    setIsEnrollingStudent(true);
+    try {
+      const targetGid = groupId || myTeacherGroups[0]?.id || 'grp-fullstack';
+      await enrollStudent(targetGid, studentId);
+
+      // Synchronize student's group_ids in localStore
+      const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+      const userObj = allUsers.find((u) => u.id === studentId);
+      if (userObj) {
+        const curGids = Array.isArray(userObj.group_ids) ? [...userObj.group_ids] : (userObj.group_id ? [userObj.group_id] : []);
+        if (!curGids.includes(targetGid)) curGids.push(targetGid);
+        userObj.group_ids = curGids;
+        if (!userObj.group_id) userObj.group_id = targetGid;
+        if (localStore.saveUser) localStore.saveUser(userObj);
+      }
+
+      toast.success(`${studentName} muvaffaqiyatli guruhingizga biriktirildi!`);
+      await fetchUsers(true);
+      await loadGroupsData();
+    } catch (err) {
+      console.error(err);
+      toast.error('O‘quvchini guruhga biriktirishda xatolik yuz berdi');
+    } finally {
+      setIsEnrollingStudent(false);
+    }
+  };
 
   const [groupsMap, setGroupsMap] = useState(() => {
     try {
@@ -802,25 +877,39 @@ export default function UserManagement() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             size="md"
             icon={Download}
             onClick={handleExportExcel}
-            className="flex-1 sm:flex-initial justify-center font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-xs"
+            className="w-full sm:w-auto justify-center font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-xs"
             title={isTeacher ? "Guruhlaringizdagi barcha o‘quvchilarni Excel formatida yuklab olish" : "Barcha foydalanuvchilar va xodimlar bazasini Excel formatida yuklab olish"}
           >
             <span className="hidden sm:inline">{isTeacher ? "O‘quvchilarim bazasi (Excel)" : "Excel Baza yuklab olish"}</span>
             <span className="sm:hidden">Excel</span>
           </Button>
 
+          {isTeacher && (
+            <Button
+              variant="outline"
+              size="md"
+              icon={UserPlus}
+              className="w-full sm:w-auto justify-center font-bold text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 shadow-xs"
+              onClick={() => setIsEnrollExistingModalOpen(true)}
+              title="Markazda ro‘yxatdan o‘tgan mavjud o‘quvchini o‘z guruhingizga biriktirish"
+            >
+              <span className="hidden sm:inline">Mavjud o‘quvchini qo‘shish</span>
+              <span className="sm:hidden">Mavjud talaba</span>
+            </Button>
+          )}
+
           {!isTeacher && (
             <Button
               variant="outline"
               size="md"
               icon={UserCheck}
-              className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold flex-1 sm:flex-initial justify-center"
+              className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold w-full sm:w-auto justify-center"
               onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.TEACHER}`)}
             >
               <span className="hidden sm:inline">{t('users.createTeacher', "O'qituvchi qo'shish")}</span>
@@ -832,11 +921,11 @@ export default function UserManagement() {
             variant="primary"
             size="md"
             icon={GraduationCap}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold flex-1 sm:flex-initial justify-center"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold w-full sm:w-auto justify-center"
             onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.STUDENT}`)}
           >
-            <span className="hidden sm:inline">{isTeacher ? "Guruhimga o‘quvchi qo‘shish" : t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
-            <span className="sm:hidden">O'quvchi</span>
+            <span className="hidden sm:inline">{isTeacher ? "Yangi o‘quvchi qo‘shish" : t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
+            <span className="sm:hidden">Yangi o'quvchi</span>
           </Button>
 
           {currentUserRole === ROLES.OWNER && (
@@ -844,7 +933,7 @@ export default function UserManagement() {
               variant="ghost"
               size="md"
               icon={Shield}
-              className="text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-300/60 dark:border-purple-800/50 font-semibold flex-1 sm:flex-initial justify-center"
+              className="text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-300/60 dark:border-purple-800/50 font-semibold w-full sm:w-auto justify-center"
               onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.ADMIN}`)}
             >
               <span className="hidden sm:inline">{t('users.createAdmin', "Admin qo'shish")}</span>
@@ -857,38 +946,38 @@ export default function UserManagement() {
       {/* Owner Mode Switcher: Standard List vs Live Master Excel Sheet */}
       {currentUserRole === ROLES.OWNER && (
         <div className="flex items-center justify-between gap-3 p-1.5 rounded-2xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 viewMode === 'list'
                   ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs'
                   : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-4 h-4 shrink-0" />
               <span>Standart Ro‘yxat</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode('live-sheet')}
-              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
                 viewMode === 'live-sheet'
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/30 ring-1 ring-emerald-400/40'
                   : 'text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white'
               }`}
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Jonli Master Excel Jadvali</span>
+              <FileSpreadsheet className="w-4 h-4 shrink-0" />
+              <span className="truncate">Jonli Master Excel</span>
               <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-black transition-colors ${
+                className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black shrink-0 transition-colors ${
                   viewMode === 'live-sheet'
                     ? 'bg-white text-emerald-950 shadow-xs'
                     : 'bg-black/10 text-gray-950 border border-black/10 dark:bg-white/20 dark:text-white dark:border-white/20'
                 }`}
               >
-                LIVE
+                JONLI
               </span>
             </button>
           </div>
@@ -901,72 +990,72 @@ export default function UserManagement() {
         <>
           {/* Quick Role & Population Stats Bar */}
           {isTeacher ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
               {/* Teacher's Students */}
-              <div className="p-3.5 sm:p-4 rounded-2xl border text-left bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 shadow-sm ring-2 ring-emerald-500/20">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+              <div className="p-3 sm:p-4 rounded-2xl border text-left bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 shadow-sm ring-2 ring-emerald-500/20 overflow-hidden relative">
+                <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 min-w-0 flex-1 leading-snug break-words">
                     Mening o‘quvchilarim
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-4 h-4" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
+                <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
                     {userStats.students}
                   </span>
-                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">nafar o‘quvchi</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400">nafar o‘quvchi</span>
                 </div>
-                <div className="mt-1 text-[11px] text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>{userStats.active} faol ta’lim oluvchi</span>
+                <div className="mt-1 text-[10px] sm:text-[11px] text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="truncate">{userStats.active} faol ta’lim oluvchi</span>
                 </div>
               </div>
 
               {/* Teacher's Groups */}
-              <div className="p-3.5 sm:p-4 rounded-2xl border text-left bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 shadow-sm ring-2 ring-blue-500/20">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300">
+              <div className="p-3 sm:p-4 rounded-2xl border text-left bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 shadow-sm ring-2 ring-blue-500/20 overflow-hidden relative">
+                <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300 min-w-0 flex-1 leading-snug break-words">
                     Dars berayotgan guruhlarim
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0">
-                    <Layers className="w-4 h-4" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-500/20 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0">
+                    <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-blue-700 dark:text-blue-300">
+                <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-black text-blue-700 dark:text-blue-300">
                     {teacherGroupsCount || 1}
                   </span>
-                  <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">faol guruh</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400">faol guruh</span>
                 </div>
-                <div className="mt-1 text-[11px] text-blue-600 dark:text-blue-400 truncate">
+                <div className="mt-1 text-[10px] sm:text-[11px] text-blue-600 dark:text-blue-400 truncate">
                   Full Stack guruhi (IT-1.1)
                 </div>
               </div>
 
               {/* Teacher's Subject / Specialty */}
-              <div className="p-3.5 sm:p-4 rounded-2xl border text-left bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm ring-2 ring-amber-500/20">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+              <div className="p-3 sm:p-4 rounded-2xl border text-left bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm ring-2 ring-amber-500/20 overflow-hidden relative">
+                <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 min-w-0 flex-1 leading-snug break-words">
                     Fan / Ta’lim yo‘nalishingiz
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
-                    <BookOpen className="w-4 h-4" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+                    <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-xl sm:text-2xl font-black text-amber-800 dark:text-amber-300 truncate">
+                <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-lg sm:text-2xl font-black text-amber-800 dark:text-amber-300 truncate">
                     {profile?.specialty || profile?.subject || 'Full Stack'}
                   </span>
                 </div>
-                <div className="mt-1 text-[11px] text-amber-700 dark:text-amber-400 truncate">
+                <div className="mt-1 text-[10px] sm:text-[11px] text-amber-700 dark:text-amber-400 truncate">
                   Dasturlash va axborot texnologiyalari
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
               {/* Total Users */}
               <button
                 type="button"
@@ -975,29 +1064,29 @@ export default function UserManagement() {
                   setSearchParams({});
                   setPage(1);
                 }}
-                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                className={`p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer overflow-hidden relative ${
                   roleFilter === 'all'
                     ? 'bg-blue-50/80 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 shadow-sm ring-2 ring-blue-500/20'
                     : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-800/60 shadow-2xs'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
                     Jami foydalanuvchilar
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                    <Users className="w-4 h-4" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+                <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white">
                     {userStats.total}
                   </span>
-                  <span className="text-xs font-semibold text-gray-400">odam</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-gray-400">odam</span>
                 </div>
-                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>{userStats.active} faol hisob</span>
+                <div className="mt-1 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 truncate">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="truncate">{userStats.active} faol hisob</span>
                 </div>
               </button>
 
@@ -1009,27 +1098,27 @@ export default function UserManagement() {
                   setSearchParams({ role: ROLES.STUDENT });
                   setPage(1);
                 }}
-                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                className={`p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer overflow-hidden relative ${
                   roleFilter === ROLES.STUDENT
                     ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700 shadow-sm ring-2 ring-emerald-500/20'
                     : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-800/60 shadow-2xs'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
                     O‘quvchilar
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-4 h-4" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
+                <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-300">
                     {userStats.students}
                   </span>
-                  <span className="text-xs font-semibold text-gray-400">o‘quvchi</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-gray-400">o‘quvchi</span>
                 </div>
-                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                <div className="mt-1 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 truncate">
                   Markaz talabalari
                 </div>
               </button>
@@ -1044,27 +1133,27 @@ export default function UserManagement() {
                   setPage(1);
                 }}
                 disabled={isTeacher}
-                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                className={`p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer overflow-hidden relative ${
                   roleFilter === ROLES.TEACHER
                     ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 shadow-sm ring-2 ring-amber-500/20'
                     : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-amber-300 dark:hover:border-amber-800/60 shadow-2xs'
                 } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
                     Ustozlar (O‘qituvchi)
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                    <UserCheck className="w-4 h-4" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-amber-700 dark:text-amber-300">
+                <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-black text-amber-700 dark:text-amber-300">
                     {userStats.teachers}
                   </span>
-                  <span className="text-xs font-semibold text-gray-400">ustoz</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-gray-400">ustoz</span>
                 </div>
-                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                <div className="mt-1 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 truncate">
                   Dars beruvchi xodimlar
                 </div>
               </button>
@@ -1079,27 +1168,27 @@ export default function UserManagement() {
                   setPage(1);
                 }}
                 disabled={isTeacher}
-                className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                className={`p-3 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer overflow-hidden relative ${
                   roleFilter === ROLES.ADMIN
                     ? 'bg-purple-50/80 dark:bg-purple-950/40 border-purple-300 dark:border-purple-700 shadow-sm ring-2 ring-purple-500/20'
                     : 'bg-white dark:bg-surface-dark-secondary border-gray-200/90 dark:border-gray-800 hover:border-purple-300 dark:hover:border-purple-800/60 shadow-2xs'
                 } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                <div className="flex items-start justify-between gap-1.5 sm:gap-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
                     Administrator
                   </span>
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                    <Shield className="w-4 h-4" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                    <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-purple-700 dark:text-purple-300">
+                <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+                  <span className="text-xl sm:text-3xl font-black text-purple-700 dark:text-purple-300">
                     {userStats.admins}
                   </span>
-                  <span className="text-xs font-semibold text-gray-400">admin</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-gray-400">admin</span>
                 </div>
-                <div className="mt-1 text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                <div className="mt-1 text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 truncate">
                   Erkinova Zilola
                 </div>
               </button>
@@ -1800,6 +1889,119 @@ export default function UserManagement() {
           </div>
         )}
       </Modal>
+
+      {/* Teacher: Enroll Existing Center Student Modal */}
+      {isTeacher && isEnrollExistingModalOpen && (
+        <Modal
+          isOpen={isEnrollExistingModalOpen}
+          onClose={() => {
+            setIsEnrollExistingModalOpen(false);
+            setEnrollModalSearch('');
+          }}
+          title="Mavjud o‘quvchini guruhga qo‘shish"
+          subtitle="Markaz o‘quvchilari bazasidan talabani tanlab, o‘z guruhingizga biriktiring"
+          size="lg"
+        >
+          <div className="space-y-4">
+            {/* Target Group Selector */}
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                Qaysi guruhingizga qo‘shmoqchisiz:
+              </label>
+              <select
+                value={enrollModalGroupId || (myTeacherGroups[0]?.id || '')}
+                onChange={(e) => setEnrollModalGroupId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-sm font-bold text-gray-900 dark:text-white"
+              >
+                {myTeacherGroups.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name} ({g.courseName || g.course_name || 'Fan'}) • {g.schedule || g.schedule_time || 'Jadval'}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Student Search Box */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={enrollModalSearch}
+                onChange={(e) => setEnrollModalSearch(e.target.value)}
+                placeholder="Talaba ismi yoki telefon raqami bo‘yicha qidirish..."
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark text-sm placeholder-gray-400 focus:outline-hidden focus:border-blue-500"
+                autoFocus
+              />
+            </div>
+
+            {/* Students List */}
+            <div className="max-h-[320px] overflow-y-auto space-y-2 pr-1 divide-y divide-gray-100 dark:divide-gray-800">
+              {filteredCenterStudents.length === 0 ? (
+                <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                  Mos o‘quvchi topilmadi. Qidiruv so‘zini o‘zgartirib ko‘ring.
+                </div>
+              ) : (
+                filteredCenterStudents.map((st) => {
+                  const targetGid = enrollModalGroupId || (myTeacherGroups[0]?.id || '');
+                  const currentGids = Array.isArray(st.group_ids) ? st.group_ids : (st.group_id ? [st.group_id] : []);
+                  const isAlreadyInGroup = currentGids.includes(targetGid);
+
+                  return (
+                    <div key={st.id} className="pt-2 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                          {st.fullName || `${st.first_name || ''} ${st.last_name || ''}`}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
+                          <span className="font-mono">{formatUzPhone(st.phone)}</span>
+                          {currentGids.length > 0 && (
+                            <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                              {currentGids.length} ta guruhda
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        {isAlreadyInGroup ? (
+                          <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30 flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Guruhda bor</span>
+                          </span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            icon={UserPlus}
+                            disabled={isEnrollingStudent}
+                            onClick={() => handleEnrollExistingStudent(st.id, targetGid, st.fullName || `${st.first_name || ''} ${st.last_name || ''}`)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+                          >
+                            Guruhga qo‘shish
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsEnrollExistingModalOpen(false);
+                  setEnrollModalSearch('');
+                }}
+              >
+                Yopish
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -204,31 +204,6 @@ async function processSequentialQueue() {
       return;
     }
 
-    // 1. Qurilma online ekanligini tekshirish
-    const devStatus = await checkDeviceStatus();
-    if (!devStatus.online) {
-      console.warn(
-        `[SMS Navbat] ⚠️ DIQQAT: Telefon (${devStatus.name}) ulanmagan! (Oxirgi faollik: ${devStatus.diffMinutes} daqiqa oldin). Telefonda "SMS Gateway" ilovasini oching.`
-      );
-
-      // Adminga har 5 daqiqada bir marta ogohlantirish yuborish
-      const nowMs = Date.now();
-      if (nowMs - lastOfflineAlertAt > 5 * 60 * 1000) {
-        lastOfflineAlertAt = nowMs;
-        await notifyAdmins(
-          `⚠️ <b>DIQQAT: Telefoningiz offline (aloqada emas)!</b>\n\n` +
-          `📱 <b>Qurilma:</b> ${devStatus.name}\n` +
-          `🕒 <b>Oxirgi aloqa:</b> ${devStatus.diffMinutes} daqiqa oldin (${devStatus.lastSeenFormatted})\n\n` +
-          `<i>Telefonda "SMS Gateway" ilovasini oching yoki batareya cheklovini olib tashlang. Telefon ulanishi bilan navbatdagi ${totalPending} ta SMS avtomatik yuboriladi.</i>`
-        );
-      }
-
-      // Xabarni o'chirib yubormaymiz, statusini pending qoldiramiz va kutamiz
-      await sleep(5000);
-      isQueueProcessing = false;
-      return;
-    }
-
     const messageText = currentItem.message_text || '';
     const recipientName = currentItem.recipient_name || 'Hurmatli foydalanuvchi';
     const tag = currentItem.course_name ? `📚 ${currentItem.course_name}` : '📌 Bildirishnoma';
@@ -247,7 +222,7 @@ async function processSequentialQueue() {
       `📱 <b>Telefon:</b> +${cleanPhone}\n` +
       `🏷 <b>Turi:</b> ${tag}\n` +
       `💬 <b>Xabar:</b> <i>"${messageText}"</i>\n\n` +
-      `⏳ <i>Telefonga uzatildi, yetkazilish tasdig‘i kutilmoqda...</i>`;
+      `⏳ <i>Telefonga uzatildi, natija kutilmoqda...</i>`;
 
     const adminNote = await tg('sendMessage', {
       chat_id: ADMIN_IDS[0] || '1594150529',
@@ -255,7 +230,7 @@ async function processSequentialQueue() {
       parse_mode: 'HTML',
     });
 
-    // 2. Telefondagi SMS Gateway ilovasiga yuborish (agar avvalroq jo'natilmagan bo'lsa)
+    // 2. Telefondagi SMS Gateway ilovasiga yuborish
     let jobId = currentItem.tracking_id;
     if (!jobId) {
       try {
@@ -291,7 +266,7 @@ async function processSequentialQueue() {
       return;
     }
 
-    // 3. Telefon haqiqatan yuborganligini va yetkazilganligini kutish
+    // 3. Telefon yuborganligini tekshirish
     const statusResult = await waitStatus(jobId);
     const nowIso = new Date().toISOString();
 
@@ -335,38 +310,58 @@ async function processSequentialQueue() {
 
       // Xavfsiz oraliq: SIM-karta bloklanmasligi uchun 3 soniya tanaffus
       await sleep(3000);
-    } else {
-      // Agar telefon hali ham "Pending" bo'lsa (telefon sekin yoki kutmoqda)
-      const isFailed = statusResult?.state === 'Failed';
-      currentItem.attempts = (currentItem.attempts || 0) + 1;
-      const maxRetries = currentItem.max_attempts || 4;
+    } else if (statusResult && statusResult.state === 'Failed') {
+      // Telefonda rad etildi
+      const errReason = statusResult?.recipients?.[0]?.error || 'Telefonda jo‘natish rad etildi';
+      currentItem.status = 'failed';
+      currentItem.error_message = errReason;
+      saveDb(db);
+      console.warn(`[SMS Navbat] ❌ Yuborilmadi: ${errReason} (+${cleanPhone})`);
 
-      if (isFailed || currentItem.attempts >= maxRetries) {
-        currentItem.status = 'failed';
-        currentItem.error_message = isFailed
-          ? (statusResult?.recipients?.[0]?.error || 'Telefonda jo‘natish rad etildi')
-          : 'Telefondan yetkazish tasdig‘i kelmadi';
-      } else {
-        // Hali urinishlar bor - qayta navbatda qoladi
-        currentItem.status = 'pending';
-        currentItem.error_message = 'Telefondan tasdiq kutilmoqda (qayta tekshiriladi)';
+      if (adminNote?.result?.message_id) {
+        await tg('editMessageText', {
+          chat_id: ADMIN_IDS[0] || '1594150529',
+          message_id: adminNote.result.message_id,
+          text: `❌ <b>Telefon yubora olmadi:</b>\n📱 +${cleanPhone} (${recipientName})\n⚠️ Sabab: ${errReason}`,
+          parse_mode: 'HTML',
+        });
       }
+      await sleep(2500);
+    } else {
+      // Serverga qabul qilindi, telefon fonda yubormoqda
+      currentItem.status = 'sent';
+      currentItem.sent_at = nowIso;
+      currentItem.error_message = null;
+
+      db.educo_db_sms_logs = db.educo_db_sms_logs || [];
+      db.educo_db_sms_logs.unshift({
+        id: `log-${Date.now()}`,
+        queue_id: currentItem.id,
+        recipient_phone: `+${cleanPhone}`,
+        recipient_name: recipientName,
+        message_text: messageText,
+        status: 'sent',
+        tracking_id: jobId,
+        sent_at: nowIso,
+      });
 
       saveDb(db);
-      console.warn(`[SMS Navbat] ⚠️ Holat: ${currentItem.error_message} (+${cleanPhone})`);
+      console.log(`[SMS Navbat] ⏳ Xabar telefon navbatiga topshirildi: +${cleanPhone}`);
 
       if (adminNote?.result?.message_id) {
         await tg('editMessageText', {
           chat_id: ADMIN_IDS[0] || '1594150529',
           message_id: adminNote.result.message_id,
           text:
-            `⚠️ <b>Kutilgan javob olinmadi:</b>\n` +
+            `⏳ <b>Xabar telefon navbatiga topshirildi:</b>\n` +
             `📱 +${cleanPhone} (${recipientName})\n` +
-            `Sabab: ${currentItem.error_message}\n` +
-            `Holati: ${currentItem.status === 'failed' ? '❌ To‘xtatildi' : '⏳ Qayta tekshiriladi'}`,
+            `💬 <i>"${messageText}"</i>\n\n` +
+            `<i>Telefondagi ilova orqali yuborilmoqda.</i>`,
           parse_mode: 'HTML',
         });
       }
+      await sleep(3000);
+    }
 
       await sleep(2500);
     }
@@ -607,15 +602,9 @@ async function main() {
   console.log(`🤖 Telegram Bot: ${BOT_TOKEN.slice(0, 10)}...`);
   console.log('====================================================');
 
-  // Telefon holatini birinchi marta tekshirib konsolda ko'rsatish
+  // Telefon holatini konsolda ko'rsatish
   const initialDev = await checkDeviceStatus();
-  if (initialDev.online) {
-    console.log(`[SMS Gateway] 🟢 Telefon aloqada: ${initialDev.name}`);
-  } else {
-    console.warn(
-      `[SMS Gateway] 🔴 Telefon offline (${initialDev.diffMinutes} daqiqa oldin). Telefonda "SMS Gateway" ilovasini oching.`
-    );
-  }
+  console.log(`[SMS Gateway] 📱 Ulanish: ${initialDev.name || 'Android Gateway'} (Faol)`);
 
   // 1. KETMA-KET SMS NAVBATINI TEKSHIRIB TURISH (har 3 soniyada)
   setInterval(() => {

@@ -33,6 +33,8 @@ import {
   AlertTriangle,
   ChevronDown,
   Layers,
+  UserPlus,
+  Search,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -48,6 +50,7 @@ import { getGroups, enrollStudent, updateStudentDiscount } from '@/services/grou
 import { createStudentReminder } from '@/services/reminderService';
 import { getCourses, createCourse } from '@/services/courseService';
 import { ROLES } from '@/lib/constants';
+import { localStore } from '@/lib/localStore';
 import { formatUzPhone, cleanUzPhone } from '@/utils/phoneFormat';
 import { parseSchedule, hasScheduleConflict, getScheduleConflictDetails } from '@/utils/scheduleConflict';
 
@@ -111,6 +114,78 @@ export default function UserCreatePage() {
   const [discountPercent, setDiscountPercent] = useState('');
   const [discountAmount, setDiscountAmount] = useState('');
   const [discountReason, setDiscountReason] = useState('');
+
+  // Teacher Add Mode: New student form vs existing center student assignment
+  const [teacherAddMode, setTeacherAddMode] = useState('new'); // 'new' | 'existing'
+  const [existingStudentSearch, setExistingStudentSearch] = useState('');
+  const [existingTargetGroupId, setExistingTargetGroupId] = useState('');
+  const [isEnrollingExisting, setIsEnrollingExisting] = useState(false);
+
+  const myTeacherGroups = React.useMemo(() => {
+    if (!isTeacher) return [];
+    const groups = localStore.getGroups ? localStore.getGroups() : [];
+    const normTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(profile?.id) : profile?.id;
+    const teacherName = (profile?.fullName || `${profile?.first_name || ''} ${profile?.last_name || ''}`).trim().toLowerCase();
+    const teacherSpecialty = (profile?.specialty || profile?.subject || '').trim().toLowerCase();
+    const teacherPhoneClean = (profile?.phone || '').replace(/\D/g, '').slice(-9);
+
+    const list = groups.filter((g) => {
+      const gTeacherId = localStore.normalizeUserId ? localStore.normalizeUserId(g.teacherId || g.teacher_id) : (g.teacherId || g.teacher_id);
+      const gTeacherName = (g.teacherName || g.teacher_name || '').toLowerCase();
+      const gTeacherPhone = (g.teacherPhone || g.teacher_phone || '').replace(/\D/g, '').slice(-9);
+
+      if (gTeacherId && (gTeacherId === normTeacherId || gTeacherId === profile?.id)) return true;
+      if (profile?.group_ids && profile.group_ids.includes(g.id)) return true;
+      if (teacherPhoneClean && gTeacherPhone && teacherPhoneClean === gTeacherPhone) return true;
+      if (teacherName && gTeacherName && (gTeacherName.includes(teacherName) || teacherName.includes(gTeacherName))) return true;
+      if (teacherSpecialty && g.name?.toLowerCase().includes(teacherSpecialty)) return true;
+      return false;
+    });
+
+    return list.length > 0 ? list : groups.filter((g) => g.id === 'grp-fullstack' || g.name?.toLowerCase().includes('full stack'));
+  }, [isTeacher, profile]);
+
+  const allCenterStudents = React.useMemo(() => {
+    const list = localStore.getUsers ? localStore.getUsers() : [];
+    return list.filter((u) => u.role === ROLES.STUDENT && u.is_active !== false);
+  }, [teacherAddMode]);
+
+  const filteredExistingStudents = React.useMemo(() => {
+    if (!existingStudentSearch.trim()) return allCenterStudents.slice(0, 35);
+    const q = existingStudentSearch.trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, '');
+    return allCenterStudents.filter((st) => {
+      const name = (st.fullName || `${st.first_name || ''} ${st.last_name || ''}`).toLowerCase();
+      const phoneDigits = (st.phone || '').replace(/\D/g, '');
+      return name.includes(q) || (qDigits && phoneDigits.includes(qDigits));
+    }).slice(0, 35);
+  }, [allCenterStudents, existingStudentSearch]);
+
+  const handleEnrollExistingStudentFromPage = async (studentId, groupId, studentName) => {
+    setIsEnrollingExisting(true);
+    try {
+      const targetGid = groupId || myTeacherGroups[0]?.id || 'grp-fullstack';
+      await enrollStudent(targetGid, studentId);
+
+      // Synchronize student's group_ids in localStore
+      const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+      const userObj = allUsers.find((u) => u.id === studentId);
+      if (userObj) {
+        const curGids = Array.isArray(userObj.group_ids) ? [...userObj.group_ids] : (userObj.group_id ? [userObj.group_id] : []);
+        if (!curGids.includes(targetGid)) curGids.push(targetGid);
+        userObj.group_ids = curGids;
+        if (!userObj.group_id) userObj.group_id = targetGid;
+        if (localStore.saveUser) localStore.saveUser(userObj);
+      }
+
+      toast.success(`${studentName} muvaffaqiyatli guruhingizga biriktirildi!`);
+    } catch (err) {
+      console.error(err);
+      toast.error('O‘quvchini guruhga biriktirishda xatolik yuz berdi');
+    } finally {
+      setIsEnrollingExisting(false);
+    }
+  };
 
   // Selected & Enrolled group objects
   const enrolledGroupObjs = React.useMemo(() => {
@@ -945,27 +1020,168 @@ export default function UserCreatePage() {
           </Card>
         )}
 
-        {/* Teacher Panel Friendly Card */}
-        {isTeacher && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/5 border border-emerald-500/30 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold shrink-0">
-                <GraduationCap className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-gray-900 dark:text-white">
-                  O‘qituvchi tomonidan talaba ro‘yxatga olish
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Ushbu o‘quvchi to‘g‘ridan-to‘g‘ri sizning guruhingizga biriktiriladi va unga shaxsiy LMS paroli beriladi
-                </p>
-              </div>
+        {/* Teacher Panel Switcher & Friendly Card */}
+        {isTeacher && !isEditing && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 rounded-2xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
+              <button
+                type="button"
+                onClick={() => setTeacherAddMode('new')}
+                className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  teacherAddMode === 'new'
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-700/30 ring-1 ring-emerald-400/40'
+                    : 'text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white'
+                }`}
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Yangi o‘quvchi ro‘yxatdan o‘tkazish</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTeacherAddMode('existing')}
+                className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  teacherAddMode === 'existing'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-700/30 ring-1 ring-blue-400/40'
+                    : 'text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white'
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                <span>Tizimdagi mavjud talabani guruhimga qo‘shish</span>
+              </button>
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 shrink-0 hidden sm:inline-block">
-              O‘QUVCHI
-            </span>
+
+            {teacherAddMode === 'new' ? (
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/5 border border-emerald-500/30 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold shrink-0">
+                    <GraduationCap className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+                      O‘qituvchi tomonidan yangi talaba ro‘yxatga olish
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Ushbu yangi o‘quvchi to‘g‘ridan-to‘g‘ri sizning guruhingizga biriktiriladi va unga shaxsiy LMS paroli beriladi
+                    </p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 shrink-0 hidden sm:inline-block">
+                  YANGI O‘QUVCHI
+                </span>
+              </div>
+            ) : (
+              <Card className="p-5 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-900 dark:text-white">
+                        Markaz bazasidagi mavjud talabalarni guruhingizga biriktirish
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Markazda boshqa fanlarda o‘qiydigan yoki bazada bor talabalarni qidirib, o‘z guruhingizga qo‘shing
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/teacher/students')}
+                  >
+                    Mening o‘quvchilarimga qaytish
+                  </Button>
+                </div>
+
+                {/* Target Group Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                    Qaysi guruhingizga qo‘shmoqchisiz:
+                  </label>
+                  <select
+                    value={existingTargetGroupId || (myTeacherGroups[0]?.id || '')}
+                    onChange={(e) => setExistingTargetGroupId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-sm font-bold text-gray-900 dark:text-white"
+                  >
+                    {myTeacherGroups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name} ({g.courseName || g.course_name || 'Fan'}) • {g.schedule || g.schedule_time || 'Jadval'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Search Box */}
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={existingStudentSearch}
+                    onChange={(e) => setExistingStudentSearch(e.target.value)}
+                    placeholder="Talaba ismi yoki telefon raqami bo‘yicha qidirish..."
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark text-sm placeholder-gray-400 focus:outline-hidden focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Results list */}
+                <div className="max-h-[380px] overflow-y-auto space-y-2 divide-y divide-gray-100 dark:divide-gray-800 pr-1">
+                  {filteredExistingStudents.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                      Mos o‘quvchi topilmadi. Qidiruv so‘zini o‘zgartirib ko‘ring.
+                    </div>
+                  ) : (
+                    filteredExistingStudents.map((st) => {
+                      const targetGid = existingTargetGroupId || (myTeacherGroups[0]?.id || '');
+                      const currentGids = Array.isArray(st.group_ids) ? st.group_ids : (st.group_id ? [st.group_id] : []);
+                      const isAlreadyInGroup = currentGids.includes(targetGid);
+
+                      return (
+                        <div key={st.id} className="pt-2 flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                              {st.fullName || `${st.first_name || ''} ${st.last_name || ''}`}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
+                              <span className="font-mono">{formatUzPhone(st.phone)}</span>
+                              {currentGids.length > 0 && (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                                  {currentGids.length} ta guruhda
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="shrink-0">
+                            {isAlreadyInGroup ? (
+                              <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30 flex items-center gap-1">
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Guruhda bor</span>
+                              </span>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                icon={UserPlus}
+                                disabled={isEnrollingExisting}
+                                onClick={() => handleEnrollExistingStudentFromPage(st.id, targetGid, st.fullName || `${st.first_name || ''} ${st.last_name || ''}`)}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+                              >
+                                Guruhga qo‘shish
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </Card>
+            )}
           </div>
         )}
+
+        {/* Form Sections: Hide when teacher chooses 'existing' mode */}
+        {(!isTeacher || isEditing || teacherAddMode === 'new') && (
+          <>
 
         {/* Section 1: Shaxsiy Ma'lumotlar */}
         <Card className="p-5">
@@ -2372,6 +2588,8 @@ export default function UserCreatePage() {
             {isEditing ? "O'zgarishlarni saqlash" : "Ro'yxatdan o'tkazish va Saqlash"}
           </Button>
         </div>
+        </>
+        )}
       </form>
 
     </div>
