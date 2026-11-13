@@ -4,10 +4,28 @@
 
 import fs from 'fs';
 import path from 'path';
+import net from 'net';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Bitta kompyuterda faqat 1 ta bot jarayoni ishlashini ta'minlash (Singleton Mutex)
+const LOCK_PORT = 59123;
+function acquireSingletonLock() {
+  return new Promise((resolve) => {
+    const s = net.createServer();
+    s.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log('ℹ️ [bot.js] Boshqa bot jarayoni allaqachon ishlab turibdi. Ushbu nusxa to‘xtatildi.');
+        process.exit(0);
+      }
+      resolve(false);
+    });
+    s.once('listening', () => resolve(true));
+    s.listen(LOCK_PORT, '127.0.0.1');
+  });
+}
 
 // ====== ASOSIY SOZLAMALAR ======
 const BOT_TOKEN = process.env.BOT_TOKEN || '6939455511:AAF3lg3N6FdScstAgBC0zxvyvFELFoBYUJI';
@@ -581,6 +599,8 @@ async function handleTelegramMessage(msg) {
 // 4. ASOSIY ISHGA TUSHIRISH (MAIN)
 // ==============================================================================
 async function main() {
+  await acquireSingletonLock();
+
   console.log('====================================================');
   console.log('🚀 EDUCO LMS SMS & Telegram Bot xizmati ishga tushdi!');
   console.log(`📱 SMS Gateway: ${SMS_USER} (${SMS_API})`);
