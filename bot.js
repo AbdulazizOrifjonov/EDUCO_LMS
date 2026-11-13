@@ -63,6 +63,69 @@ function saveDb(db) {
   }
 }
 
+// --- CLOUDFLARE SYNC: Termux & Remote Server Qo'llab-quvvatlash ---
+const CLOUD_SYNC_URL = process.env.CLOUD_SYNC_URL || 'https://educo-lms.pages.dev';
+let lastCloudSyncAt = 0;
+
+async function syncCloudStore() {
+  if (!CLOUD_SYNC_URL) return;
+  const now = Date.now();
+  if (now - lastCloudSyncAt < 4000) return;
+  lastCloudSyncAt = now;
+
+  try {
+    const res = await fetch(`${CLOUD_SYNC_URL}/api/sync-store?force=1`);
+    if (!res.ok) return;
+    const cloudData = await res.json();
+    if (!cloudData || typeof cloudData !== 'object') return;
+
+    const db = getDb();
+    let changed = false;
+
+    if (Array.isArray(cloudData.educo_db_sms_queue) && cloudData.educo_db_sms_queue.length > 0) {
+      db.educo_db_sms_queue = db.educo_db_sms_queue || [];
+      for (const cloudItem of cloudData.educo_db_sms_queue) {
+        const localIdx = db.educo_db_sms_queue.findIndex((q) => q.id === cloudItem.id);
+        if (localIdx === -1) {
+          db.educo_db_sms_queue.push(cloudItem);
+          changed = true;
+        } else if (cloudItem.status && localIdx >= 0) {
+          if (db.educo_db_sms_queue[localIdx].status === 'pending' && cloudItem.status !== 'pending') {
+            db.educo_db_sms_queue[localIdx] = cloudItem;
+            changed = true;
+          }
+        }
+      }
+    }
+
+    if (cloudData.educo_db_sms_settings) {
+      db.educo_db_sms_settings = {
+        ...db.educo_db_sms_settings,
+        ...cloudData.educo_db_sms_settings,
+      };
+      changed = true;
+    }
+
+    if (changed) {
+      saveDb(db);
+    }
+  } catch (_) {}
+}
+
+async function pushQueueToCloud() {
+  if (!CLOUD_SYNC_URL) return;
+  try {
+    await syncCloudStore();
+    const db = getDb();
+    const queue = db.educo_db_sms_queue || [];
+    await fetch(`${CLOUD_SYNC_URL}/api/sync-store`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ educo_db_sms_queue: queue }),
+    });
+  } catch (_) {}
+}
+
 // --- TELEGRAM API WRAPPER ---
 async function tg(method, body) {
   try {
@@ -179,6 +242,7 @@ async function processSequentialQueue() {
   isQueueProcessing = true;
 
   try {
+    await syncCloudStore();
     const db = getDb();
     const queue = db.educo_db_sms_queue || [];
     const settings = db.educo_db_sms_settings || {};
@@ -309,6 +373,7 @@ async function processSequentialQueue() {
       });
 
       saveDb(db);
+      pushQueueToCloud().catch(() => {});
       console.log(`[SMS Navbat] ✅ Yuborildi va tasdiqlandi: +${cleanPhone}`);
 
       if (adminNote?.result?.message_id) {
@@ -334,6 +399,7 @@ async function processSequentialQueue() {
       currentItem.status = 'failed';
       currentItem.error_message = errReason;
       saveDb(db);
+      pushQueueToCloud().catch(() => {});
       console.warn(`[SMS Navbat] ❌ Yuborilmadi: ${errReason} (+${cleanPhone})`);
 
       if (adminNote?.result?.message_id) {
@@ -394,6 +460,7 @@ async function processSequentialQueue() {
 // ==============================================================================
 function populateDebtorsToQueue() {
   try {
+    await syncCloudStore();
     const db = getDb();
     const settings = db.educo_db_sms_settings || {};
     const debtorSmsEnabled = Boolean(settings.debtor_sms_enabled);
