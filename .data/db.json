@@ -8987,7 +8987,7 @@
       "recipient_name": "Telegram orqali yozilgan",
       "recipient_type": "manual",
       "message_text": "saloma t",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "created_at": "2026-11-13T14:47:50.364Z",
@@ -8995,8 +8995,17 @@
       "last_attempt_at": "2026-11-13T16:47:13.543Z",
       "tracking_id": "t5VOlm46po8Vy5tWtYNsy",
       "sent_at": "2026-11-13T16:47:20.338Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:47:18.48+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:47:16.65+03:00",
+      "android_sent_at": "2026-11-13T19:47:16.957+03:00",
+      "lms_latency_ms": 7163149,
+      "cloud_to_phone_latency_ms": 3130,
+      "phone_to_carrier_latency_ms": 307,
+      "android_latency_ms": 3437,
+      "carrier_latency_ms": 1523,
+      "total_latency_ms": 7168109,
+      "updated_at": "2026-11-13T17:52:13.312Z"
     },
     {
       "id": "sms-deb-1794587447024-mkivb",
@@ -9007,7 +9016,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Ismoil Arslonovning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-930098339-grp-matematika-2026-11",
@@ -9017,8 +9026,17 @@
       "last_attempt_at": "2026-11-13T16:47:28.125Z",
       "tracking_id": "vQ526RNsqzGMGcjkgZXH-",
       "sent_at": "2026-11-13T16:47:36.218Z",
-      "delivered_at": "2026-11-13T16:47:36.218Z",
-      "error_message": null
+      "delivered_at": "2026-11-13T19:47:34.55+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:47:32.567+03:00",
+      "android_sent_at": "2026-11-13T19:47:32.972+03:00",
+      "lms_latency_ms": 1001436,
+      "cloud_to_phone_latency_ms": 3963,
+      "phone_to_carrier_latency_ms": 405,
+      "android_latency_ms": 4368,
+      "carrier_latency_ms": 1578,
+      "total_latency_ms": 1007382,
+      "updated_at": "2026-11-13T17:52:13.296Z"
     },
     {
       "id": "sms-deb-1794587447199-98eb9",
@@ -9029,7 +9047,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Ismoil Arslonovning Full Stack guruhi (IT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Full Stack guruhi (IT-1.1)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-930098339-grp-fullstack-2026-11",
@@ -9039,8 +9057,17 @@
       "last_attempt_at": "2026-11-13T16:47:43.209Z",
       "tracking_id": "7WQQM_rkmGkcddq_YAByd",
       "sent_at": "2026-11-13T16:47:51.270Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:47:50+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:47:48.143+03:00",
+      "android_sent_at": "2026-11-13T19:47:48.369+03:00",
+      "lms_latency_ms": 1016319,
+      "cloud_to_phone_latency_ms": 4624,
+      "phone_to_carrier_latency_ms": 226,
+      "android_latency_ms": 4850,
+      "carrier_latency_ms": 1631,
+      "total_latency_ms": 1022800,
+      "updated_at": "2026-11-13T17:52:13.280Z"
     },
     {
       "id": "sms-deb-1794587447201-z6ub0",
@@ -9051,7 +9078,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Zafir Mamadjonovning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-901236463-grp-matematika-2026-11",
@@ -9061,8 +9088,17 @@
       "last_attempt_at": "2026-11-13T16:47:58.181Z",
       "tracking_id": "vvU9pqUchhIAi8RhHnpwa",
       "sent_at": "2026-11-13T16:48:04.498Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:48:04.107+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:48:00.936+03:00",
+      "android_sent_at": "2026-11-13T19:48:01.184+03:00",
+      "lms_latency_ms": 1032070,
+      "cloud_to_phone_latency_ms": 1665,
+      "phone_to_carrier_latency_ms": 248,
+      "android_latency_ms": 1913,
+      "carrier_latency_ms": 2923,
+      "total_latency_ms": 1036906,
+      "updated_at": "2026-11-13T17:52:13.265Z"
     },
     {
       "id": "sms-deb-1794587447201-dofyl",
@@ -9073,7 +9109,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Muslima Abdurahmonovaning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-998580121-grp-matematika-2026-11",
@@ -9083,8 +9119,17 @@
       "last_attempt_at": "2026-11-13T16:48:10.285Z",
       "tracking_id": "HpCH5WIsI5_VKeW-bfT_l",
       "sent_at": "2026-11-13T16:48:28.461Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:48:49.77+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:48:12.706+03:00",
+      "android_sent_at": "2026-11-13T19:48:12.933+03:00",
+      "lms_latency_ms": 1043728,
+      "cloud_to_phone_latency_ms": 1777,
+      "phone_to_carrier_latency_ms": 227,
+      "android_latency_ms": 2004,
+      "carrier_latency_ms": 36837,
+      "total_latency_ms": 1082569,
+      "updated_at": "2026-11-13T17:52:13.248Z"
     },
     {
       "id": "sms-deb-1794587447246-3ftgw",
@@ -9095,7 +9140,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Abdulaziz Abdurahmonovning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-998580121-abdula-grp-matematika-2026-11",
@@ -9105,8 +9150,17 @@
       "last_attempt_at": "2026-11-13T16:48:36.970Z",
       "tracking_id": "bKS2Jsteqa4sQI0H4bZ9Z",
       "sent_at": "2026-11-13T16:48:46.382Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:48:52.62+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:48:41.549+03:00",
+      "android_sent_at": "2026-11-13T19:48:41.75+03:00",
+      "lms_latency_ms": 1070232,
+      "cloud_to_phone_latency_ms": 4070,
+      "phone_to_carrier_latency_ms": 201,
+      "android_latency_ms": 4271,
+      "carrier_latency_ms": 10870,
+      "total_latency_ms": 1085373,
+      "updated_at": "2026-11-13T17:52:13.230Z"
     },
     {
       "id": "sms-deb-1794587447247-dpd5s",
@@ -9117,7 +9171,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Shoxbek Shuxratovning Matematika 1.2 (MAT-1.2) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.2 (MAT-1.2)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-998822309-grp-1793615416295-2026-11",
@@ -9127,8 +9181,17 @@
       "last_attempt_at": "2026-11-13T16:48:52.909Z",
       "tracking_id": "UeSzNezS49piF14IZhxrq",
       "sent_at": "2026-11-13T16:48:58.750Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:49:00.396+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:48:56.374+03:00",
+      "android_sent_at": "2026-11-13T19:48:56.648+03:00",
+      "lms_latency_ms": 1086157,
+      "cloud_to_phone_latency_ms": 2969,
+      "phone_to_carrier_latency_ms": 274,
+      "android_latency_ms": 3243,
+      "carrier_latency_ms": 3748,
+      "total_latency_ms": 1093148,
+      "updated_at": "2026-11-13T17:52:13.217Z"
     },
     {
       "id": "sms-deb-1794587447248-m359g",
@@ -9139,7 +9202,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Shoxbek Shuxratovning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-998822309-grp-matematika-2026-11",
@@ -9149,8 +9212,17 @@
       "last_attempt_at": "2026-11-13T16:49:04.127Z",
       "tracking_id": "Y9GbMfL8qrP6vz1IM4Axn",
       "sent_at": "2026-11-13T16:49:12.602Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:49:11.616+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:49:08.206+03:00",
+      "android_sent_at": "2026-11-13T19:49:08.481+03:00",
+      "lms_latency_ms": 1097901,
+      "cloud_to_phone_latency_ms": 3057,
+      "phone_to_carrier_latency_ms": 275,
+      "android_latency_ms": 3332,
+      "carrier_latency_ms": 3135,
+      "total_latency_ms": 1104368,
+      "updated_at": "2026-11-13T17:52:13.204Z"
     },
     {
       "id": "sms-deb-1794587447248-hb5gs",
@@ -9161,7 +9233,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Shoxbek Shuxratovning Ingliz tili 1.2 (ENG-1.2) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Ingliz tili 1.2 (ENG-1.2)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-998822309-grp-ingliz-tili-2-2026-11",
@@ -9171,8 +9243,17 @@
       "last_attempt_at": "2026-11-13T16:49:19.488Z",
       "tracking_id": "dt2c-YhPsGvmU41LJyWwm",
       "sent_at": "2026-11-13T16:49:28.912Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:49:30.095+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:49:25.888+03:00",
+      "android_sent_at": "2026-11-13T19:49:26.131+03:00",
+      "lms_latency_ms": 1114189,
+      "cloud_to_phone_latency_ms": 4451,
+      "phone_to_carrier_latency_ms": 243,
+      "android_latency_ms": 4694,
+      "carrier_latency_ms": 3964,
+      "total_latency_ms": 1122847,
+      "updated_at": "2026-11-13T17:52:13.191Z"
     },
     {
       "id": "sms-deb-1794587447318-io2yh",
@@ -9183,7 +9264,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Amirxon Baxavaddinovning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "sent",
+      "status": "DELIVERED",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-977608589-grp-matematika-2026-11",
@@ -9193,8 +9274,17 @@
       "last_attempt_at": "2026-11-13T16:49:34.464Z",
       "tracking_id": "opGqZke_alL10hqqXacLe",
       "sent_at": "2026-11-13T16:49:39.410Z",
-      "delivered_at": null,
-      "error_message": null
+      "delivered_at": "2026-11-13T19:49:38.455+03:00",
+      "error_message": null,
+      "android_received_at": "2026-11-13T19:49:35.903+03:00",
+      "android_sent_at": "2026-11-13T19:49:36.212+03:00",
+      "lms_latency_ms": 1127527,
+      "cloud_to_phone_latency_ms": 1058,
+      "phone_to_carrier_latency_ms": 309,
+      "android_latency_ms": 1367,
+      "carrier_latency_ms": 2243,
+      "total_latency_ms": 1131137,
+      "updated_at": "2026-11-13T17:52:13.179Z"
     },
     {
       "id": "sms-deb-1794587447319-nxkv9",
@@ -9223,7 +9313,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Umar To'laganovning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "sent",
+      "status": "UNKNOWN",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-908189959-grp-matematika-2026-11",
@@ -9233,7 +9323,9 @@
       "last_attempt_at": "2026-11-13T17:15:15.685Z",
       "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
       "sent_at": "2026-11-13T17:16:24.470Z",
-      "error_message": null
+      "error_message": "Yetkazilganlik hisoboti kelmagan (Gateway kutish vaqti 30 daqiqadan oshdi)",
+      "lms_latency_ms": 2671112,
+      "updated_at": "2026-11-13T18:06:59.356Z"
     },
     {
       "id": "sms-deb-1794587447455-hiky7",
@@ -9244,7 +9336,7 @@
       "message_text": "Hurmatli ota-ona! Farzandingiz Faxriddin Kamolovning Matematika 1.1 (MAT-1.1) kursi uchun 1 200 000 so'm to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS",
       "amount_due": 1200000,
       "course_name": "Matematika 1.1 (MAT-1.1)",
-      "status": "cancelled",
+      "status": "UNKNOWN",
       "attempts": 0,
       "max_attempts": 3,
       "idempotency_key": "sms-bill-usr-student-935436617-grp-matematika-2026-11",
@@ -9252,7 +9344,10 @@
       "created_at": "2026-11-13T16:30:47.455Z",
       "queued_at": "2026-11-13T16:30:47.455Z",
       "last_attempt_at": "2026-11-13T17:16:36.512Z",
-      "tracking_id": "HkZt56038OuCA2xu8545W"
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "error_message": "Yetkazilganlik hisoboti kelmagan (Gateway kutish vaqti 30 daqiqadan oshdi)",
+      "lms_latency_ms": 2753715,
+      "updated_at": "2026-11-13T18:06:59.256Z"
     },
     {
       "id": "sms-deb-1794587447455-93wxg",
@@ -12185,6 +12280,892 @@
       },
       "error_details": null,
       "created_at": "2026-11-06T09:08:26.505Z"
+    },
+    {
+      "id": "sms-log-1794592333176-5vff",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.176Z"
+    },
+    {
+      "id": "sms-log-1794592333162-ws05",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.162Z"
+    },
+    {
+      "id": "sms-log-1794592333187-kcws",
+      "queue_id": "sms-deb-1794587447318-io2yh",
+      "tracking_id": "opGqZke_alL10hqqXacLe",
+      "device_id": null,
+      "recipient_phone": "+998977608589",
+      "recipient_name": "Amirxon Baxavaddinov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:49:34.845+03:00",
+      "android_received_at": "2026-11-13T19:49:35.903+03:00",
+      "android_sent_at": "2026-11-13T19:49:36.212+03:00",
+      "delivered_at": "2026-11-13T19:49:38.455+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:49:38.455+03:00",
+          "Pending": "2026-11-13T19:49:34.845+03:00",
+          "Processed": "2026-11-13T19:49:35.903+03:00",
+          "Sent": "2026-11-13T19:49:36.212+03:00"
+        },
+        "lms_latency_ms": 1127527,
+        "cloud_to_phone_latency_ms": 1058,
+        "phone_to_carrier_latency_ms": 309,
+        "carrier_latency_ms": 2243,
+        "total_latency_ms": 1131137
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.187Z"
+    },
+    {
+      "id": "sms-log-1794592333201-f5ia",
+      "queue_id": "sms-deb-1794587447248-hb5gs",
+      "tracking_id": "dt2c-YhPsGvmU41LJyWwm",
+      "device_id": null,
+      "recipient_phone": "+998998822309",
+      "recipient_name": "Shoxbek Shuxratov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:49:21.437+03:00",
+      "android_received_at": "2026-11-13T19:49:25.888+03:00",
+      "android_sent_at": "2026-11-13T19:49:26.131+03:00",
+      "delivered_at": "2026-11-13T19:49:30.095+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:49:30.095+03:00",
+          "Pending": "2026-11-13T19:49:21.437+03:00",
+          "Processed": "2026-11-13T19:49:25.888+03:00",
+          "Sent": "2026-11-13T19:49:26.131+03:00"
+        },
+        "lms_latency_ms": 1114189,
+        "cloud_to_phone_latency_ms": 4451,
+        "phone_to_carrier_latency_ms": 243,
+        "carrier_latency_ms": 3964,
+        "total_latency_ms": 1122847
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.201Z"
+    },
+    {
+      "id": "sms-log-1794592333213-s0yw",
+      "queue_id": "sms-deb-1794587447248-m359g",
+      "tracking_id": "Y9GbMfL8qrP6vz1IM4Axn",
+      "device_id": null,
+      "recipient_phone": "+998998822309",
+      "recipient_name": "Shoxbek Shuxratov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:49:05.149+03:00",
+      "android_received_at": "2026-11-13T19:49:08.206+03:00",
+      "android_sent_at": "2026-11-13T19:49:08.481+03:00",
+      "delivered_at": "2026-11-13T19:49:11.616+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:49:11.616+03:00",
+          "Pending": "2026-11-13T19:49:05.149+03:00",
+          "Processed": "2026-11-13T19:49:08.206+03:00",
+          "Sent": "2026-11-13T19:49:08.481+03:00"
+        },
+        "lms_latency_ms": 1097901,
+        "cloud_to_phone_latency_ms": 3057,
+        "phone_to_carrier_latency_ms": 275,
+        "carrier_latency_ms": 3135,
+        "total_latency_ms": 1104368
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.213Z"
+    },
+    {
+      "id": "sms-log-1794592333226-j04l",
+      "queue_id": "sms-deb-1794587447247-dpd5s",
+      "tracking_id": "UeSzNezS49piF14IZhxrq",
+      "device_id": null,
+      "recipient_phone": "+998998822309",
+      "recipient_name": "Shoxbek Shuxratov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:48:53.405+03:00",
+      "android_received_at": "2026-11-13T19:48:56.374+03:00",
+      "android_sent_at": "2026-11-13T19:48:56.648+03:00",
+      "delivered_at": "2026-11-13T19:49:00.396+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:49:00.396+03:00",
+          "Pending": "2026-11-13T19:48:53.405+03:00",
+          "Processed": "2026-11-13T19:48:56.374+03:00",
+          "Sent": "2026-11-13T19:48:56.648+03:00"
+        },
+        "lms_latency_ms": 1086157,
+        "cloud_to_phone_latency_ms": 2969,
+        "phone_to_carrier_latency_ms": 274,
+        "carrier_latency_ms": 3748,
+        "total_latency_ms": 1093148
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.226Z"
+    },
+    {
+      "id": "sms-log-1794592333243-kayl",
+      "queue_id": "sms-deb-1794587447246-3ftgw",
+      "tracking_id": "bKS2Jsteqa4sQI0H4bZ9Z",
+      "device_id": null,
+      "recipient_phone": "+998998580121",
+      "recipient_name": "Abdulaziz Abdurahmonov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:48:37.479+03:00",
+      "android_received_at": "2026-11-13T19:48:41.549+03:00",
+      "android_sent_at": "2026-11-13T19:48:41.75+03:00",
+      "delivered_at": "2026-11-13T19:48:52.62+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:48:52.62+03:00",
+          "Pending": "2026-11-13T19:48:37.475+03:00",
+          "Processed": "2026-11-13T19:48:41.549+03:00",
+          "Sent": "2026-11-13T19:48:41.75+03:00"
+        },
+        "lms_latency_ms": 1070232,
+        "cloud_to_phone_latency_ms": 4070,
+        "phone_to_carrier_latency_ms": 201,
+        "carrier_latency_ms": 10870,
+        "total_latency_ms": 1085373
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.243Z"
+    },
+    {
+      "id": "sms-log-1794592333261-hkxo",
+      "queue_id": "sms-deb-1794587447201-dofyl",
+      "tracking_id": "HpCH5WIsI5_VKeW-bfT_l",
+      "device_id": null,
+      "recipient_phone": "+998998580121",
+      "recipient_name": "Muslima Abdurahmonova (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:48:10.929+03:00",
+      "android_received_at": "2026-11-13T19:48:12.706+03:00",
+      "android_sent_at": "2026-11-13T19:48:12.933+03:00",
+      "delivered_at": "2026-11-13T19:48:49.77+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:48:49.77+03:00",
+          "Pending": "2026-11-13T19:48:10.928+03:00",
+          "Processed": "2026-11-13T19:48:12.706+03:00",
+          "Sent": "2026-11-13T19:48:12.933+03:00"
+        },
+        "lms_latency_ms": 1043728,
+        "cloud_to_phone_latency_ms": 1777,
+        "phone_to_carrier_latency_ms": 227,
+        "carrier_latency_ms": 36837,
+        "total_latency_ms": 1082569
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.261Z"
+    },
+    {
+      "id": "sms-log-1794592333277-9yvp",
+      "queue_id": "sms-deb-1794587447201-z6ub0",
+      "tracking_id": "vvU9pqUchhIAi8RhHnpwa",
+      "device_id": null,
+      "recipient_phone": "+998901236463",
+      "recipient_name": "Zafir Mamadjonov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:47:59.271+03:00",
+      "android_received_at": "2026-11-13T19:48:00.936+03:00",
+      "android_sent_at": "2026-11-13T19:48:01.184+03:00",
+      "delivered_at": "2026-11-13T19:48:04.107+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:48:04.107+03:00",
+          "Pending": "2026-11-13T19:47:59.27+03:00",
+          "Processed": "2026-11-13T19:48:00.936+03:00",
+          "Sent": "2026-11-13T19:48:01.184+03:00"
+        },
+        "lms_latency_ms": 1032070,
+        "cloud_to_phone_latency_ms": 1665,
+        "phone_to_carrier_latency_ms": 248,
+        "carrier_latency_ms": 2923,
+        "total_latency_ms": 1036906
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.277Z"
+    },
+    {
+      "id": "sms-log-1794592333292-mtyb",
+      "queue_id": "sms-deb-1794587447199-98eb9",
+      "tracking_id": "7WQQM_rkmGkcddq_YAByd",
+      "device_id": null,
+      "recipient_phone": "+998930098339",
+      "recipient_name": "Ismoil Arslonov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:47:43.519+03:00",
+      "android_received_at": "2026-11-13T19:47:48.143+03:00",
+      "android_sent_at": "2026-11-13T19:47:48.369+03:00",
+      "delivered_at": "2026-11-13T19:47:50+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:47:50+03:00",
+          "Pending": "2026-11-13T19:47:43.519+03:00",
+          "Processed": "2026-11-13T19:47:48.143+03:00",
+          "Sent": "2026-11-13T19:47:48.369+03:00"
+        },
+        "lms_latency_ms": 1016319,
+        "cloud_to_phone_latency_ms": 4624,
+        "phone_to_carrier_latency_ms": 226,
+        "carrier_latency_ms": 1631,
+        "total_latency_ms": 1022800
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.292Z"
+    },
+    {
+      "id": "sms-log-1794592333325-mk3e",
+      "queue_id": "sms-manual-1794581270364",
+      "tracking_id": "t5VOlm46po8Vy5tWtYNsy",
+      "device_id": null,
+      "recipient_phone": "+998933312253",
+      "recipient_name": "Telegram orqali yozilgan",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:47:13.52+03:00",
+      "android_received_at": "2026-11-13T19:47:16.65+03:00",
+      "android_sent_at": "2026-11-13T19:47:16.957+03:00",
+      "delivered_at": "2026-11-13T19:47:18.48+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:47:18.48+03:00",
+          "Pending": "2026-11-13T19:47:13.52+03:00",
+          "Processed": "2026-11-13T19:47:16.65+03:00",
+          "Sent": "2026-11-13T19:47:16.957+03:00"
+        },
+        "lms_latency_ms": 7163149,
+        "cloud_to_phone_latency_ms": 3130,
+        "phone_to_carrier_latency_ms": 307,
+        "carrier_latency_ms": 1523,
+        "total_latency_ms": 7168109
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.325Z"
+    },
+    {
+      "id": "sms-log-1794592333308-uhkw",
+      "queue_id": "sms-deb-1794587447024-mkivb",
+      "tracking_id": "vQ526RNsqzGMGcjkgZXH-",
+      "device_id": null,
+      "recipient_phone": "+998930098339",
+      "recipient_name": "Ismoil Arslonov (Qarzdorlik)",
+      "status": "DELIVERED",
+      "dispatched_at": "2026-11-13T19:47:28.604+03:00",
+      "android_received_at": "2026-11-13T19:47:32.567+03:00",
+      "android_sent_at": "2026-11-13T19:47:32.972+03:00",
+      "delivered_at": "2026-11-13T19:47:34.55+03:00",
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Delivered",
+        "states": {
+          "Delivered": "2026-11-13T19:47:34.55+03:00",
+          "Pending": "2026-11-13T19:47:28.604+03:00",
+          "Processed": "2026-11-13T19:47:32.567+03:00",
+          "Sent": "2026-11-13T19:47:32.972+03:00"
+        },
+        "lms_latency_ms": 1001436,
+        "cloud_to_phone_latency_ms": 3963,
+        "phone_to_carrier_latency_ms": 405,
+        "carrier_latency_ms": 1578,
+        "total_latency_ms": 1007382
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:13.308Z"
+    },
+    {
+      "id": "sms-log-1794592353477-2q22",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:33.477Z"
+    },
+    {
+      "id": "sms-log-1794592353454-gh02",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:33.454Z"
+    },
+    {
+      "id": "sms-log-1794592376734-dtl5",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:56.734Z"
+    },
+    {
+      "id": "sms-log-1794592376766-3ubr",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:52:56.766Z"
+    },
+    {
+      "id": "sms-log-1794592392066-11jo",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:53:12.066Z"
+    },
+    {
+      "id": "sms-log-1794592392089-keoj",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:53:12.089Z"
+    },
+    {
+      "id": "sms-log-1794592514678-6bqh",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:55:14.678Z"
+    },
+    {
+      "id": "sms-log-1794592514652-p234",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:55:14.652Z"
+    },
+    {
+      "id": "sms-log-1794592564518-b0l6",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:56:04.518Z"
+    },
+    {
+      "id": "sms-log-1794592564505-re5n",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T17:56:04.505Z"
+    },
+    {
+      "id": "sms-log-1794592979267-d01f",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:02:59.267Z"
+    },
+    {
+      "id": "sms-log-1794592979282-gjg2",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:02:59.282Z"
+    },
+    {
+      "id": "sms-log-1794592986085-6a7c",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:03:06.085Z"
+    },
+    {
+      "id": "sms-log-1794592986120-ajd7",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:03:06.120Z"
+    },
+    {
+      "id": "sms-log-1794593007610-f03p",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:03:27.610Z"
+    },
+    {
+      "id": "sms-log-1794593007635-i5xf",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:03:27.635Z"
+    },
+    {
+      "id": "sms-log-1794593016344-bcw7",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:03:36.344Z"
+    },
+    {
+      "id": "sms-log-1794593016363-z0z3",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:03:36.363Z"
+    },
+    {
+      "id": "sms-log-1794593090888-z4pn",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:04:50.888Z"
+    },
+    {
+      "id": "sms-log-1794593090915-xtvu",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:04:50.915Z"
+    },
+    {
+      "id": "sms-log-1794593219425-56t3",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:06:59.425Z"
+    },
+    {
+      "id": "sms-log-1794593219341-hnqo",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T18:06:59.341Z"
     }
   ],
   "educo_db_chat_messages": [
@@ -12418,7 +13399,10 @@
     "anti_duplicate_days": 15,
     "sender_name": "EDUCO",
     "notify_owner_on_failure": true,
-    "updated_at": "2026-11-11T05:51:14.966Z"
+    "updated_at": "2026-11-11T05:51:14.966Z",
+    "debtor_sms_enabled": false,
+    "debtor_sms_start_date": "",
+    "debtor_sms_start_day": 5
   },
   "test": true,
   "educo_db_website_courses": [
@@ -15249,7 +16233,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 1793779167979,
+  "_sync_version": 1793779168126,
   "_deleted_ids": [
     "usr-test-sync-1",
     "usr-1793596191113",
@@ -15261,5 +16245,5 @@
     "test_sync_user",
     "sch-it-frontend-mon-1793642706723"
   ],
-  "_updated_at": 1794590200981
+  "_updated_at": 1794593219867
 }

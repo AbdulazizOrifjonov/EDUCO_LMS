@@ -16,6 +16,7 @@ import {
   Trash2,
   HelpCircle,
   ShieldCheck,
+  ShieldAlert,
   Search,
   Filter,
   Plus,
@@ -140,6 +141,17 @@ export default function SmsManagementPage() {
   const isSavingDeviceRef = useRef(false);
   const isSavingSettingsRef = useRef(false);
   const isTogglingSystemRef = useRef(false);
+
+  // Debtor SMS Date Constraints
+  const todayStr = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const isDateReached = useMemo(() => {
+    if (!settings?.debtor_sms_start_date) return true;
+    return todayStr >= settings.debtor_sms_start_date;
+  }, [settings?.debtor_sms_start_date, todayStr]);
 
   // Template variables helper
   const templateVariables = [
@@ -329,6 +341,78 @@ export default function SmsManagementPage() {
     }
   };
 
+  // Toggle Debtor SMS Reminders Enabled/Disabled
+  const handleToggleDebtorSms = async () => {
+    try {
+      const nextState = !settings?.debtor_sms_enabled;
+      const nextDate = settings?.debtor_sms_start_date || todayStr;
+      const updated = await updateSmsSettings({
+        ...settings,
+        debtor_sms_enabled: nextState,
+        debtor_sms_start_date: nextDate,
+      });
+      setSettings(updated);
+      if (nextState) {
+        toast.success(`Qarzdorlarga to‘lov SMS eslatmasi YOQILDI (${nextDate} sanasidan boshlab ota-onalarga yuboriladi)`);
+      } else {
+        toast.info("Qarzdorlarga to‘lov SMS eslatmasi O‘CHIRILDI. Ota-onalarga to‘lov xabarlari bormaydi.");
+      }
+    } catch (err) {
+      toast.error(`Sozlamani o‘zgartirishda xatolik: ${err.message}`);
+    }
+  };
+
+  // Change Debtor Start Date
+  const handleChangeDebtorStartDate = async (newDate) => {
+    try {
+      const updated = await updateSmsSettings({
+        ...settings,
+        debtor_sms_start_date: newDate,
+      });
+      setSettings(updated);
+      toast.success(`Boshlanish sanasi saqlandi: ${newDate}`);
+    } catch (err) {
+      toast.error(`Sanani saqlashda xatolik: ${err.message}`);
+    }
+  };
+
+  // Generate and Send Debtor Queue immediately
+  const handleGenerateAndSendDebtorQueue = async () => {
+    if (!settings?.debtor_sms_enabled) {
+      toast.warning("Qarzdorlarga SMS yuborish o‘chirilgan! Avval tugmani 'ON' qilib yoqing.");
+      return;
+    }
+    if (!isDateReached) {
+      toast.warning(`Belgilangan sana (${settings.debtor_sms_start_date}) hali kelmadi! Bugun: ${todayStr}`);
+      return;
+    }
+    if (isGeneratingQueueRef.current || generatingQueue) return;
+    try {
+      isGeneratingQueueRef.current = true;
+      setGeneratingQueue(true);
+      const res = await generateDebtorQueue({ excludedStudentIds, forceRequeue: true });
+      if (res.queuedCount === 0) {
+        toast.info(res.message || "Barcha qarzdor ota-onalar allaqachon navbatga olingan yoki qarzdorlar yo‘q.");
+      } else {
+        toast.success(`🎉 ${res.queuedCount} ta qarzdor ota-onaga SMS navbatga qo‘shildi va yuborilmoqda!`);
+      }
+      const [updatedQueue, updatedRecips] = await Promise.all([
+        getSmsQueue(),
+        getProspectiveRecipients({ settingsOverride: settings, excludedStudentIds }),
+      ]);
+      setQueue(updatedQueue);
+      setProspectiveRecipients(updatedRecips || []);
+      setActiveTab('queue');
+    } catch (err) {
+      toast.error(`Xatolik: ${err.message}`);
+    } finally {
+      setGeneratingQueue(false);
+      setTimeout(() => {
+        isGeneratingQueueRef.current = false;
+      }, 1000);
+    }
+  };
+
   // Ping Device
   const handlePingDevice = async (device) => {
     if (isPingingDeviceIdRef.current || pingingDeviceId) return;
@@ -388,11 +472,31 @@ export default function SmsManagementPage() {
   // Generate Debtor Queue
   const handleGenerateQueue = async () => {
     if (isGeneratingQueueRef.current || generatingQueue) return;
+    if (!settings?.debtor_sms_enabled) {
+      toast.warning("Qarzdorlarga to‘lov SMS yuborish o‘chirilgan! Avval yuqoridagi 'ON' tugmasini bosing.");
+      return;
+    }
+    if (!isDateReached) {
+      toast.warning(`Belgilangan sana (${settings.debtor_sms_start_date}) hali yetib kelmadi! Bugun: ${todayStr}`);
+      return;
+    }
     try {
       isGeneratingQueueRef.current = true;
       setGeneratingQueue(true);
-      const res = await generateDebtorQueue({ excludedStudentIds });
-      toast.success(`Qarzdorlar tekshirildi: +${res.queuedCount} ta navbatda`);
+      const res = await generateDebtorQueue({ excludedStudentIds, forceRequeue: true });
+      if (res.status === 'disabled') {
+        toast.warning(res.message);
+        return;
+      }
+      if (res.status === 'date_not_reached') {
+        toast.info(res.message);
+        return;
+      }
+      if (res.queuedCount === 0) {
+        toast.info(res.message || "Barcha qarzdor ota-onalar allaqachon navbatga qo‘yilgan yoki qarzdorlar yo‘q.");
+      } else {
+        toast.success(`Qarzdorlar tekshirildi: +${res.queuedCount} ta ota-onaga SMS navbatda`);
+      }
       const [updatedQueue, updatedRecips] = await Promise.all([
         getSmsQueue(),
         getProspectiveRecipients({ settingsOverride: settings, excludedStudentIds }),
@@ -926,6 +1030,168 @@ export default function SmsManagementPage() {
               ? `Qarzdorlarni tekshirish (${prospectiveStats.debtorsCount})`
               : 'Qarzdorlarni tekshirish'}
           </Button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* QARZDORLARGA SMS XABAR YUBORISH (ON / OFF) BOSHQARUV PANELI              */}
+      {/* ========================================================================= */}
+      <div
+        className={`p-4 sm:p-5 rounded-2xl border transition-all shadow-sm ${
+          settings?.debtor_sms_enabled
+            ? 'bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border-emerald-300 dark:border-emerald-700/80 ring-2 ring-emerald-500/20'
+            : 'bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent border-rose-300 dark:border-rose-900/60 ring-2 ring-rose-500/10'
+        }`}
+      >
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Left Block: Icon, Title, Description, and ON/OFF Toggle Switch */}
+          <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+            <div
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-md ${
+                settings?.debtor_sms_enabled
+                  ? 'bg-emerald-600 text-white shadow-emerald-600/30'
+                  : 'bg-rose-600 text-white shadow-rose-600/30'
+              }`}
+            >
+              {settings?.debtor_sms_enabled ? (
+                <CheckCircle2 className="w-6 h-6" />
+              ) : (
+                <XCircle className="w-6 h-6" />
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-black text-gray-900 dark:text-gray-100 tracking-tight">
+                  Qarzdorlarga To‘lov SMS Eslatmasi
+                </h2>
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider ${
+                    settings?.debtor_sms_enabled
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700'
+                      : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
+                  }`}
+                >
+                  {settings?.debtor_sms_enabled ? '🟢 ON: Faol' : '🔴 OFF: O‘chirilgan'}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {settings?.debtor_sms_enabled
+                  ? 'Qarzdor o‘quvchilarning ota-onalariga belgilangan sanadan boshlab avtomatik to‘lov SMS eslatmalari yuboriladi.'
+                  : 'Ota-onalarga to‘lov haqida hech qanday xabar bormaydi (tizim to‘liq to‘xtatilgan).'}
+              </p>
+            </div>
+          </div>
+
+          {/* Right Block: The Main ON/OFF Switch Button */}
+          <div className="flex items-center gap-2.5 self-start lg:self-auto shrink-0 flex-wrap sm:flex-nowrap">
+            <button
+              type="button"
+              onClick={handleToggleDebtorSms}
+              className={`relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm shadow-md transition-all cursor-pointer select-none active:scale-95 ${
+                settings?.debtor_sms_enabled
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-400 shadow-emerald-600/30'
+                  : 'bg-rose-600 hover:bg-rose-700 text-white ring-2 ring-rose-400 shadow-rose-600/30'
+              }`}
+            >
+              <span
+                className={`w-3 h-3 rounded-full ${
+                  settings?.debtor_sms_enabled ? 'bg-white animate-pulse' : 'bg-white/80'
+                }`}
+              />
+              <span>{settings?.debtor_sms_enabled ? 'ON: YOQILGAN' : 'OFF: O‘CHIRILGAN'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Date Selector and Rules Configuration (When ON) */}
+        <div className="mt-4 pt-4 border-t border-gray-200/60 dark:border-gray-800/80 grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center">
+          {/* Start Date Field */}
+          <div className="md:col-span-5 flex flex-col sm:flex-row sm:items-center gap-2">
+            <label className="text-xs font-bold text-gray-700 dark:text-gray-300 shrink-0">
+              📅 Qaysi sanadan boshlab yuborilsin:
+            </label>
+            <input
+              type="date"
+              value={settings?.debtor_sms_start_date || todayStr}
+              disabled={!settings?.debtor_sms_enabled}
+              onChange={(e) => handleChangeDebtorStartDate(e.target.value)}
+              className="px-3 py-1.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-gray-900 dark:text-gray-100 text-xs sm:text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
+            />
+          </div>
+
+          {/* Quick Date Presets */}
+          <div className="md:col-span-4 flex items-center gap-1.5 flex-wrap">
+            <button
+              type="button"
+              disabled={!settings?.debtor_sms_enabled}
+              onClick={() => {
+                handleChangeDebtorStartDate(todayStr);
+              }}
+              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-surface-dark-tertiary hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-2xs cursor-pointer disabled:opacity-50"
+            >
+              Bugun ({new Date().getDate()}-sana)
+            </button>
+            <button
+              type="button"
+              disabled={!settings?.debtor_sms_enabled}
+              onClick={() => {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+                handleChangeDebtorStartDate(tStr);
+              }}
+              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-surface-dark-tertiary hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-2xs cursor-pointer disabled:opacity-50"
+            >
+              Ertaga
+            </button>
+            <button
+              type="button"
+              disabled={!settings?.debtor_sms_enabled}
+              onClick={() => {
+                const d = new Date();
+                const target = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-05`;
+                handleChangeDebtorStartDate(target);
+              }}
+              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-surface-dark-tertiary hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-2xs cursor-pointer disabled:opacity-50"
+            >
+              Oyning 5-kuni
+            </button>
+          </div>
+
+          {/* Quick Dispatch Action Button */}
+          <div className="md:col-span-3 flex justify-start md:justify-end">
+            <Button
+              variant="primary"
+              size="sm"
+              icon={Send}
+              disabled={!settings?.debtor_sms_enabled || generatingQueue}
+              onClick={handleGenerateAndSendDebtorQueue}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs px-3.5 py-2 rounded-xl shadow-xs cursor-pointer w-full md:w-auto justify-center disabled:opacity-50"
+            >
+              Qarzdorlarga darhol SMS yuborish
+            </Button>
+          </div>
+        </div>
+
+        {/* Dynamic Status Notification Banner */}
+        <div className="mt-3 text-xs flex items-center gap-2">
+          {!settings?.debtor_sms_enabled ? (
+            <span className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1.5">
+              <ShieldAlert className="w-4 h-4 shrink-0" />
+              Tugma OFF holatda: Ota-onalarga hech qanday to‘lov eslatmasi bormaydi. Xabar jo‘natish uchun yuqoridagi tugmani bosing.
+            </span>
+          ) : isDateReached ? (
+            <span className="text-emerald-700 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              Belgilangan sana ({settings?.debtor_sms_start_date || 'Bugun'}) yetib kelgan. Hozirda {prospectiveStats.debtorsCount} ta qarzdor o‘quvchining ota-onalariga xabar yuborishga tayyor.
+            </span>
+          ) : (
+            <span className="text-amber-700 dark:text-amber-300 font-bold flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+              Kutilmoqda: Belgilangan sana ({settings?.debtor_sms_start_date}) hali yetib kelmadi. SMS yuborish o‘sha kundan boshlanadi.
+            </span>
+          )}
         </div>
       </div>
 
@@ -1555,12 +1821,15 @@ export default function SmsManagementPage() {
                     size="sm"
                     icon={Play}
                     isLoading={generatingQueue}
-                    disabled={generatingQueue || prospectiveStats.debtorsCount === 0}
+                    disabled={generatingQueue || prospectiveStats.debtorsCount === 0 || !settings?.debtor_sms_enabled}
+                    title={!settings?.debtor_sms_enabled ? "Qarzdorlarga SMS o‘chirilgan (avval yuqoridagi tugmani yoqing)" : "Qarzdorlarni navbatga olish"}
                     onClick={handleGenerateQueue}
-                    className="!h-10 !min-h-[40px] px-4 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-sm"
+                    className="!h-10 !min-h-[40px] px-4 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-sm disabled:opacity-50"
                   >
                     {generatingQueue
                       ? 'Navbatga olinmoqda...'
+                      : !settings?.debtor_sms_enabled
+                      ? 'Qarzdorlik SMS O‘chirilgan'
                       : `Qarzdorlarni navbatga olish (${prospectiveStats.debtorsCount})`}
                   </Button>
                 </div>

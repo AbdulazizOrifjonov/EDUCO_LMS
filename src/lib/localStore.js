@@ -39,7 +39,10 @@ export const STORAGE_KEYS = {
 
 const INITIAL_SMS_SETTINGS = {
   id: 'sms-settings-1',
-  is_enabled: false,
+  is_enabled: true,
+  debtor_sms_enabled: false,
+  debtor_sms_start_date: '',
+  debtor_sms_start_day: 5,
   schedule_days: [1, 5, 10, 15, 20, 25],
   schedule_time: '10:00',
   target_recipient: 'father_first',
@@ -2645,6 +2648,23 @@ class LocalStore {
     if (!settings || typeof settings !== 'object') {
       settings = { ...INITIAL_SMS_SETTINGS };
       this.setItem(STORAGE_KEYS.SMS_SETTINGS, settings);
+    } else {
+      let changed = false;
+      if (typeof settings.debtor_sms_enabled !== 'boolean') {
+        settings.debtor_sms_enabled = false;
+        changed = true;
+      }
+      if (settings.debtor_sms_start_date === undefined) {
+        settings.debtor_sms_start_date = '';
+        changed = true;
+      }
+      if (settings.debtor_sms_start_day === undefined) {
+        settings.debtor_sms_start_day = 5;
+        changed = true;
+      }
+      if (changed) {
+        this.setItem(STORAGE_KEYS.SMS_SETTINGS, settings);
+      }
     }
     return settings;
   }

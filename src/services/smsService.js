@@ -113,11 +113,14 @@ export async function updateSmsSettings(settingsData) {
     const payload = {
       ...settingsData,
       is_enabled: Boolean(settingsData.is_enabled),
+      debtor_sms_enabled: Boolean(settingsData.debtor_sms_enabled),
+      debtor_sms_start_date: settingsData.debtor_sms_start_date || '',
+      debtor_sms_start_day: Number(settingsData.debtor_sms_start_day || 5),
       schedule_days: settingsData.schedule_days || [1, 5, 10, 15, 20, 25],
       schedule_time: settingsData.schedule_time || '10:00',
       target_recipient: settingsData.target_recipient || 'father_first',
       message_template: settingsData.message_template,
-      send_interval_seconds: Number(settingsData.send_interval_seconds || 1.2),
+      send_interval_seconds: Number(settingsData.send_interval_seconds || 4),
       max_retries: Number(settingsData.max_retries || 3),
       anti_duplicate_days: Number(settingsData.anti_duplicate_days || 15),
       sender_name: settingsData.sender_name || 'EDUCO',
@@ -834,23 +837,39 @@ export function formatSmsMessage(template, variables) {
  * Accepts optional excludedStudentIds or forceRequeue.
  */
 export async function generateDebtorQueue(options = {}) {
-  // Qarzdorlarga va to'lovga oid SMS xabarlar yuborish to'xtatilgan (Foydalanuvchi talabi)
-  // Faqat test tizimida forceRequeue: true bo'lgandagina ruxsat beriladi
-  if (!options.forceRequeue) {
+  const settings = await getSmsSettings();
+
+  // 1. Agar qarzdorlarga SMS yuborish o'chirilgan bo'lsa (va forceRequeue bo'lmasa) - HECH QANDAY SMS YUBORILMAYDI!
+  if (!settings.debtor_sms_enabled && !options.forceRequeue) {
     return {
       totalDebtors: 0,
       queuedCount: 0,
       skippedCount: 0,
       noPhoneCount: 0,
-      message: "Qarzdorlarga to'lov SMS yuborish vaqtincha to'xtatilgan",
+      status: 'disabled',
+      message: "Qarzdorlarga to‘lov SMS xabarlari yuborish o‘chirilgan. Yoqish uchun SMS bo‘limidagi 'ON' tugmasini bosing.",
     };
   }
 
-  const settings = await getSmsSettings();
+  // 2. Belgilangan sana tekshiruvi: Agar sana belgilanib, bugungi sana undan oldin bo'lsa - xabar yuborilmaydi!
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  if (settings.debtor_sms_start_date && !options.forceRequeue) {
+    if (todayStr < settings.debtor_sms_start_date) {
+      return {
+        totalDebtors: 0,
+        queuedCount: 0,
+        skippedCount: 0,
+        noPhoneCount: 0,
+        status: 'date_not_reached',
+        message: `Belgilangan sana (${settings.debtor_sms_start_date}) hali yetib kelmadi. Bugun: ${todayStr}. SMS yuborish belgilangan kunda boshlanadi.`,
+      };
+    }
+  }
+
   const summaryList = await getTuitionSummary({ status: 'ALL' });
   const allProfiles = localStore.getUsers().filter((u) => u.role === 'student');
 
-  const now = new Date();
   const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const existingQueue = localStore.getSmsQueue();
   const excludedIds = options.excludedStudentIds || [];

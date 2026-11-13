@@ -1084,14 +1084,15 @@ async function handleCallbackQuery(cq) {
 
     // Agar ushbu guruh davomati allaqachon yakunlangan bo'lsa, o'zgarish darhol ota-ona va o'quvchiga yuboriladi
     if (wasFinalized) {
+      const tName = group.teacher_name || session.fullName || 'Fan mentori';
       await sendAttendanceTelegramNotification({
         studentId,
         status: nextStatus,
         courseName: group.course_name || group.name,
-        teacherName: group.teacher_name || session.fullName,
+        teacherName: tName,
         lessonTime: getGroupLessonTime(group),
       });
-      enqueueAttendanceSmsInBot(db, student, nextStatus, group.course_name || group.name, getGroupLessonTime(group), todayPretty);
+      enqueueAttendanceSmsInBot(db, student, nextStatus, group.course_name || group.name, getGroupLessonTime(group), todayPretty, tName);
     }
 
     const studentName = student.fullName || student.name || 'O‘quvchi';
@@ -1166,7 +1167,7 @@ async function handleCallbackQuery(cq) {
       });
 
       // Agar ota-onaning telefon raqami bo'lsa, davomat SMS xabari navbatga qo'yiladi
-      enqueueAttendanceSmsInBot(db, st, status, courseName, lessonTime, todayPretty);
+      enqueueAttendanceSmsInBot(db, st, status, courseName, lessonTime, todayPretty, teacherName);
     }
 
     saveDb(db);
@@ -2491,7 +2492,7 @@ export async function handleUpdate(update) {
 }
 
 // --- REAL-TIME ATTENDANCE & GRADE TRIGGER FUNCTIONS ---
-export function enqueueAttendanceSmsInBot(db, student, status, courseName, lessonTime, dateStr) {
+export function enqueueAttendanceSmsInBot(db, student, status, courseName, lessonTime, dateStr, teacherName = 'Fan mentori') {
   try {
     if (!student) return;
     const father = (student.father_phone || student.fatherPhone || '').trim();
@@ -2502,12 +2503,24 @@ export function enqueueAttendanceSmsInBot(db, student, status, courseName, lesso
 
     const sName = student.fullName || student.full_name || `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Talaba';
     let messageText = '';
-    if (status === 'absent') {
-      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateStr}) ${courseName} fanidan darsda QATNASHMADI (darsga kelmadi). Dars vaqti: ${lessonTime}. EDUCO`;
+    if (status === 'present') {
+      messageText =
+        `🟢 Hurmatli Ota-ona,\n\n` +
+        `Farzandingiz ${sName} ${courseName} fanidan ${dateStr} sanasidagi darsga qatnashdi. Dars ${lessonTime} oralig‘ida o‘tkazildi.\n\n` +
+        `Biz farzandingizning bilim olishdagi intilishi va ishtiyoqini yuqori baholaymiz.\n\n` +
+        `Hurmat bilan, Fan mentori ${teacherName}`;
     } else if (status === 'late') {
-      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateStr}) ${courseName} fanidan darsga KECH QOLIB keldi. Dars vaqti: ${lessonTime}. EDUCO`;
+      messageText =
+        `🟡 Hurmatli Ota-ona,\n\n` +
+        `Farzandingiz ${sName} ${courseName} fanidan ${dateStr} kungi darsga KECH QOLIB yetib keldi. Dars ${lessonTime} oralig‘ida o‘tkazilmoqda.\n\n` +
+        `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n\n` +
+        `Hurmat bilan, Fan mentori ${teacherName}`;
     } else {
-      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateStr}) ${courseName} fanidagi darsga qatnashdi. EDUCO`;
+      messageText =
+        `🔴 DIQQAT: Hurmatli Ota-ona,\n\n` +
+        `Farzandingiz ${sName} bugun (${dateStr}) ${courseName} fanidan darsda QATNASHMADI (Darsga kelmadi). Dars vaqti: ${lessonTime}.\n\n` +
+        `Sababini aniqlashtirish uchun o‘quv markazi ma’muriyati bilan bog‘lanishingizni so‘raymiz.\n\n` +
+        `Hurmat bilan, EDUCO LMS Ma’muriyati`;
     }
 
     const idempotencyKey = `sms-att-${student.id}-${dateStr}-${status}`;

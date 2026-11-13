@@ -131,7 +131,26 @@ describe('SMS Service - Comprehensive Suite', () => {
   });
 
   describe('generateDebtorQueue and processQueueBatch', () => {
-    it('generates queue for students with unpaid tuition balances', async () => {
+    it('blocks queue generation when debtor_sms_enabled is false', async () => {
+      await updateSmsSettings({ debtor_sms_enabled: false });
+      const res = await generateDebtorQueue();
+      expect(res.queuedCount).toBe(0);
+      expect(res.status).toBe('disabled');
+      expect(res.message).toContain("o‘chirilgan");
+    });
+
+    it('blocks queue generation when start date is in the future', async () => {
+      const futureDate = '2099-12-31';
+      await updateSmsSettings({ debtor_sms_enabled: true, debtor_sms_start_date: futureDate });
+      const res = await generateDebtorQueue();
+      expect(res.queuedCount).toBe(0);
+      expect(res.status).toBe('date_not_reached');
+      expect(res.message).toContain("hali yetib kelmadi");
+    });
+
+    it('generates queue for students with unpaid tuition balances when enabled', async () => {
+      const todayStr = new Date().toISOString().split('T')[0];
+      await updateSmsSettings({ debtor_sms_enabled: true, debtor_sms_start_date: todayStr });
       const queueRes = await generateDebtorQueue({ forceRequeue: true });
       expect(queueRes).toBeDefined();
       expect(typeof queueRes.queuedCount).toBe('number');
