@@ -385,7 +385,7 @@ function createMockTable(tableName) {
         rows = localStore.getItem('educo_db_homework', []);
       } else if (tableName === 'homework_submissions') {
         rows = localStore.getItem('educo_db_submissions', []);
-      } else if (tableName === 'materials') {
+      } else if (tableName === 'materials' || tableName === 'learning_materials') {
         rows = localStore.getItem('educo_db_materials', []);
       } else if (tableName === 'tuition_fees' || tableName === 'payments') {
         rows = localStore.getPayments();
@@ -439,7 +439,7 @@ function createMockTable(tableName) {
             list.push(newItem);
             localStore.setItem('educo_db_submissions', list);
             saved.push(newItem);
-          } else if (tableName === 'materials') {
+          } else if (tableName === 'materials' || tableName === 'learning_materials') {
             const newItem = { id: item.id || `mat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...item, created_at: new Date().toISOString() };
             const list = localStore.getItem('educo_db_materials', []);
             list.push(newItem);

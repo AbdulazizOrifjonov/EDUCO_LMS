@@ -945,7 +945,7 @@ export default function SmsManagementPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in pb-12">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in pb-28 sm:pb-16">
       {/* Page Header Banner */}
       <div className="bg-white dark:bg-surface-dark-secondary p-3.5 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-xs space-y-3.5 sm:space-y-4">
         {/* Top Row: Icon, Titles, Shield Badge, and Master Status Switch */}
@@ -991,7 +991,7 @@ export default function SmsManagementPage() {
         </div>
 
         {/* Action Buttons Row */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800/80">
+        <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 sm:gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800/80 [&>*:last-child:nth-child(odd)]:col-span-2">
           <Button
             variant="outline"
             size="md"
@@ -999,9 +999,10 @@ export default function SmsManagementPage() {
             isLoading={reconcilingStatus}
             disabled={reconcilingStatus || generatingQueue}
             onClick={handleReconcileDeliveryStatus}
-            className="cursor-pointer font-bold justify-center text-xs sm:text-sm w-full sm:w-auto text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+            className="cursor-pointer font-bold justify-center text-xs sm:text-sm w-full sm:w-auto text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 px-2.5 sm:px-4"
           >
-            {reconcilingStatus ? 'Tekshirilmoqda...' : 'Hisobotlarni tekshirish'}
+            <span className="hidden sm:inline">{reconcilingStatus ? 'Tekshirilmoqda...' : 'Hisobotlarni tekshirish'}</span>
+            <span className="sm:hidden">{reconcilingStatus ? 'Tekshirish...' : 'Hisobotlar'}</span>
           </Button>
 
           <Button
@@ -1010,7 +1011,7 @@ export default function SmsManagementPage() {
             icon={Send}
             disabled={generatingQueue || togglingSystem || reconcilingStatus}
             onClick={() => setIsTestModalOpen(true)}
-            className="cursor-pointer font-bold justify-center text-xs sm:text-sm w-full sm:w-auto"
+            className="cursor-pointer font-bold justify-center text-xs sm:text-sm w-full sm:w-auto px-2.5 sm:px-4"
           >
             Test SMS
           </Button>
@@ -1022,13 +1023,22 @@ export default function SmsManagementPage() {
             isLoading={generatingQueue}
             disabled={generatingQueue || togglingSystem || reconcilingStatus}
             onClick={handleGenerateQueue}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white shadow-sm font-bold cursor-pointer justify-center text-xs sm:text-sm w-full sm:w-auto"
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white shadow-sm font-bold cursor-pointer justify-center text-xs sm:text-sm w-full sm:w-auto px-2.5 sm:px-4"
           >
-            {generatingQueue
-              ? 'Tekshirilmoqda...'
-              : prospectiveStats.debtorsCount > 0
-              ? `Qarzdorlarni tekshirish (${prospectiveStats.debtorsCount})`
-              : 'Qarzdorlarni tekshirish'}
+            <span className="hidden sm:inline">
+              {generatingQueue
+                ? 'Tekshirilmoqda...'
+                : prospectiveStats.debtorsCount > 0
+                ? `Qarzdorlarni tekshirish (${prospectiveStats.debtorsCount})`
+                : 'Qarzdorlarni tekshirish'}
+            </span>
+            <span className="sm:hidden">
+              {generatingQueue
+                ? 'Tekshirilmoqda...'
+                : prospectiveStats.debtorsCount > 0
+                ? `Qarzdorlar (${prospectiveStats.debtorsCount})`
+                : 'Qarzdorlar'}
+            </span>
           </Button>
         </div>
       </div>
@@ -1384,12 +1394,12 @@ export default function SmsManagementPage() {
       )}
 
       {/* Navigation Tabs Bar */}
-      <div className="flex items-center gap-2.5 border-b border-gray-200 dark:border-gray-800 pb-3.5 mb-6 sm:mb-8 overflow-x-auto no-scrollbar flex-nowrap scroll-smooth">
+      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 pb-3 mb-6 sm:mb-8 overflow-x-auto no-scrollbar flex-nowrap scroll-smooth">
         {[
-          { key: 'overview', label: 'Sozlamalar va Avtomatlashtirish', icon: Sliders },
-          { key: 'devices', label: 'Dual Gateway Qurilmalar', icon: Smartphone, badge: devices.length },
-          { key: 'queue', label: 'SMS Navbati & Qarzdorlar', icon: ListOrdered, badge: stats.pending },
-          { key: 'logs', label: 'Yuborish Tarixi & Jurnali', icon: History, badge: logs.length },
+          { key: 'overview', shortLabel: 'Sozlamalar', label: 'Sozlamalar va Avtomatlashtirish', icon: Sliders },
+          { key: 'devices', shortLabel: 'Dual Gateway', label: 'Dual Gateway Qurilmalar', icon: Smartphone, badge: devices.length },
+          { key: 'queue', shortLabel: 'SMS Navbati', label: 'SMS Navbati & Qarzdorlar', icon: ListOrdered, badge: stats.pending },
+          { key: 'logs', shortLabel: 'Yuborish Tarixi', label: 'Yuborish Tarixi & Jurnali', icon: History, badge: logs.length },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -1398,17 +1408,18 @@ export default function SmsManagementPage() {
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 isActive
                   ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-md shadow-blue-600/30 dark:shadow-emerald-600/30 ring-2 ring-blue-400/40 dark:ring-emerald-400/40'
                   : 'bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary border border-gray-200/80 dark:border-gray-700/60'
               }`}
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span>{tab.label}</span>
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="inline sm:hidden">{tab.shortLabel}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
               {tab.badge !== undefined && tab.badge > 0 && (
                 <span
-                  className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                  className={`text-[10px] px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full font-black ${
                     isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                   }`}
                 >
@@ -2561,27 +2572,28 @@ export default function SmsManagementPage() {
                   />
                 </div>
 
-                {/* 2. Status Filter Segmented Pills (Exact h-10 / 40px seamless full-height with 6 distinct states) */}
-                <div className="inline-flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-surface-dark-secondary text-xs h-10 min-h-[40px] max-h-[40px] p-0 overflow-x-auto no-scrollbar divide-x divide-gray-200 dark:divide-gray-700 shrink-0 shadow-2xs">
+                {/* 2. Status Filter Segmented Pills (Scrollable with clean responsive labels) */}
+                <div className="flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-surface-dark-secondary text-xs h-10 min-h-[40px] p-0 overflow-x-auto no-scrollbar divide-x divide-gray-200 dark:divide-gray-700 shrink-0 shadow-2xs max-w-full">
                   {[
-                    { key: 'ALL', label: 'Barchasi', count: queue.length },
-                    { key: 'PENDING', label: 'Kutilmoqda', count: stats.pending + stats.dispatching },
-                    { key: SMS_STATUS.SUBMITTED, label: 'Operatorga berildi', count: stats.submitted },
-                    { key: SMS_STATUS.DELIVERED, label: 'Yetkazildi', count: stats.delivered },
-                    { key: SMS_STATUS.UNKNOWN, label: 'Tasdiqsiz', count: stats.unknown },
-                    { key: SMS_STATUS.FAILED, label: 'Xatolik', count: stats.failed },
+                    { key: 'ALL', label: 'Barchasi', shortLabel: 'Barchasi', count: queue.length },
+                    { key: 'PENDING', label: 'Kutilmoqda', shortLabel: 'Kutilmoqda', count: stats.pending + stats.dispatching },
+                    { key: SMS_STATUS.SUBMITTED, label: 'Operatorga berildi', shortLabel: 'Yuborildi', count: stats.submitted },
+                    { key: SMS_STATUS.DELIVERED, label: 'Yetkazildi', shortLabel: 'Yetkazildi', count: stats.delivered },
+                    { key: SMS_STATUS.UNKNOWN, label: 'Tasdiqsiz', shortLabel: 'Tasdiqsiz', count: stats.unknown },
+                    { key: SMS_STATUS.FAILED, label: 'Xatolik', shortLabel: 'Xato', count: stats.failed },
                   ].map((st) => (
                     <button
                       key={st.key}
                       type="button"
                       onClick={() => setQueueStatusFilter(st.key)}
-                      className={`h-full min-h-[40px] max-h-[40px] flex items-center justify-center gap-1.5 px-3 sm:px-3.5 font-bold transition-all cursor-pointer whitespace-nowrap text-xs ${
+                      className={`h-full min-h-[40px] flex items-center justify-center gap-1.5 px-3 sm:px-3.5 font-bold transition-all cursor-pointer whitespace-nowrap text-xs shrink-0 ${
                         queueStatusFilter === st.key
                           ? 'bg-blue-600 dark:bg-emerald-600 text-white font-black shadow-xs'
                           : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
                       }`}
                     >
-                      <span>{st.label}</span>
+                      <span className="hidden sm:inline">{st.label}</span>
+                      <span className="inline sm:hidden">{st.shortLabel}</span>
                       <span
                         className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
                           queueStatusFilter === st.key
@@ -2596,8 +2608,8 @@ export default function SmsManagementPage() {
                 </div>
               </div>
 
-              {/* Right Group: Action Buttons (Exact h-10 / 40px) */}
-              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 shrink-0">
+              {/* Right Group: Action Buttons (Responsive on mobile: flexible height, no clipping) */}
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 shrink-0 [&>*:last-child:nth-child(odd)]:col-span-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -2605,9 +2617,10 @@ export default function SmsManagementPage() {
                   isLoading={reconcilingStatus}
                   disabled={reconcilingStatus || processingQueue}
                   onClick={handleReconcileDeliveryStatus}
-                  className="!h-10 !min-h-[40px] !max-h-[40px] !py-0 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-3.5 rounded-xl"
+                  className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-2.5 sm:px-3.5 rounded-xl py-1.5 sm:py-0"
                 >
-                  {reconcilingStatus ? 'Tekshirilmoqda...' : 'Hisobotlarni tekshirish'}
+                  <span className="hidden sm:inline">{reconcilingStatus ? 'Tekshirilmoqda...' : 'Hisobotlarni tekshirish'}</span>
+                  <span className="sm:hidden">{reconcilingStatus ? 'Tekshirish...' : 'Hisobotlar'}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -2616,7 +2629,7 @@ export default function SmsManagementPage() {
                   isLoading={refreshingQueue}
                   disabled={refreshingQueue}
                   onClick={handleRefreshData}
-                  className="!h-10 !min-h-[40px] !max-h-[40px] !py-0 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-3.5 rounded-xl"
+                  className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-2.5 sm:px-3.5 rounded-xl py-1.5 sm:py-0"
                 >
                   Yangilash
                 </Button>
@@ -2628,9 +2641,10 @@ export default function SmsManagementPage() {
                     isLoading={retryingAll}
                     disabled={retryingAll}
                     onClick={handleRetryAllFailed}
-                    className="!h-10 !min-h-[40px] !max-h-[40px] !py-0 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-3.5 rounded-xl"
+                    className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-2.5 sm:px-3.5 rounded-xl py-1.5 sm:py-0"
                   >
-                    Ketmaganlarni navbatga qo‘shish ({stats.failed})
+                    <span className="hidden sm:inline">Ketmaganlarni navbatga qo‘shish ({stats.failed})</span>
+                    <span className="sm:hidden">Qayta qo‘shish ({stats.failed})</span>
                   </Button>
                 )}
                 <Button
@@ -2640,11 +2654,18 @@ export default function SmsManagementPage() {
                   isLoading={processingQueue}
                   disabled={(stats.pending + stats.dispatching) === 0 || processingQueue}
                   onClick={handleProcessQueue}
-                  className="!h-10 !min-h-[40px] !max-h-[40px] !py-0 bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer justify-center text-xs w-full sm:w-auto px-4 rounded-xl"
+                  className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer justify-center text-xs w-full sm:w-auto px-2.5 sm:px-4 rounded-xl py-1.5 sm:py-0"
                 >
-                  {processingQueue
-                    ? 'Tarqatilmoqda... (kuting)'
-                    : `Navbatdagi xabarlarni yuborish (${stats.pending + stats.dispatching})`}
+                  <span className="hidden sm:inline">
+                    {processingQueue
+                      ? 'Tarqatilmoqda... (kuting)'
+                      : `Navbatdagi xabarlarni yuborish (${stats.pending + stats.dispatching})`}
+                  </span>
+                  <span className="sm:hidden">
+                    {processingQueue
+                      ? 'Yuborilmoqda...'
+                      : `Yuborish (${stats.pending + stats.dispatching})`}
+                  </span>
                 </Button>
               </div>
             </div>

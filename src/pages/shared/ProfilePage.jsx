@@ -810,7 +810,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-24 sm:pb-12">
       {/* Back button if viewing another user from users list */}
       {isViewingOther && (
         <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-800">
@@ -1388,7 +1388,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                         <button
                           key={c.id}
                           type="button"
-                          onClick={() => setSelectedCourseFilter(c.id)}
+                          onClick={() => setSelectedCourseFilter(selectedCourseFilter === c.id ? 'all' : c.id)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
                             selectedCourseFilter === c.id
                               ? 'bg-blue-600 text-white border-blue-600 shadow-sm'

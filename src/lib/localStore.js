@@ -1333,6 +1333,18 @@ class LocalStore {
     let raw = this.getItem(STORAGE_KEYS.GROUPS, INITIAL_GROUPS);
     if (!Array.isArray(raw)) raw = [];
 
+    // Ensure canonical grp-fullstack has all 3 students (Ismoil, Amirbek, Qudratilla)
+    const fullstackGrp = raw.find((g) => g.id === 'grp-fullstack');
+    if (fullstackGrp) {
+      const canonicalIds = ['usr-student-930098339', 'usr-1793599332662', 'usr-student-943852253'];
+      const currentIds = Array.isArray(fullstackGrp.student_ids) ? fullstackGrp.student_ids : [];
+      const mergedIds = Array.from(new Set([...currentIds, ...canonicalIds]));
+      if (mergedIds.length !== currentIds.length) {
+        fullstackGrp.student_ids = mergedIds;
+        this.setItem(STORAGE_KEYS.GROUPS, raw);
+      }
+    }
+
     // Ensure Abdulazizbek Orifjonov (Mentor) has his canonical Full Stack groups with exact requested schedules
     const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
     if (raw.length > 0 || !isTestEnv) {
@@ -1893,16 +1905,10 @@ class LocalStore {
       },
     ];
 
-    let raw = this.getItem(STORAGE_KEYS.ATTENDANCE, defaultAttendance);
-    if (!Array.isArray(raw) || raw.length < 5) {
+    let raw = this.getItem(STORAGE_KEYS.ATTENDANCE, null);
+    if (!raw || !Array.isArray(raw)) {
       raw = defaultAttendance;
       this.setItem(STORAGE_KEYS.ATTENDANCE, raw);
-    } else {
-      const hasOct2 = raw.some(r => r.student_id === 'usr-student-1' && (r.date === '2026-10-02' || (r.lesson_id && r.lesson_id.includes('2026-10-02'))));
-      if (!hasOct2) {
-        raw = [...defaultAttendance, ...raw.filter(r => !defaultAttendance.some(d => d.id === r.id))];
-        this.setItem(STORAGE_KEYS.ATTENDANCE, raw);
-      }
     }
     return raw;
   }

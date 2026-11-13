@@ -858,7 +858,7 @@ export default function UserManagement() {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-24 sm:pb-12">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -1071,7 +1071,7 @@ export default function UserManagement() {
                 }`}
               >
                 <div className="flex items-start justify-between gap-1.5 sm:gap-2">
-                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words [overflow-wrap:anywhere] pr-1">
                     Jami foydalanuvchilar
                   </span>
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -1105,7 +1105,7 @@ export default function UserManagement() {
                 }`}
               >
                 <div className="flex items-start justify-between gap-1.5 sm:gap-2">
-                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words [overflow-wrap:anywhere] pr-1">
                     O‘quvchilar
                   </span>
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
@@ -1140,7 +1140,7 @@ export default function UserManagement() {
                 } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <div className="flex items-start justify-between gap-1.5 sm:gap-2">
-                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words [overflow-wrap:anywhere] pr-1">
                     Ustozlar (O‘qituvchi)
                   </span>
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -1175,7 +1175,7 @@ export default function UserManagement() {
                 } ${isTeacher ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <div className="flex items-start justify-between gap-1.5 sm:gap-2">
-                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-0 flex-1 leading-snug break-words [overflow-wrap:anywhere] pr-1">
                     Administrator
                   </span>
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">

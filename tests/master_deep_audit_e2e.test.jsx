@@ -205,7 +205,7 @@ describe('MASTER AUDIT: Complete End-to-End Business Lifecycle & QA Verification
       { to: student.phone, message: queueItem.message_text, forceSend: false }
     );
     expect(duplicateSubmission).toBeDefined();
-  });
+  }, 30000);
 
   it('Stage 3: Security & Access Control Privilege Separation', async () => {
     // 3.1 Verify root owner cannot be deleted

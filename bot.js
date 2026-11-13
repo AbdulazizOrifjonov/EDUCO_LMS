@@ -458,7 +458,7 @@ async function processSequentialQueue() {
 // ==============================================================================
 // 2. QARZDORLARNI TAHLIL QILISH VA NAVBATGA QO'YISH
 // ==============================================================================
-function populateDebtorsToQueue() {
+async function populateDebtorsToQueue() {
   try {
     await syncCloudStore();
     const db = getDb();

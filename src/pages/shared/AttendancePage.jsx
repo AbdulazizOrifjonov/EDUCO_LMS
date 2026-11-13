@@ -726,7 +726,7 @@ export default function AttendancePage() {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-24 sm:pb-12">
       {/* ========================================================================= */}
       {/* PROMINENT TOP BREADCRUMB PATH (Davomat > Ustoz > Guruh)                   */}
       {/* Marked in Image 4 with Google Chrome Browser History Support             */}
