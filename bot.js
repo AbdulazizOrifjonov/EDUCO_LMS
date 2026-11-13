@@ -55,7 +55,6 @@ async function tg(method, body) {
     });
     return await r.json();
   } catch (e) {
-    console.error(`[Telegram API Error: ${method}]`, e.message);
     return { ok: false, error: e.message };
   }
 }
@@ -85,15 +84,38 @@ async function smsApi(method, pathStr, body) {
   return j;
 }
 
+// Telefon qurilmasining online/offline holatini tekshirish
+async function checkDeviceStatus() {
+  try {
+    const devices = await smsApi('GET', '/devices');
+    const dev = Array.isArray(devices) ? devices[0] : null;
+    if (!dev) return { online: false, name: 'Qurilma topilmadi', diffMinutes: 999 };
+
+    const lastSeen = new Date(dev.lastSeen || 0);
+    const diffMinutes = Math.round((Date.now() - lastSeen.getTime()) / 60000);
+    const isOnline = diffMinutes <= 3; // 3 daqiqa ichida signal bergan bo'lsa online
+
+    return {
+      online: isOnline,
+      name: dev.name || 'Android Qurilma',
+      lastSeenIso: dev.lastSeen,
+      diffMinutes,
+      lastSeenFormatted: lastSeen.toLocaleTimeString('uz-UZ'),
+    };
+  } catch (err) {
+    return { online: false, name: 'Xatolik', diffMinutes: 999, error: err.message };
+  }
+}
+
 const sendSms = (phone, text) =>
   smsApi('POST', '/messages', {
     textMessage: { text },
     phoneNumbers: ['+' + phone.replace(/^\+/, '')],
   });
 
-// Telefon haqiqatan yuborganligini tekshirish (30 soniyagacha)
+// Telefon haqiqatan yuborganligini tekshirish (40 soniyagacha)
 async function waitStatus(id) {
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 20; i++) {
     await sleep(2000);
     try {
       const s = await smsApi('GET', `/messages/${id}`);
@@ -132,6 +154,7 @@ function parsePhoneAndText(raw) {
 // Bitta yuborildimi, toki ketmaguncha keyingisiga o'tmaydi va SMS ketmay qolmaydi!
 // ==============================================================================
 let isQueueProcessing = false;
+let lastOfflineAlertAt = 0;
 
 async function processSequentialQueue() {
   if (isQueueProcessing) return;
@@ -147,7 +170,7 @@ async function processSequentialQueue() {
       return;
     }
 
-    // Navbatdagi eng birinchi element (FIFO)
+    // Navbatdagi birinchi element (FIFO)
     const currentItem = pendingItems[0];
     const totalPending = pendingItems.length;
 
@@ -163,11 +186,36 @@ async function processSequentialQueue() {
       return;
     }
 
+    // 1. Qurilma online ekanligini tekshirish
+    const devStatus = await checkDeviceStatus();
+    if (!devStatus.online) {
+      console.warn(
+        `[SMS Navbat] ⚠️ DIQQAT: Telefon (${devStatus.name}) ulanmagan! (Oxirgi faollik: ${devStatus.diffMinutes} daqiqa oldin). Telefonda "SMS Gateway" ilovasini oching.`
+      );
+
+      // Adminga har 5 daqiqada bir marta ogohlantirish yuborish
+      const nowMs = Date.now();
+      if (nowMs - lastOfflineAlertAt > 5 * 60 * 1000) {
+        lastOfflineAlertAt = nowMs;
+        await notifyAdmins(
+          `⚠️ <b>DIQQAT: Telefoningiz offline (aloqada emas)!</b>\n\n` +
+          `📱 <b>Qurilma:</b> ${devStatus.name}\n` +
+          `🕒 <b>Oxirgi aloqa:</b> ${devStatus.diffMinutes} daqiqa oldin (${devStatus.lastSeenFormatted})\n\n` +
+          `<i>Telefonda "SMS Gateway" ilovasini oching yoki batareya cheklovini olib tashlang. Telefon ulanishi bilan navbatdagi ${totalPending} ta SMS avtomatik yuboriladi.</i>`
+        );
+      }
+
+      // Xabarni o'chirib yubormaymiz, statusini pending qoldiramiz va kutamiz
+      await sleep(5000);
+      isQueueProcessing = false;
+      return;
+    }
+
     const messageText = currentItem.message_text || '';
     const recipientName = currentItem.recipient_name || 'Hurmatli foydalanuvchi';
     const tag = currentItem.course_name ? `📚 ${currentItem.course_name}` : '📌 Bildirishnoma';
 
-    // 1. Holatni "processing" ga o'tkazish
+    // Holatni "processing" ga o'tkazish
     currentItem.status = 'processing';
     currentItem.last_attempt_at = new Date().toISOString();
     saveDb(db);
@@ -181,7 +229,7 @@ async function processSequentialQueue() {
       `📱 <b>Telefon:</b> +${cleanPhone}\n` +
       `🏷 <b>Turi:</b> ${tag}\n` +
       `💬 <b>Xabar:</b> <i>"${messageText}"</i>\n\n` +
-      `⏳ <i>Telefonga uzatildi, natija kutilmoqda...</i>`;
+      `⏳ <i>Telefonga uzatildi, yetkazilish tasdig‘i kutilmoqda...</i>`;
 
     const adminNote = await tg('sendMessage', {
       chat_id: ADMIN_IDS[0] || '1594150529',
@@ -189,40 +237,44 @@ async function processSequentialQueue() {
       parse_mode: 'HTML',
     });
 
-    // 2. Telefondagi SMS Gateway ilovasiga yuborish
-    let job = null;
-    let sendError = null;
-    try {
-      job = await sendSms(cleanPhone, messageText);
-    } catch (err) {
-      sendError = err.message;
+    // 2. Telefondagi SMS Gateway ilovasiga yuborish (agar avvalroq jo'natilmagan bo'lsa)
+    let jobId = currentItem.tracking_id;
+    if (!jobId) {
+      try {
+        const job = await sendSms(cleanPhone, messageText);
+        if (job && job.id) {
+          jobId = job.id;
+          currentItem.tracking_id = jobId;
+          saveDb(db);
+        }
+      } catch (err) {
+        console.error(`[SMS Navbat] ❌ API xatosi (+${cleanPhone}):`, err.message);
+      }
     }
 
-    if (!job || !job.id) {
-      // Yuborishda xatolik bo'ldi
+    if (!jobId) {
       currentItem.attempts = (currentItem.attempts || 0) + 1;
       const maxRetries = currentItem.max_attempts || 3;
       currentItem.status = currentItem.attempts >= maxRetries ? 'failed' : 'pending';
-      currentItem.error_message = sendError || 'SMS Gateway uzatmadi';
+      currentItem.error_message = 'SMS Gateway ga uzatib bo‘lmadi';
       saveDb(db);
 
-      console.error(`[SMS Navbat] ❌ Xatolik (+${cleanPhone}): ${currentItem.error_message}`);
       if (adminNote?.result?.message_id) {
         await tg('editMessageText', {
           chat_id: ADMIN_IDS[0] || '1594150529',
           message_id: adminNote.result.message_id,
-          text: `❌ <b>Xatolik yuz berdi:</b>\n📱 +${cleanPhone} (${recipientName})\n⚠️ Sabab: ${currentItem.error_message}\n\nQayta urinish: ${currentItem.attempts}/${maxRetries}`,
+          text: `❌ <b>Xatolik yuz berdi:</b>\n📱 +${cleanPhone} (${recipientName})\n⚠️ Sabab: Gateway serveriga ulanib bo‘lmadi.\nQayta urinish: ${currentItem.attempts}/${maxRetries}`,
           parse_mode: 'HTML',
         });
       }
 
-      await sleep(2000);
+      await sleep(3000);
       isQueueProcessing = false;
       return;
     }
 
     // 3. Telefon haqiqatan yuborganligini va yetkazilganligini kutish
-    const statusResult = await waitStatus(job.id);
+    const statusResult = await waitStatus(jobId);
     const nowIso = new Date().toISOString();
 
     if (statusResult && (statusResult.state === 'Delivered' || statusResult.state === 'Sent')) {
@@ -230,7 +282,6 @@ async function processSequentialQueue() {
       currentItem.status = 'sent';
       currentItem.sent_at = nowIso;
       currentItem.delivered_at = statusResult.state === 'Delivered' ? nowIso : null;
-      currentItem.tracking_id = job.id;
       currentItem.error_message = null;
 
       // Log saqlash
@@ -242,7 +293,7 @@ async function processSequentialQueue() {
         recipient_name: recipientName,
         message_text: messageText,
         status: 'sent',
-        tracking_id: job.id,
+        tracking_id: jobId,
         sent_at: nowIso,
       });
 
@@ -267,14 +318,21 @@ async function processSequentialQueue() {
       // Xavfsiz oraliq: SIM-karta bloklanmasligi uchun 3 soniya tanaffus
       await sleep(3000);
     } else {
-      // Telefon holat bermadi yoki Failed
+      // Agar telefon hali ham "Pending" bo'lsa (telefon sekin yoki kutmoqda)
       const isFailed = statusResult?.state === 'Failed';
       currentItem.attempts = (currentItem.attempts || 0) + 1;
-      const maxRetries = currentItem.max_attempts || 3;
-      currentItem.status = currentItem.attempts >= maxRetries || isFailed ? 'failed' : 'pending';
-      currentItem.error_message = isFailed
-        ? (statusResult?.recipients?.[0]?.error || 'Telefonda jo‘natish rad etildi')
-        : 'Telefondan 30 soniyada javob kelmadi';
+      const maxRetries = currentItem.max_attempts || 4;
+
+      if (isFailed || currentItem.attempts >= maxRetries) {
+        currentItem.status = 'failed';
+        currentItem.error_message = isFailed
+          ? (statusResult?.recipients?.[0]?.error || 'Telefonda jo‘natish rad etildi')
+          : 'Telefondan yetkazish tasdig‘i kelmadi';
+      } else {
+        // Hali urinishlar bor - qayta navbatda qoladi
+        currentItem.status = 'pending';
+        currentItem.error_message = 'Telefondan tasdiq kutilmoqda (qayta tekshiriladi)';
+      }
 
       saveDb(db);
       console.warn(`[SMS Navbat] ⚠️ Holat: ${currentItem.error_message} (+${cleanPhone})`);
@@ -287,7 +345,7 @@ async function processSequentialQueue() {
             `⚠️ <b>Kutilgan javob olinmadi:</b>\n` +
             `📱 +${cleanPhone} (${recipientName})\n` +
             `Sabab: ${currentItem.error_message}\n` +
-            `Holati: ${currentItem.status === 'failed' ? '❌ Bekor qilindi' : '⏳ Qayta navbatga qo‘yildi'}`,
+            `Holati: ${currentItem.status === 'failed' ? '❌ To‘xtatildi' : '⏳ Qayta tekshiriladi'}`,
           parse_mode: 'HTML',
         });
       }
@@ -310,7 +368,6 @@ function populateDebtorsToQueue() {
     const students = (db.educo_db_users || []).filter((u) => u.role === 'student' && u.is_active !== false);
     const groups = db.educo_db_groups || [];
     const payments = db.educo_db_payments || [];
-    const settings = db.educo_db_sms_settings || {};
     const queue = db.educo_db_sms_queue || [];
 
     const now = new Date();
@@ -338,7 +395,7 @@ function populateDebtorsToQueue() {
           let targetPhone = st.father_phone || st.mother_phone || st.phone;
           if (!targetPhone) continue;
 
-          cleanPhone = targetPhone.replace(/\D/g, '');
+          let cleanPhone = targetPhone.replace(/\D/g, '');
           if (cleanPhone.length === 9) cleanPhone = '998' + cleanPhone;
 
           const sName = `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.fullName || 'Talaba';
@@ -385,11 +442,10 @@ const HELP_TEXT =
   `🤖 <b>EDUCO LMS SMS & Telegram Boti</b>\n\n` +
   `Ushbu bot LMS tizimidagi SMS xabarlarni (Davomat, Qarzdorlar, Eslatmalar) telefoningiz orqali ketma-ket yuborilishini boshqaradi.\n\n` +
   `<b>📋 Asosiy Buyruqlar:</b>\n` +
-  `• <b>/status</b> — Navbat va SMS shlyuz holatini ko‘rish\n` +
+  `• <b>/status</b> — Navbat va SMS shlyuz (telefon) holatini ko‘rish\n` +
   `• <b>/queue</b> — Navbatdagi kutilayotgan SMSlar ro‘yxati\n` +
   `• <b>/debtors</b> — Qarzdorlarni tekshirish va navbatga qo‘shish\n` +
   `• <b>/retry</b> — Xatolik tufayli to‘xtagan barcha SMSlarni qayta yuborish\n` +
-  `• <b>/clear</b> — Yuborilgan eski xabarlarni tozalash\n` +
   `• <b>/id</b> — Sizning Telegram ID ingizni ko‘rish\n\n` +
   `<b>📲 To‘g‘ridan-to‘g‘ri SMS yuborish:</b>\n` +
   `<i>+998901234567 Salom, dars soat 14:00 da boshlanadi</i>`;
@@ -412,6 +468,7 @@ async function handleTelegramMessage(msg) {
 
   // 1. STATUS BUYRUG'I
   if (text === '/status') {
+    const devStatus = await checkDeviceStatus();
     const db = getDb();
     const queue = db.educo_db_sms_queue || [];
     const pendingCount = queue.filter((q) => q.status === 'pending').length;
@@ -422,14 +479,20 @@ async function handleTelegramMessage(msg) {
     }).length;
     const failedCount = queue.filter((q) => q.status === 'failed').length;
 
+    const deviceIndicator = devStatus.online
+      ? `🟢 Online (${devStatus.name})`
+      : `🔴 Offline (${devStatus.diffMinutes} daqiqa oldin)`;
+
     return reply(
       `📊 <b>EDUCO LMS SMS Holati:</b>\n\n` +
-      `📱 <b>Shlyuz:</b> 🟢 Faol (EMTIDA - +998 93 582 17 74)\n` +
+      `📱 <b>Telefon:</b> ${deviceIndicator}\n` +
       `⏳ <b>Navbatda kutilayotgan:</b> ${pendingCount} ta\n` +
       `🔄 <b>Hozir yuborilayotgan:</b> ${processingCount} ta\n` +
       `✅ <b>Bugun yuborilgan:</b> ${sentToday} ta\n` +
       `❌ <b>Xatolik bergan:</b> ${failedCount} ta\n\n` +
-      `<i>SMSlar navbat bilan bittalab yuborilmoqda.</i>`
+      (devStatus.online
+        ? `<i>SMSlar navbat bilan bittalab yuborilmoqda.</i>`
+        : `⚠️ <b>Telefon aloqada emas!</b> Iltimos, telefonda "SMS Gateway" ilovasini oching.`)
     );
   }
 
@@ -476,11 +539,12 @@ async function handleTelegramMessage(msg) {
       if (item.status === 'failed') {
         item.status = 'pending';
         item.attempts = 0;
+        item.error_message = null;
         count++;
       }
     });
     saveDb(db);
-    return reply(`🔄 <b>${count} ta xatolik bergan SMS qayta navbatga qo‘yildi!</b>`);
+    return reply(`🔄 <b>${count} ta to‘xtagan SMS qayta navbatga qo‘yildi!</b>`);
   }
 
   // 5. TO'G'RIDAN-TO'G'RI SMS YUBORISH
@@ -523,13 +587,15 @@ async function main() {
   console.log(`🤖 Telegram Bot: ${BOT_TOKEN.slice(0, 10)}...`);
   console.log('====================================================');
 
-  // Adminga bot ishga tushgani haqida salom xabari
-  notifyAdmins(
-    `🚀 <b>EDUCO LMS SMS & Telegram Boti ishga tushdi!</b>\n\n` +
-    `📱 <b>SMS Shlyuz:</b> 🟢 Faol (EMTIDA - +998 93 582 17 74)\n` +
-    `🕒 <b>Vaqt:</b> ${new Date().toLocaleTimeString('uz-UZ')}\n` +
-    `<i>Davomat va qarzdorlik SMSlari avtomatik bittalab yuboriladi.</i>`
-  ).catch(() => {});
+  // Telefon holatini birinchi marta tekshirib konsolda ko'rsatish
+  const initialDev = await checkDeviceStatus();
+  if (initialDev.online) {
+    console.log(`[SMS Gateway] 🟢 Telefon aloqada: ${initialDev.name}`);
+  } else {
+    console.warn(
+      `[SMS Gateway] 🔴 Telefon offline (${initialDev.diffMinutes} daqiqa oldin). Telefonda "SMS Gateway" ilovasini oching.`
+    );
+  }
 
   // 1. KETMA-KET SMS NAVBATINI TEKSHIRIB TURISH (har 3 soniyada)
   setInterval(() => {
