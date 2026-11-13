@@ -34,6 +34,9 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '9049935207:AAG2b-t507eJCpf3
 const DB_PATH = path.resolve(ROOT_DIR, '.data', 'db.json');
 const SESSIONS_PATH = path.resolve(ROOT_DIR, '.data', 'bot_sessions.json');
 
+// Davomat va baholar bo'yicha Telegram xabarnomalari ota-onaga yuborilishi faol
+export const PARENTS_NOTIFICATION_ENABLED = true;
+
 // --- DATABASE & SESSION HELPERS ---
 function getDb() {
   try {
@@ -1088,6 +1091,7 @@ async function handleCallbackQuery(cq) {
         teacherName: group.teacher_name || session.fullName,
         lessonTime: getGroupLessonTime(group),
       });
+      enqueueAttendanceSmsInBot(db, student, nextStatus, group.course_name || group.name, getGroupLessonTime(group), todayPretty);
     }
 
     const studentName = student.fullName || student.name || 'O‘quvchi';
@@ -1160,6 +1164,9 @@ async function handleCallbackQuery(cq) {
         teacherName,
         lessonTime,
       });
+
+      // Agar ota-onaning telefon raqami bo'lsa, davomat SMS xabari navbatga qo'yiladi
+      enqueueAttendanceSmsInBot(db, st, status, courseName, lessonTime, todayPretty);
     }
 
     saveDb(db);
@@ -1174,8 +1181,7 @@ async function handleCallbackQuery(cq) {
       `🟢 <b>Qatnashdi:</b> ${presentCount} nafar\n` +
       `🟡 <b>Kech qoldi:</b> ${lateCount} nafar\n` +
       `🔴 <b>Kelmadi:</b> ${absentCount} nafar\n\n` +
-      `Barcha talaba va ota-onalar telegramiga bildirishnomalar yuborildi! ✅\n` +
-      `Davomat LMS platformasiga to‘liq saqlandi.\n\n` +
+      `Davomat LMS tizimiga saqlandi va ota-onalariga xabarnomalar yuborildi! ✅\n\n` +
       `<i>Dars davomida o‘quvchilar holatini qayta tahrirlashingiz mumkin.</i>`;
 
     const finalKeyboard = [];
@@ -1461,8 +1467,7 @@ async function handleCallbackQuery(cq) {
       successText += `🚫 <b>Darsga kelmaganlar:</b> ${absentCount} nafar (baholashdan avtomatik chiqarildi)\n`;
     }
     successText += `📈 <b>Guruh o‘rtacha bali:</b> ${avgScore} ball\n\n` +
-      `Barcha baholangan o‘quvchilar va ularning ota-onalariga xushxabarlar yuborildi! ✅\n` +
-      `Baholar LMS platformasiga to‘liq muhrlandi.\n\n` +
+      `Baholar LMS platformasiga to‘liq saqlandi! ✅\n\n` +
       `<i>Dars davomida baholarni istalgan payt qayta tahrirlashingiz mumkin.</i>`;
 
     const finalKeyboard = [
@@ -2486,6 +2491,53 @@ export async function handleUpdate(update) {
 }
 
 // --- REAL-TIME ATTENDANCE & GRADE TRIGGER FUNCTIONS ---
+export function enqueueAttendanceSmsInBot(db, student, status, courseName, lessonTime, dateStr) {
+  try {
+    if (!student) return;
+    const father = (student.father_phone || student.fatherPhone || '').trim();
+    const mother = (student.mother_phone || student.motherPhone || '').trim();
+    const parent = (student.parent_phone || student.parentPhone || '').trim();
+    const targetPhone = father || mother || parent;
+    if (!targetPhone) return;
+
+    const sName = student.fullName || student.full_name || `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Talaba';
+    let messageText = '';
+    if (status === 'absent') {
+      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateStr}) ${courseName} fanidan darsda QATNASHMADI (darsga kelmadi). Dars vaqti: ${lessonTime}. EDUCO`;
+    } else if (status === 'late') {
+      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateStr}) ${courseName} fanidan darsga KECH QOLIB keldi. Dars vaqti: ${lessonTime}. EDUCO`;
+    } else {
+      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateStr}) ${courseName} fanidagi darsga qatnashdi. EDUCO`;
+    }
+
+    const idempotencyKey = `sms-att-${student.id}-${dateStr}-${status}`;
+    db.educo_db_sms_queue = db.educo_db_sms_queue || [];
+    const exists = db.educo_db_sms_queue.some((q) => q.idempotency_key === idempotencyKey && q.status !== 'failed' && q.status !== 'cancelled');
+    if (exists) return;
+
+    let cleanPhone = targetPhone.replace(/\D/g, '');
+    if (cleanPhone.length === 9) cleanPhone = '998' + cleanPhone;
+
+    db.educo_db_sms_queue.push({
+      id: `sms-att-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      student_id: student.id,
+      recipient_phone: '+' + cleanPhone,
+      recipient_name: `${sName} (Ota-onasi)`,
+      recipient_type: 'parent',
+      message_text: messageText,
+      course_name: courseName,
+      status: 'pending',
+      attempts: 0,
+      max_attempts: 3,
+      idempotency_key: idempotencyKey,
+      created_at: new Date().toISOString(),
+      queued_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('[Bot Attendance SMS Enqueue Error]:', err.message);
+  }
+}
+
 export async function sendAttendanceTelegramNotification({ studentId, status, remark, courseName = 'Dars', teacherName = 'Fan mentori', lessonTime = '09:30 - 10:50' }) {
   try {
     const db = getDb();
@@ -2546,8 +2598,8 @@ export async function sendAttendanceTelegramNotification({ studentId, status, re
         await sendMessage(chatId, studentMsg);
       }
 
-      // Send to parent
-      if (sess.role === 'parent') {
+      // Send to parent (Faqat PARENTS_NOTIFICATION_ENABLED yoqilganda yuboriladi)
+      if (PARENTS_NOTIFICATION_ENABLED && sess.role === 'parent') {
         const isParent = [fClean, mClean, pClean].filter(Boolean).some((p) => p === sessClean || p.endsWith(sessClean.slice(-9)));
         if (isParent) {
           await sendMessage(chatId, parentMsg);
@@ -2609,7 +2661,7 @@ export async function sendGradeTelegramNotification({
       if (sess.role === 'student' && sessClean === stClean) {
         await sendMessage(chatId, text);
       }
-      if (sess.role === 'parent') {
+      if (PARENTS_NOTIFICATION_ENABLED && sess.role === 'parent') {
         const isParent = [fClean, mClean, pClean].filter(Boolean).some((p) => p === sessClean || p.endsWith(sessClean.slice(-9)));
         if (isParent) {
           await sendMessage(chatId, parentText);
@@ -2708,7 +2760,7 @@ async function checkAndSend20MinuteLessonReminders() {
             if (sess.role === 'student' && sessClean === stClean) {
               await sendMessage(chatId, studentReminder);
             }
-            if (sess.role === 'parent') {
+            if (PARENTS_NOTIFICATION_ENABLED && sess.role === 'parent') {
               const isParent = [fClean, mClean, pClean].filter(Boolean).some((p) => p === sessClean || p.endsWith(sessClean.slice(-9)));
               if (isParent) {
                 const parentReminder = `🔔 <b>Farzandingiz darsiga 20 daqiqa qoldi!</b>\n\n` +

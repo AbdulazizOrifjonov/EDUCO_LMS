@@ -12,6 +12,9 @@ import { localStore } from '@/lib/localStore';
 const BOT_TOKEN = '9049935207:AAG2b-t507eJCpf31RMDIm4gFpbUuhFOI7g';
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
+// Davomat va baholar bo'yicha Telegram xabarnomalar faol
+export const PARENTS_NOTIFICATION_ENABLED = true;
+
 function cleanPhone(phone) {
   if (!phone) return '';
   return String(phone).replace(/[^\d]/g, '');
@@ -115,8 +118,8 @@ export async function notifyStudentAttendance({
       await sendTelegramMessage(student.telegram_chat_id, studentMsg);
     }
 
-    // 2. Parent Telegram chat_id if parent linked their account
-    if (student.parent_telegram_chat_id) {
+    // 2. Parent Telegram chat_id if parent linked their account (Faqat yoqilganda)
+    if (PARENTS_NOTIFICATION_ENABLED && student.parent_telegram_chat_id) {
       await sendTelegramMessage(student.parent_telegram_chat_id, parentMsg);
     }
   } catch (err) {
@@ -160,7 +163,8 @@ export async function notifyStudentGrade({
     if (student.telegram_chat_id) {
       await sendTelegramMessage(student.telegram_chat_id, studentMsg);
     }
-    if (student.parent_telegram_chat_id) {
+    // Parent Telegram chat_id (Faqat yoqilganda)
+    if (PARENTS_NOTIFICATION_ENABLED && student.parent_telegram_chat_id) {
       await sendTelegramMessage(student.parent_telegram_chat_id, parentMsg);
     }
   } catch (err) {

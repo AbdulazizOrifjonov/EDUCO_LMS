@@ -21,6 +21,9 @@ export const SMS_STATUS = {
   UNKNOWN: 'UNKNOWN',
 };
 
+// Davomat SMS xabarlari ota-onalarga yuborilishi faol
+export const PARENTS_SMS_ENABLED = true;
+
 /**
  * Normalizes any legacy or mixed-case status to canonical SMS_STATUS
  */
@@ -831,6 +834,18 @@ export function formatSmsMessage(template, variables) {
  * Accepts optional excludedStudentIds or forceRequeue.
  */
 export async function generateDebtorQueue(options = {}) {
+  // Qarzdorlarga va to'lovga oid SMS xabarlar yuborish to'xtatilgan (Foydalanuvchi talabi)
+  // Faqat test tizimida forceRequeue: true bo'lgandagina ruxsat beriladi
+  if (!options.forceRequeue) {
+    return {
+      totalDebtors: 0,
+      queuedCount: 0,
+      skippedCount: 0,
+      noPhoneCount: 0,
+      message: "Qarzdorlarga to'lov SMS yuborish vaqtincha to'xtatilgan",
+    };
+  }
+
   const settings = await getSmsSettings();
   const summaryList = await getTuitionSummary({ status: 'ALL' });
   const allProfiles = localStore.getUsers().filter((u) => u.role === 'student');
@@ -983,7 +998,10 @@ export async function enqueueAttendanceSms({
   status = 'absent',
   date = null,
   remark = '',
+  teacherName = 'Fan mentori',
 }) {
+  if (!PARENTS_SMS_ENABLED) return null;
+
   try {
     const settings = await getSmsSettings();
     if (!settings || !settings.is_enabled) return null;
@@ -1000,25 +1018,31 @@ export async function enqueueAttendanceSms({
       'Talaba';
     const dateFormatted = date || new Date().toISOString().split('T')[0];
 
-    // Priority phone resolution based on settings
-    let targetPhone = '';
-    let recipientType = 'parent';
-    const father = student.father_phone;
-    const mother = student.mother_phone;
-    const parent = student.parent_phone;
-    const directPhone = student.phone;
-
-    if (settings.target_recipient === 'mother_first') {
-      targetPhone = mother || father || parent || directPhone;
-      recipientType = mother ? 'mother' : father ? 'father' : parent ? 'parent' : 'student';
-    } else if (settings.target_recipient === 'student_direct') {
-      targetPhone = directPhone || father || mother || parent;
-      recipientType = directPhone ? 'student' : 'parent';
-    } else {
-      targetPhone = father || mother || parent || directPhone;
-      recipientType = father ? 'father' : mother ? 'mother' : parent ? 'parent' : 'student';
+    // Sana formatini chiroyli qilish (masalan, 2026-11-13 -> 13.11.2026)
+    let prettyDate = dateFormatted;
+    if (dateFormatted && dateFormatted.includes('-')) {
+      const parts = dateFormatted.split('-');
+      if (parts.length === 3) {
+        prettyDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
+      }
     }
 
+    // Ota-ona telefon raqamlari (Talab: faqat ota-ona raqami bo'lsa ularga SMS yuboriladi)
+    let targetPhone = '';
+    let recipientType = 'parent';
+    const father = (student.father_phone || student.fatherPhone || '').trim();
+    const mother = (student.mother_phone || student.motherPhone || '').trim();
+    const parent = (student.parent_phone || student.parentPhone || '').trim();
+
+    if (settings.target_recipient === 'mother_first') {
+      targetPhone = mother || father || parent;
+      recipientType = mother ? 'mother' : father ? 'father' : 'parent';
+    } else {
+      targetPhone = father || mother || parent;
+      recipientType = father ? 'father' : mother ? 'mother' : 'parent';
+    }
+
+    // Ota-onaning telefon raqami bo'lmasa, SMS yuborilmaydi (talab: faqat ota-onaga SMS borsin)
     if (!targetPhone) return null;
 
     // Idempotency key: prevents duplicate attendance SMS for the same student, date, and status
@@ -1030,12 +1054,24 @@ export async function enqueueAttendanceSms({
     if (alreadyQueued) return alreadyQueued;
 
     let messageText = '';
-    if (status === 'absent') {
-      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateFormatted}) ${courseName} fanidan darsda QATNASHMADI (darsga kelmadi). Dars vaqti: ${lessonTime}. EDUCO`;
+    if (status === 'present') {
+      messageText =
+        `🟢 Hurmatli Ota-ona,\n\n` +
+        `Farzandingiz ${sName} ${courseName} fanidan ${prettyDate} sanasidagi darsga qatnashdi. Dars ${lessonTime} oralig‘ida o‘tkazildi.\n\n` +
+        `Biz farzandingizning bilim olishdagi intilishi va ishtiyoqini yuqori baholaymiz.\n\n` +
+        `Hurmat bilan, Fan mentori ${teacherName}`;
     } else if (status === 'late') {
-      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateFormatted}) ${courseName} fanidan darsga KECH QOLIB keldi. Dars vaqti: ${lessonTime}. EDUCO`;
+      messageText =
+        `🟡 Hurmatli Ota-ona,\n\n` +
+        `Farzandingiz ${sName} ${courseName} fanidan ${prettyDate} kungi darsga KECH QOLIB yetib keldi. Dars ${lessonTime} oralig‘ida o‘tkazilmoqda.\n\n` +
+        `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n\n` +
+        `Hurmat bilan, Fan mentori ${teacherName}`;
     } else {
-      messageText = `Hurmatli ota-ona! Farzandingiz ${sName} bugun (${dateFormatted}) ${courseName} fanidagi darsga qatnashdi. EDUCO`;
+      messageText =
+        `🔴 DIQQAT: Hurmatli Ota-ona,\n\n` +
+        `Farzandingiz ${sName} bugun (${prettyDate}) ${courseName} fanidan darsda QATNASHMADI (Darsga kelmadi). Dars vaqti: ${lessonTime}.\n\n` +
+        `Sababini aniqlashtirish uchun o‘quv markazi ma’muriyati bilan bog‘lanishingizni so‘raymiz.\n\n` +
+        `Hurmat bilan, EDUCO LMS Ma’muriyati`;
     }
 
     const nowIso = new Date().toISOString();

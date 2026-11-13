@@ -181,7 +181,26 @@ async function processSequentialQueue() {
   try {
     const db = getDb();
     const queue = db.educo_db_sms_queue || [];
-    const pendingItems = queue.filter((q) => q.status === 'pending');
+    // Qarzdorlik yoki to'lov xabarlarini avtomatik bekor qilish (faqat davomat va tizim xabarlari yuboriladi)
+    const isDebtorMsg = (item) =>
+      item &&
+      (item.recipient_type === 'debtor' ||
+        (item.message_text &&
+          (item.message_text.includes('to‘lov') ||
+            item.message_text.includes('qarzdor') ||
+            item.message_text.includes("to'lov"))));
+
+    let queueChanged = false;
+    for (const q of queue) {
+      if ((q.status === 'pending' || q.status === 'processing') && isDebtorMsg(q)) {
+        q.status = 'cancelled';
+        q.error_message = "Qarzdorlik/to'lov SMS yuborish to'xtatilgan";
+        queueChanged = true;
+      }
+    }
+    if (queueChanged) saveDb(db);
+
+    const pendingItems = queue.filter((q) => q.status === 'pending' && !isDebtorMsg(q));
 
     if (pendingItems.length === 0) {
       isQueueProcessing = false;
@@ -363,8 +382,7 @@ async function processSequentialQueue() {
       await sleep(3000);
     }
 
-      await sleep(2500);
-    }
+    await sleep(2500);
   } catch (err) {
     console.error('[SMS Navbat Xatosi]', err.message);
   } finally {
@@ -373,79 +391,11 @@ async function processSequentialQueue() {
 }
 
 // ==============================================================================
-// 2. QARZDORLARNI AVTOMATIK TAHLIL QILISH VA NAVBATGA QO'YISH
+// 2. QARZDORLARNI AVTOMATIK TAHLIL QILISH (TO'XTATILGAN)
 // ==============================================================================
 function populateDebtorsToQueue() {
-  try {
-    const db = getDb();
-    const students = (db.educo_db_users || []).filter((u) => u.role === 'student' && u.is_active !== false);
-    const groups = db.educo_db_groups || [];
-    const payments = db.educo_db_payments || [];
-    const queue = db.educo_db_sms_queue || [];
-
-    const now = new Date();
-    const currentPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    let addedCount = 0;
-
-    for (const st of students) {
-      const studentGroups = groups.filter((g) =>
-        Array.isArray(g.student_ids) && g.student_ids.includes(st.id)
-      );
-      if (studentGroups.length === 0) continue;
-
-      for (const grp of studentGroups) {
-        const monthlyFee = Number(grp.monthly_fee || grp.price || 1200000);
-        const studentPayments = payments
-          .filter((p) => p.student_id === st.id && (p.group_id === grp.id || !p.group_id))
-          .reduce((sum, p) => sum + Number(p.amount || 0), 0);
-
-        const debt = monthlyFee - studentPayments;
-        if (debt > 0) {
-          const idempotencyKey = `sms-bill-${st.id}-${grp.id}-${currentPeriod}`;
-          const exists = queue.some((q) => q.idempotency_key === idempotencyKey && q.status !== 'failed');
-          if (exists) continue;
-
-          let targetPhone = st.father_phone || st.mother_phone || st.phone;
-          if (!targetPhone) continue;
-
-          let cleanPhone = targetPhone.replace(/\D/g, '');
-          if (cleanPhone.length === 9) cleanPhone = '998' + cleanPhone;
-
-          const sName = `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.fullName || 'Talaba';
-          const formattedDebt = new Intl.NumberFormat('uz-UZ').format(debt) + " so'm";
-          const msg = `Hurmatli ota-ona! Farzandingiz ${sName}ning ${grp.name} kursi uchun ${formattedDebt} to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS`;
-
-          queue.push({
-            id: `sms-deb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-            student_id: st.id,
-            recipient_phone: '+' + cleanPhone,
-            recipient_name: `${sName} (Qarzdorlik)`,
-            recipient_type: 'debtor',
-            message_text: msg,
-            amount_due: debt,
-            course_name: grp.name,
-            status: 'pending',
-            attempts: 0,
-            max_attempts: 3,
-            idempotency_key: idempotencyKey,
-            billing_period: currentPeriod,
-            created_at: new Date().toISOString(),
-            queued_at: new Date().toISOString(),
-          });
-          addedCount++;
-        }
-      }
-    }
-
-    if (addedCount > 0) {
-      db.educo_db_sms_queue = queue;
-      saveDb(db);
-    }
-    return addedCount;
-  } catch (e) {
-    console.error('[Debtors Analysis Error]', e.message);
-    return 0;
-  }
+  // Qarzdorlarga va to'lovga oid SMS xabarlar yuborish qat'iy to'xtatilgan (faqat davomat SMS ruxsat etilgan)
+  return 0;
 }
 
 // ==============================================================================
@@ -536,11 +486,7 @@ async function handleTelegramMessage(msg) {
 
   // 3. DEBTORS BUYRUG'I
   if (text === '/debtors') {
-    const added = populateDebtorsToQueue();
-    if (added === 0) {
-      return reply('✅ <b>Barcha qarzdorlar allaqachon navbatga qo‘yilgan yoki qarzdorlar yo‘q.</b>');
-    }
-    return reply(`🔔 <b>Qarzdorlar tahlili:</b> ${added} ta yangi SMS navbatga qo‘shildi va yuborilmoqda!`);
+    return reply('ℹ️ <b>Qarzdorlarga SMS yuborish to‘xtatilgan.</b>\nHozirda faqat ota-onalarga dars davomati SMS lari yuboriladi.');
   }
 
   // 4. RETRY BUYRUG'I
@@ -611,10 +557,10 @@ async function main() {
     processSequentialQueue().catch((e) => console.error('[Queue Interval Error]', e.message));
   }, 3000);
 
-  // 2. KUNDALIK QARZDORLIKNI TEKSHIRISH (har 30 daqiqada)
-  setInterval(() => {
-    populateDebtorsToQueue();
-  }, 30 * 60 * 1000);
+  // 2. KUNDALIK QARZDORLIKNI TEKSHIRISH (TO'XTATILGAN)
+  // setInterval(() => {
+  //   populateDebtorsToQueue();
+  // }, 30 * 60 * 1000);
 
   // Dastlabki navbat tekshiruvi
   processSequentialQueue();
@@ -640,4 +586,6 @@ async function main() {
   }
 }
 
-main();
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+  main();
+}

@@ -250,11 +250,12 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
         remark: r.remark || '',
       }).catch(() => {});
 
-      // Enqueue Attendance SMS for parent notification
+      // Enqueue Attendance SMS for parent notification (faqat ota-onasi raqami bo'lsa navbatga qo'yiladi)
       enqueueAttendanceSms({
         studentId: r.student_id,
         courseName,
         lessonTime,
+        teacherName,
         status: r.status,
         date: lesson?.lesson_date || null,
         remark: r.remark || '',
