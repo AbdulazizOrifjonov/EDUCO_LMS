@@ -4,13 +4,16 @@ color 0E
 cls
 
 echo ==========================================================
-echo    EDUCO LMS - WINDOWS STARTUP AVTOMATIK TIZIMNI O'CHIRISH
+echo    EDUCO LMS - WINDOWS STARTUP TIZIMINI O'CHIRISH
 echo ==========================================================
 echo.
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$startupPath = [Environment]::GetFolderPath('Startup') + '\EDUCO_LMS_BOT.lnk'; if (Test-Path $startupPath) { Remove-Item -Path $startupPath -Force; Write-Host '[MUVAFFAQIYATLI] Startup yorlig''i olib tashlandi!' -ForegroundColor Green } else { Write-Host '[INFO] Startup papkasida EDUCO yorlig''i yo''q edi.' -ForegroundColor Yellow }"
+echo Startup yorlig'i olib tashlanmoqda...
+
+cscript //nologo "%~dp0scripts\remove_startup_shortcut.vbs"
 
 echo.
 echo ==========================================================
-echo Avtomatik ishga tushish o'chirildi.
+echo [TAYYOR] Avtomatik ishga tushish o'chirildi.
 echo ==========================================================
+echo.
 pause

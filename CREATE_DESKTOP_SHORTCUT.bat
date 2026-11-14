@@ -7,11 +7,14 @@ echo ==========================================================
 echo    EDUCO LMS - ISH STOLIDA (DESKTOP) TUGMA YARATISH
 echo ==========================================================
 echo.
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $desktopPath = [Environment]::GetFolderPath('Desktop'); $shortcut = $ws.CreateShortcut($desktopPath + '\🚀 EDUCO BOT ISHGA TUSHIRISH.lnk'); $shortcut.TargetPath = 'C:\Users\Abdul\Documents\EDUCO_LMS\START_BOT.bat'; $shortcut.WorkingDirectory = 'C:\Users\Abdul\Documents\EDUCO_LMS'; $shortcut.Description = 'EDUCO LMS Telegram Bot & SMS Launcher'; $shortcut.Save(); Write-Host ('[MUVAFFAQIYATLI] Ish stolida yorliq yaratildi: ' + $desktopPath + '\🚀 EDUCO BOT ISHGA TUSHIRISH.lnk') -ForegroundColor Green"
+echo Ish stolida "EDUCO BOT ISHGA TUSHIRISH" yorlig'i yaratilmoqda...
+
+cscript //nologo "%~dp0scripts\create_desktop_shortcut.vbs"
 
 echo.
 echo ==========================================================
-echo [TAYYOR] Endi ish stolingizdagi "🚀 EDUCO BOT ISHGA TUSHIRISH"
-echo belgisini ikki marta bossangiz, bot darhol ishga tushadi!
+echo [TAYYOR] Ish stolingizda "EDUCO BOT ISHGA TUSHIRISH"
+echo belgisi muvaffaqiyatli yaratildi!
 echo ==========================================================
+echo.
 pause

@@ -1,8 +1,9 @@
 @echo off
 title EDUCO LMS - Telegram Bot ^& SMS Xizmati
 color 0A
-cls
 
+:start
+cls
 echo ==========================================================
 echo    EDUCO LMS - TELEGRAM BOT VA SMS GATEWAY XIZMATI
 echo ==========================================================

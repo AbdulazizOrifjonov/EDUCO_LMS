@@ -9354,7 +9354,7 @@
       "sent_at": "2026-11-13T17:16:24.470Z",
       "error_message": "Yetkazilganlik hisoboti kelmagan (Gateway kutish vaqti 30 daqiqadan oshdi)",
       "lms_latency_ms": 2671112,
-      "updated_at": "2026-11-13T18:52:16.317Z"
+      "updated_at": "2026-11-13T19:14:52.281Z"
     },
     {
       "id": "sms-deb-1794587447455-hiky7",
@@ -9376,7 +9376,7 @@
       "tracking_id": "HkZt56038OuCA2xu8545W",
       "error_message": "Yetkazilganlik hisoboti kelmagan (Gateway kutish vaqti 30 daqiqadan oshdi)",
       "lms_latency_ms": 2753715,
-      "updated_at": "2026-11-13T18:52:15.987Z"
+      "updated_at": "2026-11-13T19:14:51.327Z"
     },
     {
       "id": "sms-deb-1794587447455-93wxg",
@@ -11893,9 +11893,35 @@
       "billing_period": "2026-11",
       "created_at": "2026-11-13T16:30:48.239Z",
       "queued_at": "2026-11-13T16:30:48.239Z"
+    },
+    {
+      "id": "sms-manual-1794627676765",
+      "recipient_phone": "+998936101774",
+      "recipient_name": "Telegram orqali yozilgan",
+      "recipient_type": "manual",
+      "message_text": "lsvdbzbd dj",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-14T03:41:16.766Z",
+      "queued_at": "2026-11-14T03:41:17.081Z",
+      "last_attempt_at": "2026-11-14T03:41:18.126Z",
+      "tracking_id": "XaT7uv7h0OnHY1aUd59j8",
+      "sent_at": "2026-11-14T03:42:05.706Z",
+      "error_message": null
     }
   ],
   "educo_db_sms_logs": [
+    {
+      "id": "log-1794627725706",
+      "queue_id": "sms-manual-1794627676765",
+      "recipient_phone": "+998936101774",
+      "recipient_name": "Telegram orqali yozilgan",
+      "message_text": "lsvdbzbd dj",
+      "status": "sent",
+      "tracking_id": "XaT7uv7h0OnHY1aUd59j8",
+      "sent_at": "2026-11-14T03:42:05.706Z"
+    },
     {
       "id": "log-1794590184470",
       "queue_id": "sms-deb-1794587447366-i0zmk",
@@ -15115,6 +15141,54 @@
       },
       "error_details": null,
       "created_at": "2026-11-13T18:52:16.364Z"
+    },
+    {
+      "id": "sms-log-1794597291809-pkml",
+      "queue_id": "sms-deb-1794587447455-hiky7",
+      "tracking_id": "HkZt56038OuCA2xu8545W",
+      "device_id": null,
+      "recipient_phone": "+998935436617",
+      "recipient_name": "Faxriddin Kamolov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:16:41.17+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:16:41.169+03:00"
+        },
+        "lms_latency_ms": 2753715
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T19:14:51.810Z"
+    },
+    {
+      "id": "sms-log-1794597292414-thee",
+      "queue_id": "sms-deb-1794587447366-i0zmk",
+      "tracking_id": "XQzTCTxYrZU0DCxnp4mGF",
+      "device_id": null,
+      "recipient_phone": "+998908189959",
+      "recipient_name": "Umar To'laganov (Qarzdorlik)",
+      "status": "UNKNOWN",
+      "dispatched_at": "2026-11-13T20:15:18.478+03:00",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "reconciled": true,
+        "gateway_state": "Pending",
+        "states": {
+          "Pending": "2026-11-13T20:15:18.477+03:00"
+        },
+        "lms_latency_ms": 2671112
+      },
+      "error_details": null,
+      "created_at": "2026-11-13T19:14:52.414Z"
     }
   ],
   "educo_db_chat_messages": [
@@ -18182,7 +18256,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 1793779168448,
+  "_sync_version": 1793779168460,
   "_deleted_ids": [
     "usr-test-sync-1",
     "usr-1793596191113",
@@ -18194,5 +18268,5 @@
     "sch-it-frontend-mon-1793642706723",
     "usr-1793599332662"
   ],
-  "_updated_at": 1794595940795
+  "_updated_at": 1794627725707
 }
