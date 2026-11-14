@@ -119,4 +119,72 @@ describe('Teacher Group Creation with Automatic Schedule and Student Enrollment'
     expect(updated.schedule_days).toBe('Har kuni (Dush-Shan)');
     expect(updated.schedule_time).toBe('18:00 - 19:30');
   });
+
+  it('switches cleanly between Toq kunlar (D/CH/J) and Juft kunlar (S/P/SH), supporting day names and explicit teacher bindings', () => {
+    const teacherId = 'usr-teacher-shaxnoza';
+    const teacherName = 'Shaxnoza Ismatova';
+
+    const group = localStore.saveGroup({
+      id: 'grp-test-rus-juft',
+      name: 'Rus tili 1.2 (RUS-1.2)',
+      course_id: 'crs-rus-tili',
+      room: 'Xona 104',
+    });
+
+    // 1. First saved as Toq kunlar (D/CH/J)
+    localStore.saveGroupSchedule({
+      groupId: group.id,
+      days: [1, 3, 5],
+      startTime: '09:30',
+      endTime: '11:00',
+      room: 'Xona 104',
+      teacherId,
+      teacherName,
+    });
+
+    let slots = localStore.getSchedules().filter((s) => s.group_id === group.id);
+    expect(slots).toHaveLength(3);
+    expect(slots.map((s) => Number(s.day_of_week))).toEqual([1, 3, 5]);
+
+    // 2. Now user selects Juft kunlar (S/P/SH) -> passes [2, 4, 6]
+    localStore.saveGroupSchedule({
+      groupId: group.id,
+      days: [2, 4, 6],
+      startTime: '10:00',
+      endTime: '11:30',
+      room: 'Xona 104',
+      teacherId,
+      teacherName,
+    });
+
+    slots = localStore.getSchedules().filter((s) => s.group_id === group.id);
+    // Old odd slots are wiped, only even slots exist
+    expect(slots).toHaveLength(3);
+    expect(slots.map((s) => Number(s.day_of_week))).toEqual([2, 4, 6]);
+    slots.forEach((s) => {
+      expect(s.teacher_id).toBe(teacherId);
+      expect(s.teacher_name).toBe(teacherName);
+      expect(s.start_time).toBe('10:00:00');
+      expect(s.end_time).toBe('11:30:00');
+    });
+
+    const updatedGroup = localStore.getGroups().find((g) => g.id === group.id);
+    expect(updatedGroup.schedule_days).toBe('Sesh-Pay-Shan');
+    expect(updatedGroup.schedule_time).toBe('10:00 - 11:30');
+
+    // 3. String day names ('Tuesday', 'Thursday', 'Saturday') mapping test
+    const stringNamedSlots = localStore.saveGroupSchedule({
+      groupId: group.id,
+      days: ['Tuesday', 'Thursday', 'Saturday'],
+      startTime: '14:00',
+      endTime: '15:30',
+      room: 'Xona 104',
+      teacherId,
+      teacherName,
+    });
+
+    expect(stringNamedSlots).toHaveLength(3);
+    expect(stringNamedSlots.map((s) => Number(s.day_of_week))).toEqual([2, 4, 6]);
+    expect(stringNamedSlots.every((s) => !isNaN(s.day_of_week))).toBe(true);
+  });
 });

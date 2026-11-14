@@ -15513,9 +15513,62 @@
       "sent_at": null,
       "created_at": "2026-11-14T06:46:02.594Z",
       "updated_at": "2026-11-14T06:46:02.606Z"
+    },
+    {
+      "id": "sms-manual-1794660976021",
+      "recipient_phone": "+998998584737",
+      "recipient_name": "Telegram orqali yozilgan",
+      "recipient_type": "manual",
+      "message_text": "Yaxshimisiz",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-14T12:56:16.021Z",
+      "queued_at": "2026-11-14T12:56:16.021Z",
+      "last_attempt_at": "2026-11-14T12:56:16.528Z",
+      "tracking_id": "RKC1eOboFk_2zGnMtDIwl",
+      "sent_at": "2026-11-14T12:57:01.197Z",
+      "error_message": null
+    },
+    {
+      "id": "sms-manual-1794661649625",
+      "recipient_phone": "+998998584737",
+      "recipient_name": "Telegram orqali yozilgan",
+      "recipient_type": "manual",
+      "message_text": "Salom",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-14T13:07:29.625Z",
+      "queued_at": "2026-11-14T13:07:29.682Z",
+      "last_attempt_at": "2026-11-14T13:07:35.171Z",
+      "tracking_id": "204It5Ce_Z7dArU6M0g-7",
+      "sent_at": "2026-11-14T13:07:41.112Z",
+      "delivered_at": "2026-11-14T13:07:41.112Z",
+      "error_message": null
     }
   ],
   "educo_db_sms_logs": [
+    {
+      "id": "log-1794661661112",
+      "queue_id": "sms-manual-1794661649625",
+      "recipient_phone": "+998998584737",
+      "recipient_name": "Telegram orqali yozilgan",
+      "message_text": "Salom",
+      "status": "sent",
+      "tracking_id": "204It5Ce_Z7dArU6M0g-7",
+      "sent_at": "2026-11-14T13:07:41.112Z"
+    },
+    {
+      "id": "log-1794661021198",
+      "queue_id": "sms-manual-1794660976021",
+      "recipient_phone": "+998998584737",
+      "recipient_name": "Telegram orqali yozilgan",
+      "message_text": "Yaxshimisiz",
+      "status": "sent",
+      "tracking_id": "RKC1eOboFk_2zGnMtDIwl",
+      "sent_at": "2026-11-14T12:57:01.197Z"
+    },
     {
       "id": "log-1794635662867",
       "queue_id": "sms-manual-1794635651487",
@@ -21918,7 +21971,7 @@
       "created_at": "2026-11-14T12:47:01.465Z"
     }
   ],
-  "_sync_version": 1793779171248,
+  "_sync_version": 1793779171317,
   "_deleted_ids": [
     "usr-test-sync-1",
     "usr-1793596191113",
@@ -21930,5 +21983,5 @@
     "sch-it-frontend-mon-1793642706723",
     "usr-1793599332662"
   ],
-  "_updated_at": 1794660914165
+  "_updated_at": 1794661898179
 }

@@ -414,29 +414,38 @@ export default function GroupForm({
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              { id: 'odd', label: 'Toq kunlar (D/CH/J)', days: [1, 3, 5] },
-              { id: 'even', label: 'Juft kunlar (S/P/SH)', days: [2, 4, 6] },
-              { id: 'everyday', label: 'Har kuni (D-SH)', days: [1, 2, 3, 4, 5, 6] },
-              { id: 'weekend', label: 'Dam olish (SH/Y)', days: [6, 7] },
-            ].map((p) => {
-              const active = selectedDays.length === p.days.length && p.days.every((d) => selectedDays.includes(d));
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setSelectedDays(p.days)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    active
-                      ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              );
-            })}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedDays([1, 3, 5])}
+              className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                selectedDays.length === 3 && [1, 3, 5].every((d) => selectedDays.includes(d))
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs ring-2 ring-indigo-400/40'
+                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-indigo-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span>Toq kunlar</span>
+                <span className="text-[10px] opacity-80">D / CH / J</span>
+              </div>
+              <div className="text-[11px] font-normal opacity-90 truncate">Dush • Chor • Jum</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedDays([2, 4, 6])}
+              className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                selectedDays.length === 3 && [2, 4, 6].every((d) => selectedDays.includes(d))
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs ring-2 ring-indigo-400/40'
+                  : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-indigo-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span>Juft kunlar</span>
+                <span className="text-[10px] opacity-80">S / P / SH</span>
+              </div>
+              <div className="text-[11px] font-normal opacity-90 truncate">Sesh • Pay • Shan</div>
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-1">

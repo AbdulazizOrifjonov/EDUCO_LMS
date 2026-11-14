@@ -930,6 +930,8 @@ export default function UserCreatePage() {
           startTime,
           endTime,
           room: payload.room,
+          teacherId: targetGroup.teacher_id || targetGroup.teacherId || '',
+          teacherName: targetGroup.teacher_name || targetGroup.teacherName || '',
         });
       }
 

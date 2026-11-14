@@ -87,14 +87,28 @@ export default function ScheduleManagement() {
     if (!isSilent) setLoading(true);
     try {
       const data = localStore.getSchedules();
+      const allLocalGroups = localStore.getGroups ? localStore.getGroups() : [];
+      const allLocalUsers = localStore.getUsers ? localStore.getUsers() : [];
 
-      const formatted = (data || []).map((s) => ({
-        ...s,
-        groupName: s.groups?.name || s.groupName || 'Group',
-        courseName: s.groups?.courses?.name || s.courseName || '',
-        color: s.groups?.courses?.color || s.color || '#123D78',
-        teachers: (s.groups?.group_teachers || []).map((gt) => gt.profiles),
-      }));
+      const formatted = (data || []).map((s) => {
+        const foundGroup = allLocalGroups.find((g) => g.id === s.group_id);
+        const groupName = foundGroup?.name || s.groups?.name || s.group_name || s.groupName || 'Guruh';
+        const courseName = foundGroup?.courseName || foundGroup?.course_name || foundGroup?.courses?.name || s.groups?.courses?.name || s.course_name || s.courseName || '';
+        const teacherId = s.teacher_id || foundGroup?.teacher_id || foundGroup?.teacherId || '';
+        const teacherUser = allLocalUsers.find((u) => u.id === teacherId);
+        const teacherName = s.teacher_name || foundGroup?.teacher_name || foundGroup?.teacherName || (teacherUser ? `${teacherUser.first_name || ''} ${teacherUser.last_name || ''}`.trim() : '');
+
+        return {
+          ...s,
+          groupName,
+          courseName,
+          color: foundGroup?.courseColor || s.groups?.courses?.color || s.color || '#123D78',
+          room: s.room || foundGroup?.room || '101-xona',
+          teacher_id: teacherId,
+          teacher_name: teacherName,
+          teachers: (s.groups?.group_teachers || []).map((gt) => gt.profiles),
+        };
+      });
 
       setSchedules(formatted);
     } catch (err) {
@@ -178,22 +192,31 @@ export default function ScheduleManagement() {
   const filteredSchedules = schedules.filter((s) => {
     if (isTeacher) {
       const myId = profile?.id;
+      const myNormId = localStore?.normalizeUserId ? localStore.normalizeUserId(myId) : myId;
       const myName = teacherFullName.trim().toLowerCase();
+      const sTid = s.teacher_id;
+      const sNormTid = localStore?.normalizeUserId ? localStore.normalizeUserId(sTid) : sTid;
+
       const hasMyGroup = groups.some((g) => g.id === s.group_id);
-      const hasMyId = s.teachers?.some((t) => t?.id === myId) || s.teacher_id === myId;
-      const hasMyName = s.teachers?.some((t) => {
-        const tName = `${t?.first_name || ''} ${t?.last_name || ''}`.trim().toLowerCase();
-        return myName && tName && (tName.includes(myName) || myName.includes(tName));
-      }) || (s.teacher_name && myName && s.teacher_name.toLowerCase().includes(myName));
+      const hasMyId = (myId && (sTid === myId || sNormTid === myNormId)) ||
+        s.teachers?.some((t) => t?.id === myId || (localStore?.normalizeUserId && localStore.normalizeUserId(t?.id) === myNormId));
+      const sTeacherName = (s.teacher_name || '').toLowerCase();
+      const hasMyName = (myName && sTeacherName && (sTeacherName.includes(myName) || myName.includes(sTeacherName))) ||
+        s.teachers?.some((t) => {
+          const tName = `${t?.first_name || ''} ${t?.last_name || ''}`.trim().toLowerCase();
+          return myName && tName && (tName.includes(myName) || myName.includes(tName));
+        });
 
       // Fast check direct from localStore groups
       let groupMatchesTeacher = false;
       if (!hasMyGroup && !hasMyId && !hasMyName && s.group_id) {
-        const directG = localStore.getGroups?.().find((g) => g.id === s.group_id);
+        const directG = (localStore.getGroups ? localStore.getGroups() : []).find((g) => g.id === s.group_id);
         if (directG) {
           const directTid = directG.teacher_id || directG.teacherId;
+          const directNormTid = localStore?.normalizeUserId ? localStore.normalizeUserId(directTid) : directTid;
           const directTname = (directG.teacher_name || directG.teacherName || '').toLowerCase();
-          groupMatchesTeacher = (myId && directTid === myId) || (myName && directTname && (directTname.includes(myName) || myName.includes(directTname)));
+          groupMatchesTeacher = (myId && (directTid === myId || directNormTid === myNormId)) ||
+            (myName && directTname && (directTname.includes(myName) || myName.includes(directTname)));
         }
       }
 
@@ -411,7 +434,7 @@ export default function ScheduleManagement() {
                     dayLessons.map((item) => {
                       const cardColor = getSubjectColor(item.groupName, item.courseName, item.color);
                       const teacher = item.teachers?.[0];
-                      const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : null;
+                      const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : (item.teacher_name || null);
 
                       return (
                         <div
@@ -627,7 +650,7 @@ export default function ScheduleManagement() {
                   {currentDayLessons.map((item) => {
                     const cardColor = getSubjectColor(item.groupName, item.courseName, item.color);
                     const teacher = item.teachers?.[0];
-                    const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : null;
+                    const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : (item.teacher_name || null);
 
                     return (
                       <div

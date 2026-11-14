@@ -660,6 +660,9 @@ export default function GroupCreatePage() {
         image_url: avatarUrl,
         student_ids: selectedStudentIds,
         enrolled_count: selectedStudentIds.length,
+        days: selectedDays,
+        startTime,
+        endTime,
       };
 
       let targetGroupId = id;
@@ -678,6 +681,8 @@ export default function GroupCreatePage() {
           startTime,
           endTime,
           room: data.room || '101-xona',
+          teacherId: actualTeacherId,
+          teacherName: actualTeacherName,
         });
       }
 
@@ -1382,69 +1387,132 @@ export default function GroupCreatePage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {/* 2 Primary Big Cards: Toq kunlar vs Juft kunlar */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {/* Toq kunlar Card */}
                   <button
                     type="button"
                     onClick={() => handleSelectDayPattern('odd')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                    className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between gap-2.5 ${
                       selectedDays.length === 3 && [1, 3, 5].every((d) => selectedDays.includes(d))
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
-                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                        ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 shadow-md ring-2 ring-indigo-500/30'
+                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary hover:border-indigo-300 dark:hover:border-indigo-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>D / CH / J</span>
-                      <span className="text-[10px] opacity-80">Toq kunlar</span>
+                    <div className="flex items-start justify-between gap-2 w-full">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs ${
+                          selectedDays.length === 3 && [1, 3, 5].every((d) => selectedDays.includes(d))
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                        }`}>
+                          D/CH/J
+                        </div>
+                        <div>
+                          <div className="font-extrabold text-sm text-gray-900 dark:text-white">
+                            Toq kunlar (D / CH / J)
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            Dushanba • Chorshanba • Juma
+                          </div>
+                        </div>
+                      </div>
+                      {selectedDays.length === 3 && [1, 3, 5].every((d) => selectedDays.includes(d)) && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-indigo-600 text-white">
+                          ✓ Tanlangan
+                        </span>
+                      )}
                     </div>
-                    <div className="text-[11px] font-normal opacity-90 truncate">Dush • Chor • Jum</div>
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {['Dushanba', 'Chorshanba', 'Juma'].map((dn) => (
+                        <span
+                          key={dn}
+                          className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                            selectedDays.length === 3 && [1, 3, 5].every((d) => selectedDays.includes(d))
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          {dn}
+                        </span>
+                      ))}
+                    </div>
                   </button>
 
+                  {/* Juft kunlar Card */}
                   <button
                     type="button"
                     onClick={() => handleSelectDayPattern('even')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                    className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between gap-2.5 ${
                       selectedDays.length === 3 && [2, 4, 6].every((d) => selectedDays.includes(d))
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
-                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                        ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 shadow-md ring-2 ring-indigo-500/30'
+                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary hover:border-indigo-300 dark:hover:border-indigo-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>S / P / SH</span>
-                      <span className="text-[10px] opacity-80">Juft kunlar</span>
+                    <div className="flex items-start justify-between gap-2 w-full">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs ${
+                          selectedDays.length === 3 && [2, 4, 6].every((d) => selectedDays.includes(d))
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                        }`}>
+                          S/P/SH
+                        </div>
+                        <div>
+                          <div className="font-extrabold text-sm text-gray-900 dark:text-white">
+                            Juft kunlar (S / P / SH)
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            Seshanba • Payshanba • Shanba
+                          </div>
+                        </div>
+                      </div>
+                      {selectedDays.length === 3 && [2, 4, 6].every((d) => selectedDays.includes(d)) && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-indigo-600 text-white">
+                          ✓ Tanlangan
+                        </span>
+                      )}
                     </div>
-                    <div className="text-[11px] font-normal opacity-90 truncate">Sesh • Pay • Shan</div>
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {['Seshanba', 'Payshanba', 'Shanba'].map((dn) => (
+                        <span
+                          key={dn}
+                          className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                            selectedDays.length === 3 && [2, 4, 6].every((d) => selectedDays.includes(d))
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          {dn}
+                        </span>
+                      ))}
+                    </div>
                   </button>
+                </div>
 
+                {/* Secondary options: Har kuni / Dam olish */}
+                <div className="flex items-center gap-2 pt-1 flex-wrap">
                   <button
                     type="button"
                     onClick={() => handleSelectDayPattern('everyday')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                       selectedDays.length === 6 && [1, 2, 3, 4, 5, 6].every((d) => selectedDays.includes(d))
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
-                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>Har kuni</span>
-                      <span className="text-[10px] opacity-80">Intensiv</span>
-                    </div>
-                    <div className="text-[11px] font-normal opacity-90 truncate">Dush - Shanba</div>
+                    Har kuni (Dush - Shanba)
                   </button>
-
                   <button
                     type="button"
                     onClick={() => handleSelectDayPattern('weekend')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                       selectedDays.length === 2 && [6, 7].every((d) => selectedDays.includes(d))
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
-                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>Dam olish</span>
-                      <span className="text-[10px] opacity-80">Weekend</span>
-                    </div>
-                    <div className="text-[11px] font-normal opacity-90 truncate">Shanba • Yakshanba</div>
+                    Dam olish (Shanba • Yakshanba)
                   </button>
                 </div>
 
