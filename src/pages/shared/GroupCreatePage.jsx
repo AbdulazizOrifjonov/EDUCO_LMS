@@ -32,11 +32,13 @@ import {
   UserPlus,
   Phone,
   ShieldCheck,
+  User,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import PasswordStrengthInput, { generateStrongPassword } from '@/components/ui/PasswordStrengthInput';
 import Select from '@/components/ui/Select';
 import DatePicker from '@/components/ui/DatePicker';
 import Modal from '@/components/ui/Modal';
@@ -144,13 +146,14 @@ export default function GroupCreatePage() {
   const [studentSearch, setStudentSearch] = useState('');
   const [studentFilter, setStudentFilter] = useState('all'); // 'all' | 'unassigned' | 'selected'
 
-  // Quick Inline Student Creation state (2-yo‘l)
+  // Quick Inline Student Creation state (2-yo‘l: Asl holidek to‘liq ma’lumotlar)
   const [studentMode, setStudentMode] = useState('list'); // 'list' | 'create'
   const [newStudentFirst, setNewStudentFirst] = useState('');
   const [newStudentLast, setNewStudentLast] = useState('');
   const [newStudentPhone, setNewStudentPhone] = useState('+998 ');
-  const [newStudentParentPhone, setNewStudentParentPhone] = useState('+998 ');
-  const [newStudentPassword, setNewStudentPassword] = useState('');
+  const [newStudentFatherPhone, setNewStudentFatherPhone] = useState('+998 ');
+  const [newStudentMotherPhone, setNewStudentMotherPhone] = useState('+998 ');
+  const [newStudentPassword, setNewStudentPassword] = useState('Educo#2026!');
   const [isSavingStudent, setIsSavingStudent] = useState(false);
 
   const {
@@ -254,7 +257,8 @@ export default function GroupCreatePage() {
   };
 
   const cleanNewStudentPhone = cleanUzPhone(newStudentPhone);
-  const cleanNewParentPhone = cleanUzPhone(newStudentParentPhone);
+  const cleanNewFatherPhone = cleanUzPhone(newStudentFatherPhone);
+  const cleanNewMotherPhone = cleanUzPhone(newStudentMotherPhone);
 
   // Check if student personal phone already belongs to another user
   const studentPhoneConflict = useMemo(() => {
@@ -266,17 +270,29 @@ export default function GroupCreatePage() {
     });
   }, [cleanNewStudentPhone]);
 
-  // Check if parent phone is shared by siblings (already in center)
-  const parentSiblings = useMemo(() => {
-    if (!cleanNewParentPhone || cleanNewParentPhone.length < 9) return [];
+  // Check if father phone is shared by siblings (already in center)
+  const fatherSiblings = useMemo(() => {
+    if (!cleanNewFatherPhone || cleanNewFatherPhone.length < 9) return [];
     const allUsers = localStore.getUsers ? localStore.getUsers() : [];
     return allUsers.filter((u) => {
       if (u.role !== 'student') return false;
-      const uFather = cleanUzPhone(u.father_phone);
-      const uMother = cleanUzPhone(u.mother_phone);
-      return (uFather && uFather === cleanNewParentPhone) || (uMother && uMother === cleanNewParentPhone);
+      const uFather = cleanUzPhone(u.father_phone || u.fatherPhone);
+      const uMother = cleanUzPhone(u.mother_phone || u.motherPhone);
+      return (uFather && uFather === cleanNewFatherPhone) || (uMother && uMother === cleanNewFatherPhone);
     });
-  }, [cleanNewParentPhone]);
+  }, [cleanNewFatherPhone]);
+
+  // Check if mother phone is shared by siblings (already in center)
+  const motherSiblings = useMemo(() => {
+    if (!cleanNewMotherPhone || cleanNewMotherPhone.length < 9) return [];
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    return allUsers.filter((u) => {
+      if (u.role !== 'student') return false;
+      const uFather = cleanUzPhone(u.father_phone || u.fatherPhone);
+      const uMother = cleanUzPhone(u.mother_phone || u.motherPhone);
+      return (uFather && uFather === cleanNewMotherPhone) || (uMother && uMother === cleanNewMotherPhone);
+    });
+  }, [cleanNewMotherPhone]);
 
   const filteredStudents = useMemo(() => {
     let list = allStudents;
@@ -317,7 +333,7 @@ export default function GroupCreatePage() {
       return;
     }
     if (!cleanNewStudentPhone) {
-      toast.error('O‘quvchining shaxsiy telefon raqamini (Login uchun) to‘liq kiriting!');
+      toast.error('O‘quvchining shaxsiy telefon raqamini (LMS Login uchun) to‘liq kiriting!');
       return;
     }
     if (studentPhoneConflict) {
@@ -326,20 +342,22 @@ export default function GroupCreatePage() {
       );
       return;
     }
-    if (!cleanNewParentPhone) {
-      toast.error('Ota-onaning telefon raqamini (SMS xabarlar uchun) to‘liq kiriting!');
+    if (!cleanNewFatherPhone && !cleanNewMotherPhone) {
+      toast.error('Ota-onaning telefon raqamlaridan (Otasi yoki onasi) kamida bittasini to‘liq kiriting!');
       return;
     }
 
     try {
       setIsSavingStudent(true);
+      const finalPassword = newStudentPassword.trim() || generateStrongPassword();
       const createdStudent = await createUser({
         firstName: first,
         lastName: last,
         phone: cleanNewStudentPhone,
-        fatherPhone: cleanNewParentPhone,
+        fatherPhone: cleanNewFatherPhone,
+        motherPhone: cleanNewMotherPhone,
         role: ROLES.STUDENT,
-        password: newStudentPassword.trim() || 'Talaba#2026!',
+        password: finalPassword,
         isActive: true,
       });
 
@@ -352,8 +370,9 @@ export default function GroupCreatePage() {
       setNewStudentFirst('');
       setNewStudentLast('');
       setNewStudentPhone('+998 ');
-      setNewStudentParentPhone('+998 ');
-      setNewStudentPassword('');
+      setNewStudentFatherPhone('+998 ');
+      setNewStudentMotherPhone('+998 ');
+      setNewStudentPassword(generateStrongPassword());
       setStudentMode('list');
     } catch (err) {
       toast.error(`Xatolik: ${err.message}`);
@@ -1778,7 +1797,12 @@ export default function GroupCreatePage() {
             </button>
             <button
               type="button"
-              onClick={() => setStudentMode('create')}
+              onClick={() => {
+                if (!newStudentPassword) {
+                  setNewStudentPassword(generateStrongPassword());
+                }
+                setStudentMode('create');
+              }}
               className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
                 studentMode === 'create'
                   ? 'bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-500'
@@ -1791,46 +1815,53 @@ export default function GroupCreatePage() {
           </div>
 
           {studentMode === 'create' ? (
-            /* Path 2: Inline Quick Student Creation Form */
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-blue-50/70 dark:from-emerald-950/30 dark:via-gray-900/40 dark:to-blue-950/30 border border-emerald-200 dark:border-emerald-800 space-y-4 animate-fade-in">
-              <div className="flex items-center justify-between border-b border-emerald-200/60 dark:border-emerald-800/60 pb-3">
-                <div className="flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            /* Path 2: Inline Quick Student Creation Form (Asl holidek to‘liq ma’lumotlar) */
+            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-gray-800/90 border-2 border-emerald-500/40 dark:border-emerald-600/40 shadow-md shadow-emerald-500/5 space-y-5 animate-fade-in">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/80 pb-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-sm shadow-emerald-600/30">
+                    <UserPlus className="w-5 h-5" />
+                  </div>
                   <div>
-                    <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                      Yangi o‘quvchini ro‘yxatdan o‘tkazish va biriktirish
+                    <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                      <span>Yangi o‘quvchini ro‘yxatdan o‘tkazish va biriktirish</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
+                        Asl tizim
+                      </span>
                     </h4>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Talaba ma‘lumotlarini kiriting. U avtomatik tarzda yaratiladi va ushbu guruhga darhol biriktiriladi.
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Talaba ma’lumotlarini kiriting. U to‘liq hisob sifatida yaratiladi va ushbu guruhga darhol biriktiriladi.
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setStudentMode('list')}
-                  className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors cursor-pointer"
+                  title="Bekor qilish"
                 >
-                  Bekor qilish
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Information Callout */}
-              <div className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-emerald-100 dark:border-emerald-900 text-xs text-gray-600 dark:text-gray-300 space-y-1">
-                <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-50/80 via-teal-50/40 to-blue-50/60 dark:from-emerald-950/30 dark:via-gray-900/40 dark:to-blue-950/30 border border-emerald-200/80 dark:border-emerald-800/60 text-xs text-gray-600 dark:text-gray-300 space-y-2">
+                <div className="font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Telefon raqamlari bo‘yicha tizim qoidalari:</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
-                  <div className="bg-emerald-50/60 dark:bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-200/60">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px]">
+                  <div className="bg-white/80 dark:bg-gray-800/80 p-2.5 rounded-lg border border-emerald-200/60 dark:border-emerald-900/50">
                     <span className="font-bold text-emerald-900 dark:text-emerald-200">1. Talabaning shaxsiy telefoni (Login):</span>
                     <p className="text-gray-600 dark:text-gray-400 mt-0.5">
                       Faqat 1 ta o‘quvchining o‘ziga tegishli unikal login raqami. Boshqa profil yoki rol uchun qayta ishlatilishi mumkin emas.
                     </p>
                   </div>
-                  <div className="bg-blue-50/60 dark:bg-blue-950/40 p-2.5 rounded-lg border border-blue-200/60">
-                    <span className="font-bold text-blue-900 dark:text-blue-200">2. Ota-onaning telefoni (SMS xabarlar):</span>
+                  <div className="bg-white/80 dark:bg-gray-800/80 p-2.5 rounded-lg border border-blue-200/60 dark:border-blue-900/50">
+                    <span className="font-bold text-blue-900 dark:text-blue-200">2. Ota-onaning telefonlari (Otasi va Onasi):</span>
                     <p className="text-gray-600 dark:text-gray-400 mt-0.5">
-                      Bir nechta farzand (2 yoki 3 ta aka-uka/opa-singil) uchun BIR XIL bo‘lishi mumkin! Xabarlar har bir farzand uchun alohida boradi.
+                      SMS xabarlar (davomat, baho, to‘lov) uchun. Aka-uka yoki opa-singillar uchun bir xil bo‘lishi mumkin!
                     </p>
                   </div>
                 </div>
@@ -1843,6 +1874,7 @@ export default function GroupCreatePage() {
                     Ism <span className="text-brand-red">*</span>
                   </label>
                   <Input
+                    icon={User}
                     placeholder="Masalan: Sardor"
                     value={newStudentFirst}
                     onChange={(e) => setNewStudentFirst(e.target.value)}
@@ -1853,6 +1885,7 @@ export default function GroupCreatePage() {
                     Familiya <span className="text-brand-red">*</span>
                   </label>
                   <Input
+                    icon={User}
                     placeholder="Masalan: Alimov"
                     value={newStudentLast}
                     onChange={(e) => setNewStudentLast(e.target.value)}
@@ -1860,99 +1893,135 @@ export default function GroupCreatePage() {
                 </div>
               </div>
 
-              {/* Fields: Student Phone & Parent Phone */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Student Personal Phone */}
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
-                    Talabaning shaxsiy telefoni (Login uchun) <span className="text-brand-red">*</span>
-                  </label>
-                  <Input
-                    icon={Phone}
-                    placeholder="+998 90 123 45 67"
-                    value={newStudentPhone}
-                    onChange={(e) => setNewStudentPhone(formatUzPhone(e.target.value))}
-                    className={studentPhoneConflict ? 'border-red-500 ring-2 ring-red-500/20' : ''}
-                  />
-                  {studentPhoneConflict ? (
-                    <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 text-[11px] text-red-700 dark:text-red-300 flex items-start gap-1.5 animate-fade-in">
-                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                      <span>
-                        <strong>Xatolik:</strong> Bu telefon raqam (+{cleanNewStudentPhone}) bilan tizimda allaqachon boshqa foydalanuvchi ({studentPhoneConflict.full_name || studentPhoneConflict.username}) ro‘yxatdan o‘tgan! Har bir talaba faqat o‘zining shaxsiy raqami orqali o‘z profiliga kirishi shart.
-                      </span>
-                    </div>
-                  ) : cleanNewStudentPhone && cleanNewStudentPhone.length >= 9 ? (
-                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Telefon raqam bo‘sh va biriktirish uchun tayyor</span>
-                    </p>
-                  ) : (
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                      Talaba shaxsiy kabinetiga ushbu raqam orqali kiradi
-                    </p>
-                  )}
-                </div>
-
-                {/* Parent Phone */}
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
-                    Ota-onaning telefoni (Otasi yoki onasi - SMS uchun) <span className="text-brand-red">*</span>
-                  </label>
-                  <Input
-                    icon={Phone}
-                    placeholder="+998 90 987 65 43"
-                    value={newStudentParentPhone}
-                    onChange={(e) => setNewStudentParentPhone(formatUzPhone(e.target.value))}
-                  />
-                  {parentSiblings.length > 0 ? (
-                    <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-start gap-1.5 animate-fade-in">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>
-                        <strong>Ko‘p farzandli oila:</strong> Ushbu ota-onaning boshqa farzandi ham mavjud: <strong>{parentSiblings.map((s) => `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.username).join(', ')}</strong>. SMS xabarlar har bir farzand uchun alohida boradi.
-                      </span>
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                      Davomat, baholar va to‘lov xabarlari ushbu raqamga yuboriladi
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Optional Password */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                  Kabinet paroli (Ixtiyoriy)
+              {/* Student Personal Phone */}
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Talabaning shaxsiy telefoni (LMS Kabinet Login uchun) <span className="text-brand-red">*</span>
                 </label>
                 <Input
-                  placeholder="Bo‘sh qoldirilsa avtomatik: Talaba#2026!"
+                  icon={Phone}
+                  placeholder="+998 90 123 45 67"
+                  value={newStudentPhone}
+                  onChange={(e) => setNewStudentPhone(formatUzPhone(e.target.value))}
+                  className={studentPhoneConflict ? 'border-red-500 ring-2 ring-red-500/20' : ''}
+                />
+                {studentPhoneConflict ? (
+                  <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 text-[11px] text-red-700 dark:text-red-300 flex items-start gap-1.5 animate-fade-in">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Xatolik:</strong> Bu telefon raqam (+{cleanNewStudentPhone}) bilan tizimda allaqachon boshqa foydalanuvchi ({studentPhoneConflict.full_name || studentPhoneConflict.username}) ro‘yxatdan o‘tgan! Har bir talaba faqat o‘zining shaxsiy raqami orqali o‘z profiliga kirishi shart.
+                    </span>
+                  </div>
+                ) : cleanNewStudentPhone && cleanNewStudentPhone.length >= 9 ? (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Telefon raqam bo‘sh va biriktirish uchun tayyor</span>
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                    Talaba shaxsiy kabinetiga ushbu raqam orqali kiradi
+                  </p>
+                )}
+              </div>
+
+              {/* Parent Phones: Father Phone & Mother Phone */}
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Father Phone */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                      Otasining telefon raqami (SMS uchun) <span className="text-gray-400 font-normal">(Ixtiyoriy)</span>
+                    </label>
+                    <Input
+                      icon={Phone}
+                      placeholder="+998 90 123 45 67"
+                      value={newStudentFatherPhone}
+                      onChange={(e) => setNewStudentFatherPhone(formatUzPhone(e.target.value))}
+                    />
+                    {fatherSiblings.length > 0 ? (
+                      <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-start gap-1.5 animate-fade-in">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>
+                          <strong>Ko‘p farzandli oila:</strong> Boshqa farzandi: <strong>{fatherSiblings.map((s) => `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.username).join(', ')}</strong>
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                        Davomat, baholar va to‘lov SMS lari otasiga boradi
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Mother Phone */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                      Onasining telefon raqami (SMS uchun) <span className="text-gray-400 font-normal">(Ixtiyoriy)</span>
+                    </label>
+                    <Input
+                      icon={Phone}
+                      placeholder="+998 90 987 65 43"
+                      value={newStudentMotherPhone}
+                      onChange={(e) => setNewStudentMotherPhone(formatUzPhone(e.target.value))}
+                    />
+                    {motherSiblings.length > 0 ? (
+                      <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-start gap-1.5 animate-fade-in">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                        <span>
+                          <strong>Ko‘p farzandli oila:</strong> Boshqa farzandi: <strong>{motherSiblings.map((s) => `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.username).join(', ')}</strong>
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                        Davomat, baholar va to‘lov SMS lari onasiga boradi
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 italic">
+                  * Otasi yoki onasining telefonidan kamida bittasini kiritish yetarli.
+                </p>
+              </div>
+
+              {/* Password with PasswordStrengthInput (Auto Generate, Eye Toggle, Strength) */}
+              <div>
+                <PasswordStrengthInput
+                  label="LMS Kabinetga kirish paroli"
+                  required
                   value={newStudentPassword}
-                  onChange={(e) => setNewStudentPassword(e.target.value)}
+                  onValueChange={(val) => setNewStudentPassword(val)}
+                  placeholder="Masalan: Educo#2026!"
                 />
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-emerald-200/60 dark:border-emerald-800/60">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setStudentMode('list')}
-                >
-                  Bekor qilish
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="sm"
-                  isLoading={isSavingStudent}
-                  disabled={Boolean(studentPhoneConflict)}
-                  onClick={handleCreateInlineStudent}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  <span>O‘quvchini saqlash va guruhga qo‘shish</span>
-                </Button>
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-100 dark:border-gray-700/80 flex-wrap">
+                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>O‘quvchi yaratilishi bilan ushbu guruhga avtomatik biriktiriladi</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="md"
+                    onClick={() => setStudentMode('list')}
+                    className="h-10 px-4 rounded-xl font-semibold text-xs sm:text-sm"
+                  >
+                    Bekor qilish
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="md"
+                    isLoading={isSavingStudent}
+                    disabled={Boolean(studentPhoneConflict)}
+                    onClick={handleCreateInlineStudent}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 px-5 rounded-xl shadow-md shadow-emerald-600/30 text-xs sm:text-sm whitespace-nowrap flex items-center gap-2"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    <span>O‘quvchini saqlash va guruhga qo‘shish</span>
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (

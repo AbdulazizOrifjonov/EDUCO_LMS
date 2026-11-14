@@ -15563,9 +15563,36 @@
       "sent_at": "2026-11-14T13:29:16.238Z",
       "delivered_at": null,
       "error_message": null
+    },
+    {
+      "id": "sms-manual-1794666934485",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Telegram orqali yozilgan",
+      "recipient_type": "manual",
+      "message_text": "wefrgh",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-14T14:35:34.485Z",
+      "queued_at": "2026-11-14T14:35:34.485Z",
+      "last_attempt_at": "2026-11-14T14:35:36.246Z",
+      "tracking_id": "TJrIViyMB0qyPdmkJoZLU",
+      "sent_at": "2026-11-14T14:35:39.348Z",
+      "delivered_at": null,
+      "error_message": null
     }
   ],
   "educo_db_sms_logs": [
+    {
+      "id": "log-1794666939348",
+      "queue_id": "sms-manual-1794666934485",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Telegram orqali yozilgan",
+      "message_text": "wefrgh",
+      "status": "sent",
+      "tracking_id": "TJrIViyMB0qyPdmkJoZLU",
+      "sent_at": "2026-11-14T14:35:39.348Z"
+    },
     {
       "id": "log-1794662956238",
       "queue_id": "sms-manual-1794662948666",
@@ -21998,7 +22025,7 @@
       "created_at": "2026-11-14T12:47:01.465Z"
     }
   ],
-  "_sync_version": 1793779171762,
+  "_sync_version": 1793779172658,
   "_deleted_ids": [
     "usr-test-sync-1",
     "usr-1793596191113",
@@ -22010,5 +22037,5 @@
     "sch-it-frontend-mon-1793642706723",
     "usr-1793599332662"
   ],
-  "_updated_at": 1794664688852
+  "_updated_at": 1794672059512
 }
