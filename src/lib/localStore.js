@@ -1676,8 +1676,8 @@ class LocalStore {
       const c = g ? courses.find((crs) => crs.id === g.course_id) : null;
       const t = g ? users.find((usr) => usr.id === g.teacher_id) : null;
 
-      const teacherId = g?.teacher_id || t?.id || '';
-      const teacherName = g?.teacher_name || (t ? `${t.first_name || ''} ${t.last_name || ''}`.trim() : '');
+      const teacherId = g?.teacher_id || t?.id || s.teacher_id || '';
+      const teacherName = g?.teacher_name || (t ? `${t.first_name || ''} ${t.last_name || ''}`.trim() : '') || s.teacher_name || '';
 
       return {
         ...s,
@@ -1805,6 +1805,90 @@ class LocalStore {
       };
       this.setItem(STORAGE_KEYS.GROUPS, groups);
     }
+
+    try {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-data-sync'));
+      }
+    } catch (_) {}
+
+    return savedItems;
+  }
+
+  /**
+   * Save group schedule for an arbitrary set of days and time range.
+   * Auto-links to the group's teacher, room, and updates the group's schedule text.
+   */
+  saveGroupSchedule({ groupId, days = [1, 3, 5], startTime = '09:00', endTime = '10:30', room = '101-xona' }) {
+    if (!groupId) return [];
+    const formattedStart = startTime.length === 5 ? `${startTime}:00` : startTime;
+    const formattedEnd = endTime.length === 5 ? `${endTime}:00` : endTime;
+    const dayNumbers = Array.isArray(days) ? days.map(Number) : [1, 3, 5];
+
+    let list = this.getItem(STORAGE_KEYS.LESSON_SCHEDULES, INITIAL_SCHEDULES);
+
+    // Find the group to get its teacher_id and teacher_name
+    const groups = this.getGroups();
+    const targetGroup = groups.find((g) => g.id === groupId);
+    const teacherId = targetGroup?.teacher_id || targetGroup?.teacherId || '';
+    const teacherName = targetGroup?.teacher_name || targetGroup?.teacherName || '';
+
+    // Remove any previous schedules for this group
+    list = list.filter((s) => s.group_id !== groupId);
+
+    const savedItems = [];
+    for (const dayNum of dayNumbers) {
+      const entry = {
+        id: `sch-${Date.now()}-${dayNum}-${Math.random().toString(36).slice(2, 6)}`,
+        group_id: groupId,
+        day_of_week: dayNum,
+        start_time: formattedStart,
+        end_time: formattedEnd,
+        room: room || targetGroup?.room || '101-xona',
+        teacher_id: teacherId,
+        teacher_name: teacherName,
+        created_at: new Date().toISOString(),
+      };
+      list.push(entry);
+      savedItems.push(entry);
+    }
+
+    this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, list);
+    this.broadcastToCloud(STORAGE_KEYS.LESSON_SCHEDULES, list);
+
+    // Also update group's schedule string
+    const gIdx = groups.findIndex((g) => g.id === groupId);
+    if (gIdx >= 0) {
+      const dayNames = {
+        1: 'Dush', 2: 'Sesh', 3: 'Chor', 4: 'Pay', 5: 'Jum', 6: 'Shan', 7: 'Yak'
+      };
+      let dayLabel = dayNumbers.map((d) => dayNames[d] || d).join('-');
+      if (dayNumbers.length === 3 && [1, 3, 5].every((d) => dayNumbers.includes(d))) {
+        dayLabel = 'Dush-Chor-Jum';
+      } else if (dayNumbers.length === 3 && [2, 4, 6].every((d) => dayNumbers.includes(d))) {
+        dayLabel = 'Sesh-Pay-Shan';
+      } else if (dayNumbers.length === 6) {
+        dayLabel = 'Har kuni (Dush-Shan)';
+      }
+
+      groups[gIdx] = {
+        ...groups[gIdx],
+        room: room || groups[gIdx].room,
+        schedule: `${dayLabel}, ${formattedStart.slice(0, 5)} - ${formattedEnd.slice(0, 5)}`,
+        schedule_days: dayLabel,
+        schedule_time: `${formattedStart.slice(0, 5)} - ${formattedEnd.slice(0, 5)}`,
+        start_time: formattedStart.slice(0, 5),
+        end_time: formattedEnd.slice(0, 5),
+        updated_at: new Date().toISOString(),
+      };
+      this.setItem(STORAGE_KEYS.GROUPS, groups);
+      this.broadcastToCloud(STORAGE_KEYS.GROUPS, groups);
+    }
+
+    this.pushToServer({
+      [STORAGE_KEYS.LESSON_SCHEDULES]: list,
+      [STORAGE_KEYS.GROUPS]: groups,
+    }).catch(() => {});
 
     try {
       if (typeof window !== 'undefined') {
