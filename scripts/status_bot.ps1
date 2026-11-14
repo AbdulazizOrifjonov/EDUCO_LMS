@@ -7,9 +7,11 @@ if ($procs) {
         Write-Host ("  Jarayon ID (PID): " + $p.ProcessId)
         Write-Host ("  Ishga tushgan vaqt: " + $p.CreationDate)
     }
+    exit 0
 } else {
     Write-Host "==========================================" -ForegroundColor Red
     Write-Host "🔴 EDUCO LMS BOT HOZIR ISHLAMAYAPTI" -ForegroundColor Red
     Write-Host "==========================================" -ForegroundColor Red
     Write-Host "Ishga tushirish uchun ish stolidagi yorliqni bosing." -ForegroundColor Yellow
+    exit 1
 }
