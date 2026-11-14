@@ -285,9 +285,9 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
 
     await Promise.all(notifyPromises);
 
-    // 3. SMS Navbatini ZUDLIK BILAN jo'natish (processQueueBatch)
+    // 3. SMS Navbatini ZUDLIK BILAN jo'natish (Faqat davomat SMS lari jo'natiladi!)
     setTimeout(() => {
-      processQueueBatch({ limit: 50 }).catch((batchErr) => {
+      processQueueBatch({ limit: 50, categories: ['attendance'], allowDebtors: false }).catch((batchErr) => {
         console.warn('[attendanceService] processQueueBatch error:', batchErr);
       });
     }, 150);

@@ -972,6 +972,9 @@ export async function generateDebtorQueue(options = {}) {
       recipient_phone: normalizePhone(targetPhone),
       recipient_name: `${studentFullName} (${recipientType === 'father' ? 'Otasi' : recipientType === 'mother' ? 'Onasi' : 'Talaba'})`,
       recipient_type: recipientType,
+      category: 'tuition',
+      manual_approved: Boolean(options.manualApproved || options.forceRequeue),
+      is_manual_send: Boolean(options.manualApproved || options.forceRequeue),
       message_text: messageText,
       amount_due: Number(debtor.balance),
       course_name: effectiveCourseName,
@@ -1199,9 +1202,9 @@ export async function enqueueAttendanceSms({
     } catch (_) {}
     localStore.saveSmsQueueItem(queueItem);
 
-    // Zudlik bilan yuborishni ishga tushirish (orqa fonda navbatni uzatish)
+    // Zudlik bilan yuborishni ishga tushirish (Faqat davomat SMS lari jo'natiladi!)
     setTimeout(() => {
-      processQueueBatch({ limit: 50 }).catch(() => {});
+      processQueueBatch({ limit: 50, categories: ['attendance'], allowDebtors: false }).catch(() => {});
     }, 100);
 
     return queueItem;
@@ -1405,9 +1408,16 @@ export async function getSmsLogs(limit = 100) {
 }
 
 /**
- * Processes pending queue items with Dual-Device Failover & rate limiting
+ * Processes pending queue items with Dual-Device Failover & rate limiting.
+ * STRICT POLICY: Debtor SMS are NEVER processed automatically;
+ * only Attendance and Test SMS go automatically unless allowDebtors or manual_approved is set!
  */
-export async function processQueueBatch({ limit = 500, onProgress = () => {} } = {}) {
+export async function processQueueBatch({
+  limit = 500,
+  allowDebtors = false,
+  categories = null,
+  onProgress = () => {},
+} = {}) {
   if (isBatchProcessing) {
     console.warn('[smsService] Queue batch processing is already in progress, rejecting parallel run.');
     return { processed: 0, sent: 0, failed: 0, inProgress: true };
@@ -1442,10 +1452,56 @@ export async function processQueueBatch({ limit = 500, onProgress = () => {} } =
     const pendingItems = allQueue
       .filter((q) => {
         const norm = normalizeSmsStatus(q.status);
-        if (norm === SMS_STATUS.PENDING) return true;
-        // If DISPATCHING but has no tracking_id, it failed to dispatch earlier and should be retried
-        if (norm === SMS_STATUS.DISPATCHING && !q.tracking_id) return true;
-        return false;
+        const isPending = norm === SMS_STATUS.PENDING || (norm === SMS_STATUS.DISPATCHING && !q.tracking_id);
+        if (!isPending) return false;
+
+        // Davomat SMS lari
+        const isAttendance =
+          q.category === 'attendance' ||
+          q.id?.startsWith('sms-att-') ||
+          q.idempotency_key?.startsWith('sms-att-') ||
+          (q.message_text &&
+            (q.message_text.includes('QATNASHMADI') ||
+              q.message_text.includes('Darsga kelmadi') ||
+              q.message_text.includes('KECH QOLIB') ||
+              q.message_text.includes('KECHIKIB') ||
+              q.message_text.includes('yetib keldi') ||
+              q.message_text.includes('darsga qatnashdi')));
+
+        // Test va qo'lda kiritilgan sinov SMS lari
+        const isTest =
+          q.category === 'test' ||
+          q.category === 'manual' ||
+          q.recipient_type === 'test' ||
+          q.recipient_type === 'manual' ||
+          q.id?.startsWith('sms-test-') ||
+          q.id?.startsWith('test-') ||
+          q.id?.startsWith('sms-manual-');
+
+        // Qarzdorlik SMS lari
+        const isDebtor =
+          !isAttendance &&
+          !isTest &&
+          (q.category === 'tuition' ||
+            q.category === 'debtor' ||
+            q.recipient_type === 'debtor' ||
+            (q.message_text &&
+              (q.message_text.includes('to‘lov') ||
+                q.message_text.includes('qarzdor') ||
+                q.message_text.includes("to'lov"))));
+
+        // Kategoriya bo'yicha filter
+        if (Array.isArray(categories) && categories.length > 0) {
+          const itemCat = isAttendance ? 'attendance' : isTest ? 'test' : 'tuition';
+          if (!categories.includes(itemCat)) return false;
+        }
+
+        // QAT'IY TALAB: Qarzdorlar SMS lari faqat foydalanuvchi jismonan "Yuborish" tugmasini bosgandagina jo'natiladi!
+        if (isDebtor && !allowDebtors && !q.manual_approved && !q.is_manual_send) {
+          return false;
+        }
+
+        return true;
       })
       .sort((a, b) => {
         const timeA = new Date(a.scheduled_at || a.queued_at || a.created_at || 0).getTime();
@@ -1957,15 +2013,10 @@ export function startSmsAutomationWorker({ onScheduledTrigger = () => {} } = {})
       if (lastProcessedMinuteKey === minuteKey) return; // Prevent multiple runs in same minute
       lastProcessedMinuteKey = minuteKey;
 
-      console.log(`[SMS Avtomatika] Reja vaqti yetib keldi (${scheduleTime}). Qarzdorlarni tekshirish boshlanmoqda...`);
-
-      const res = await generateDebtorQueue();
-      let sentInfo = null;
-      if (res && res.queuedCount > 0) {
-        sentInfo = await processQueueBatch({ limit: 50 });
-      }
-
-      onScheduledTrigger({ minuteKey, res, sentInfo });
+      // QAT'IY TALAB: Qarzdorlarga avtomatik SMS yuborilmaydi!
+      // Faqat admin SmsManagementPage da "Qarzdorlarga SMS yuborish" tugmasini jismonan bosgandagina jo'natiladi.
+      console.log(`[SMS Avtomatika] Reja vaqti yetib keldi (${scheduleTime}). Avtomatik yuborish o‘chirilgan — faqat jismoniy tugma bosilganda yuboriladi.`);
+      onScheduledTrigger({ minuteKey, status: 'manual_only' });
     } catch (err) {
       console.warn('[SMS Avtomatika] Xatolik:', err);
     }

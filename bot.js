@@ -268,21 +268,49 @@ async function processSequentialQueue() {
             item.message_text.includes('qatnashdi') ||
             item.message_text.includes('sababli holatda qoldirishi'))));
 
+    // Test yoki qo'lda kiritilgan sinov SMS larini aniqlash (Doimo o'tadi)
+    const isTestMsg = (item) =>
+      item &&
+      (item.category === 'test' ||
+        item.category === 'manual' ||
+        item.recipient_type === 'test' ||
+        item.recipient_type === 'manual' ||
+        item.id?.startsWith('sms-test-') ||
+        item.id?.startsWith('test-') ||
+        item.id?.startsWith('sms-manual-'));
+
     // Qarzdorlik yoki to'lov xabarlarini aniqlash (faqat oylik to'lov qarzdorlari)
     const isDebtorMsg = (item) =>
       item &&
       !isAttendanceMsg(item) &&
-      (item.recipient_type === 'debtor' ||
+      !isTestMsg(item) &&
+      (item.category === 'tuition' ||
+        item.category === 'debtor' ||
+        item.recipient_type === 'debtor' ||
         (item.message_text &&
           (item.message_text.includes('to‘lov') ||
             item.message_text.includes('qarzdor') ||
             item.message_text.includes("to'lov"))));
 
-    // Davomat SMS lari har doim birinchi bo'lib o'tadi; qarzdorlik esa sozlamaga qaraydi
+    // QAT'IY TALAB: Bot orqali avtomatik tarzda FAQAT davomat va test/manual SMS lari yuboriladi!
+    // Qarzdorlar SMS lari bot tomonidan avtomatik yuborilmaydi.
+    // Ular faqat admin saytdan "Jismoniy Yuborish" tugmasini bosganda (manual_approved === true) yuboriladi.
     const pendingItems = queue.filter((q) => {
-      if (q.status !== 'pending') return false;
-      if (isAttendanceMsg(q)) return true; // Davomat SMS ota-onalarga doimo zudlik bilan yetkaziladi!
-      return allowDebtorSms || !isDebtorMsg(q);
+      const normStatus = String(q.status || '').toLowerCase();
+      if (normStatus !== 'pending') return false;
+
+      // 1. Davomat SMS lari - zudlik bilan avtomatik ketadi!
+      if (isAttendanceMsg(q)) return true;
+
+      // 2. Test yoki manual SMS lar - zudlik bilan avtomatik ketadi!
+      if (isTestMsg(q)) return true;
+
+      // 3. Qarzdorlik SMS lari: FAQAT admin jismonan "Yuborish" tugmasini bosgandagina ketadi!
+      if (isDebtorMsg(q)) {
+        return Boolean(q.manual_approved || q.is_manual_send);
+      }
+
+      return false;
     });
 
     if (pendingItems.length === 0) {

@@ -217,4 +217,33 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
     expect(boburLate).toBeDefined();
     expect(boburLate.message_text).toContain('KECHIKIB');
   });
+
+  it('7. Strict Isolation: Debtor SMS is NEVER dispatched automatically when attendance is taken', async () => {
+    // Stage an existing debtor item in queue
+    const debtorItem = {
+      id: 'sms-bill-debtor-test',
+      student_id: 'st-debtor-99',
+      recipient_phone: '+998901112233',
+      recipient_name: 'Debtor Student',
+      category: 'tuition',
+      message_text: 'Hurmatli ota-ona! 350,000 so‘m to‘lov muddati yetib keldi. EDUCO',
+      status: SMS_STATUS.PENDING,
+      manual_approved: false,
+    };
+    localStore.saveSmsQueueItem(debtorItem);
+
+    // Teacher conducts attendance
+    const lessonId = 'lsn-grp-test-isolation';
+    await saveAttendanceRecords(
+      lessonId,
+      [{ student_id: 'st-test-1', status: 'absent' }],
+      'teacher-1'
+    );
+
+    // Verify debtor item remains strictly PENDING (NOT dispatched!)
+    const queue = localStore.getSmsQueue();
+    const checkedDebtor = queue.find((q) => q.id === 'sms-bill-debtor-test');
+    expect(checkedDebtor).toBeDefined();
+    expect(checkedDebtor.status).toBe(SMS_STATUS.PENDING);
+  });
 });

@@ -390,12 +390,22 @@ export default function SmsManagementPage() {
     try {
       isGeneratingQueueRef.current = true;
       setGeneratingQueue(true);
-      const res = await generateDebtorQueue({ excludedStudentIds, forceRequeue: true });
+      const res = await generateDebtorQueue({ excludedStudentIds, forceRequeue: true, manualApproved: true });
       if (res.queuedCount === 0) {
         toast.info(res.message || "Barcha qarzdor ota-onalar allaqachon navbatga olingan yoki qarzdorlar yo‘q.");
       } else {
         toast.success(`🎉 ${res.queuedCount} ta qarzdor ota-onaga SMS navbatga qo‘shildi va yuborilmoqda!`);
       }
+
+      // Jismoniy tugma bosildi - barcha navbatdagi qarzdorlik SMS lariga manual_approved beramiz
+      const currentQ = localStore.getSmsQueue();
+      currentQ.forEach((q) => {
+        if (q.status === 'PENDING') {
+          localStore.updateSmsQueueItem(q.id, { manual_approved: true, is_manual_send: true });
+        }
+      });
+      // Va zudlik bilan jo'natishni boshlaymiz
+      processQueueBatch({ limit: 500, allowDebtors: true, onProgress: (p) => setQueueProgress(p) }).catch(() => {});
       const [updatedQueue, updatedRecips] = await Promise.all([
         getSmsQueue(),
         getProspectiveRecipients({ settingsOverride: settings, excludedStudentIds }),
@@ -514,14 +524,24 @@ export default function SmsManagementPage() {
     }
   };
 
-  // Process Batch
+  // Process Batch (Jismoniy tugma bosilganda)
   const handleProcessQueue = async () => {
     if (isProcessingQueueRef.current || processingQueue) return;
     try {
       isProcessingQueueRef.current = true;
       setProcessingQueue(true);
+
+      // Jismoniy yuborish tugmasi bosildi: barcha navbatdagi elementlarga manual_approved beramiz
+      const currentQ = localStore.getSmsQueue();
+      currentQ.forEach((q) => {
+        if (q.status === 'PENDING') {
+          localStore.updateSmsQueueItem(q.id, { manual_approved: true, is_manual_send: true });
+        }
+      });
+
       const res = await processQueueBatch({
         limit: 500,
+        allowDebtors: true, // Jismoniy tugma bosilgani uchun qarzdorlarga ham ruxsat beriladi!
         onProgress: (p) => setQueueProgress(p),
       });
       if (res.inProgress) {
@@ -551,7 +571,9 @@ export default function SmsManagementPage() {
     try {
       isRetryingIdRef.current = id;
       setRetryingId(id);
+      localStore.updateSmsQueueItem(id, { manual_approved: true, is_manual_send: true });
       await retryQueueItem(id);
+      processQueueBatch({ limit: 10, allowDebtors: true }).catch(() => {});
       toast.success('Xabar qayta urinish navbatiga qo‘yildi');
       const updatedQueue = await getSmsQueue();
       setQueue(updatedQueue);
