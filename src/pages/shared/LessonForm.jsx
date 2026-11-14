@@ -100,13 +100,25 @@ export default function LessonForm({
         if (userIsTeacher) {
           const myName = teacherFullName.trim().toLowerCase();
           const myId = profile?.id;
-          gList = gList.filter((g) => {
+          const filtered = gList.filter((g) => {
             const matchId = (myId && (g.teacher_id === myId || g.teacherId === myId || g.primaryTeacher?.id === myId));
             const matchGt = Array.isArray(g.group_teachers) && g.group_teachers.some(t => (t.teacher_id || t.id || t.profiles?.id) === myId);
             const gName = (g.teacher_name || g.teacherName || g.primaryTeacher?.fullName || '').trim().toLowerCase();
             const matchName = myName && gName && (gName.includes(myName) || myName.includes(gName));
             return matchId || matchGt || matchName;
           });
+          if (filtered.length > 0) {
+            gList = filtered;
+          }
+        }
+        // If editing an existing lesson, ensure that lesson's group is preserved in the list
+        const activeGid = lesson?.group_id || lesson?.groupId;
+        if (activeGid && !gList.some((g) => g.id === activeGid)) {
+          const allLocal = localStore.getGroups ? localStore.getGroups() : [];
+          const found = allLocal.find((g) => g.id === activeGid);
+          if (found) {
+            gList = [found, ...gList];
+          }
         }
         setGroups(gList);
       } catch (err) {

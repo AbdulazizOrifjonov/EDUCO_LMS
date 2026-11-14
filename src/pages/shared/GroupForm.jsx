@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslation } from 'react-i18next';
-import { Users, GraduationCap, Building2, Calendar, DollarSign, Hash, Camera, Trash2 } from 'lucide-react';
+import { Users, GraduationCap, Building2, Calendar, DollarSign, Hash, Camera, Trash2, Clock, Check } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -42,6 +42,9 @@ export default function GroupForm({
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [cropModalFile, setCropModalFile] = useState(null);
+  const [selectedDays, setSelectedDays] = useState([1, 3, 5]);
+  const [startTime, setStartTime] = useState('09:00');
+  const [endTime, setEndTime] = useState('10:30');
 
   const {
     register,
@@ -106,6 +109,14 @@ export default function GroupForm({
 
     if (group) {
       setAvatarUrl(group.avatar_url || group.image_url || '');
+      if (group.schedules && group.schedules.length > 0) {
+        setSelectedDays(group.schedules.map((s) => Number(s.day_of_week || s.dayOfWeek)));
+        if (group.schedules[0]?.start_time) setStartTime(group.schedules[0].start_time.slice(0, 5));
+        if (group.schedules[0]?.end_time) setEndTime(group.schedules[0].end_time.slice(0, 5));
+      } else if (group.start_time && group.end_time) {
+        setStartTime(group.start_time.slice(0, 5));
+        setEndTime(group.end_time.slice(0, 5));
+      }
       reset({
         name: group.name || '',
         courseId: group.course_id || '',
@@ -118,6 +129,9 @@ export default function GroupForm({
       });
     } else {
       setAvatarUrl('');
+      setSelectedDays([1, 3, 5]);
+      setStartTime('09:00');
+      setEndTime('10:30');
       reset({
         name: '',
         courseId: '',
@@ -168,6 +182,9 @@ export default function GroupForm({
         startDate: data.startDate || null,
         avatar_url: avatarUrl,
         image_url: avatarUrl,
+        days: selectedDays,
+        startTime,
+        endTime,
       };
       if (isEditing) {
         await updateGroup(group.id, payload);
@@ -383,6 +400,69 @@ export default function GroupForm({
             onChange={(val) => setValue('startDate', val)}
             className="w-full"
           />
+        </div>
+
+        {/* Schedule: Lesson Days and Time */}
+        <div className="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-indigo-600" />
+              <span>Dars kunlari va Vaqti</span>
+            </span>
+            <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
+              {startTime} - {endTime}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { id: 'odd', label: 'Toq kunlar (D/CH/J)', days: [1, 3, 5] },
+              { id: 'even', label: 'Juft kunlar (S/P/SH)', days: [2, 4, 6] },
+              { id: 'everyday', label: 'Har kuni (D-SH)', days: [1, 2, 3, 4, 5, 6] },
+              { id: 'weekend', label: 'Dam olish (SH/Y)', days: [6, 7] },
+            ].map((p) => {
+              const active = selectedDays.length === p.days.length && p.days.every((d) => selectedDays.includes(d));
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setSelectedDays(p.days)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    active
+                      ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <div>
+              <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                Boshlanish
+              </label>
+              <Input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                Tugash
+              </label>
+              <Input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">

@@ -29,6 +29,9 @@ import {
   Check,
   CalendarCheck,
   UserCheck,
+  UserPlus,
+  Phone,
+  ShieldCheck,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -139,6 +142,16 @@ export default function GroupCreatePage() {
   const [allStudents, setAllStudents] = useState([]);
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [studentSearch, setStudentSearch] = useState('');
+  const [studentFilter, setStudentFilter] = useState('all'); // 'all' | 'unassigned' | 'selected'
+
+  // Quick Inline Student Creation state (2-yo‘l)
+  const [studentMode, setStudentMode] = useState('list'); // 'list' | 'create'
+  const [newStudentFirst, setNewStudentFirst] = useState('');
+  const [newStudentLast, setNewStudentLast] = useState('');
+  const [newStudentPhone, setNewStudentPhone] = useState('+998 ');
+  const [newStudentParentPhone, setNewStudentParentPhone] = useState('+998 ');
+  const [newStudentPassword, setNewStudentPassword] = useState('');
+  const [isSavingStudent, setIsSavingStudent] = useState(false);
 
   const {
     register,
@@ -240,16 +253,114 @@ export default function GroupCreatePage() {
     });
   };
 
+  const cleanNewStudentPhone = cleanUzPhone(newStudentPhone);
+  const cleanNewParentPhone = cleanUzPhone(newStudentParentPhone);
+
+  // Check if student personal phone already belongs to another user
+  const studentPhoneConflict = useMemo(() => {
+    if (!cleanNewStudentPhone || cleanNewStudentPhone.length < 9) return null;
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    return allUsers.find((u) => {
+      const uPhone = cleanUzPhone(u.phone);
+      return uPhone && uPhone === cleanNewStudentPhone;
+    });
+  }, [cleanNewStudentPhone]);
+
+  // Check if parent phone is shared by siblings (already in center)
+  const parentSiblings = useMemo(() => {
+    if (!cleanNewParentPhone || cleanNewParentPhone.length < 9) return [];
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    return allUsers.filter((u) => {
+      if (u.role !== 'student') return false;
+      const uFather = cleanUzPhone(u.father_phone);
+      const uMother = cleanUzPhone(u.mother_phone);
+      return (uFather && uFather === cleanNewParentPhone) || (uMother && uMother === cleanNewParentPhone);
+    });
+  }, [cleanNewParentPhone]);
+
   const filteredStudents = useMemo(() => {
-    if (!studentSearch.trim()) return allStudents;
+    let list = allStudents;
+
+    if (studentFilter === 'selected') {
+      list = list.filter((s) => selectedStudentIds.includes(s.id));
+    } else if (studentFilter === 'unassigned') {
+      list = list.filter((s) => {
+        const gids = Array.isArray(s.group_ids) ? s.group_ids : (s.group_id ? [s.group_id] : []);
+        return gids.length === 0;
+      });
+    }
+
+    if (!studentSearch.trim()) return list;
     const q = studentSearch.toLowerCase().trim();
-    return allStudents.filter((s) => {
+    return list.filter((s) => {
       const fullName = `${s.first_name || ''} ${s.last_name || ''}`.toLowerCase();
       const phone = (s.phone || '').replace(/\D/g, '');
+      const fatherPhone = (s.father_phone || '').replace(/\D/g, '');
+      const motherPhone = (s.mother_phone || '').replace(/\D/g, '');
       const username = (s.username || '').toLowerCase();
-      return fullName.includes(q) || phone.includes(q) || username.includes(q);
+      return (
+        fullName.includes(q) ||
+        phone.includes(q) ||
+        fatherPhone.includes(q) ||
+        motherPhone.includes(q) ||
+        username.includes(q)
+      );
     });
-  }, [allStudents, studentSearch]);
+  }, [allStudents, studentSearch, studentFilter, selectedStudentIds]);
+
+  const handleCreateInlineStudent = async (e) => {
+    e?.preventDefault?.();
+    const first = newStudentFirst.trim();
+    const last = newStudentLast.trim();
+    if (!first || !last) {
+      toast.error('O‘quvchining ismi va familiyasini kiriting!');
+      return;
+    }
+    if (!cleanNewStudentPhone) {
+      toast.error('O‘quvchining shaxsiy telefon raqamini (Login uchun) to‘liq kiriting!');
+      return;
+    }
+    if (studentPhoneConflict) {
+      toast.error(
+        `Bu telefon raqam (+${cleanNewStudentPhone}) bilan tizimda allaqachon boshqa foydalanuvchi (${studentPhoneConflict.full_name || studentPhoneConflict.username}) ro‘yxatdan o‘tgan! Har bir talaba faqat o‘zining shaxsiy raqamiga ega bo‘lishi shart.`
+      );
+      return;
+    }
+    if (!cleanNewParentPhone) {
+      toast.error('Ota-onaning telefon raqamini (SMS xabarlar uchun) to‘liq kiriting!');
+      return;
+    }
+
+    try {
+      setIsSavingStudent(true);
+      const createdStudent = await createUser({
+        firstName: first,
+        lastName: last,
+        phone: cleanNewStudentPhone,
+        fatherPhone: cleanNewParentPhone,
+        role: ROLES.STUDENT,
+        password: newStudentPassword.trim() || 'Talaba#2026!',
+        isActive: true,
+      });
+
+      setAllStudents((prev) => [createdStudent, ...prev]);
+      setSelectedStudentIds((prev) => (prev.includes(createdStudent.id) ? prev : [...prev, createdStudent.id]));
+
+      toast.success(`✓ "${first} ${last}" o‘quvchi yaratildi va guruhga biriktirildi!`);
+
+      // Reset inline form
+      setNewStudentFirst('');
+      setNewStudentLast('');
+      setNewStudentPhone('+998 ');
+      setNewStudentParentPhone('+998 ');
+      setNewStudentPassword('');
+      setStudentMode('list');
+    } catch (err) {
+      toast.error(`Xatolik: ${err.message}`);
+    } finally {
+      setIsSavingStudent(false);
+    }
+  };
 
   const handleToggleStudent = (studentId) => {
     setSelectedStudentIds((prev) => {
@@ -398,6 +509,23 @@ export default function GroupCreatePage() {
               }
               if (grpSchedules[0].end_time) {
                 setEndTime(grpSchedules[0].end_time.slice(0, 5));
+              }
+              setHasSchedule(true);
+            } else if (grp.schedule || grp.schedule_time) {
+              const schedStr = grp.schedule || '';
+              if (/sesh|pay|shan/i.test(schedStr)) {
+                setSelectedDays([2, 4, 6]);
+              } else if (/dush|chor|jum/i.test(schedStr)) {
+                setSelectedDays([1, 3, 5]);
+              } else if (/har kuni/i.test(schedStr)) {
+                setSelectedDays([1, 2, 3, 4, 5, 6]);
+              } else if (/dam olish|shanba.*yakshanba/i.test(schedStr)) {
+                setSelectedDays([6, 7]);
+              }
+              const timeMatch = (grp.schedule_time || schedStr).match(/(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})/);
+              if (timeMatch) {
+                setStartTime(timeMatch[1]);
+                setEndTime(timeMatch[2]);
               }
               setHasSchedule(true);
             }
@@ -553,10 +681,25 @@ export default function GroupCreatePage() {
         });
       }
 
-      // 2. Auto-enroll selected students
-      if (selectedStudentIds.length > 0 && targetGroupId) {
-        for (const studentId of selectedStudentIds) {
-          await enrollStudent(targetGroupId, studentId);
+      // 2. Sync enrolled students (add new, remove deselected)
+      if (targetGroupId) {
+        if (isEditing) {
+          const currentGroup = await getGroupById(targetGroupId);
+          const currentIds = (currentGroup?.students || []).map((s) => s.id);
+          for (const studentId of selectedStudentIds) {
+            if (!currentIds.includes(studentId)) {
+              await enrollStudent(targetGroupId, studentId);
+            }
+          }
+          for (const studentId of currentIds) {
+            if (!selectedStudentIds.includes(studentId)) {
+              await removeStudent(targetGroupId, studentId);
+            }
+          }
+        } else if (selectedStudentIds.length > 0) {
+          for (const studentId of selectedStudentIds) {
+            await enrollStudent(targetGroupId, studentId);
+          }
         }
         const grps = localStore.getGroups();
         const gIdx = grps.findIndex((g) => g.id === targetGroupId);
@@ -1426,167 +1569,12 @@ export default function GroupCreatePage() {
           )}
         </Card>
 
-        {/* Section 4: Students Enrollment */}
-        <Card className="p-6 space-y-5">
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              <div>
-                <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                  4. Guruh o‘quvchilari (Talabalarni biriktirish)
-                </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Guruhga kiritiladigan o‘quvchilarni tanlang. Ular darhol ushbu guruh a‘zosi sifatida ro‘yxatga olinadi.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                selectedStudentIds.length > Number(watch('capacity') || 20)
-                  ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border-red-300'
-                  : 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200'
-              }`}>
-                Tanlangan: {selectedStudentIds.length} / {watch('capacity') || 20} talaba
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {/* Search and Batch Actions */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="O‘quvchini ismi yoki telefon raqami bo‘yicha qidirish..."
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleSelectAllStudents}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-purple-100 dark:bg-gray-800 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer"
-                >
-                  ✓ Qidirilganlarni tanlash
-                </button>
-                {selectedStudentIds.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleClearStudents}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-50 hover:bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
-                  >
-                    Tozalash ({selectedStudentIds.length})
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Selected Student Pills (if any) */}
-            {selectedStudentIds.length > 0 && (
-              <div className="p-3 rounded-xl bg-purple-50/60 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/50 space-y-1.5">
-                <div className="text-[11px] font-bold text-purple-900 dark:text-purple-300 flex items-center justify-between">
-                  <span>Biriktirilgan o‘quvchilar:</span>
-                  <span>{selectedStudentIds.length} ta</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
-                  {selectedStudentIds.map((sId) => {
-                    const st = allStudents.find((s) => s.id === sId);
-                    const name = st ? `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.username : sId;
-                    return (
-                      <span
-                        key={sId}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-gray-800 text-purple-900 dark:text-purple-200 border border-purple-200 dark:border-purple-800 shadow-2xs"
-                      >
-                        <UserCheck className="w-3 h-3 text-purple-600 dark:text-purple-400" />
-                        <span className="truncate max-w-[150px]">{name}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleStudent(sId)}
-                          className="hover:text-red-600 p-0.5 ml-0.5 cursor-pointer"
-                          title="Guruhdan chiqarish"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Student Picker List */}
-            <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-surface-dark-tertiary">
-              {filteredStudents.length === 0 ? (
-                <div className="p-6 text-center text-xs text-gray-500 dark:text-gray-400">
-                  {studentSearch ? 'Qidiruv bo‘yicha o‘quvchilar topilmadi.' : 'Tizimda hali o‘quvchilar ro‘yxatga olinmagan.'}
-                </div>
-              ) : (
-                filteredStudents.slice(0, 50).map((st) => {
-                  const isSelected = selectedStudentIds.includes(st.id);
-                  const fullName = `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.username;
-                  return (
-                    <div
-                      key={st.id}
-                      onClick={() => handleToggleStudent(st.id)}
-                      className={`p-2.5 sm:px-4 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
-                        isSelected
-                          ? 'bg-purple-50/80 dark:bg-purple-950/40 hover:bg-purple-100/70'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => {}} // Controlled by container onClick
-                          className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 shrink-0 pointer-events-none"
-                        />
-                        <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0">
-                          {st.first_name?.[0] || st.username?.[0] || 'U'}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                            {fullName}
-                          </div>
-                          <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
-                            {st.phone || '@' + st.username}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="shrink-0 text-right">
-                        {isSelected ? (
-                          <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">
-                            ✓ Biriktirilgan
-                          </span>
-                        ) : (
-                          <span className="text-[11px] text-gray-400 hover:text-purple-600 font-medium">
-                            + Qo‘shish
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-            {filteredStudents.length > 50 && (
-              <p className="text-[11px] text-center text-gray-400">
-                Ko‘rsatilmoqda: 50 ta / jami {filteredStudents.length} ta o‘quvchi. Qidiruvdan foydalanib aniq talabani toping.
-              </p>
-            )}
-          </div>
-        </Card>
-
-        {/* Section 5: Pricing & Capacity */}
+        {/* Section 4: Pricing & Capacity */}
         <Card className="p-6 space-y-5">
           <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
             <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <h2 className="text-base font-bold text-gray-900 dark:text-white">
-              5. Oylik to‘lov va Talabalar sig‘imi
+              4. Oylik to‘lov va Talabalar sig‘imi
             </h2>
           </div>
 
@@ -1639,12 +1627,12 @@ export default function GroupCreatePage() {
           </div>
         </Card>
 
-        {/* Section 6: Status and Dates */}
+        {/* Section 5: Status and Dates */}
         <Card className="p-6 space-y-5">
           <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
             <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             <h2 className="text-base font-bold text-gray-900 dark:text-white">
-              6. Guruh holati va Dars sanalari
+              5. Guruh holati va Dars sanalari
             </h2>
           </div>
 
@@ -1679,6 +1667,406 @@ export default function GroupCreatePage() {
               />
             </div>
           </div>
+        </Card>
+
+        {/* Section 6: Students Enrollment (2 Paths: Existing or Inline New Student) */}
+        <Card className="p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <div>
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                  6. Guruh talabalari (O‘quvchilarni biriktirish — 2 ta yo‘l)
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Guruhga o‘quvchilarni mavjud bazadan tanlang yoki to‘g‘ridan-to‘g‘ri yangi o‘quvchi ro‘yxatdan o‘tkazing
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                selectedStudentIds.length > Number(watch('capacity') || 20)
+                  ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border-red-300'
+                  : 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200'
+              }`}>
+                Tanlangan: {selectedStudentIds.length} / {watch('capacity') || 20} talaba
+              </span>
+            </div>
+          </div>
+
+          {/* Two Paths Switcher */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-1.5 rounded-2xl bg-gray-100 dark:bg-surface-dark-tertiary">
+            <button
+              type="button"
+              onClick={() => setStudentMode('list')}
+              className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                studentMode === 'list'
+                  ? 'bg-white dark:bg-gray-800 text-purple-700 dark:text-purple-300 shadow-xs ring-1 ring-purple-200 dark:ring-purple-900'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Users className="w-4 h-4 text-purple-600" />
+              <span>1-yo‘l: Mavjud o‘quvchilardan tanlash ({allStudents.length} ta)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStudentMode('create')}
+              className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                studentMode === 'create'
+                  ? 'bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-500'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>2-yo‘l: Yangi o‘quvchi yaratish va biriktirish</span>
+            </button>
+          </div>
+
+          {studentMode === 'create' ? (
+            /* Path 2: Inline Quick Student Creation Form */
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-blue-50/70 dark:from-emerald-950/30 dark:via-gray-900/40 dark:to-blue-950/30 border border-emerald-200 dark:border-emerald-800 space-y-4 animate-fade-in">
+              <div className="flex items-center justify-between border-b border-emerald-200/60 dark:border-emerald-800/60 pb-3">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                      Yangi o‘quvchini ro‘yxatdan o‘tkazish va biriktirish
+                    </h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Talaba ma‘lumotlarini kiriting. U avtomatik tarzda yaratiladi va ushbu guruhga darhol biriktiriladi.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStudentMode('list')}
+                  className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer"
+                >
+                  Bekor qilish
+                </button>
+              </div>
+
+              {/* Information Callout */}
+              <div className="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-emerald-100 dark:border-emerald-900 text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Telefon raqamlari bo‘yicha tizim qoidalari:</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+                  <div className="bg-emerald-50/60 dark:bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-200/60">
+                    <span className="font-bold text-emerald-900 dark:text-emerald-200">1. Talabaning shaxsiy telefoni (Login):</span>
+                    <p className="text-gray-600 dark:text-gray-400 mt-0.5">
+                      Faqat 1 ta o‘quvchining o‘ziga tegishli unikal login raqami. Boshqa profil yoki rol uchun qayta ishlatilishi mumkin emas.
+                    </p>
+                  </div>
+                  <div className="bg-blue-50/60 dark:bg-blue-950/40 p-2.5 rounded-lg border border-blue-200/60">
+                    <span className="font-bold text-blue-900 dark:text-blue-200">2. Ota-onaning telefoni (SMS xabarlar):</span>
+                    <p className="text-gray-600 dark:text-gray-400 mt-0.5">
+                      Bir nechta farzand (2 yoki 3 ta aka-uka/opa-singil) uchun BIR XIL bo‘lishi mumkin! Xabarlar har bir farzand uchun alohida boradi.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fields: First Name & Last Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    Ism <span className="text-brand-red">*</span>
+                  </label>
+                  <Input
+                    placeholder="Masalan: Sardor"
+                    value={newStudentFirst}
+                    onChange={(e) => setNewStudentFirst(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    Familiya <span className="text-brand-red">*</span>
+                  </label>
+                  <Input
+                    placeholder="Masalan: Alimov"
+                    value={newStudentLast}
+                    onChange={(e) => setNewStudentLast(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Fields: Student Phone & Parent Phone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Student Personal Phone */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Talabaning shaxsiy telefoni (Login uchun) <span className="text-brand-red">*</span>
+                  </label>
+                  <Input
+                    icon={Phone}
+                    placeholder="+998 90 123 45 67"
+                    value={newStudentPhone}
+                    onChange={(e) => setNewStudentPhone(formatUzPhone(e.target.value))}
+                    className={studentPhoneConflict ? 'border-red-500 ring-2 ring-red-500/20' : ''}
+                  />
+                  {studentPhoneConflict ? (
+                    <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 text-[11px] text-red-700 dark:text-red-300 flex items-start gap-1.5 animate-fade-in">
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Xatolik:</strong> Bu telefon raqam (+{cleanNewStudentPhone}) bilan tizimda allaqachon boshqa foydalanuvchi ({studentPhoneConflict.full_name || studentPhoneConflict.username}) ro‘yxatdan o‘tgan! Har bir talaba faqat o‘zining shaxsiy raqami orqali o‘z profiliga kirishi shart.
+                      </span>
+                    </div>
+                  ) : cleanNewStudentPhone && cleanNewStudentPhone.length >= 9 ? (
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Telefon raqam bo‘sh va biriktirish uchun tayyor</span>
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Talaba shaxsiy kabinetiga ushbu raqam orqali kiradi
+                    </p>
+                  )}
+                </div>
+
+                {/* Parent Phone */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Ota-onaning telefoni (Otasi yoki onasi - SMS uchun) <span className="text-brand-red">*</span>
+                  </label>
+                  <Input
+                    icon={Phone}
+                    placeholder="+998 90 987 65 43"
+                    value={newStudentParentPhone}
+                    onChange={(e) => setNewStudentParentPhone(formatUzPhone(e.target.value))}
+                  />
+                  {parentSiblings.length > 0 ? (
+                    <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-start gap-1.5 animate-fade-in">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Ko‘p farzandli oila:</strong> Ushbu ota-onaning boshqa farzandi ham mavjud: <strong>{parentSiblings.map((s) => `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.username).join(', ')}</strong>. SMS xabarlar har bir farzand uchun alohida boradi.
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                      Davomat, baholar va to‘lov xabarlari ushbu raqamga yuboriladi
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Optional Password */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Kabinet paroli (Ixtiyoriy)
+                </label>
+                <Input
+                  placeholder="Bo‘sh qoldirilsa avtomatik: Talaba#2026!"
+                  value={newStudentPassword}
+                  onChange={(e) => setNewStudentPassword(e.target.value)}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-emerald-200/60 dark:border-emerald-800/60">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setStudentMode('list')}
+                >
+                  Bekor qilish
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  isLoading={isSavingStudent}
+                  disabled={Boolean(studentPhoneConflict)}
+                  onClick={handleCreateInlineStudent}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>O‘quvchini saqlash va guruhga qo‘shish</span>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            /* Path 1: Existing Students Checklist */
+            <div className="space-y-3 animate-fade-in">
+              {/* Search, Filter Chips, and Batch Actions */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="O‘quvchini ismi yoki telefon raqami bo‘yicha qidirish..."
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                  {/* Filter chips */}
+                  <div className="inline-flex items-center p-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setStudentFilter('all')}
+                      className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                        studentFilter === 'all'
+                          ? 'bg-white dark:bg-gray-700 text-purple-700 dark:text-purple-300 shadow-2xs'
+                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      Barchasi ({allStudents.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStudentFilter('selected')}
+                      className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                        studentFilter === 'selected'
+                          ? 'bg-white dark:bg-gray-700 text-purple-700 dark:text-purple-300 shadow-2xs'
+                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      Tanlanganlar ({selectedStudentIds.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStudentFilter('unassigned')}
+                      className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                        studentFilter === 'unassigned'
+                          ? 'bg-white dark:bg-gray-700 text-purple-700 dark:text-purple-300 shadow-2xs'
+                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      Guruhsizlar
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleSelectAllStudents}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-purple-100 dark:bg-gray-800 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer"
+                  >
+                    ✓ Qidirilganlarni tanlash
+                  </button>
+                  {selectedStudentIds.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearStudents}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-50 hover:bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
+                    >
+                      Tozalash ({selectedStudentIds.length})
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Selected Student Pills (if any) */}
+              {selectedStudentIds.length > 0 && (
+                <div className="p-3 rounded-xl bg-purple-50/60 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/50 space-y-1.5">
+                  <div className="text-[11px] font-bold text-purple-900 dark:text-purple-300 flex items-center justify-between">
+                    <span>Biriktirilgan o‘quvchilar ({selectedStudentIds.length} ta):</span>
+                    <button
+                      type="button"
+                      onClick={handleClearStudents}
+                      className="text-red-600 hover:underline cursor-pointer"
+                    >
+                      Barchasini bekor qilish
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                    {selectedStudentIds.map((sId) => {
+                      const st = allStudents.find((s) => s.id === sId);
+                      const name = st ? `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.username : sId;
+                      return (
+                        <span
+                          key={sId}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-gray-800 text-purple-900 dark:text-purple-200 border border-purple-200 dark:border-purple-800 shadow-2xs"
+                        >
+                          <UserCheck className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                          <span className="truncate max-w-[150px]">{name}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStudent(sId)}
+                            className="hover:text-red-600 p-0.5 ml-0.5 cursor-pointer"
+                            title="Guruhdan chiqarish"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Student Picker List */}
+              <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-surface-dark-tertiary">
+                {filteredStudents.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                    {studentSearch ? 'Qidiruv bo‘yicha o‘quvchilar topilmadi.' : 'Tizimda hali o‘quvchilar ro‘yxatga olinmagan.'}
+                  </div>
+                ) : (
+                  filteredStudents.slice(0, 50).map((st) => {
+                    const isSelected = selectedStudentIds.includes(st.id);
+                    const fullName = `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.username;
+                    const parentContact = st.father_phone ? `Otasi: ${st.father_phone}` : st.mother_phone ? `Onasi: ${st.mother_phone}` : '';
+                    return (
+                      <div
+                        key={st.id}
+                        onClick={() => handleToggleStudent(st.id)}
+                        className={`p-2.5 sm:px-4 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                          isSelected
+                            ? 'bg-purple-50/80 dark:bg-purple-950/40 hover:bg-purple-100/70'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}} // Controlled by container onClick
+                            className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 shrink-0 pointer-events-none"
+                          />
+                          <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0">
+                            {st.first_name?.[0] || st.username?.[0] || 'U'}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                              {fullName}
+                            </div>
+                            <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono flex items-center gap-2">
+                              <span>{st.phone || '@' + st.username}</span>
+                              {parentContact && (
+                                <span className="text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-400">
+                                  {parentContact}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          {isSelected ? (
+                            <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">
+                              ✓ Biriktirilgan
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-gray-400 hover:text-purple-600 font-medium">
+                              + Qo‘shish
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+              {filteredStudents.length > 50 && (
+                <p className="text-[11px] text-center text-gray-400">
+                  Ko‘rsatilmoqda: 50 ta / jami {filteredStudents.length} ta o‘quvchi. Qidiruvdan foydalanib aniq talabani toping.
+                </p>
+              )}
+            </div>
+          )}
         </Card>
 
         {/* Bottom Actions */}
