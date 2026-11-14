@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { localStore } from '@/lib/localStore';
 import { notifyStudentAttendance } from './telegramBotService';
-import { enqueueAttendanceSms } from './smsService';
+import { enqueueAttendanceSms, processQueueBatch } from './smsService';
 
 const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('placeholder');
 
@@ -192,6 +192,20 @@ export async function getGroupAttendanceStatus(groupId, date = null) {
  */
 export async function saveAttendanceRecords(lessonId, records = [], recordedBy = null) {
   const now = new Date().toISOString();
+
+  // Avvalgi holatlarni o'qib olish (status o'zgarishi, kechikkanlarni aniqlash va dublikat SMS oldini olish uchun)
+  let prevStatusMap = {};
+  try {
+    const prevRecords = await getAttendanceForLesson(lessonId);
+    if (Array.isArray(prevRecords)) {
+      prevRecords.forEach((pr) => {
+        if (pr && pr.student_id) {
+          prevStatusMap[pr.student_id] = pr.status;
+        }
+      });
+    }
+  } catch (_) {}
+
   if (!isPlaceholder) {
     try {
       const payload = records.map((r) => ({
@@ -211,7 +225,6 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
 
       if (!error && data) {
         localStore.saveAttendance(payload);
-        return data;
       }
     } catch (err) {
       console.warn('Supabase saveAttendance failed, using localStore:', err);
@@ -229,7 +242,7 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
   }));
   localStore.saveAttendance(payload);
 
-  // Trigger real-time Telegram notification to Students and Parents
+  // Trigger real-time Telegram notification and SMS for Parents
   try {
     const allLessons = typeof localStore.getLessons === 'function' ? localStore.getLessons() : [];
     const lesson = allLessons.find((l) => l.id === lessonId);
@@ -239,29 +252,48 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
     const teacherName = group?.teacher_name || 'Fan mentori';
     const lessonTime = lesson ? `${lesson.start_time?.slice(0, 5) || '09:30'} - ${lesson.end_time?.slice(0, 5) || '10:50'}` : 'Dars vaqtida';
 
-    records.forEach((r) => {
+    const notifyPromises = records.map(async (r) => {
+      const prevStatus = prevStatusMap[r.student_id] || null;
+
+      // 1. Telegram bot orqali bildirishnoma
       notifyStudentAttendance({
         studentId: r.student_id,
         courseName,
         lessonTime,
         teacherName,
         status: r.status,
+        prevStatus,
         date: lesson?.lesson_date || null,
         remark: r.remark || '',
       }).catch(() => {});
 
-      // Enqueue Attendance SMS for parent notification (faqat ota-onasi raqami bo'lsa navbatga qo'yiladi)
-      enqueueAttendanceSms({
+      // 2. Ota-onaga SMS yuborish navbatiga qo'yish (smart transition & anti-duplicate)
+      return enqueueAttendanceSms({
         studentId: r.student_id,
         courseName,
         lessonTime,
         teacherName,
         status: r.status,
+        prevStatus,
         date: lesson?.lesson_date || null,
         remark: r.remark || '',
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn('[attendanceService] enqueueAttendanceSms failed:', err);
+        return null;
+      });
     });
-  } catch (_) {}
+
+    await Promise.all(notifyPromises);
+
+    // 3. SMS Navbatini ZUDLIK BILAN jo'natish (processQueueBatch)
+    setTimeout(() => {
+      processQueueBatch({ limit: 50 }).catch((batchErr) => {
+        console.warn('[attendanceService] processQueueBatch error:', batchErr);
+      });
+    }, 150);
+  } catch (err) {
+    console.warn('[attendanceService] notifications error:', err);
+  }
 
   return payload;
 }

@@ -2902,12 +2902,15 @@ class LocalStore {
   saveSmsQueueItem(item) {
     const list = this.getSmsQueue();
     const queueItem = {
+      ...item,
       id: item.id || `sms-job-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       tracking_id: item.tracking_id || null,
       student_id: item.student_id,
       recipient_phone: item.recipient_phone,
       recipient_name: item.recipient_name || '',
       recipient_type: item.recipient_type || 'parent',
+      category: item.category || 'tuition',
+      attendance_status: item.attendance_status || null,
       message_text: item.message_text,
       amount_due: Number(item.amount_due || 0),
       course_name: item.course_name || '',

@@ -1008,6 +1008,8 @@ export async function generateDebtorQueue(options = {}) {
 
 /**
  * Enqueue attendance notification SMS for students/parents
+ * Supports smart transitions (e.g. from absent -> late during 30-min window)
+ * and prevents duplicate SMS if status has not changed.
  */
 export async function enqueueAttendanceSms({
   studentId,
@@ -1015,6 +1017,7 @@ export async function enqueueAttendanceSms({
   courseName = 'Dars',
   lessonTime = 'Dars vaqtida',
   status = 'absent',
+  prevStatus = null,
   date = null,
   remark = '',
   teacherName = 'Fan mentori',
@@ -1037,7 +1040,7 @@ export async function enqueueAttendanceSms({
       'Talaba';
     const dateFormatted = date || new Date().toISOString().split('T')[0];
 
-    // Sana formatini chiroyli qilish (masalan, 2026-11-13 -> 13.11.2026)
+    // Sana formatini chiroyli qilish (masalan, 2026-11-14 -> 14.11.2026)
     let prettyDate = dateFormatted;
     if (dateFormatted && dateFormatted.includes('-')) {
       const parts = dateFormatted.split('-');
@@ -1064,28 +1067,101 @@ export async function enqueueAttendanceSms({
     // Ota-onaning telefon raqami bo'lmasa, SMS yuborilmaydi (talab: faqat ota-onaga SMS borsin)
     if (!targetPhone) return null;
 
-    // Idempotency key: prevents duplicate attendance SMS for the same student, date, and status
-    const idempotencyKey = `sms-att-${studentId}-${dateFormatted}-${status}`;
+    // --- MANTIQIY TEKSHIRUV: Qayta saqlash va Status O'zgarishi (30 daqiqa ichida) ---
     const existingQueue = localStore.getSmsQueue() || [];
-    const alreadyQueued = existingQueue.find(
-      (q) => q.idempotency_key === idempotencyKey && q.status !== 'failed' && q.status !== 'cancelled'
+    const prevQueueItems = existingQueue.filter(
+      (q) =>
+        q.student_id === studentId &&
+        (q.category === 'attendance' ||
+          q.id?.startsWith('sms-att-') ||
+          q.idempotency_key?.startsWith(`sms-att-${studentId}-${dateFormatted}`))
     );
-    if (alreadyQueued) return alreadyQueued;
+
+    // 1. Agar avvalgi holat bilan bir xil bo'lsa va allaqachon xabar navbatda/yuborilgan bo'lsa - Dublikat SMS yuborilmaydi!
+    if (prevStatus && prevStatus === status) {
+      const alreadySame = prevQueueItems.find(
+        (q) => {
+          const normStatus = String(q.status || '').toUpperCase();
+          const isSame = q.attendance_status === status || q.idempotency_key?.includes(`-${status}`);
+          return isSame && normStatus !== 'FAILED' && normStatus !== 'CANCELLED';
+        }
+      );
+      if (alreadySame) return alreadySame;
+    }
+
+    // 2. Agar avval "kelmagan" (absent) deb qayd etilgan bo'lsa va navbatda kutilayotgan bo'lsa:
+    const pendingAbsentItem = prevQueueItems.find(
+      (q) => {
+        const normStatus = String(q.status || '').toUpperCase();
+        const isAbsent = q.attendance_status === 'absent' || q.idempotency_key?.includes('-absent');
+        const isPending = normStatus === 'PENDING' || normStatus === 'SCHEDULED' || normStatus === 'DISPATCHING';
+        return isAbsent && isPending;
+      }
+    );
+
+    // Agar o'quvchi kechikib kelsa yoki kelsa, navbatdagi eski "kelmadi" xabarini bekor qilamiz
+    if (pendingAbsentItem && (status === 'late' || status === 'present')) {
+      localStore.updateSmsQueueItem(pendingAbsentItem.id, {
+        status: 'CANCELLED',
+        error_message: `O‘quvchi darsga ${status === 'late' ? 'kechikib kelganligi' : 'kelganligi'} sababli bekor qilindi`,
+      });
+      try {
+        await supabase
+          .from('sms_queue')
+          .update({
+            status: 'CANCELLED',
+            error_message: `O‘quvchi darsga ${status === 'late' ? 'kechikib kelganligi' : 'kelganligi'} sababli bekor qilindi`,
+          })
+          .eq('id', pendingAbsentItem.id);
+      } catch (_) {}
+    }
+
+    // 3. Avvalgi "kelmadi" xabari ota-onaga ALLAQACHON ketgan bo'lsa (sent/delivered/dispatched):
+    const alreadySentAbsent = prevQueueItems.find(
+      (q) => {
+        const normStatus = String(q.status || '').toUpperCase();
+        const isAbsent = q.attendance_status === 'absent' || q.idempotency_key?.includes('-absent');
+        return isAbsent && (normStatus === 'DELIVERED' || normStatus === 'SUBMITTED' || normStatus === 'SENT' || normStatus === 'PROCESSING');
+      }
+    );
 
     let messageText = '';
-    if (status === 'present') {
+    if (status === 'late') {
+      if (alreadySentAbsent || prevStatus === 'absent') {
+        // Avval darsga kelmadi deb xabar ketgan edi, hozir esa kechikib keldi
+        messageText =
+          `🟡 Hurmatli Ota-ona,\n\n` +
+          `Farzandingiz ${sName} ${courseName} fanidan bugungi darsga KECHIKIB yetib keldi va darsda qatnashmoqda. Dars vaqti: ${lessonTime}.\n\n` +
+          `(Eslatma: Avvalroq darsga kelmadi deb qayd etilgan edi).\n\n` +
+          `Hurmat bilan, Fan mentori ${teacherName}`;
+      } else {
+        // Dastlabki kechikish xabari
+        messageText =
+          `🟡 Hurmatli Ota-ona,\n\n` +
+          `Farzandingiz ${sName} ${courseName} fanidan bugungi (${prettyDate}) darsga KECHIKIB keldi. Dars vaqti: ${lessonTime}.\n\n` +
+          `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n\n` +
+          `Hurmat bilan, Fan mentori ${teacherName}`;
+      }
+    } else if (status === 'present') {
+      if (alreadySentAbsent || prevStatus === 'absent') {
+        messageText =
+          `🟢 Hurmatli Ota-ona,\n\n` +
+          `Farzandingiz ${sName} ${courseName} fanidan darsga yetib keldi va ayni damda mashg‘ulotda faol qatnashmoqda. Dars vaqti: ${lessonTime}.\n\n` +
+          `Hurmat bilan, Fan mentori ${teacherName}`;
+      } else {
+        messageText =
+          `🟢 Hurmatli Ota-ona,\n\n` +
+          `Farzandingiz ${sName} ${courseName} fanidan ${prettyDate} sanasidagi darsga qatnashdi. Dars ${lessonTime} oralig‘ida o‘tkazildi.\n\n` +
+          `Biz farzandingizning bilim olishdagi intilishi va ishtiyoqini yuqori baholaymiz.\n\n` +
+          `Hurmat bilan, Fan mentori ${teacherName}`;
+      }
+    } else if (status === 'excused') {
       messageText =
-        `🟢 Hurmatli Ota-ona,\n\n` +
-        `Farzandingiz ${sName} ${courseName} fanidan ${prettyDate} sanasidagi darsga qatnashdi. Dars ${lessonTime} oralig‘ida o‘tkazildi.\n\n` +
-        `Biz farzandingizning bilim olishdagi intilishi va ishtiyoqini yuqori baholaymiz.\n\n` +
-        `Hurmat bilan, Fan mentori ${teacherName}`;
-    } else if (status === 'late') {
-      messageText =
-        `🟡 Hurmatli Ota-ona,\n\n` +
-        `Farzandingiz ${sName} ${courseName} fanidan ${prettyDate} kungi darsga KECH QOLIB yetib keldi. Dars ${lessonTime} oralig‘ida o‘tkazilmoqda.\n\n` +
-        `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n\n` +
+        `ℹ️ Hurmatli Ota-ona,\n\n` +
+        `Farzandingiz ${sName} ${courseName} darsini sababli holatda qoldirishi qayd etildi${remark ? ` (${remark})` : ''}. Dars vaqti: ${lessonTime}.\n\n` +
         `Hurmat bilan, Fan mentori ${teacherName}`;
     } else {
+      // status === 'absent'
       messageText =
         `🔴 DIQQAT: Hurmatli Ota-ona,\n\n` +
         `Farzandingiz ${sName} bugun (${prettyDate}) ${courseName} fanidan darsda QATNASHMADI (Darsga kelmadi). Dars vaqti: ${lessonTime}.\n\n` +
@@ -1093,6 +1169,7 @@ export async function enqueueAttendanceSms({
         `Hurmat bilan, EDUCO LMS Ma’muriyati`;
     }
 
+    const idempotencyKey = `sms-att-${studentId}-${dateFormatted}-${status}-${Date.now()}`;
     const nowIso = new Date().toISOString();
     const queueItem = {
       id: `sms-att-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -1100,6 +1177,8 @@ export async function enqueueAttendanceSms({
       recipient_phone: normalizePhone(targetPhone),
       recipient_name: `${sName} (${recipientType === 'father' ? 'Otasi' : recipientType === 'mother' ? 'Onasi' : 'Talaba'})`,
       recipient_type: recipientType,
+      category: 'attendance',
+      attendance_status: status,
       message_text: messageText,
       course_name: courseName,
       status: SMS_STATUS.PENDING,
@@ -1119,6 +1198,12 @@ export async function enqueueAttendanceSms({
       await supabase.from('sms_queue').insert([queueItem]);
     } catch (_) {}
     localStore.saveSmsQueueItem(queueItem);
+
+    // Zudlik bilan yuborishni ishga tushirish (orqa fonda navbatni uzatish)
+    setTimeout(() => {
+      processQueueBatch({ limit: 50 }).catch(() => {});
+    }, 100);
+
     return queueItem;
   } catch (err) {
     console.warn('[smsService] enqueueAttendanceSms exception:', err.message);

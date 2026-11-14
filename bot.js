@@ -252,18 +252,38 @@ async function processSequentialQueue() {
     const dateReached = !debtorStartDate || todayStr >= debtorStartDate;
     const allowDebtorSms = debtorSmsEnabled && dateReached;
 
-    // Qarzdorlik yoki to'lov xabarlarini aniqlash
+    // Davomat xabarlarini aniqlash (Davomat SMS lari HECH QACHON to'xtatilmaydi, zudlik bilan ketadi!)
+    const isAttendanceMsg = (item) =>
+      item &&
+      (item.category === 'attendance' ||
+        item.recipient_category === 'attendance' ||
+        item.id?.startsWith('sms-att-') ||
+        item.idempotency_key?.startsWith('sms-att-') ||
+        (item.message_text &&
+          (item.message_text.includes('QATNASHMADI') ||
+            item.message_text.includes('Darsga kelmadi') ||
+            item.message_text.includes('KECH QOLIB') ||
+            item.message_text.includes('KECHIKIB') ||
+            item.message_text.includes('darsga yetib keldi') ||
+            item.message_text.includes('qatnashdi') ||
+            item.message_text.includes('sababli holatda qoldirishi'))));
+
+    // Qarzdorlik yoki to'lov xabarlarini aniqlash (faqat oylik to'lov qarzdorlari)
     const isDebtorMsg = (item) =>
       item &&
+      !isAttendanceMsg(item) &&
       (item.recipient_type === 'debtor' ||
-        item.recipient_type === 'parent' ||
         (item.message_text &&
           (item.message_text.includes('to‘lov') ||
             item.message_text.includes('qarzdor') ||
             item.message_text.includes("to'lov"))));
 
-    // Agar ruxsat berilmagan bo'lsa, qarzdorlik SMS lari yuborilmaydi (navbatda kutiladi)
-    const pendingItems = queue.filter((q) => q.status === 'pending' && (allowDebtorSms || !isDebtorMsg(q)));
+    // Davomat SMS lari har doim birinchi bo'lib o'tadi; qarzdorlik esa sozlamaga qaraydi
+    const pendingItems = queue.filter((q) => {
+      if (q.status !== 'pending') return false;
+      if (isAttendanceMsg(q)) return true; // Davomat SMS ota-onalarga doimo zudlik bilan yetkaziladi!
+      return allowDebtorSms || !isDebtorMsg(q);
+    });
 
     if (pendingItems.length === 0) {
       isQueueProcessing = false;
@@ -288,7 +308,12 @@ async function processSequentialQueue() {
 
     const messageText = currentItem.message_text || '';
     const recipientName = currentItem.recipient_name || 'Hurmatli foydalanuvchi';
-    const tag = currentItem.course_name ? `📚 ${currentItem.course_name}` : '📌 Bildirishnoma';
+    const isAtt = isAttendanceMsg(currentItem);
+    const tag = isAtt
+      ? `📋 Davomat (${currentItem.attendance_status === 'late' ? 'Kechikkan' : currentItem.attendance_status === 'absent' ? 'Kelmadi' : 'Qatnashgan'})`
+      : currentItem.course_name
+        ? `📚 ${currentItem.course_name}`
+        : '📌 Bildirishnoma';
 
     // Holatni "processing" ga o'tkazish
     currentItem.status = 'processing';

@@ -471,11 +471,23 @@ export default function AttendancePage() {
         submittedAt: now,
       });
       await refreshGroupStatuses();
-      toast.success(
-        attendanceStatus.hasAttendance
-          ? 'Davomat muvaffaqiyatli yangilandi! (30 daqiqa ichida tahrirlash mumkin)'
-          : 'Davomat qabul qilindi! 30 daqiqa ichida kechikkanlarni tahrirlashingiz mumkin.'
-      );
+
+      const lateCount = records.filter((r) => r.status === 'late').length;
+      const absentCount = records.filter((r) => r.status === 'absent').length;
+
+      if (attendanceStatus.hasAttendance) {
+        if (lateCount > 0) {
+          toast.success(
+            `Davomat yangilandi! Kechikkan ${lateCount} nafar o‘quvchining ota-onalariga kechikish haqida SMS yuborildi.`
+          );
+        } else {
+          toast.success('Davomat muvaffaqiyatli yangilandi! Ota-onalarga SMS xabarlar uzatildi.');
+        }
+      } else {
+        toast.success(
+          `Davomat qabul qilindi! ${absentCount > 0 ? `${absentCount} nafar kelmagan o‘quvchi ota-onalariga SMS yuborilmoqda. ` : ''}30 daqiqa ichida kechikkanlarni tahrirlashingiz mumkin.`
+        );
+      }
     } catch (err) {
       console.error(err);
       toast.error(err.message || t('common.error', 'Davomatni saqlashda xatolik'));
@@ -825,9 +837,12 @@ export default function AttendancePage() {
                 isLoading={savingRoster}
                 disabled={loadingRoster || rosterStudents.length === 0}
                 onClick={handleSaveRoster}
-                className="!bg-blue-600 hover:!bg-blue-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 text-white shadow-md shadow-blue-600/25 dark:shadow-emerald-600/25 cursor-pointer"
+                className="!bg-blue-600 hover:!bg-blue-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 text-white shadow-md shadow-blue-600/25 dark:shadow-emerald-600/25 cursor-pointer flex items-center gap-1.5"
               >
-                {attendanceStatus.hasAttendance ? 'O‘zgarishlarni saqlash' : t('common.save', 'Davomatni saqlash')}
+                <span>{attendanceStatus.hasAttendance ? 'O‘zgarishlarni saqlash' : t('common.save', 'Davomatni saqlash')}</span>
+                <span className="hidden sm:inline-flex items-center text-[10px] font-bold bg-white/25 dark:bg-white/20 px-1.5 py-0.5 rounded-full ml-1 text-white">
+                  📱 SMS
+                </span>
               </Button>
             )}
           </div>
@@ -1917,6 +1932,27 @@ export default function AttendancePage() {
                     </div>
                     <p className="text-xs text-amber-800 dark:text-amber-300 mt-0.5">
                       Dars boshlanishiga {lessonTimeInfo.diffHours > 0 ? `${lessonTimeInfo.diffHours} soat ` : ''}{lessonTimeInfo.diffMins} daqiqa qoldi. Davomat dars boshlanganidan so‘ng to‘liq ochiladi.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : attendanceStatus.hasAttendance && attendanceStatus.isWithin30Min ? (
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 border-2 border-amber-400/60 dark:border-amber-600/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs mb-4 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                    <Clock className="w-5 h-5 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-amber-950 dark:text-amber-100">
+                        ⏱️ 30 daqiqalik kechikkanlarni qayd etish oynasi faol
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500 text-white shadow-xs">
+                        {attendanceStatus.minutesLeft} daqiqa qoldi
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-900/90 dark:text-amber-200/90 mt-0.5">
+                      Darsga kechikib kelgan o‘quvchilarni <strong>Kechikkan</strong> holatiga o‘tkazib <strong>O‘zgarishlarni saqlash</strong> tugmasini bosing — ota-onalariga darhol farzandi darsga kechikib yetib kelgani haqida SMS yuboriladi.
                     </p>
                   </div>
                 </div>
