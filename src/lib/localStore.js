@@ -261,6 +261,29 @@ const INITIAL_USERS = [
     created_at: '2026-11-04T06:03:14.870Z',
     updated_at: '2026-11-04T12:19:37.240Z',
   },
+  {
+    id: 'usr-student-936101774',
+    username: 'student_936101774',
+    first_name: 'Javohir',
+    last_name: 'Orifjonov',
+    fullName: 'Javohir Orifjonov',
+    full_name: 'Javohir Orifjonov',
+    name: 'Javohir Orifjonov',
+    role: 'student',
+    phone: '+998 93 610 17 74',
+    father_phone: '+998 93 610 17 74',
+    mother_phone: '+998 93 582 17 74',
+    email: 'student_936101774@educo.app',
+    password: 'Student#1774',
+    course_id: 'crs-fullstack',
+    course_ids: ['crs-fullstack'],
+    group_id: 'grp-fullstack-103',
+    group_ids: ['grp-fullstack-103', 'grp-fullstack-1.3'],
+    is_active: true,
+    has_temp_phone: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 ];
 
 const INITIAL_GROUPS = [];
@@ -1415,7 +1438,7 @@ class LocalStore {
           },
           {
             id: 'grp-fullstack-103',
-            name: 'Full Stack 1.3 (FS-1.3)',
+            name: 'Full Stack 1.3 (FUL-1.3)',
             course_id: 'crs-fullstack',
             courseId: 'crs-fullstack',
             course_name: 'Full Stack',
@@ -1424,17 +1447,19 @@ class LocalStore {
             teacherId: 'usr-1793463763683',
             teacher_name: 'Abdulazizbek Orifjonov',
             teacherName: 'Abdulazizbek Orifjonov',
-            schedule: 'Dush-Chor-Jum, 18:00 - 20:00',
-            schedule_days: 'Dush-Chor-Jum',
-            schedule_time: '18:00 - 20:00',
-            start_time: '18:00',
-            end_time: '20:00',
-            room: '105-xona',
+            schedule: 'Har kuni, 17:50 - 19:00',
+            schedule_days: 'Har kuni',
+            schedule_time: '17:50 - 19:00',
+            start_time: '17:50',
+            end_time: '19:00',
+            days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            room: '3-xona (IT Lab)',
             capacity: 25,
-            enrolled_count: 12,
+            enrolled_count: 1,
+            student_ids: ['usr-student-936101774'],
             status: 'active',
-            monthly_price: 600000,
-            price: 600000,
+            monthly_price: 500000,
+            price: 500000,
             created_at: '2026-10-31T12:00:00.000Z',
           },
         ];
@@ -1836,19 +1861,42 @@ class LocalStore {
    * Save group schedule for an arbitrary set of days and time range.
    * Auto-links to the group's teacher, room, and updates the group's schedule text.
    */
-  saveGroupSchedule({ groupId, days = [1, 3, 5], startTime = '09:00', endTime = '10:30', room = '101-xona' }) {
+  saveGroupSchedule({
+    groupId,
+    days = [1, 3, 5],
+    startTime = '09:00',
+    endTime = '10:30',
+    room = '101-xona',
+    teacherId: optTeacherId = '',
+    teacherName: optTeacherName = '',
+  }) {
     if (!groupId) return [];
     const formattedStart = startTime.length === 5 ? `${startTime}:00` : startTime;
     const formattedEnd = endTime.length === 5 ? `${endTime}:00` : endTime;
-    const dayNumbers = Array.isArray(days) ? days.map(Number) : [1, 3, 5];
+    const DAY_MAP = {
+      monday: 1, mon: 1, dush: 1, dushanba: 1, 1: 1, '1': 1,
+      tuesday: 2, tue: 2, sesh: 2, seshanba: 2, 2: 2, '2': 2,
+      wednesday: 3, wed: 3, chor: 3, chorshanba: 3, 3: 3, '3': 3,
+      thursday: 4, thu: 4, pay: 4, payshanba: 4, 4: 4, '4': 4,
+      friday: 5, fri: 5, jum: 5, juma: 5, 5: 5, '5': 5,
+      saturday: 6, sat: 6, shan: 6, shanba: 6, 6: 6, '6': 6,
+      sunday: 7, sun: 7, yak: 7, yakshanba: 7, 7: 7, '7': 7,
+    };
+    const dayNumbers = Array.isArray(days)
+      ? days
+          .map((d) => DAY_MAP[String(d).toLowerCase().trim()] || Number(d) || 1)
+          .filter((n) => !isNaN(n) && n >= 1 && n <= 7)
+      : [1, 3, 5];
 
     let list = this.getItem(STORAGE_KEYS.LESSON_SCHEDULES, INITIAL_SCHEDULES);
 
-    // Find the group to get its teacher_id and teacher_name
+    // Find the group to get its teacher_id, teacher_name and course
     const groups = this.getGroups();
     const targetGroup = groups.find((g) => g.id === groupId);
-    const teacherId = targetGroup?.teacher_id || targetGroup?.teacherId || '';
-    const teacherName = targetGroup?.teacher_name || targetGroup?.teacherName || '';
+    const teacherId = optTeacherId || targetGroup?.teacher_id || targetGroup?.teacherId || '';
+    const teacherName = optTeacherName || targetGroup?.teacher_name || targetGroup?.teacherName || '';
+    const groupName = targetGroup?.name || '';
+    const courseName = targetGroup?.courseName || targetGroup?.course_name || '';
 
     // Remove any previous schedules for this group
     list = list.filter((s) => s.group_id !== groupId);
@@ -1858,6 +1906,8 @@ class LocalStore {
       const entry = {
         id: `sch-${Date.now()}-${dayNum}-${Math.random().toString(36).slice(2, 6)}`,
         group_id: groupId,
+        group_name: groupName,
+        course_name: courseName,
         day_of_week: dayNum,
         start_time: formattedStart,
         end_time: formattedEnd,
@@ -1873,7 +1923,7 @@ class LocalStore {
     this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, list);
     this.broadcastToCloud(STORAGE_KEYS.LESSON_SCHEDULES, list);
 
-    // Also update group's schedule string
+    // Also update group's schedule string and teacher details
     const gIdx = groups.findIndex((g) => g.id === groupId);
     if (gIdx >= 0) {
       const dayNames = {
@@ -1890,6 +1940,8 @@ class LocalStore {
 
       groups[gIdx] = {
         ...groups[gIdx],
+        teacher_id: teacherId || groups[gIdx].teacher_id,
+        teacher_name: teacherName || groups[gIdx].teacher_name,
         room: room || groups[gIdx].room,
         schedule: `${dayLabel}, ${formattedStart.slice(0, 5)} - ${formattedEnd.slice(0, 5)}`,
         schedule_days: dayLabel,
