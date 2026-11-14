@@ -157,9 +157,9 @@ const courseSchema = z.object({
   code: z.string().min(2, 'Course code is required (e.g. FE-1.1)'),
   description: z.string().optional().or(z.literal('')),
   monthlyFee: z.preprocess(
-    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
+    (val) => (val === '' || val === null || val === undefined ? 500000 : Number(val)),
     z.number().min(0, 'Monthly fee cannot be negative')
-  ).default(0),
+  ).default(500000),
   color: z.string().default('#123D78'),
   isActive: z.boolean().default(true),
 });
@@ -209,7 +209,7 @@ export default function CourseForm({
       name: '',
       code: '',
       description: '',
-      monthlyFee: '',
+      monthlyFee: 500000,
       color: '#123D78',
       isActive: true,
     },
@@ -241,7 +241,7 @@ export default function CourseForm({
         name: '',
         code: '',
         description: '',
-        monthlyFee: '',
+        monthlyFee: 500000,
         color: '#123D78',
         isActive: true,
       });
@@ -407,7 +407,7 @@ export default function CourseForm({
             type="number"
             step="1000"
             icon={DollarSign}
-            placeholder="Masalan: 600000"
+            placeholder="Masalan: 500000"
             error={errors.monthlyFee?.message}
             {...register('monthlyFee')}
           />

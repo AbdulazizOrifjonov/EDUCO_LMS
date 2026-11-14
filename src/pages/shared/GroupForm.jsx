@@ -22,7 +22,7 @@ const groupSchema = z.object({
   teacherId: z.string().optional().or(z.literal('')),
   room: z.string().optional().or(z.literal('')),
   capacity: z.coerce.number().min(1, 'Capacity must be at least 1').max(100, 'Max capacity is 100'),
-  monthlyPrice: z.coerce.number().min(0, 'Oylik to‘lov 0 dan kam bo‘lishi mumkin emas').default(0),
+  monthlyPrice: z.coerce.number().min(0, 'Oylik to‘lov 0 dan kam bo‘lishi mumkin emas').default(500000),
   status: z.enum(['active', 'completed', 'archived', 'upcoming']).default('active'),
   startDate: z.string().optional().or(z.literal('')),
 });
@@ -58,7 +58,7 @@ export default function GroupForm({
       teacherId: '',
       room: '',
       capacity: 20,
-      monthlyPrice: 0,
+      monthlyPrice: 500000,
       status: 'active',
       startDate: '',
     },
@@ -124,7 +124,7 @@ export default function GroupForm({
         teacherId: '',
         room: '',
         capacity: 20,
-        monthlyPrice: 0,
+        monthlyPrice: 500000,
         status: 'active',
         startDate: new Date().toISOString().split('T')[0],
       });
@@ -371,7 +371,7 @@ export default function GroupForm({
               type="number"
               step="1000"
               icon={DollarSign}
-              placeholder="Masalan: 600000"
+              placeholder="Masalan: 500000"
               error={errors.monthlyPrice?.message}
               {...register('monthlyPrice')}
             />

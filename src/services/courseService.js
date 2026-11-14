@@ -165,7 +165,7 @@ export async function createCourse({
   name,
   code,
   description,
-  monthlyFee = 0,
+  monthlyFee = 500000,
   color = '#064e3b',
   isActive = true,
 }) {

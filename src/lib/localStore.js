@@ -974,7 +974,16 @@ class LocalStore {
           ? courseData.monthly_fee
           : courseData.monthlyFee !== undefined
           ? courseData.monthlyFee
-          : (existingCourse?.monthly_fee || 0)
+          : (existingCourse?.monthly_fee ?? 500000)
+      ),
+      price: Number(
+        courseData.price !== undefined
+          ? courseData.price
+          : courseData.monthly_fee !== undefined
+          ? courseData.monthly_fee
+          : courseData.monthlyFee !== undefined
+          ? courseData.monthlyFee
+          : (existingCourse?.price || existingCourse?.monthly_fee || 500000)
       ),
       color: courseData.color || existingCourse?.color || '#123D78',
       is_active: courseData.is_active ?? courseData.isActive ?? existingCourse?.is_active ?? true,

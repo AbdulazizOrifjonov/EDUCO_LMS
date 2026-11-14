@@ -15329,6 +15329,41 @@
       "sent_at": "2026-11-14T05:54:22.866Z",
       "delivered_at": null,
       "error_message": null
+    },
+    {
+      "id": "sms-att-1794638762594-q19bn",
+      "tracking_id": null,
+      "student_id": "usr-1794638446470",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Zafarbek Karimov (Otasi)",
+      "recipient_type": "father",
+      "message_text": "🟢 Hurmatli Ota-ona,\n\nFarzandingiz Zafarbek Karimov Dars fanidan 14.11.2026 sanasidagi darsga qatnashdi. Dars Dars vaqtida oralig‘ida o‘tkazildi.\n\nBiz farzandingizning bilim olishdagi intilishi va ishtiyoqini yuqori baholaymiz.\n\nHurmat bilan, Fan mentori Fan mentori",
+      "amount_due": 0,
+      "course_name": "Dars",
+      "group_name": "",
+      "due_date": null,
+      "status": "PENDING",
+      "device_id": null,
+      "attempts": 0,
+      "max_attempts": 3,
+      "last_attempt_at": null,
+      "error_message": null,
+      "billing_period": "2026-11",
+      "idempotency_key": "sms-att-usr-1794638446470-2026-11-14-present",
+      "scheduled_at": "2026-11-14T06:46:02.594Z",
+      "queued_at": "2026-11-14T06:46:02.594Z",
+      "dispatched_at": null,
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "lms_latency_ms": null,
+      "android_latency_ms": null,
+      "carrier_latency_ms": null,
+      "total_latency_ms": null,
+      "sent_at": null,
+      "created_at": "2026-11-14T06:46:02.594Z",
+      "updated_at": "2026-11-14T06:46:02.606Z"
     }
   ],
   "educo_db_sms_logs": [
@@ -18892,9 +18927,9 @@
     "anti_duplicate_days": 15,
     "sender_name": "EDUCO",
     "notify_owner_on_failure": true,
-    "updated_at": "2026-11-11T05:51:14.966Z",
+    "updated_at": "2026-11-14T06:20:17.213Z",
     "debtor_sms_enabled": false,
-    "debtor_sms_start_date": "",
+    "debtor_sms_start_date": "2026-11-14",
     "debtor_sms_start_day": 5
   },
   "test": true,
@@ -21726,7 +21761,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 1793779169056,
+  "_sync_version": 1793779169604,
   "_deleted_ids": [
     "usr-test-sync-1",
     "usr-1793596191113",
@@ -21738,5 +21773,5 @@
     "sch-it-frontend-mon-1793642706723",
     "usr-1793599332662"
   ],
-  "_updated_at": 1794635928568
+  "_updated_at": 1794640418137
 }

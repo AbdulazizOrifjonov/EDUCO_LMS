@@ -2,12 +2,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 /**
- * Apple & Asus ROG-Grade Scroll Reveal Hook
- * - Bounding box check triggers on mount ONLY for elements genuinely in initial viewport.
- * - Negative bottom rootMargin triggers animation when element enters 45px into view,
- *   ensuring the user visually witnesses the luxurious floating entrance.
- * - Hardware accelerated translate3d + cubic-bezier(0.16, 1, 0.3, 1) provides 120fps silkiness.
- * - Stagger delays gracefully cascade elements without blocking viewing.
+ * Ultra-Fast & Smooth Scroll Reveal Hook (Zero Lag / Pre-triggered)
+ * - Pre-triggers 250px ahead of the viewport so fast scrolling never encounters blank areas.
+ * - Snappy 0.38s transitions with minimal stagger delays for instant responsiveness.
+ * - Fast-swipe scroll listeners guarantee zero missing or delayed elements.
  */
 export function useScrollReveal(options = {}) {
   const ref = useRef(null);
@@ -22,17 +20,20 @@ export function useScrollReveal(options = {}) {
       return;
     }
 
-    // 1. Initial viewport check: ONLY mark visible if genuinely inside initial visible screen
+    // 1. Initial viewport check: mark visible if in or close to initial visible screen
     try {
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-      if (rect.top < vh - 50 && rect.bottom > 40) {
+      if (rect.top < vh + 150 && rect.bottom > -100) {
         setIsVisible(true);
         return;
       }
     } catch (_) {}
 
-    // 2. Observer with negative bottom margin: triggers as element glides 45px into viewport
+    // 2. Pre-triggered Observer: begins animation 250px ahead of the viewport
+    const rootMargin = options.rootMargin ?? '150px 0px 250px 0px';
+    const threshold = options.threshold ?? 0.01;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -41,19 +42,19 @@ export function useScrollReveal(options = {}) {
         }
       },
       {
-        threshold: options.threshold ?? 0.06,
-        rootMargin: options.rootMargin ?? '0px 0px -45px 0px',
+        threshold,
+        rootMargin,
       }
     );
 
     observer.observe(el);
 
-    // 3. Fallback scroll handler for fast swipes to guarantee zero permanently hidden elements
+    // 3. Fast scroll & flick listener: triggers immediately when scrolling quickly
     const handleScrollCheck = () => {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-      if (rect.top < vh) {
+      if (rect.top < vh + 300 && rect.bottom > -150) {
         setIsVisible(true);
         observer.unobserve(el);
         window.removeEventListener('scroll', handleScrollCheck);
@@ -89,8 +90,8 @@ export function ScrollReveal({
     zoom: 'reveal-init-zoom',
   }[animation] || 'reveal-init-up';
 
-  // Allow gentle stagger cascade up to 350ms so cards glide in one after another
-  const effectiveDelay = Math.min(Math.max(delay, 0), 350);
+  // Snappy stagger cascade capped at 100ms so cards glide in without blocking fast scrolling
+  const effectiveDelay = Math.min(Math.max(delay, 0), 100);
 
   return (
     <Component

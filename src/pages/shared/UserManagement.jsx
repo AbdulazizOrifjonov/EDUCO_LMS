@@ -860,7 +860,7 @@ export default function UserManagement() {
   return (
     <div className="space-y-6 animate-fade-in pb-24 sm:pb-12">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2.5 flex-wrap">
             <Users className="w-7 h-7 text-brand-navy dark:text-blue-400" />
@@ -877,17 +877,17 @@ export default function UserManagement() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto [&>*:last-child:nth-child(odd)]:col-span-2">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 w-full xl:w-auto shrink-0">
           <Button
             variant="outline"
             size="md"
             icon={Download}
             onClick={handleExportExcel}
-            className="w-full sm:w-auto justify-center font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 shadow-xs px-2.5 sm:px-4 text-xs sm:text-sm"
+            className="w-full sm:w-auto justify-center font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700/70 bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 shadow-2xs px-3 sm:px-4 h-10 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all"
             title={isTeacher ? "Guruhlaringizdagi barcha o‘quvchilarni Excel formatida yuklab olish" : "Barcha foydalanuvchilar va xodimlar bazasini Excel formatida yuklab olish"}
           >
-            <span className="hidden sm:inline">{isTeacher ? "O‘quvchilarim bazasi (Excel)" : "Excel Baza yuklab olish"}</span>
-            <span className="sm:hidden">Excel</span>
+            <span className="hidden 2xl:inline">{isTeacher ? "O‘quvchilarim bazasi (Excel)" : "Excel Baza yuklab olish"}</span>
+            <span className="2xl:hidden">{isTeacher ? "Excel Baza" : "Excel Baza"}</span>
           </Button>
 
           {isTeacher && (
@@ -895,12 +895,12 @@ export default function UserManagement() {
               variant="outline"
               size="md"
               icon={UserPlus}
-              className="w-full sm:w-auto justify-center font-bold text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 shadow-xs px-2.5 sm:px-4 text-xs sm:text-sm"
+              className="w-full sm:w-auto justify-center font-bold text-blue-700 dark:text-blue-300 border border-blue-300/80 dark:border-blue-700/70 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 shadow-2xs px-3 sm:px-4 h-10 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all"
               onClick={() => setIsEnrollExistingModalOpen(true)}
               title="Markazda ro‘yxatdan o‘tgan mavjud o‘quvchini o‘z guruhingizga biriktirish"
             >
-              <span className="hidden sm:inline">Mavjud o‘quvchini qo‘shish</span>
-              <span className="sm:hidden">Mavjud talaba</span>
+              <span className="hidden 2xl:inline">Mavjud o‘quvchini qo‘shish</span>
+              <span className="2xl:hidden">+ Mavjud o‘quvchi</span>
             </Button>
           )}
 
@@ -909,11 +909,12 @@ export default function UserManagement() {
               variant="outline"
               size="md"
               icon={UserCheck}
-              className="border-amber-400/80 text-amber-700 hover:bg-amber-50 dark:border-amber-600/60 dark:text-amber-300 dark:hover:bg-amber-950/40 font-semibold w-full sm:w-auto justify-center px-2.5 sm:px-4 text-xs sm:text-sm shadow-xs"
+              className="w-full sm:w-auto justify-center font-bold text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/70 bg-white dark:bg-gray-800 hover:bg-amber-50 dark:hover:bg-amber-950/40 shadow-2xs px-3 sm:px-4 h-10 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all"
               onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.TEACHER}`)}
+              title="Yangi o‘qituvchi hisobini yaratish"
             >
-              <span className="hidden sm:inline">{t('users.createTeacher', "O'qituvchi qo'shish")}</span>
-              <span className="sm:hidden">O'qituvchi</span>
+              <span className="hidden 2xl:inline">{t('users.createTeacher', "O'qituvchi qo'shish")}</span>
+              <span className="2xl:hidden">+ O‘qituvchi</span>
             </Button>
           )}
 
@@ -921,23 +922,25 @@ export default function UserManagement() {
             variant="primary"
             size="md"
             icon={GraduationCap}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40 font-semibold w-full sm:w-auto justify-center px-2.5 sm:px-4 text-xs sm:text-sm"
+            className="w-full sm:w-auto justify-center font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/30 border border-emerald-500/50 hover:shadow-md px-3 sm:px-4 h-10 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all"
             onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.STUDENT}`)}
+            title="Yangi o‘quvchi hisobini yaratish"
           >
-            <span className="hidden sm:inline">{isTeacher ? "Yangi o‘quvchi qo‘shish" : t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
-            <span className="sm:hidden">O'quvchi</span>
+            <span className="hidden 2xl:inline">{isTeacher ? "Yangi o‘quvchi qo‘shish" : t('users.createStudent', "Yangi o'quvchi qo'shish")}</span>
+            <span className="2xl:hidden">+ Yangi o‘quvchi</span>
           </Button>
 
           {currentUserRole === ROLES.OWNER && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="md"
               icon={Shield}
-              className="text-purple-700 dark:text-purple-300 hover:bg-purple-100/70 dark:hover:bg-purple-950/50 border border-purple-300/80 dark:border-purple-800/60 bg-purple-50/50 dark:bg-purple-950/20 font-semibold w-full sm:w-auto justify-center px-2.5 sm:px-4 text-xs sm:text-sm shadow-xs"
+              className="w-full sm:w-auto justify-center font-bold text-purple-700 dark:text-purple-300 border border-purple-300/80 dark:border-purple-700/70 bg-white dark:bg-gray-800 hover:bg-purple-50 dark:hover:bg-purple-950/40 shadow-2xs px-3 sm:px-4 h-10 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all"
               onClick={() => navigate(`/${currentUserRole}/users/create?role=${ROLES.ADMIN}`)}
+              title="Yangi administrator hisobini yaratish"
             >
-              <span className="hidden sm:inline">{t('users.createAdmin', "Admin qo'shish")}</span>
-              <span className="sm:hidden">Admin</span>
+              <span className="hidden 2xl:inline">{t('users.createAdmin', "Administrator qo'shish")}</span>
+              <span className="2xl:hidden">+ Administrator</span>
             </Button>
           )}
         </div>

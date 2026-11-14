@@ -36,9 +36,9 @@ const courseSchema = z.object({
   code: z.string().min(2, 'Kurs kodi kiritilishi shart'),
   description: z.string().optional().or(z.literal('')),
   monthlyFee: z.preprocess(
-    (val) => (val === '' || val === null || val === undefined ? 0 : Number(val)),
+    (val) => (val === '' || val === null || val === undefined ? 500000 : Number(val)),
     z.number().min(0, 'To‘lov manfiy bo‘lishi mumkin emas')
-  ).default(0),
+  ).default(500000),
   color: z.string().default('#123D78'),
   isActive: z.boolean().default(true),
 });
@@ -114,7 +114,7 @@ export default function CourseCreatePage() {
       name: '',
       code: '',
       description: '',
-      monthlyFee: '',
+      monthlyFee: 500000,
       color: '#123D78',
       isActive: true,
     },
