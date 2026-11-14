@@ -46,7 +46,7 @@ import TimePicker from '@/components/ui/TimePicker';
 import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
 import { toast } from '@/components/ui/Toast';
 import { createUser, updateUser, getUserById } from '@/services/userService';
-import { getGroups, enrollStudent, updateStudentDiscount } from '@/services/groupService';
+import { getGroups, enrollStudent, updateStudentDiscount, updateGroup } from '@/services/groupService';
 import { createStudentReminder } from '@/services/reminderService';
 import { getCourses, createCourse } from '@/services/courseService';
 import { ROLES } from '@/lib/constants';
@@ -95,6 +95,16 @@ export default function UserCreatePage() {
 
   // Group quick action state (Schedule, Teacher, Course switcher drawers per group card)
   const [activeGroupAction, setActiveGroupAction] = useState({ groupId: null, type: null });
+  // Group schedule editing state (Direct schedule modification & parallel group switch)
+  const [groupScheduleEdit, setGroupScheduleEdit] = useState({
+    groupId: null,
+    tab: 'direct', // 'direct' | 'parallel'
+    days: ['Monday', 'Wednesday', 'Friday'],
+    startTime: '18:00',
+    endTime: '20:00',
+    room: '',
+    isSaving: false,
+  });
   // Add another group drawer & course filter
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [filterCourseForAdd, setFilterCourseForAdd] = useState('all');
@@ -790,6 +800,32 @@ export default function UserCreatePage() {
     toast.success(`«${newG?.name || 'Guruh'}» qo‘shimcha yo‘nalish sifatida biriktirildi! Saqlash tugmasini bosing.`);
   };
 
+  const SCHEDULE_DAYS_PRESETS = [
+    { label: '📅 Toq kunlar (Dush-Chor-Jum)', days: ['Monday', 'Wednesday', 'Friday'] },
+    { label: '📅 Juft kunlar (Sesh-Pay-Shan)', days: ['Tuesday', 'Thursday', 'Saturday'] },
+    { label: '⚡ Har kuni (Du-Shan)', days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] },
+    { label: '🏖️ Dam olish (Shanba-Yak)', days: ['Saturday', 'Sunday'] },
+  ];
+
+  const WEEK_DAYS_LIST = [
+    { id: 'Monday', short: 'Dush', name: 'Dushanba' },
+    { id: 'Tuesday', short: 'Sesh', name: 'Seshanba' },
+    { id: 'Wednesday', short: 'Chor', name: 'Chorshanba' },
+    { id: 'Thursday', short: 'Pay', name: 'Payshanba' },
+    { id: 'Friday', short: 'Jum', name: 'Juma' },
+    { id: 'Saturday', short: 'Shan', name: 'Shanba' },
+    { id: 'Sunday', short: 'Yak', name: 'Yakshanba' },
+  ];
+
+  const SCHEDULE_TIME_PRESETS = [
+    { label: '08:00 - 10:00', start: '08:00', end: '10:00' },
+    { label: '09:00 - 10:30', start: '09:00', end: '10:30' },
+    { label: '14:00 - 15:30', start: '14:00', end: '15:30' },
+    { label: '16:00 - 17:30', start: '16:00', end: '17:30' },
+    { label: '18:00 - 19:30', start: '18:00', end: '19:30' },
+    { label: '18:00 - 20:00', start: '18:00', end: '20:00' },
+  ];
+
   const handleToggleGroupAction = (groupId, actionType) => {
     setActiveGroupAction((prev) => {
       if (prev.groupId === groupId && prev.type === actionType) {
@@ -797,6 +833,128 @@ export default function UserCreatePage() {
       }
       return { groupId, type: actionType };
     });
+
+    if (actionType === 'time') {
+      const targetG = groupsList.find((g) => g.id === groupId);
+      if (targetG) {
+        const rawTimeStr = targetG.schedule || targetG.schedule_time || '';
+        const timeMatch = rawTimeStr.match(/(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/);
+        const sTime = timeMatch ? timeMatch[1] : (targetG.startTime || targetG.start_time || '18:00');
+        const eTime = timeMatch ? timeMatch[2] : (targetG.endTime || targetG.end_time || '20:00');
+
+        const rawDaysStr = (targetG.schedule_days || targetG.schedule || '').toLowerCase();
+        let initialDays = ['Monday', 'Wednesday', 'Friday'];
+        if (Array.isArray(targetG.days) && targetG.days.length > 0) {
+          initialDays = targetG.days;
+        } else if (rawDaysStr.includes('sesh') || rawDaysStr.includes('pay') || rawDaysStr.includes('tue')) {
+          initialDays = ['Tuesday', 'Thursday', 'Saturday'];
+        } else if (rawDaysStr.includes('har kun') || rawDaysStr.includes('every')) {
+          initialDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        } else if (rawDaysStr.includes('dam') || rawDaysStr.includes('yak')) {
+          initialDays = ['Saturday', 'Sunday'];
+        } else if (rawDaysStr.includes('dush') || rawDaysStr.includes('chor') || rawDaysStr.includes('jum') || rawDaysStr.includes('mon')) {
+          initialDays = ['Monday', 'Wednesday', 'Friday'];
+        }
+
+        setGroupScheduleEdit({
+          groupId: targetG.id,
+          tab: 'direct',
+          days: initialDays,
+          startTime: sTime,
+          endTime: eTime,
+          room: targetG.room || '',
+          isSaving: false,
+        });
+      }
+    }
+  };
+
+  const handleToggleScheduleDay = (dayId) => {
+    setGroupScheduleEdit((prev) => {
+      const exists = prev.days.includes(dayId);
+      const nextDays = exists ? prev.days.filter((d) => d !== dayId) : [...prev.days, dayId];
+      return { ...prev, days: nextDays };
+    });
+  };
+
+  const handleApplyDaysPreset = (presetDays) => {
+    setGroupScheduleEdit((prev) => ({ ...prev, days: presetDays }));
+  };
+
+  const handleApplyTimePreset = (start, end) => {
+    setGroupScheduleEdit((prev) => ({ ...prev, startTime: start, endTime: end }));
+  };
+
+  const handleSaveGroupScheduleDirect = async (targetGroup) => {
+    if (!targetGroup) return;
+    const { days, startTime, endTime, room } = groupScheduleEdit;
+    if (!days || days.length === 0) {
+      toast.error('Iltimos, kamida bitta dars kunini tanlang!');
+      return;
+    }
+    if (!startTime || !endTime) {
+      toast.error('Dars boshlanish va tugash vaqtini kiriting!');
+      return;
+    }
+
+    setGroupScheduleEdit((prev) => ({ ...prev, isSaving: true }));
+    try {
+      const dayShorts = {
+        Monday: 'Dush',
+        Tuesday: 'Sesh',
+        Wednesday: 'Chor',
+        Thursday: 'Pay',
+        Friday: 'Jum',
+        Saturday: 'Shan',
+        Sunday: 'Yak',
+      };
+      const formattedDays = days.map((d) => dayShorts[d] || d).join('-');
+      const formattedSchedule = `${formattedDays}, ${startTime} - ${endTime}`;
+
+      const payload = {
+        days,
+        startTime,
+        endTime,
+        schedule_days: formattedDays,
+        schedule_time: `${startTime} - ${endTime}`,
+        schedule: formattedSchedule,
+        room: room || targetGroup.room || '101-xona',
+      };
+
+      await updateGroup(targetGroup.id, payload);
+
+      if (localStore.saveGroupSchedule) {
+        localStore.saveGroupSchedule({
+          groupId: targetGroup.id,
+          days,
+          startTime,
+          endTime,
+          room: payload.room,
+        });
+      }
+
+      setGroupsList((prev) =>
+        prev.map((g) =>
+          g.id === targetGroup.id
+            ? {
+                ...g,
+                ...payload,
+                schedule_days: formattedDays,
+                schedule: formattedSchedule,
+                room: payload.room,
+              }
+            : g
+        )
+      );
+
+      toast.success(`🎉 «${targetGroup.name}» dars kuni va vaqti muvaffaqiyatli o‘zgartirildi: ${formattedSchedule}`);
+      setActiveGroupAction({ groupId: null, type: null });
+    } catch (err) {
+      console.error('Failed to update group schedule:', err);
+      toast.error(err.message || 'Dars jadvalini saqlashda xatolik yuz berdi');
+    } finally {
+      setGroupScheduleEdit((prev) => ({ ...prev, isSaving: false }));
+    }
   };
 
   const getRoleHeaderInfo = () => {
@@ -1707,10 +1865,10 @@ export default function UserCreatePage() {
                               ? 'bg-amber-600 text-white ring-2 ring-amber-400/40'
                               : 'bg-amber-50 hover:bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 dark:text-amber-200 border border-amber-300 dark:border-amber-800'
                           }`}
-                          title="Ushbu yo‘nalish bo‘yicha boshqa vaqtdagi parallel guruhga ko‘chirish"
+                          title="Ushbu guruh dars kunlari va soatini o‘zgartirish yoki parallel guruhga ko‘chirish"
                         >
                           <Clock className="w-3.5 h-3.5 shrink-0" />
-                          <span>⏰ Vaqtini almashtirish</span>
+                          <span>⏰ Dars kuni va vaqtini o‘zgartirish</span>
                         </button>
 
                         {/* 2. Ustozini almashtirish */}
@@ -1755,101 +1913,286 @@ export default function UserCreatePage() {
                         </button>
                       </div>
 
-                      {/* ⏰ DRAWER 1: Vaqtini almashtirish (Parallel vaqtga ko'chirish) */}
+                      {/* ⏰ DRAWER 1: Dars kuni va vaqtini to'g'ridan-to'g'ri o'zgartirish & Parallel guruh */}
                       {isActionOpen && currentActionType === 'time' && (
-                        <div className="p-3.5 sm:p-4 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 space-y-3 animate-fade-in">
-                          <div className="flex items-center justify-between pb-2 border-b border-amber-200 dark:border-amber-800/80">
-                            <div className="flex items-center gap-2">
-                              <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-                              <h4 className="font-black text-xs sm:text-sm text-gray-900 dark:text-white">
-                                «{group.name}» dars vaqtini almashtirish
-                              </h4>
+                        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-50/90 to-orange-50/70 dark:from-amber-950/40 dark:to-orange-950/30 border-2 border-amber-300 dark:border-amber-700/80 shadow-md space-y-4 animate-fade-in">
+                          {/* Header */}
+                          <div className="flex items-center justify-between pb-3 border-b border-amber-200 dark:border-amber-800">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                                <Clock className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h4 className="font-black text-xs sm:text-sm text-gray-900 dark:text-white">
+                                  «{group.name}» dars kuni va vaqtini o‘zgartirish
+                                </h4>
+                                <p className="text-[11px] text-amber-900/80 dark:text-amber-200/80">
+                                  Hozirgi dars jadvali: <span className="font-mono font-bold text-gray-900 dark:text-white">{group.schedule_days || group.schedule || 'Jadval belgilanmagan'}</span>
+                                </p>
+                              </div>
                             </div>
                             <button
                               type="button"
                               onClick={() => setActiveGroupAction({ groupId: null, type: null })}
-                              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg"
+                              className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 p-1.5 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors cursor-pointer"
+                              title="Yopish"
                             >
-                              <X className="w-4 h-4" />
+                              <X className="w-5 h-5" />
                             </button>
                           </div>
-                          <p className="text-xs text-amber-900 dark:text-amber-200">
-                            Ushbu yo‘nalish (<strong>{group.courseName || group.course_name}</strong>) bo‘yicha parallel guruhlar va ularning dars vaqtlari:
-                          </p>
 
-                          {timeAlternatives.length === 0 ? (
-                            <div className="p-3 rounded-lg bg-white/80 dark:bg-gray-800/80 text-xs text-gray-600 dark:text-gray-300 flex items-center justify-between gap-2">
-                              <span>Hozircha ushbu kurs bo‘yicha boshqa parallel guruh mavjud emas.</span>
-                              <button
-                                type="button"
-                                onClick={() => navigate(`/${currentUserRole}/groups/create?courseId=${group.course_id || group.courseId || ''}`)}
-                                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shrink-0"
-                              >
-                                + Yangi 2-guruh ochish
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {timeAlternatives.map((altG) => {
-                                const altSched = altG.schedule_days || altG.schedule || 'Jadvalsiz';
-                                const altRoom = altG.room ? `${altG.room.replace(/^xona\s*/i, '')}-xona` : '';
-                                const altTeacher = altG.teacherName || altG.teacher_name || 'Ustoz';
-                                const isEnrolledInThis = enrolledGroupIds.includes(altG.id);
+                          {/* Navigation Tabs */}
+                          <div className="flex items-center gap-2 p-1 rounded-xl bg-amber-100/70 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800">
+                            <button
+                              type="button"
+                              onClick={() => setGroupScheduleEdit((prev) => ({ ...prev, tab: 'direct' }))}
+                              className={`flex-1 py-2 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                groupScheduleEdit.tab === 'direct'
+                                  ? 'bg-amber-600 text-white shadow-xs'
+                                  : 'text-amber-900 dark:text-amber-200 hover:bg-amber-200/60 dark:hover:bg-amber-800/60'
+                              }`}
+                            >
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span>📅 Shu guruh dars kuni va vaqtini tahrirlash</span>
+                            </button>
 
-                                // Check if altG conflicts with ANY OTHER enrolled group (except the one being replaced)
-                                const altConflict = enrolledGroupObjs.some((otherG) => {
-                                  if (otherG.id === group.id) return false;
-                                  const oSched = otherG.schedule_days || otherG.schedule || '';
-                                  return oSched && altSched && hasScheduleConflict(oSched, altSched);
-                                });
+                            <button
+                              type="button"
+                              onClick={() => setGroupScheduleEdit((prev) => ({ ...prev, tab: 'parallel' }))}
+                              className={`flex-1 py-2 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                                groupScheduleEdit.tab === 'parallel'
+                                  ? 'bg-amber-600 text-white shadow-xs'
+                                  : 'text-amber-900 dark:text-amber-200 hover:bg-amber-200/60 dark:hover:bg-amber-800/60'
+                              }`}
+                            >
+                              <RefreshCw className="w-3.5 h-3.5" />
+                              <span>🔄 Parallel boshqa guruhga ko‘chirish ({timeAlternatives.length})</span>
+                            </button>
+                          </div>
 
-                                return (
-                                  <div
-                                    key={altG.id}
-                                    className={`p-3 rounded-xl border text-xs space-y-2 transition-all ${
-                                      altConflict
-                                        ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-300 dark:border-rose-800'
-                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-amber-400'
-                                    }`}
-                                  >
-                                    <div className="flex items-start justify-between gap-1.5">
-                                      <div>
-                                        <div className="font-bold text-gray-900 dark:text-white">
-                                          «{altG.name}» {altRoom && <span className="text-[10px] text-gray-500 font-mono">({altRoom})</span>}
-                                        </div>
-                                        <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                                          👨‍🏫 {altTeacher}
-                                        </div>
-                                      </div>
-                                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 shrink-0">
-                                        {altG.enrolled_count || 0}/{altG.capacity || 20} ta
-                                      </span>
-                                    </div>
+                          {/* TAB 1: Shu guruh dars kuni va vaqtini tahrirlash */}
+                          {groupScheduleEdit.tab === 'direct' && (
+                            <div className="space-y-4 pt-1">
+                              {/* 1. Dars kunlari */}
+                              <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                                  <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                                  <span>1. Dars kunlari (Tezkor tanlov shablonlari):</span>
+                                </label>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                  {SCHEDULE_DAYS_PRESETS.map((preset) => {
+                                    const isActive =
+                                      preset.days.length === groupScheduleEdit.days.length &&
+                                      preset.days.every((d) => groupScheduleEdit.days.includes(d));
+                                    return (
+                                      <button
+                                        key={preset.label}
+                                        type="button"
+                                        onClick={() => handleApplyDaysPreset(preset.days)}
+                                        className={`px-2.5 py-2 rounded-xl text-xs font-bold text-left transition-all border cursor-pointer ${
+                                          isActive
+                                            ? 'bg-amber-600 text-white border-amber-600 shadow-xs ring-2 ring-amber-400/40'
+                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-amber-400'
+                                        }`}
+                                      >
+                                        {preset.label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
 
-                                    <div className="p-2 rounded-lg bg-amber-500/10 dark:bg-amber-950/30 text-[11px] font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
-                                      <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                                      <span>{altSched}</span>
-                                    </div>
+                                {/* Hafta kunlari individual tanlov */}
+                                <div className="flex flex-wrap gap-1.5 pt-1">
+                                  {WEEK_DAYS_LIST.map((day) => {
+                                    const isSelected = groupScheduleEdit.days.includes(day.id);
+                                    return (
+                                      <button
+                                        key={day.id}
+                                        type="button"
+                                        onClick={() => handleToggleScheduleDay(day.id)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border cursor-pointer flex items-center gap-1 ${
+                                          isSelected
+                                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-emerald-400'
+                                        }`}
+                                      >
+                                        {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                                        <span>{day.name}</span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
 
-                                    {altConflict && (
-                                      <div className="text-[10px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                                        <AlertTriangle className="w-3 h-3 shrink-0" />
-                                        <span>Boshqa biriktirilgan guruh bilan vaqt to‘qnashadi!</span>
-                                      </div>
-                                    )}
+                              {/* 2. Dars vaqti */}
+                              <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5">
+                                  <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                  <span>2. Dars vaqti (Tezkor vaqtlar yoki aniq soat):</span>
+                                </label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1.5">
+                                  {SCHEDULE_TIME_PRESETS.map((tPreset) => {
+                                    const isMatch =
+                                      groupScheduleEdit.startTime === tPreset.start && groupScheduleEdit.endTime === tPreset.end;
+                                    return (
+                                      <button
+                                        key={tPreset.label}
+                                        type="button"
+                                        onClick={() => handleApplyTimePreset(tPreset.start, tPreset.end)}
+                                        className={`px-2 py-1.5 rounded-lg text-xs font-mono font-bold text-center transition-all border cursor-pointer ${
+                                          isMatch
+                                            ? 'bg-amber-600 text-white border-amber-600 shadow-2xs ring-2 ring-amber-400/40'
+                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-amber-400'
+                                        }`}
+                                      >
+                                        {tPreset.label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
 
-                                    <button
-                                      type="button"
-                                      disabled={isEnrolledInThis}
-                                      onClick={() => handleSwitchGroup(group.id, altG.id)}
-                                      className="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs cursor-pointer shadow-2xs active:scale-95 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                                    >
-                                      <Clock className="w-3.5 h-3.5" />
-                                      <span>Ushbu vaqtga ko‘chirish</span>
-                                    </button>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                  <div>
+                                    <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block mb-1">
+                                      Boshlanish vaqti:
+                                    </label>
+                                    <input
+                                      type="time"
+                                      value={groupScheduleEdit.startTime}
+                                      onChange={(e) => setGroupScheduleEdit((prev) => ({ ...prev, startTime: e.target.value }))}
+                                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+                                    />
                                   </div>
-                                );
-                              })}
+                                  <div>
+                                    <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block mb-1">
+                                      Tugash vaqti:
+                                    </label>
+                                    <input
+                                      type="time"
+                                      value={groupScheduleEdit.endTime}
+                                      onChange={(e) => setGroupScheduleEdit((prev) => ({ ...prev, endTime: e.target.value }))}
+                                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-xs font-mono font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 block mb-1">
+                                      Xona / Auditoriya:
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="Masalan: 3-xona (IT Lab)"
+                                      value={groupScheduleEdit.room}
+                                      onChange={(e) => setGroupScheduleEdit((prev) => ({ ...prev, room: e.target.value }))}
+                                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-xs font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Saqlash tugmasi */}
+                              <div className="pt-2 flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveGroupAction({ groupId: null, type: null })}
+                                  className="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                                >
+                                  Bekor qilish
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={groupScheduleEdit.isSaving}
+                                  onClick={() => handleSaveGroupScheduleDirect(group)}
+                                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md hover:shadow-lg cursor-pointer flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+                                >
+                                  <Save className="w-4 h-4" />
+                                  <span>{groupScheduleEdit.isSaving ? 'Saqlanmoqda...' : `💾 «${group.name}» dars kuni va vaqtini saqlash`}</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* TAB 2: Parallel boshqa guruhga ko'chirish */}
+                          {groupScheduleEdit.tab === 'parallel' && (
+                            <div className="space-y-3 pt-1">
+                              <p className="text-xs text-amber-900 dark:text-amber-200">
+                                Ushbu yo‘nalish (<strong>{group.courseName || group.course_name}</strong>) bo‘yicha parallel guruhlar va ularning dars vaqtlari:
+                              </p>
+
+                              {timeAlternatives.length === 0 ? (
+                                <div className="p-3.5 rounded-xl bg-white/90 dark:bg-gray-800/90 text-xs text-gray-600 dark:text-gray-300 flex items-center justify-between gap-2 border border-gray-200 dark:border-gray-700">
+                                  <span>Hozircha ushbu kurs bo‘yicha boshqa parallel guruh mavjud emas.</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate(`/${currentUserRole}/groups/create?courseId=${group.course_id || group.courseId || ''}`)}
+                                    className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shrink-0 cursor-pointer"
+                                  >
+                                    + Yangi 2-guruh ochish
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                  {timeAlternatives.map((altG) => {
+                                    const altSched = altG.schedule_days || altG.schedule || 'Jadvalsiz';
+                                    const altRoom = altG.room ? `${altG.room.replace(/^xona\s*/i, '')}-xona` : '';
+                                    const altTeacher = altG.teacherName || altG.teacher_name || 'Ustoz';
+                                    const isEnrolledInThis = enrolledGroupIds.includes(altG.id);
+
+                                    // Check if altG conflicts with ANY OTHER enrolled group (except the one being replaced)
+                                    const altConflict = enrolledGroupObjs.some((otherG) => {
+                                      if (otherG.id === group.id) return false;
+                                      const oSched = otherG.schedule_days || otherG.schedule || '';
+                                      return oSched && altSched && hasScheduleConflict(oSched, altSched);
+                                    });
+
+                                    return (
+                                      <div
+                                        key={altG.id}
+                                        className={`p-3 rounded-xl border text-xs space-y-2 transition-all ${
+                                          altConflict
+                                            ? 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-300 dark:border-rose-800'
+                                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-amber-400'
+                                        }`}
+                                      >
+                                        <div className="flex items-start justify-between gap-1.5">
+                                          <div>
+                                            <div className="font-bold text-gray-900 dark:text-white">
+                                              «{altG.name}» {altRoom && <span className="text-[10px] text-gray-500 font-mono">({altRoom})</span>}
+                                            </div>
+                                            <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                                              👨‍🏫 {altTeacher}
+                                            </div>
+                                          </div>
+                                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 shrink-0">
+                                            {altG.enrolled_count || 0}/{altG.capacity || 20} ta
+                                          </span>
+                                        </div>
+
+                                        <div className="p-2 rounded-lg bg-amber-500/10 dark:bg-amber-950/30 text-[11px] font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                                          <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                          <span>{altSched}</span>
+                                        </div>
+
+                                        {altConflict && (
+                                          <div className="text-[10px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                                            <AlertTriangle className="w-3 h-3 shrink-0" />
+                                            <span>Boshqa biriktirilgan guruh bilan vaqt to‘qnashadi!</span>
+                                          </div>
+                                        )}
+
+                                        <button
+                                          type="button"
+                                          disabled={isEnrolledInThis}
+                                          onClick={() => handleSwitchGroup(group.id, altG.id)}
+                                          className="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs cursor-pointer shadow-2xs active:scale-95 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                        >
+                                          <Clock className="w-3.5 h-3.5" />
+                                          <span>Ushbu vaqtga ko‘chirish</span>
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
