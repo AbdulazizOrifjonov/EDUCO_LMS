@@ -24,6 +24,11 @@ import {
   X,
   Split,
   ArrowRightLeft,
+  Clock,
+  Search,
+  Check,
+  CalendarCheck,
+  UserCheck,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -39,9 +44,11 @@ import {
   getGroupById,
   getGroups,
   generateSubgroupSuggestions,
+  enrollStudent,
 } from '@/services/groupService';
 import { getCourses, createCourse } from '@/services/courseService';
 import { getTeachers, createUser } from '@/services/userService';
+import { localStore, STORAGE_KEYS } from '@/lib/localStore';
 import ImageCropperModal from '@/components/ui/ImageCropperModal';
 import GroupSplitModal from '@/components/groups/GroupSplitModal';
 import { fileToCompressedDataUrl } from '@/services/settingsService';
@@ -59,6 +66,32 @@ const groupSchema = z.object({
   startDate: z.string().optional().or(z.literal('')),
   endDate: z.string().optional().or(z.literal('')),
 });
+
+const DAYS_CONFIG = [
+  { id: 1, name: 'Dushanba', short: 'Dush', pattern: 'odd' },
+  { id: 2, name: 'Seshanba', short: 'Sesh', pattern: 'even' },
+  { id: 3, name: 'Chorshanba', short: 'Chor', pattern: 'odd' },
+  { id: 4, name: 'Payshanba', short: 'Pay', pattern: 'even' },
+  { id: 5, name: 'Juma', short: 'Jum', pattern: 'odd' },
+  { id: 6, name: 'Shanba', short: 'Shan', pattern: 'even' },
+  { id: 7, name: 'Yakshanba', short: 'Yak', pattern: 'sunday' },
+];
+
+const TIME_PRESETS = [
+  { label: '09:00 - 10:30', start: '09:00', end: '10:30' },
+  { label: '09:30 - 11:00', start: '09:30', end: '11:00' },
+  { label: '10:00 - 11:30', start: '10:00', end: '11:30' },
+  { label: '10:30 - 12:00', start: '10:30', end: '12:00' },
+  { label: '11:00 - 12:30', start: '11:00', end: '12:30' },
+  { label: '14:00 - 15:30', start: '14:00', end: '15:30' },
+  { label: '15:30 - 17:00', start: '15:30', end: '17:00' },
+  { label: '16:00 - 17:30', start: '16:00', end: '17:30' },
+  { label: '17:00 - 18:30', start: '17:00', end: '18:30' },
+  { label: '17:30 - 19:00', start: '17:30', end: '19:00' },
+  { label: '18:00 - 19:30', start: '18:00', end: '19:30' },
+  { label: '07:00 - 08:30', start: '07:00', end: '08:30' },
+  { label: '08:30 - 10:00', start: '08:30', end: '10:00' },
+];
 
 export default function GroupCreatePage() {
   const { t } = useTranslation();
@@ -93,6 +126,19 @@ export default function GroupCreatePage() {
   const [newTeacherLastName, setNewTeacherLastName] = useState('');
   const [newTeacherPhone, setNewTeacherPhone] = useState('+998 ');
   const [isSavingTeacher, setIsSavingTeacher] = useState(false);
+
+  const teacherFullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || profile?.fullName || profile?.name || '';
+
+  // Lesson Schedule (Days and Time) state
+  const [hasSchedule, setHasSchedule] = useState(true);
+  const [selectedDays, setSelectedDays] = useState([1, 3, 5]); // Default: Toq kunlar (D/CH/J)
+  const [startTime, setStartTime] = useState('09:00');
+  const [endTime, setEndTime] = useState('10:30');
+
+  // Enrolled Students state
+  const [allStudents, setAllStudents] = useState([]);
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+  const [studentSearch, setStudentSearch] = useState('');
 
   const {
     register,
@@ -168,6 +214,63 @@ export default function GroupCreatePage() {
     setSplitModalGroup(grp);
   };
 
+  const handleSelectDayPattern = (type) => {
+    if (type === 'odd') {
+      setSelectedDays([1, 3, 5]);
+      toast.info('Toq kunlar (D / CH / J) tanlandi');
+    } else if (type === 'even') {
+      setSelectedDays([2, 4, 6]);
+      toast.info('Juft kunlar (S / P / SH) tanlandi');
+    } else if (type === 'everyday') {
+      setSelectedDays([1, 2, 3, 4, 5, 6]);
+      toast.info('Har kuni (Dush - Shanba) tanlandi');
+    } else if (type === 'weekend') {
+      setSelectedDays([6, 7]);
+      toast.info('Dam olish kunlari (Shanba, Yakshanba) tanlandi');
+    }
+  };
+
+  const handleToggleDay = (dayId) => {
+    setSelectedDays((prev) => {
+      if (prev.includes(dayId)) {
+        return prev.filter((d) => d !== dayId);
+      } else {
+        return [...prev, dayId].sort((a, b) => a - b);
+      }
+    });
+  };
+
+  const filteredStudents = useMemo(() => {
+    if (!studentSearch.trim()) return allStudents;
+    const q = studentSearch.toLowerCase().trim();
+    return allStudents.filter((s) => {
+      const fullName = `${s.first_name || ''} ${s.last_name || ''}`.toLowerCase();
+      const phone = (s.phone || '').replace(/\D/g, '');
+      const username = (s.username || '').toLowerCase();
+      return fullName.includes(q) || phone.includes(q) || username.includes(q);
+    });
+  }, [allStudents, studentSearch]);
+
+  const handleToggleStudent = (studentId) => {
+    setSelectedStudentIds((prev) => {
+      if (prev.includes(studentId)) {
+        return prev.filter((id) => id !== studentId);
+      } else {
+        return [...prev, studentId];
+      }
+    });
+  };
+
+  const handleSelectAllStudents = () => {
+    const ids = filteredStudents.map((s) => s.id);
+    setSelectedStudentIds((prev) => Array.from(new Set([...prev, ...ids])));
+    toast.info(`${ids.length} ta o‘quvchi tanlandi`);
+  };
+
+  const handleClearStudents = () => {
+    setSelectedStudentIds([]);
+  };
+
   // Pre-fill query param name or subgroup if present, and resolve courseId / courseName
   useEffect(() => {
     if (!isEditing && courses.length > 0) {
@@ -222,12 +325,36 @@ export default function GroupCreatePage() {
       setCourses(courseRes.courses || []);
       setTeachers(teacherRes || []);
       setAllGroups(groupRes.groups || []);
+
+      const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+      const studentList = allUsers.filter((u) => u.role === 'student');
+      setAllStudents(studentList);
     } catch (err) {
       console.error('Failed to load group options:', err);
     } finally {
       setLoadingOptions(false);
     }
   };
+
+  // If teacher is logged in, ensure teacherId is bound to their teacher record
+  useEffect(() => {
+    if (isTeacher && teachers.length > 0 && !watch('teacherId')) {
+      const myId = profile?.id;
+      const myName = teacherFullName.trim().toLowerCase();
+      const matched = teachers.find(
+        (t) =>
+          t.id === myId ||
+          t.username === profile?.username ||
+          (myName && `${t.first_name || ''} ${t.last_name || ''}`.toLowerCase().includes(myName)) ||
+          (t.phone && profile?.phone && t.phone.replace(/\D/g, '') === profile?.phone.replace(/\D/g, ''))
+      );
+      if (matched) {
+        setValue('teacherId', matched.id);
+      } else if (myId) {
+        setValue('teacherId', myId);
+      }
+    }
+  }, [isTeacher, teachers, profile, teacherFullName, setValue, watch]);
 
   useEffect(() => {
     let mounted = true;
@@ -251,6 +378,29 @@ export default function GroupCreatePage() {
               startDate: grp.start_date ? grp.start_date.split('T')[0] : '',
               endDate: grp.end_date ? grp.end_date.split('T')[0] : '',
             });
+
+            // Pre-fill existing students
+            const existingStudentIds = Array.isArray(grp.student_ids) && grp.student_ids.length > 0
+              ? grp.student_ids
+              : (grp.students || []).map((s) => s.id);
+            if (existingStudentIds.length > 0) {
+              setSelectedStudentIds(existingStudentIds);
+            }
+
+            // Pre-fill existing schedules
+            const allSchedules = localStore.getSchedules ? localStore.getSchedules() : [];
+            const grpSchedules = allSchedules.filter((s) => s.group_id === id);
+            if (grpSchedules.length > 0) {
+              const days = grpSchedules.map((s) => Number(s.day_of_week));
+              setSelectedDays(Array.from(new Set(days)));
+              if (grpSchedules[0].start_time) {
+                setStartTime(grpSchedules[0].start_time.slice(0, 5));
+              }
+              if (grpSchedules[0].end_time) {
+                setEndTime(grpSchedules[0].end_time.slice(0, 5));
+              }
+              setHasSchedule(true);
+            }
           }
         })
         .catch((e) => {
@@ -359,10 +509,18 @@ export default function GroupCreatePage() {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
+      const actualTeacherId = isTeacher ? (profile?.id || data.teacherId || null) : (data.teacherId || null);
+      const teacherUser = teachers.find((t) => t.id === actualTeacherId);
+      const actualTeacherName = isTeacher
+        ? (teacherFullName || profile?.fullName || profile?.name)
+        : (teacherUser ? `${teacherUser.first_name || ''} ${teacherUser.last_name || ''}`.trim() || teacherUser.fullName : null);
+
       const payload = {
         name: data.name,
         courseId: data.courseId,
-        teacherId: data.teacherId || null,
+        teacherId: actualTeacherId,
+        teacher_id: actualTeacherId,
+        teacher_name: actualTeacherName,
         room: data.room || null,
         capacity: Number(data.capacity) || 20,
         monthly_price: Number(data.monthlyPrice) || 0,
@@ -372,14 +530,55 @@ export default function GroupCreatePage() {
         endDate: data.endDate || null,
         avatar_url: avatarUrl,
         image_url: avatarUrl,
+        student_ids: selectedStudentIds,
+        enrolled_count: selectedStudentIds.length,
       };
+
+      let targetGroupId = id;
       if (isEditing) {
         await updateGroup(id, payload);
-        toast.success(t('groups.updateSuccess', 'Guruh ma‘lumotlari muvaffaqiyatli saqlandi!'));
       } else {
-        await createGroup(payload);
-        toast.success(t('groups.createSuccess', 'Yangi guruh muvaffaqiyatli tashkil etildi!'));
+        const created = await createGroup(payload);
+        targetGroupId = created?.id;
       }
+
+      // 1. Auto-generate timetable slots for the teacher & group
+      if (hasSchedule && selectedDays.length > 0 && targetGroupId) {
+        localStore.saveGroupSchedule({
+          groupId: targetGroupId,
+          days: selectedDays,
+          startTime,
+          endTime,
+          room: data.room || '101-xona',
+        });
+      }
+
+      // 2. Auto-enroll selected students
+      if (selectedStudentIds.length > 0 && targetGroupId) {
+        for (const studentId of selectedStudentIds) {
+          await enrollStudent(targetGroupId, studentId);
+        }
+        const grps = localStore.getGroups();
+        const gIdx = grps.findIndex((g) => g.id === targetGroupId);
+        if (gIdx >= 0) {
+          grps[gIdx].student_ids = selectedStudentIds;
+          grps[gIdx].enrolled_count = selectedStudentIds.length;
+          localStore.saveGroup(grps[gIdx]);
+        }
+      }
+
+      // 3. Sync to Cloudflare D1
+      localStore.pushToServer({
+        [STORAGE_KEYS.GROUPS]: localStore.getGroups(),
+        [STORAGE_KEYS.LESSON_SCHEDULES]: localStore.getSchedules(),
+        [STORAGE_KEYS.MEMBERSHIPS]: localStore.getMemberships(),
+      }).catch(() => {});
+
+      toast.success(
+        isEditing
+          ? t('groups.updateSuccess', 'Guruh, dars jadvali va talabalar ro‘yxati muvaffaqiyatli saqlandi!')
+          : t('groups.createSuccess', 'Yangi guruh ochildi, dars jadvaliga avtomatik kiritildi va talabalar biriktirildi!')
+      );
       handleBack();
     } catch (err) {
       console.error(err);
@@ -462,15 +661,15 @@ export default function GroupCreatePage() {
           </div>
           <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
             <span className="w-5 h-5 rounded-full bg-amber-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">2</span>
-            <span className="truncate">2. O‘qituvchi</span>
+            <span className="truncate">2. O‘qituvchi & Xona</span>
           </div>
-          <div className="p-2.5 rounded-xl border bg-blue-100/90 border-blue-300 dark:bg-blue-950/60 font-bold text-blue-950 dark:text-blue-200 ring-2 ring-blue-400/50 flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">3</span>
-            <span className="truncate">3. O‘quv guruhi (Hozir)</span>
+          <div className="p-2.5 rounded-xl border bg-indigo-100/90 border-indigo-300 dark:bg-indigo-950/60 font-bold text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-400/50 flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">3</span>
+            <span className="truncate">3. Dars jadvali (Kun & Vaqt)</span>
           </div>
-          <div className="p-2.5 rounded-xl border bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
+          <div className="p-2.5 rounded-xl border bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-200 flex items-center gap-2 font-bold">
             <span className="w-5 h-5 rounded-full bg-purple-600 text-white font-black flex items-center justify-center text-[10px] shrink-0">4</span>
-            <span className="truncate">4. O‘quvchilar qo‘shish</span>
+            <span className="truncate">4. O‘quvchilar ({selectedStudentIds.length} ta)</span>
           </div>
         </div>
       </div>
@@ -1000,12 +1199,394 @@ export default function GroupCreatePage() {
           </div>
         </Card>
 
-        {/* Section 3: Pricing & Capacity */}
+        {/* Section 3: Lesson Days & Time (Automatic Timetable Integration) */}
+        <Card className="p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <div>
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                  3. Dars kunlari va Dars vaqti (Jadvalga avtomatik kiritish)
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Belgilangan kunlar va vaqt o‘qituvchining «Mening dars jadvalim» va umumiy dars jadvaliga avtomatik qo‘shiladi
+                </p>
+              </div>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800">
+              <input
+                type="checkbox"
+                checked={hasSchedule}
+                onChange={(e) => setHasSchedule(e.target.checked)}
+                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+              />
+              <span>Dars jadvalini shakllantirish</span>
+            </label>
+          </div>
+
+          {hasSchedule ? (
+            <div className="space-y-5">
+              {/* Day Pattern Presets */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Dars kunlari andozasi (Hafta kunlari)</span>
+                    <span className="text-brand-red">*</span>
+                  </label>
+                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                    {selectedDays.length} ta kun tanlandi
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDayPattern('odd')}
+                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                      selectedDays.length === 3 && [1, 3, 5].every((d) => selectedDays.includes(d))
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
+                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>D / CH / J</span>
+                      <span className="text-[10px] opacity-80">Toq kunlar</span>
+                    </div>
+                    <div className="text-[11px] font-normal opacity-90 truncate">Dush • Chor • Jum</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDayPattern('even')}
+                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                      selectedDays.length === 3 && [2, 4, 6].every((d) => selectedDays.includes(d))
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
+                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>S / P / SH</span>
+                      <span className="text-[10px] opacity-80">Juft kunlar</span>
+                    </div>
+                    <div className="text-[11px] font-normal opacity-90 truncate">Sesh • Pay • Shan</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDayPattern('everyday')}
+                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                      selectedDays.length === 6 && [1, 2, 3, 4, 5, 6].every((d) => selectedDays.includes(d))
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
+                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>Har kuni</span>
+                      <span className="text-[10px] opacity-80">Intensiv</span>
+                    </div>
+                    <div className="text-[11px] font-normal opacity-90 truncate">Dush - Shanba</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSelectDayPattern('weekend')}
+                    className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                      selectedDays.length === 2 && [6, 7].every((d) => selectedDays.includes(d))
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/25 ring-2 ring-indigo-400/40'
+                        : 'bg-white dark:bg-surface-dark-tertiary text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>Dam olish</span>
+                      <span className="text-[10px] opacity-80">Weekend</span>
+                    </div>
+                    <div className="text-[11px] font-normal opacity-90 truncate">Shanba • Yakshanba</div>
+                  </button>
+                </div>
+
+                {/* Individual Days Toggle Pills */}
+                <div className="pt-2">
+                  <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1.5">
+                    Kunlarni alohida tanlash yoki o‘zgartirish:
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DAYS_CONFIG.map((d) => {
+                      const isSelected = selectedDays.includes(d.id);
+                      return (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => handleToggleDay(d.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white shadow-xs scale-102 ring-1 ring-indigo-400'
+                              : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                            isSelected ? 'bg-white text-indigo-700 font-black' : 'bg-gray-300 dark:bg-gray-600 text-transparent'
+                          }`}>
+                            ✓
+                          </span>
+                          <span>{d.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Lesson Time Range and Quick Presets */}
+              <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Dars vaqti oralig‘i</span>
+                    <span className="text-brand-red">*</span>
+                  </label>
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-lg border border-emerald-500/20">
+                    {startTime} — {endTime}
+                  </span>
+                </div>
+
+                {/* Quick Time Presets (from official Educo table) */}
+                <div className="space-y-1">
+                  <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                    Tezkor dars vaqtlari (Tavsiya etilgan jadvallar):
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {TIME_PRESETS.map((tp) => {
+                      const isActive = startTime === tp.start && endTime === tp.end;
+                      return (
+                        <button
+                          key={tp.label}
+                          type="button"
+                          onClick={() => {
+                            setStartTime(tp.start);
+                            setEndTime(tp.end);
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-emerald-600 text-white shadow-xs font-bold scale-102'
+                              : 'bg-gray-100 hover:bg-emerald-50 dark:bg-gray-800 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-gray-300 hover:text-emerald-700 dark:hover:text-emerald-300 border border-gray-200/80 dark:border-gray-700'
+                          }`}
+                        >
+                          {tp.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Custom Time Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      Boshlanish vaqti
+                    </label>
+                    <Input
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      Tugash vaqti
+                    </label>
+                    <Input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Automatic Timetable Integration Notice */}
+              <div className="p-3.5 rounded-xl bg-gradient-to-r from-indigo-50 to-emerald-50 dark:from-indigo-950/40 dark:to-emerald-950/30 border border-indigo-200 dark:border-indigo-900/60 flex items-start gap-3">
+                <CalendarCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <div className="text-xs text-indigo-950 dark:text-indigo-200 space-y-0.5">
+                  <div className="font-bold">
+                    Avtomatik dars jadvali integratsiyasi:
+                  </div>
+                  <div>
+                    Ushbu guruh saqlanganda, haftaning <strong>{selectedDays.length} ta kunida</strong> (soat <strong>{startTime} - {endTime}</strong> oralig‘ida) mas‘ul o‘qituvchining dars jadvaliga darslar avtomatik joylashtiriladi. O‘qituvchi «Mening dars jadvalim» sahifasini ochganda ushbu darslar darhol ko‘rinadi.
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800 text-xs text-gray-500 dark:text-gray-400">
+              Dars jadvali avtomatik yaratilmaydi. Guruh saqlangach, dars jadvalini Dars jadvali bo‘limidan qo‘lda kiritishingiz mumkin.
+            </div>
+          )}
+        </Card>
+
+        {/* Section 4: Students Enrollment */}
+        <Card className="p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <div>
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                  4. Guruh o‘quvchilari (Talabalarni biriktirish)
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Guruhga kiritiladigan o‘quvchilarni tanlang. Ular darhol ushbu guruh a‘zosi sifatida ro‘yxatga olinadi.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                selectedStudentIds.length > Number(watch('capacity') || 20)
+                  ? 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border-red-300'
+                  : 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200'
+              }`}>
+                Tanlangan: {selectedStudentIds.length} / {watch('capacity') || 20} talaba
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {/* Search and Batch Actions */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="O‘quvchini ismi yoki telefon raqami bo‘yicha qidirish..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleSelectAllStudents}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-purple-100 dark:bg-gray-800 dark:hover:bg-purple-950/40 text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-purple-300 transition-colors cursor-pointer"
+                >
+                  ✓ Qidirilganlarni tanlash
+                </button>
+                {selectedStudentIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleClearStudents}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-50 hover:bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
+                  >
+                    Tozalash ({selectedStudentIds.length})
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Selected Student Pills (if any) */}
+            {selectedStudentIds.length > 0 && (
+              <div className="p-3 rounded-xl bg-purple-50/60 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/50 space-y-1.5">
+                <div className="text-[11px] font-bold text-purple-900 dark:text-purple-300 flex items-center justify-between">
+                  <span>Biriktirilgan o‘quvchilar:</span>
+                  <span>{selectedStudentIds.length} ta</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                  {selectedStudentIds.map((sId) => {
+                    const st = allStudents.find((s) => s.id === sId);
+                    const name = st ? `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.username : sId;
+                    return (
+                      <span
+                        key={sId}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-gray-800 text-purple-900 dark:text-purple-200 border border-purple-200 dark:border-purple-800 shadow-2xs"
+                      >
+                        <UserCheck className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+                        <span className="truncate max-w-[150px]">{name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStudent(sId)}
+                          className="hover:text-red-600 p-0.5 ml-0.5 cursor-pointer"
+                          title="Guruhdan chiqarish"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Student Picker List */}
+            <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-surface-dark-tertiary">
+              {filteredStudents.length === 0 ? (
+                <div className="p-6 text-center text-xs text-gray-500 dark:text-gray-400">
+                  {studentSearch ? 'Qidiruv bo‘yicha o‘quvchilar topilmadi.' : 'Tizimda hali o‘quvchilar ro‘yxatga olinmagan.'}
+                </div>
+              ) : (
+                filteredStudents.slice(0, 50).map((st) => {
+                  const isSelected = selectedStudentIds.includes(st.id);
+                  const fullName = `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.username;
+                  return (
+                    <div
+                      key={st.id}
+                      onClick={() => handleToggleStudent(st.id)}
+                      className={`p-2.5 sm:px-4 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'bg-purple-50/80 dark:bg-purple-950/40 hover:bg-purple-100/70'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {}} // Controlled by container onClick
+                          className="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 shrink-0 pointer-events-none"
+                        />
+                        <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-bold text-xs flex items-center justify-center shrink-0">
+                          {st.first_name?.[0] || st.username?.[0] || 'U'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                            {fullName}
+                          </div>
+                          <div className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
+                            {st.phone || '@' + st.username}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 text-right">
+                        {isSelected ? (
+                          <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">
+                            ✓ Biriktirilgan
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-gray-400 hover:text-purple-600 font-medium">
+                            + Qo‘shish
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            {filteredStudents.length > 50 && (
+              <p className="text-[11px] text-center text-gray-400">
+                Ko‘rsatilmoqda: 50 ta / jami {filteredStudents.length} ta o‘quvchi. Qidiruvdan foydalanib aniq talabani toping.
+              </p>
+            )}
+          </div>
+        </Card>
+
+        {/* Section 5: Pricing & Capacity */}
         <Card className="p-6 space-y-5">
           <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
             <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <h2 className="text-base font-bold text-gray-900 dark:text-white">
-              3. Oylik to‘lov va Talabalar sig‘imi
+              5. Oylik to‘lov va Talabalar sig‘imi
             </h2>
           </div>
 
@@ -1058,12 +1639,12 @@ export default function GroupCreatePage() {
           </div>
         </Card>
 
-        {/* Section 4: Status and Dates */}
+        {/* Section 6: Status and Dates */}
         <Card className="p-6 space-y-5">
           <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
             <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             <h2 className="text-base font-bold text-gray-900 dark:text-white">
-              4. Guruh holati va Dars sanalari
+              6. Guruh holati va Dars sanalari
             </h2>
           </div>
 

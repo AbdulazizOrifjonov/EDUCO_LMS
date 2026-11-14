@@ -406,17 +406,17 @@ export default function GroupManagement() {
             >
               <Eye className="w-4 h-4" />
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="!p-1.5 h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg"
+              title={t('common.edit', 'Tahrirlash')}
+              onClick={() => navigate(`/${currentUserRole}/groups/edit/${row.id}`)}
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
             {!isTeacher && (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="!p-1.5 h-8 w-8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg"
-                  title={t('common.edit', 'Tahrirlash')}
-                  onClick={() => navigate(`/${currentUserRole}/groups/edit/${row.id}`)}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
                 {row.studentCount >= (row.capacity || 20) && (
                   <Button
                     variant="ghost"

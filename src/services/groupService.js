@@ -317,6 +317,12 @@ export async function createGroup({
   endDate,
   avatar_url,
   image_url,
+  days,
+  startTime,
+  endTime,
+  schedule,
+  studentIds,
+  student_ids,
 }) {
   const allCourses = localStore.getCourses();
   const allUsers = localStore.getUsers();
@@ -360,6 +366,22 @@ export async function createGroup({
           course_name: course?.name,
           teacher_name: teacher?.fullName,
         });
+
+        if (days && days.length > 0 && startTime && endTime) {
+          localStore.saveGroupSchedule({
+            groupId: newGroup.id,
+            days,
+            startTime,
+            endTime,
+            room: room || '101-xona',
+          });
+        }
+
+        const enrolledIds = Array.isArray(studentIds) ? studentIds : (Array.isArray(student_ids) ? student_ids : []);
+        for (const sid of enrolledIds) {
+          await enrollStudent(newGroup.id, sid);
+        }
+
         return newGroup;
       }
     } catch (err) {
@@ -382,7 +404,23 @@ export async function createGroup({
     end_date: endDate,
     avatar_url: groupAvatar,
     image_url: groupAvatar,
+    schedule: schedule || undefined,
   });
+
+  if (days && days.length > 0 && startTime && endTime) {
+    localStore.saveGroupSchedule({
+      groupId: created.id,
+      days,
+      startTime,
+      endTime,
+      room: room || created.room,
+    });
+  }
+
+  const enrolledIds = Array.isArray(studentIds) ? studentIds : (Array.isArray(student_ids) ? student_ids : []);
+  for (const sid of enrolledIds) {
+    await enrollStudent(created.id, sid);
+  }
 
   try {
     if (typeof window !== 'undefined') {
@@ -401,6 +439,34 @@ export async function createGroup({
  * Update an existing group
  */
 export async function updateGroup(id, payload) {
+  if (payload.days && payload.days.length > 0 && payload.startTime && payload.endTime) {
+    localStore.saveGroupSchedule({
+      groupId: id,
+      days: payload.days,
+      startTime: payload.startTime,
+      endTime: payload.endTime,
+      room: payload.room,
+    });
+  }
+
+  if (Array.isArray(payload.studentIds) || Array.isArray(payload.student_ids)) {
+    const newIds = payload.studentIds || payload.student_ids || [];
+    try {
+      const currentGroup = await getGroupById(id);
+      const currentIds = (currentGroup?.students || []).map((s) => s.id);
+      for (const sid of newIds) {
+        if (!currentIds.includes(sid)) {
+          await enrollStudent(id, sid);
+        }
+      }
+      for (const sid of currentIds) {
+        if (!newIds.includes(sid)) {
+          await removeStudent(id, sid);
+        }
+      }
+    } catch (_) {}
+  }
+
   const updated = localStore.saveGroup({ id, ...payload });
   try {
     if (typeof window !== 'undefined') {

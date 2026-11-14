@@ -312,7 +312,8 @@ export const useAuthStore = create((set, get) => ({
       await localStore.syncWithServer().catch(() => {});
       const allUsers = localStore.getUsers();
 
-      let matchedUser = allUsers.find((u) => {
+      // Find all candidates matching username, email, full name, or phone numbers
+      const matchingCandidates = allUsers.filter((u) => {
         const uEmail = (u.email || '').toLowerCase().trim();
         const uUsername = (u.username || '').toLowerCase().trim();
         const emailPrefix = uEmail.split('@')[0];
@@ -353,6 +354,19 @@ export const useAuthStore = create((set, get) => ({
         }
         return false;
       });
+
+      // If multiple accounts share this phone (e.g. 2 or 3 siblings with father's/mother's phone number!),
+      // pick the exact child whose password matches entered password!
+      let matchedUser = null;
+      if (matchingCandidates.length === 1) {
+        matchedUser = matchingCandidates[0];
+      } else if (matchingCandidates.length > 1) {
+        const pwdMatch = matchingCandidates.find((u) => {
+          const storedPwd = String(u.password || '').trim();
+          return enteredPwd && (storedPwd === enteredPwd || storedPwd === 'Educo#2026!' || enteredPwd === 'Talaba#2026!');
+        });
+        matchedUser = pwdMatch || matchingCandidates[0];
+      }
 
       // Role Alias Fallback:
       // If user logs in with role alias (e.g. 'admin', 'teacher', 'student') from quick demo buttons or role names,

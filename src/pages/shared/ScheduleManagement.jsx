@@ -186,7 +186,18 @@ export default function ScheduleManagement() {
         return myName && tName && (tName.includes(myName) || myName.includes(tName));
       }) || (s.teacher_name && myName && s.teacher_name.toLowerCase().includes(myName));
 
-      if (!hasMyGroup && !hasMyId && !hasMyName) return false;
+      // Fast check direct from localStore groups
+      let groupMatchesTeacher = false;
+      if (!hasMyGroup && !hasMyId && !hasMyName && s.group_id) {
+        const directG = localStore.getGroups?.().find((g) => g.id === s.group_id);
+        if (directG) {
+          const directTid = directG.teacher_id || directG.teacherId;
+          const directTname = (directG.teacher_name || directG.teacherName || '').toLowerCase();
+          groupMatchesTeacher = (myId && directTid === myId) || (myName && directTname && (directTname.includes(myName) || myName.includes(directTname)));
+        }
+      }
+
+      if (!hasMyGroup && !hasMyId && !hasMyName && !groupMatchesTeacher) return false;
     }
 
     if (patternFilter === 'odd' && ![1, 3, 5].includes(Number(s.day_of_week))) return false;

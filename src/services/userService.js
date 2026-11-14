@@ -313,6 +313,35 @@ export async function createUser({
   const normalizedMother = cleanUzPhone(motherPhone);
   const finalPhone = normalizedPhone || normalizedFather || normalizedMother;
 
+  // Strict personal phone uniqueness check:
+  // A personal login phone must belong to only 1 profile across the whole system.
+  if (normalizedPhone) {
+    const allUsers = localStore.getUsers();
+    const phoneConflict = allUsers.find((u) => {
+      const uPhone = cleanUzPhone(u.phone);
+      if (!uPhone || uPhone !== normalizedPhone) return false;
+
+      // Allow if both are students sharing a parent contact without their own distinct personal phones
+      const isSharedParentContact =
+        role === 'student' &&
+        u.role === 'student' &&
+        (!phone || cleanUzPhone(phone) === normalizedFather || cleanUzPhone(phone) === normalizedMother) &&
+        (cleanUzPhone(u.father_phone) === normalizedPhone || cleanUzPhone(u.mother_phone) === normalizedPhone);
+
+      if (isSharedParentContact) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (phoneConflict) {
+      throw new Error(
+        `Bu telefon raqam (+${normalizedPhone}) bilan tizimda allaqachon boshqa foydalanuvchi (${phoneConflict.full_name || phoneConflict.fullName || phoneConflict.username}) ro‘yxatdan o‘tgan! Har bir talaba faqat o‘zining shaxsiy raqami orqali o‘z profiliga kirishi mumkin.`
+      );
+    }
+  }
+
   const email = resolvedUsername.includes('@') ? resolvedUsername : `${resolvedUsername.toLowerCase()}@educo.app`;
 
   if (!isPlaceholder) {
@@ -469,6 +498,20 @@ export async function updateUser(id, { firstName, lastName, fullName, full_name,
   const normalizedPhone = phone !== undefined ? cleanUzPhone(phone) : undefined;
   const normalizedFather = fatherPhone !== undefined ? cleanUzPhone(fatherPhone) : undefined;
   const normalizedMother = motherPhone !== undefined ? cleanUzPhone(motherPhone) : undefined;
+
+  if (normalizedPhone) {
+    const allUsers = localStore.getUsers();
+    const phoneConflict = allUsers.find((u) => {
+      if (u.id === id || localStore.normalizeUserId(u.id) === localStore.normalizeUserId(id)) return false;
+      const uPhone = cleanUzPhone(u.phone);
+      return uPhone && uPhone === normalizedPhone;
+    });
+    if (phoneConflict) {
+      throw new Error(
+        `Bu telefon raqam (+${normalizedPhone}) bilan allaqachon boshqa foydalanuvchi (${phoneConflict.full_name || phoneConflict.fullName || phoneConflict.username}) ro‘yxatdan o‘tgan! Har bir foydalanuvchi o‘zining unikal raqamiga ega bo‘lishi shart.`
+      );
+    }
+  }
 
   if (!isPlaceholder) {
     try {
