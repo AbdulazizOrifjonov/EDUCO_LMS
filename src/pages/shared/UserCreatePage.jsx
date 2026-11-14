@@ -142,7 +142,11 @@ export default function UserCreatePage() {
       return false;
     });
 
-    return list.length > 0 ? list : groups.filter((g) => g.id === 'grp-fullstack' || g.name?.toLowerCase().includes('full stack'));
+    return list.length > 0
+      ? list
+      : (groups.filter((g) => g.status !== 'archived').length > 0
+          ? groups.filter((g) => g.status !== 'archived')
+          : groups);
   }, [isTeacher, profile]);
 
   const allCenterStudents = React.useMemo(() => {
@@ -291,15 +295,25 @@ export default function UserCreatePage() {
       const res = await getGroups({ status: 'all', limit: 200 });
       let list = res.groups || [];
       if (isTeacher) {
-        // Teacher sees ONLY their assigned groups
+        // Teacher sees their assigned groups
         const teacherId = profile?.id;
-        const teacherName = (profile?.first_name || profile?.full_name || '').toLowerCase();
-        list = list.filter((g) => {
-          if (g.teacher_id && g.teacher_id === teacherId) return true;
-          if (g.teacherId && g.teacherId === teacherId) return true;
-          if (teacherName && (g.teacherName || g.teacher_name || '').toLowerCase().includes(teacherName)) return true;
+        const teacherName = (profile?.fullName || `${profile?.first_name || ''} ${profile?.last_name || ''}`).trim().toLowerCase();
+        const teacherPhoneClean = (profile?.phone || '').replace(/\D/g, '').slice(-9);
+
+        const filtered = list.filter((g) => {
+          const gTeacherId = g.teacher_id || g.teacherId;
+          const gTeacherName = (g.teacherName || g.teacher_name || '').toLowerCase();
+          const gTeacherPhone = (g.teacherPhone || g.teacher_phone || '').replace(/\D/g, '').slice(-9);
+
+          if (gTeacherId && (gTeacherId === teacherId || gTeacherId === profile?.id)) return true;
+          if (teacherPhoneClean && gTeacherPhone && teacherPhoneClean === gTeacherPhone) return true;
+          if (teacherName && gTeacherName && (gTeacherName.includes(teacherName) || teacherName.includes(gTeacherName))) return true;
           return false;
         });
+
+        if (filtered.length > 0) {
+          list = filtered;
+        }
       }
       setGroupsList(list);
 

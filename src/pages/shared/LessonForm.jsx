@@ -388,6 +388,49 @@ export default function LessonForm({
           </p>
         </div>
 
+        {/* Quick Time Presets */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+            Tezkor dars vaqtlari (1 marta bosishda):
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { start: '07:00', end: '08:30' },
+              { start: '08:30', end: '10:00' },
+              { start: '09:00', end: '10:30' },
+              { start: '09:30', end: '11:00' },
+              { start: '10:00', end: '11:30' },
+              { start: '10:30', end: '12:00' },
+              { start: '11:00', end: '12:30' },
+              { start: '14:00', end: '15:30' },
+              { start: '15:30', end: '17:00' },
+              { start: '16:00', end: '17:30' },
+              { start: '17:00', end: '18:30' },
+              { start: '17:30', end: '19:00' },
+              { start: '18:00', end: '19:30' },
+            ].map((slot) => {
+              const active = selectedStart === slot.start && selectedEnd === slot.end;
+              return (
+                <button
+                  key={`${slot.start}-${slot.end}`}
+                  type="button"
+                  onClick={() => {
+                    setValue('startTime', slot.start, { shouldValidate: true, shouldDirty: true });
+                    setValue('endTime', slot.end, { shouldValidate: true, shouldDirty: true });
+                  }}
+                  className={`text-[11px] px-2 py-1 rounded-lg font-mono font-medium border transition-colors ${
+                    active
+                      ? 'bg-brand-navy text-white border-brand-navy dark:bg-blue-600 dark:border-blue-500 shadow-xs'
+                      : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                  }`}
+                >
+                  {slot.start} - {slot.end}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Start & End Times */}
         <div className="grid grid-cols-2 gap-4">
           <TimePicker

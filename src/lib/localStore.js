@@ -1759,6 +1759,11 @@ class LocalStore {
       });
     }
 
+    const groups = this.getGroups();
+    const targetGroup = groups.find((g) => g.id === groupId);
+    const teacherId = targetGroup?.teacher_id || targetGroup?.teacherId || '';
+    const teacherName = targetGroup?.teacher_name || targetGroup?.teacherName || '';
+
     const savedItems = [];
     for (const dayNum of days) {
       // Avoid exact duplicate for same group + day + start_time
@@ -1778,7 +1783,9 @@ class LocalStore {
         day_of_week: dayNum,
         start_time: formattedStart,
         end_time: formattedEnd,
-        room: room || '101-xona',
+        room: room || targetGroup?.room || '101-xona',
+        teacher_id: teacherId || (dupIdx >= 0 ? list[dupIdx].teacher_id : ''),
+        teacher_name: teacherName || (dupIdx >= 0 ? list[dupIdx].teacher_name : ''),
         created_at: new Date().toISOString(),
       };
 
@@ -1791,9 +1798,9 @@ class LocalStore {
     }
 
     this.setItem(STORAGE_KEYS.LESSON_SCHEDULES, list);
+    this.broadcastToCloud(STORAGE_KEYS.LESSON_SCHEDULES, list);
 
     // Also update the group's schedule summary string
-    const groups = this.getGroups();
     const gIdx = groups.findIndex((g) => g.id === groupId);
     if (gIdx >= 0) {
       const dayLabel = pattern === 'even' ? 'Sesh-Pay-Shan' : 'Dush-Chor-Jum';
@@ -1801,10 +1808,20 @@ class LocalStore {
         ...groups[gIdx],
         room: room || groups[gIdx].room,
         schedule: `${dayLabel}, ${formattedStart.slice(0, 5)} - ${formattedEnd.slice(0, 5)}`,
+        schedule_days: dayLabel,
+        schedule_time: `${formattedStart.slice(0, 5)} - ${formattedEnd.slice(0, 5)}`,
+        start_time: formattedStart.slice(0, 5),
+        end_time: formattedEnd.slice(0, 5),
         updated_at: new Date().toISOString(),
       };
       this.setItem(STORAGE_KEYS.GROUPS, groups);
+      this.broadcastToCloud(STORAGE_KEYS.GROUPS, groups);
     }
+
+    this.pushToServer({
+      [STORAGE_KEYS.LESSON_SCHEDULES]: list,
+      [STORAGE_KEYS.GROUPS]: groups,
+    }).catch(() => {});
 
     try {
       if (typeof window !== 'undefined') {
