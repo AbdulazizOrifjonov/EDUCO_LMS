@@ -7,13 +7,13 @@ cls
 echo ==========================================================
 echo    EDUCO LMS - TELEGRAM BOT VA SMS GATEWAY XIZMATI
 echo ==========================================================
-echo  Loyha yo'li: C:\Users\Abdul\Documents\EDUCO_LMS
+echo  Loyha yo'li: %~dp0
 echo  Bot va SMS xizmati ishga tushirilmoqda...
 echo  To'xtatish uchun: Ushbu oynani yoping yoki Ctrl+C bosing
 echo ==========================================================
 echo.
 
-cd /d "C:\Users\Abdul\Documents\EDUCO_LMS"
+cd /d "%~dp0"
 node bot.js
 
 echo.
