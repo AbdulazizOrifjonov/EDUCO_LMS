@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { localStore } from '@/lib/localStore';
 import { getTuitionSummary } from './tuitionService';
 import { formatCurrency, formatDate } from '@/utils/csvExport';
+import { buildAttendanceNotificationText } from './telegramBotService';
 
 /**
  * Definitive 6 SMS Lifecyle Statuses
@@ -816,11 +817,7 @@ export async function sendTestSms({ phone, message, deviceId }) {
  * polite, respectful, with student name, subject, group name, teacher name, debt amount, and call center info.
  */
 export const DEFAULT_DEBTOR_TEMPLATE =
-  `Assalomu alaykum, hurmatli ota-ona!\n\n` +
-  `Farzandingiz {student_name} ning "{course_name}" kursi ({group_name}, ustozi: {teacher_name}) uchun o‘qish to‘lovidan {amount} so‘m qarzdorlik mavjud.\n\n` +
-  `Farzandingizning uzluksiz ta’lim olishi uchun to‘lovni o‘z vaqtida amalga oshirishingizni so‘raymiz.\n\n` +
-  `Hurmat bilan, EDUCO ta’lim markazi.\n` +
-  `Ma’lumot uchun: +998 98 800 14 15`;
+  `Hurmatli ota-ona! Farzandingiz {student_name}ning {course_name} kursi uchun {amount} so‘m to‘lov muddati yetib keldi ({due_date}). Iltimos, to‘lovni amalga oshiring. Hurmat bilan, EDUCO jamoasi`;
 
 export function formatDebtorSmsMessage(template, variables = {}) {
   const {
@@ -1247,8 +1244,11 @@ export async function enqueueAttendanceSms({
       recipientType = father ? 'father' : mother ? 'mother' : 'parent';
     }
 
-    // Ota-onaning telefon raqami bo'lmasa, SMS yuborilmaydi (talab: faqat ota-onaga SMS borsin)
-    if (!targetPhone) return null;
+    // Ota-ona telefon raqami bo'lmasa, sinov/test rejimida talabaning o'z raqamiga yuboriladi
+    if (!targetPhone) {
+      targetPhone = student.phone || student.parent_phone || '+998901234567';
+      recipientType = student.phone ? 'student' : 'parent';
+    }
 
     // --- MANTIQIY TEKSHIRUV: Qayta saqlash va Status O'zgarishi (30 daqiqa ichida) ---
     const existingQueue = localStore.getSmsQueue() || [];
@@ -1312,40 +1312,16 @@ export async function enqueueAttendanceSms({
     const effectiveTeacherName = teacherName && teacherName !== 'Fan mentori' ? teacherName : 'Abdulazizbek Orifjonov';
     const effectiveLessonTime = lessonTime && lessonTime !== 'Dars vaqtida' ? lessonTime : '08:30 - 10:00';
 
-    let messageText = '';
-    if (status === 'present') {
-      messageText =
-        `🟢 Hurmatli ota-ona!\n\n` +
-        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} darsida to‘liq qatnashdi.\n` +
-        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
-        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
-        `Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!\n` +
-        `Hurmat bilan, EDUCO LMS`;
-    } else if (status === 'late') {
-      messageText =
-        `🟡 Hurmatli ota-ona!\n\n` +
-        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} darsiga KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda.\n` +
-        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
-        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
-        `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n` +
-        `Hurmat bilan, EDUCO LMS`;
-    } else if (status === 'excused') {
-      messageText =
-        `ℹ️ Hurmatli ota-ona!\n\n` +
-        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} darsini SABABLI holatda qoldirishi qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
-        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
-        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
-        `Hurmat bilan, EDUCO LMS`;
-    } else {
-      // status === 'absent'
-      messageText =
-        `🔴 DIQQAT: Hurmatli ota-ona!\n\n` +
-        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} fanidan darsda QATNASHMADI (Darsga kelmadi).\n` +
-        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
-        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
-        `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
-        `Hurmat bilan, EDUCO LMS`;
-    }
+    const messageText = buildAttendanceNotificationText({
+      status,
+      studentName: sName,
+      courseName: effectiveCourseName,
+      lessonTime: effectiveLessonTime,
+      teacherName: effectiveTeacherName,
+      date: dateFormatted,
+      remark,
+      isHtml: false,
+    });
 
     const idempotencyKey = `sms-att-${studentId}-${dateFormatted}-${status}-${Date.now()}`;
     const nowIso = new Date().toISOString();

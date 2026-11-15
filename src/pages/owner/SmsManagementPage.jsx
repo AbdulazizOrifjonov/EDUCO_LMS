@@ -57,6 +57,9 @@ import smsService, {
   saveSmsDevice,
   pingDevice,
   sendTestSms,
+  sendDirectDebtorSmsList,
+  formatDebtorSmsMessage,
+  DEFAULT_DEBTOR_TEMPLATE,
   generateDebtorQueue,
   getProspectiveRecipients,
   getSmsQueue,
@@ -73,6 +76,7 @@ import smsService, {
   normalizeSmsStatus,
   SMS_STATUS,
 } from '@/services/smsService';
+import { markStudentAsPaid, markAllStudentsAsPaid } from '@/services/tuitionService';
 
 export default function SmsManagementPage() {
   const { t } = useTranslation();
@@ -102,6 +106,16 @@ export default function SmsManagementPage() {
   const [copiedTextId, setCopiedTextId] = useState(null);
   const previewRef = useRef(null);
 
+  // Debtor Selection States (for selective SMS and selective payment in SMS page)
+  const [selectedDebtors, setSelectedDebtors] = useState(new Set());
+  const [isDebtorSmsModalOpen, setIsDebtorSmsModalOpen] = useState(false);
+  const [debtorSmsList, setDebtorSmsList] = useState([]);
+  const [debtorSmsRecipientType, setDebtorSmsRecipientType] = useState('parent_preferred'); // 'parent_preferred' | 'student'
+  const [debtorSmsTemplate, setDebtorSmsTemplate] = useState(DEFAULT_DEBTOR_TEMPLATE);
+  const [isSendingDebtorSms, setIsSendingDebtorSms] = useState(false);
+  const [debtorSmsProgress, setDebtorSmsProgress] = useState({ current: 0, total: 0, studentName: '' });
+  const [actionLoading, setActionLoading] = useState(false);
+
   // Queue Filters
   const [queueStatusFilter, setQueueStatusFilter] = useState('ALL');
   const [queueSearch, setQueueSearch] = useState('');
@@ -130,6 +144,7 @@ export default function SmsManagementPage() {
   const [cancellingId, setCancellingId] = useState(null);
   const [refreshingQueue, setRefreshingQueue] = useState(false);
   const [retryingAll, setRetryingAll] = useState(false);
+  const [selectedLatencyItem, setSelectedLatencyItem] = useState(null);
 
   // Synchronous execution locks to immediately block rapid double-clicks
   const isSendingTestRef = useRef(false);
@@ -804,6 +819,156 @@ export default function SmsManagementPage() {
     toast.info(`"${studentName}" ota-onasi ko‘rinishi telefonda ochildi`);
   };
 
+  // Debtor selection & calculation helpers for SMS page
+  const eligibleDebtorsInSms = useMemo(() => {
+    return filteredProspectiveRecipients.filter((r) => r.isDebtor && Number(r.balance || 0) > 0);
+  }, [filteredProspectiveRecipients]);
+
+  const totalSelectedDebtInSms = useMemo(() => {
+    return filteredProspectiveRecipients
+      .filter((r) => selectedDebtors.has(r.studentId))
+      .reduce((sum, r) => sum + Number(r.balance || 0), 0);
+  }, [filteredProspectiveRecipients, selectedDebtors]);
+
+  const handleToggleSelectDebtor = (studentId, balance) => {
+    if (Number(balance || 0) <= 0) {
+      toast.info("Ushbu talabaning qarzdorligi yo‘q (to‘langan), tanlab bo‘lmaydi.");
+      return;
+    }
+    setSelectedDebtors((prev) => {
+      const next = new Set(prev);
+      if (next.has(studentId)) {
+        next.delete(studentId);
+      } else {
+        next.add(studentId);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSelectAllDebtors = () => {
+    if (selectedDebtors.size === eligibleDebtorsInSms.length && eligibleDebtorsInSms.length > 0) {
+      setSelectedDebtors(new Set());
+    } else {
+      setSelectedDebtors(new Set(eligibleDebtorsInSms.map((r) => r.studentId)));
+    }
+  };
+
+  // 1-Click Quick Payment Handler for single row
+  const handleQuickPayInSms = async (recipient) => {
+    if (actionLoading) return;
+    if (!recipient || Number(recipient.balance || 0) <= 0) {
+      toast.info("Ushbu talabaning to‘lanmagan qarzdorligi yo‘q.");
+      return;
+    }
+    try {
+      setActionLoading(true);
+      await markStudentAsPaid(recipient.studentId, recipient.balance, 'Naqd pul', 'To‘liq to‘landi (1-bosishda)');
+      toast.success(
+        `✅ ${recipient.studentName} uchun ${formatCurrency(recipient.balance)} to‘lov qabul qilindi va qarzdorlik to‘liq yopildi!`
+      );
+      setSelectedDebtors((prev) => {
+        const next = new Set(prev);
+        next.delete(recipient.studentId);
+        return next;
+      });
+      await loadData();
+    } catch (err) {
+      console.error('handleQuickPayInSms error:', err);
+      toast.error(err.message || 'To‘lovni qabul qilishda xatolik yuz berdi');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Batch Payment for Selected Debtors
+  const handleBatchPaySelectedInSms = async () => {
+    if (actionLoading || selectedDebtors.size === 0) return;
+    try {
+      setActionLoading(true);
+      const ids = Array.from(selectedDebtors);
+      const res = await markAllStudentsAsPaid(ids, 'Tanlangan talabalar qarzdorligi to‘liq yopildi');
+      toast.success(
+        `✅ Tanlangan ${res.clearedCount} ta talabaning qarzdorligi (${formatCurrency(res.totalClearedAmount)}) to‘liq to‘landi deb belgilandi!`
+      );
+      setSelectedDebtors(new Set());
+      await loadData();
+    } catch (err) {
+      console.error('handleBatchPaySelectedInSms error:', err);
+      toast.error(err.message || 'To‘lovlarni yopishda xatolik yuz berdi');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Open Debtor SMS Modal
+  const handleOpenDebtorSmsModal = (recipientsList) => {
+    const validDebtors = recipientsList.filter((r) => r.isDebtor && Number(r.balance || 0) > 0);
+    if (validDebtors.length === 0) {
+      toast.warning("Tanlangan talabalar orasida qarzdorlik mavjud talabalar topilmadi. To‘langan talabalarga SMS yuborilmaydi!");
+      return;
+    }
+    setDebtorSmsList(validDebtors);
+    setDebtorSmsTemplate(DEFAULT_DEBTOR_TEMPLATE);
+    setIsDebtorSmsModalOpen(true);
+  };
+
+  // Send Debtor SMS Handler
+  const handleSendDebtorSmsInSms = async () => {
+    if (isSendingDebtorSms || debtorSmsList.length === 0) return;
+    try {
+      setIsSendingDebtorSms(true);
+      setDebtorSmsProgress({ current: 0, total: debtorSmsList.length, studentName: '' });
+
+      const result = await sendDirectDebtorSmsList({
+        debtors: debtorSmsList,
+        customTemplate: debtorSmsTemplate,
+        recipientType: debtorSmsRecipientType,
+        onProgress: (p) => setDebtorSmsProgress(p),
+      });
+
+      if (result.sentCount > 0) {
+        toast.success(`📲 ${result.sentCount} ta qarzdorlik SMS xabarnomasi muvaffaqiyatli yuborildi!`);
+      }
+      if (result.skippedPaidCount > 0) {
+        toast.info(`ℹ️ ${result.skippedPaidCount} ta to‘langan talaba o‘tkazib yuborildi (SMS bormaydi).`);
+      }
+      if (result.failedCount > 0) {
+        toast.warning(`⚠️ ${result.failedCount} ta xabar telefon raqami noto‘g‘ri bo‘lgani uchun yuborilmadi.`);
+      }
+
+      setIsDebtorSmsModalOpen(false);
+      setDebtorSmsList([]);
+      await loadData();
+    } catch (err) {
+      console.error('handleSendDebtorSmsInSms error:', err);
+      toast.error(err.message || 'SMS yuborishda xatolik yuz berdi');
+    } finally {
+      setIsSendingDebtorSms(false);
+      setDebtorSmsProgress({ current: 0, total: 0, studentName: '' });
+    }
+  };
+
+  const livePreviewDebtorSmsSample = useMemo(() => {
+    if (!debtorSmsList || debtorSmsList.length === 0) return '';
+    const sample = debtorSmsList[0];
+    const recipientSalutation =
+      debtorSmsRecipientType === 'student'
+        ? sample.studentName || 'Hurmatli talaba'
+        : sample.fatherPhone || sample.motherPhone
+        ? 'Hurmatli ota-ona'
+        : sample.studentName || 'Hurmatli talaba';
+
+    return formatDebtorSmsMessage(debtorSmsTemplate, {
+      student_name: sample.studentName,
+      parent_name: recipientSalutation,
+      course_name: sample.courseName,
+      group_name: sample.groupName,
+      teacher_name: sample.teacherName || 'Fan ustozi',
+      amount: formatCurrency(sample.balance),
+    });
+  }, [debtorSmsList, debtorSmsTemplate, debtorSmsRecipientType]);
+
   const handleCopyPhone = (id, phone) => {
     if (!phone) return;
     navigator.clipboard.writeText(phone);
@@ -875,13 +1040,10 @@ export default function SmsManagementPage() {
     }
   };
 
-  // Render Granular Stage Latencies & 5-Step Exact Timestamps
+  // Render Clean & Compact Delivery Status / Timing with expandable modal
   const renderLatencyInfo = (item) => {
-    const hasLatencies = item.lms_latency_ms != null || item.android_latency_ms != null || item.carrier_latency_ms != null || item.total_latency_ms != null;
+    const norm = normalizeSmsStatus(item.status);
     const hasTimestamps = item.queued_at || item.dispatched_at || item.android_received_at || item.android_sent_at || item.delivered_at;
-    if (!hasLatencies && !hasTimestamps) {
-      return <span className="text-gray-400 font-mono text-[10px]">—</span>;
-    }
 
     const fmtTime = (iso) => {
       if (!iso) return '—';
@@ -893,74 +1055,52 @@ export default function SmsManagementPage() {
       }
     };
 
+    let titleText = 'Kutilmoqda';
+    let timeText = fmtTime(item.queued_at || item.created_at);
+    let icon = <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />;
+    let textColor = 'text-amber-700 dark:text-amber-400';
+
+    if (norm === SMS_STATUS.DELIVERED) {
+      icon = <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />;
+      textColor = 'text-emerald-700 dark:text-emerald-400';
+      const sec = item.total_latency_ms != null ? (item.total_latency_ms / 1000).toFixed(1) : null;
+      titleText = sec && Number(sec) > 0 && Number(sec) < 120 ? `${sec}s da yetkazildi` : 'Yetkazilgan';
+      timeText = fmtTime(item.delivered_at || item.android_sent_at || item.created_at);
+    } else if (norm === SMS_STATUS.SUBMITTED) {
+      icon = <Send className="w-3.5 h-3.5 text-sky-500 shrink-0" />;
+      textColor = 'text-sky-700 dark:text-sky-400';
+      titleText = 'Operatorga berildi';
+      timeText = fmtTime(item.android_sent_at || item.dispatched_at || item.created_at);
+    } else if (norm === SMS_STATUS.DISPATCHING) {
+      icon = <RefreshCw className="w-3.5 h-3.5 text-blue-500 animate-spin shrink-0" />;
+      textColor = 'text-blue-700 dark:text-blue-400';
+      titleText = 'Uzatilmoqda...';
+      timeText = fmtTime(item.dispatched_at || item.created_at);
+    } else if (norm === SMS_STATUS.FAILED) {
+      icon = <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />;
+      textColor = 'text-rose-700 dark:text-rose-400';
+      titleText = 'Xatolik';
+      timeText = item.error_message || 'Qurilma xatosi';
+    }
+
     return (
-      <div className="flex flex-col gap-1 text-[10px] font-mono leading-tight min-w-[150px]">
-        {/* Total Latency Header */}
-        <div className="flex items-center justify-between gap-1 border-b border-gray-100 dark:border-gray-800 pb-0.5">
-          {item.total_latency_ms != null ? (
-            <span className="font-bold text-gray-800 dark:text-gray-200">
-              Jami: {(item.total_latency_ms / 1000).toFixed(1)}s
-            </span>
-          ) : item.delivered_at ? (
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">Yetkazilgan</span>
-          ) : (
-            <span className="font-semibold text-gray-400">Jarayonda...</span>
-          )}
-          {item.tracking_id && (
-            <span className="text-[9px] text-blue-600 dark:text-blue-400 truncate max-w-[85px]" title={item.tracking_id}>
-              {item.tracking_id}
-            </span>
-          )}
+      <div className="flex flex-col gap-0.5 text-xs">
+        <div className={`flex items-center gap-1.5 font-bold ${textColor}`}>
+          {icon}
+          <span>{titleText}</span>
         </div>
-
-        {/* 5-Step Stage Latencies & Exact Timestamps */}
-        <div className="space-y-0.5 text-[9px]">
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="LMS navbatiga qo‘yilgan vaqt">
-            <span>1. Navbat:</span>
-            <span className="text-gray-700 dark:text-gray-300">{fmtTime(item.queued_at || item.created_at)}</span>
-          </div>
-
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Cloud server qabul qilgan vaqt">
-            <span>2. Cloud:</span>
-            <span className="text-gray-700 dark:text-gray-300">
-              {fmtTime(item.dispatched_at)}
-              {item.lms_latency_ms != null && <span className="text-gray-400 ml-1">({(item.lms_latency_ms / 1000).toFixed(1)}s)</span>}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Android telefon qabul qilgan vaqt">
-            <span>3. Android:</span>
-            <span className="text-gray-700 dark:text-gray-300">
-              {fmtTime(item.android_received_at || item.android_sent_at)}
-              {item.cloud_to_phone_latency_ms != null ? (
-                <span className={`ml-1 font-bold ${item.cloud_to_phone_latency_ms > 30000 ? 'text-rose-500' : 'text-emerald-600'}`}>
-                  ({(item.cloud_to_phone_latency_ms / 1000).toFixed(1)}s)
-                </span>
-              ) : item.android_latency_ms != null ? (
-                <span className="text-gray-400 ml-1">({(item.android_latency_ms / 1000).toFixed(1)}s)</span>
-              ) : null}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Operatorga topshirilgan vaqt (SMS_SENT)">
-            <span>4. Operator:</span>
-            <span className="text-gray-700 dark:text-gray-300">
-              {fmtTime(item.android_sent_at)}
-              {item.phone_to_carrier_latency_ms != null && <span className="text-gray-400 ml-1">({(item.phone_to_carrier_latency_ms / 1000).toFixed(1)}s)</span>}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400" title="Ota-onaga yetkazilgan vaqt (SMS_DELIVERED)">
-            <span>5. Yetkazildi:</span>
-            <span className="text-gray-700 dark:text-gray-300">
-              {fmtTime(item.delivered_at)}
-              {item.carrier_latency_ms != null && (
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold ml-1">
-                  ({(item.carrier_latency_ms / 1000).toFixed(1)}s)
-                </span>
-              )}
-            </span>
-          </div>
+        <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 font-mono">
+          <span title="Vaqt">{timeText}</span>
+          {hasTimestamps && (
+            <button
+              type="button"
+              onClick={() => setSelectedLatencyItem(item)}
+              className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-sans font-medium"
+              title="5 ta texnik bosqichni ko‘rish"
+            >
+              Bosqichlar
+            </button>
+          )}
         </div>
       </div>
     );
@@ -1915,20 +2055,31 @@ export default function SmsManagementPage() {
                 </div>
               </div>
 
-              {/* Recipients Table (Desktop View - Fully Responsive with 0 Horizontal Scroll) */}
+              {/* Recipients Table (Desktop View - Fully Responsive with Debtor Selection) */}
               <div className="hidden md:block w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700/80 mt-3">
                 <table className="w-full table-fixed text-left border-collapse text-xs">
                   <colgroup>
-                    <col className="w-[22%]" />
-                    <col className="w-[19%]" />
-                    <col className="w-[13%]" />
-                    <col className="w-[23%]" />
-                    <col className="w-[11%]" />
+                    <col className="w-[4%]" />
+                    <col className="w-[20%]" />
+                    <col className="w-[18%]" />
                     <col className="w-[12%]" />
+                    <col className="w-[20%]" />
+                    <col className="w-[9%]" />
+                    <col className="w-[17%]" />
                   </colgroup>
                   <thead>
                     <tr className="bg-gray-50/90 dark:bg-surface-dark-tertiary border-b border-gray-200 dark:border-gray-700/80 text-gray-500 uppercase font-bold text-[10px] xl:text-[11px] tracking-wider">
-                      <th className="py-3 pl-4 pr-2">Talaba (O‘quvchi)</th>
+                      <th className="py-3 pl-3 pr-1 text-center w-8">
+                        <input
+                          type="checkbox"
+                          checked={eligibleDebtorsInSms.length > 0 && selectedDebtors.size === eligibleDebtorsInSms.length}
+                          onChange={handleToggleSelectAllDebtors}
+                          disabled={eligibleDebtorsInSms.length === 0}
+                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 cursor-pointer"
+                          title={eligibleDebtorsInSms.length === 0 ? "Qarzdor talabalar yo‘q" : "Barcha qarzdorlarni tanlash"}
+                        />
+                      </th>
+                      <th className="py-3 pl-2 pr-2">Talaba (O‘quvchi)</th>
                       <th className="py-3 px-2">SMS Shaxs & Telefon</th>
                       <th className="py-3 px-2">Moliyaviy Holat</th>
                       <th className="py-3 px-2">SMS Matni</th>
@@ -1939,7 +2090,7 @@ export default function SmsManagementPage() {
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {filteredProspectiveRecipients.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-gray-400">
+                        <td colSpan={7} className="py-12 text-center text-gray-400">
                           <div className="flex flex-col items-center justify-center gap-2">
                             <Users className="w-8 h-8 text-gray-300 dark:text-gray-600" />
                             <span className="font-medium text-sm text-gray-600 dark:text-gray-300">
@@ -1951,17 +2102,36 @@ export default function SmsManagementPage() {
                     ) : (
                       filteredProspectiveRecipients.map((item) => {
                         const isSelectedInPreview = selectedPreviewStudentId === item.studentId;
+                        const isSelected = selectedDebtors.has(item.studentId);
+                        const isDebtor = Boolean(item.isDebtor && Number(item.balance || 0) > 0);
+
                         return (
                           <tr
                             key={item.studentId}
                             className={`transition-colors ${
-                              isSelectedInPreview
+                              isSelected
+                                ? 'bg-blue-50/70 dark:bg-blue-950/30'
+                                : isSelectedInPreview
                                 ? 'bg-blue-50/60 dark:bg-emerald-950/20'
                                 : 'hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40'
                             }`}
                           >
+                            {/* Checkbox */}
+                            <td className="py-3 pl-3 pr-1 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectDebtor(item.studentId, item.balance)}
+                                disabled={!isDebtor}
+                                className={`w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 ${
+                                  !isDebtor ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+                                }`}
+                                title={!isDebtor ? "Ushbu talaba to‘lagan (SMS bormaydi)" : "Tanlash"}
+                              />
+                            </td>
+
                             {/* Student Info */}
-                            <td className="py-3 pl-4 pr-2 overflow-hidden">
+                            <td className="py-3 pl-2 pr-2 overflow-hidden">
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 dark:from-emerald-600 dark:to-teal-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
                                   {item.studentName.slice(0, 2).toUpperCase()}
@@ -2024,7 +2194,7 @@ export default function SmsManagementPage() {
 
                             {/* Financial / Debt Status */}
                             <td className="py-3 px-2 overflow-hidden">
-                              {item.isDebtor ? (
+                              {isDebtor ? (
                                 <div className="min-w-0">
                                   <span className="text-xs font-black text-rose-600 dark:text-rose-400 block truncate">
                                     {formatCurrency(item.balance)}
@@ -2084,7 +2254,7 @@ export default function SmsManagementPage() {
                                   <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
                                   Yuborilgan
                                 </span>
-                              ) : item.isDebtor ? (
+                              ) : isDebtor ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800 whitespace-nowrap">
                                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0" />
                                   SMS boradi
@@ -2098,51 +2268,75 @@ export default function SmsManagementPage() {
 
                             {/* Action Buttons */}
                             <td className="py-3 pr-4 pl-1 text-right overflow-hidden">
-                              <div className="flex items-center justify-end gap-1">
+                              <div className="flex items-center justify-end gap-1 flex-wrap">
+                                {/* 1-Click To'landi button */}
+                                {isDebtor ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickPayInSms(item)}
+                                    className="p-1 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] flex items-center justify-center gap-1 transition-all cursor-pointer shadow-2xs shrink-0"
+                                    title="Qarzni to‘liq to‘langan deb qabul qilish (1-bosishda)"
+                                    disabled={actionLoading}
+                                  >
+                                    <CheckCircle2 className="w-3 h-3 shrink-0" />
+                                    <span>To‘landi</span>
+                                  </button>
+                                ) : (
+                                  <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                    To‘langan
+                                  </span>
+                                )}
+
+                                {/* Dedicated Debtor SMS button */}
+                                {isDebtor && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenDebtorSmsModal([item])}
+                                    className="p-1 px-2 rounded-lg border border-blue-300 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-[10px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-2xs shrink-0"
+                                    title="Ushbu talabaga to‘lov eslatma SMS yuborish"
+                                  >
+                                    <Send className="w-3 h-3 shrink-0" />
+                                    <span>SMS</span>
+                                  </button>
+                                )}
+
                                 <button
                                   type="button"
                                   onClick={() => handleViewInPhone(item.studentId, item.studentName)}
-                                  className={`p-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0 ${
+                                  className={`p-1 rounded-lg border text-xs font-semibold flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                                     isSelectedInPreview
                                       ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
-                                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-100'
                                   }`}
                                   title="Ota-ona ko‘rinishini telefonda ko‘rish"
                                 >
-                                  <Eye className="w-3.5 h-3.5 shrink-0" />
-                                  <span className="hidden 2xl:inline text-[10px]">Telefonda</span>
+                                  <Eye className="w-3 h-3 shrink-0" />
                                 </button>
 
                                 <button
                                   type="button"
                                   onClick={() => handleOpenRecipientTestSms(item)}
-                                  className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer shadow-2xs shrink-0"
+                                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-100 text-xs font-semibold flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
                                   title="Ushbu raqamga Test SMS jo‘natish"
                                 >
-                                  <Send className="w-3.5 h-3.5 text-blue-600 dark:text-emerald-400 shrink-0" />
-                                  <span className="hidden 2xl:inline text-[10px]">Sinov</span>
+                                  <Send className="w-3 h-3 text-blue-600 dark:text-emerald-400 shrink-0" />
                                 </button>
 
                                 <button
                                   type="button"
                                   onClick={() => handleToggleExclude(item.studentId, item.studentName)}
-                                  className={`p-1.5 rounded-lg border text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0 ${
+                                  className={`p-1 rounded-lg border text-xs font-bold flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                                     item.isExcluded
                                       ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
-                                      : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-gray-50'
+                                      : 'border-gray-200 dark:border-gray-700 text-gray-500 hover:text-rose-600 hover:bg-gray-50'
                                   }`}
                                   title={item.isExcluded ? 'SMS yuborishga qaytarish' : 'SMS yuborishdan chetlatish'}
                                 >
                                   {item.isExcluded ? (
-                                    <>
-                                      <UserCheck className="w-3.5 h-3.5 text-amber-700 dark:text-amber-300 shrink-0" />
-                                      <span className="hidden 2xl:inline text-[10px]">Kiritish</span>
-                                    </>
+                                    <UserCheck className="w-3 h-3 text-amber-700 dark:text-amber-300 shrink-0" />
                                   ) : (
-                                    <>
-                                      <UserX className="w-3.5 h-3.5 shrink-0" />
-                                      <span className="hidden 2xl:inline text-[10px]">Chetlash</span>
-                                    </>
+                                    <UserX className="w-3 h-3 shrink-0" />
                                   )}
                                 </button>
                               </div>
@@ -2157,70 +2351,165 @@ export default function SmsManagementPage() {
 
               {/* Mobile Cards View */}
               <div className="grid grid-cols-1 gap-3 md:hidden mt-3">
-                {filteredProspectiveRecipients.map((item) => (
-                  <Card key={item.studentId} className="p-3.5 space-y-3 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-bold text-gray-900 dark:text-gray-100 text-sm">
-                          {item.studentName}
-                        </h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {item.courseName} • {item.groupName}
-                        </p>
-                      </div>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                          item.isDebtor
-                            ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
-                            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                        }`}
-                      >
-                        {item.isDebtor ? `Qarz: ${formatCurrency(item.balance)}` : 'To‘langan'}
-                      </span>
-                    </div>
+                {filteredProspectiveRecipients.map((item) => {
+                  const isDebtor = Boolean(item.isDebtor && Number(item.balance || 0) > 0);
+                  const isSelected = selectedDebtors.has(item.studentId);
 
-                    <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-surface-dark-tertiary text-xs space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-500">Qabul qiluvchi:</span>
-                        <span className="font-bold text-gray-800 dark:text-gray-200">
-                          {item.recipientLabel}: {item.targetPhone || 'Telefon yo‘q'}
+                  return (
+                    <Card
+                      key={item.studentId}
+                      className={`p-3.5 space-y-3 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                        isSelected ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleSelectDebtor(item.studentId, item.balance)}
+                            disabled={!isDebtor}
+                            className={`w-4 h-4 rounded text-blue-600 mt-0.5 ${
+                              !isDebtor ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+                            }`}
+                          />
+                          <div>
+                            <h4 className="font-bold text-gray-900 dark:text-gray-100 text-sm">
+                              {item.studentName}
+                            </h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {item.courseName} • {item.groupName}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                            isDebtor
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                          }`}
+                        >
+                          {isDebtor ? `Qarz: ${formatCurrency(item.balance)}` : 'To‘langan'}
                         </span>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-400 text-[11px] line-clamp-2 pt-1 border-t border-gray-200 dark:border-gray-700">
-                        {item.messageText}
-                      </p>
-                    </div>
 
-                    <div className="flex items-center justify-end gap-2 pt-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        icon={Eye}
-                        onClick={() => handleViewInPhone(item.studentId, item.studentName)}
-                        className="text-xs px-2.5 py-1"
-                      >
-                        Telefonda
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        icon={Send}
-                        onClick={() => handleOpenRecipientTestSms(item)}
-                        className="text-xs px-2.5 py-1"
-                      >
-                        Sinov SMS
-                      </Button>
-                      <button
-                        type="button"
-                        onClick={() => handleToggleExclude(item.studentId, item.studentName)}
-                        className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 cursor-pointer"
-                      >
-                        {item.isExcluded ? 'Kiritish' : 'Chetlash'}
-                      </button>
-                    </div>
-                  </Card>
-                ))}
+                      <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-surface-dark-tertiary text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Qabul qiluvchi:</span>
+                          <span className="font-bold text-gray-800 dark:text-gray-200">
+                            {item.recipientLabel}: {item.targetPhone || 'Telefon yo‘q'}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-400 text-[11px] line-clamp-2 pt-1 border-t border-gray-200 dark:border-gray-700">
+                          {item.messageText}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-1.5 pt-1 flex-wrap">
+                        {isDebtor && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuickPayInSms(item)}
+                            className="p-1 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                            disabled={actionLoading}
+                          >
+                            <CheckCircle2 className="w-3 h-3 shrink-0" />
+                            <span>To‘landi</span>
+                          </button>
+                        )}
+                        {isDebtor && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDebtorSmsModal([item])}
+                            className="p-1 px-2.5 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                          >
+                            <Send className="w-3 h-3 shrink-0" />
+                            <span>SMS</span>
+                          </button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={Eye}
+                          onClick={() => handleViewInPhone(item.studentId, item.studentName)}
+                          className="text-xs px-2 py-1"
+                        >
+                          Telefonda
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={Send}
+                          onClick={() => handleOpenRecipientTestSms(item)}
+                          className="text-xs px-2 py-1"
+                        >
+                          Sinov
+                        </Button>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleExclude(item.studentId, item.studentName)}
+                          className="text-xs font-semibold px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 cursor-pointer"
+                        >
+                          {item.isExcluded ? 'Kiritish' : 'Chetlash'}
+                        </button>
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
+
+              {/* Floating Action Bar for Selected Debtors in SMS page */}
+              {selectedDebtors.size > 0 && (
+                <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-4xl bg-white dark:bg-surface-dark-secondary rounded-2xl shadow-2xl border border-blue-500/40 p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 animate-slide-up backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm shrink-0">
+                      {selectedDebtors.size}
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                        {selectedDebtors.size} ta qarzdor talaba tanlandi
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Tanlanganlar jami qarzdorligi: <span className="font-bold text-red-600 dark:text-red-400">{formatCurrency(totalSelectedDebtInSms)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={Send}
+                      onClick={() => {
+                        const list = filteredProspectiveRecipients.filter((r) => selectedDebtors.has(r.studentId));
+                        handleOpenDebtorSmsModal(list);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2 px-3 shadow-md flex items-center gap-1.5 cursor-pointer"
+                    >
+                      📲 Tanlanganlarga SMS yuborish ({selectedDebtors.size} ta)
+                    </Button>
+
+                    <Button
+                      variant="success"
+                      size="sm"
+                      icon={CheckCircle2}
+                      onClick={handleBatchPaySelectedInSms}
+                      disabled={actionLoading}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-3 shadow-md flex items-center gap-1.5 cursor-pointer"
+                    >
+                      ✅ Tanlanganlarni to‘langan qilish ({selectedDebtors.size} ta)
+                    </Button>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDebtors(new Set())}
+                      className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 underline px-2 cursor-pointer font-medium"
+                    >
+                      Bekor qilish
+                    </button>
+                  </div>
+                </div>
+              )}
             </Card>
           </div>
         </div>
@@ -2576,62 +2865,25 @@ export default function SmsManagementPage() {
       {/* ========================================================================= */}
       {activeTab === 'queue' && (
         <div className="space-y-4 sm:space-y-6">
-          {/* Queue Filter Toolbar (1 Row on Desktop, Equal Height h-10 / 40px for All Elements) */}
-          <Card className="p-3 sm:p-3.5 rounded-2xl shadow-sm">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-3">
-              {/* Left Group: Search Bar + Status Filter Segmented Pills */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-                {/* 1. Search Bar (Exact h-10 / 40px) */}
-                <div className="relative w-full sm:w-64 md:w-72 lg:w-80 shrink-0 h-10 min-h-[40px] max-h-[40px] flex items-center">
-                  <Input
-                    icon={Search}
-                    size="sm"
-                    className="!gap-0 !h-10 w-full justify-center"
-                    inputClassName="!h-10 !min-h-[40px] !max-h-[40px] text-xs rounded-xl"
-                    placeholder="Qidirish (ism, raqam, matn)..."
-                    value={queueSearch}
-                    onChange={(e) => setQueueSearch(e.target.value)}
-                  />
-                </div>
-
-                {/* 2. Status Filter Segmented Pills (Scrollable with clean responsive labels) */}
-                <div className="flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-surface-dark-secondary text-xs h-10 min-h-[40px] p-0 overflow-x-auto no-scrollbar divide-x divide-gray-200 dark:divide-gray-700 shrink-0 shadow-2xs max-w-full">
-                  {[
-                    { key: 'ALL', label: 'Barchasi', shortLabel: 'Barchasi', count: queue.length },
-                    { key: 'PENDING', label: 'Kutilmoqda', shortLabel: 'Kutilmoqda', count: stats.pending + stats.dispatching },
-                    { key: SMS_STATUS.SUBMITTED, label: 'Operatorga berildi', shortLabel: 'Yuborildi', count: stats.submitted },
-                    { key: SMS_STATUS.DELIVERED, label: 'Yetkazildi', shortLabel: 'Yetkazildi', count: stats.delivered },
-                    { key: SMS_STATUS.UNKNOWN, label: 'Tasdiqsiz', shortLabel: 'Tasdiqsiz', count: stats.unknown },
-                    { key: SMS_STATUS.FAILED, label: 'Xatolik', shortLabel: 'Xato', count: stats.failed },
-                  ].map((st) => (
-                    <button
-                      key={st.key}
-                      type="button"
-                      onClick={() => setQueueStatusFilter(st.key)}
-                      className={`h-full min-h-[40px] flex items-center justify-center gap-1.5 px-3 sm:px-3.5 font-bold transition-all cursor-pointer whitespace-nowrap text-xs shrink-0 ${
-                        queueStatusFilter === st.key
-                          ? 'bg-blue-600 dark:bg-emerald-600 text-white font-black shadow-xs'
-                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
-                      }`}
-                    >
-                      <span className="hidden sm:inline">{st.label}</span>
-                      <span className="inline sm:hidden">{st.shortLabel}</span>
-                      <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
-                          queueStatusFilter === st.key
-                            ? 'bg-white/20 text-white'
-                            : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        {st.count}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+          {/* Queue Filter Toolbar: 2 Distinct Rows (Row 1: Search + Actions, Row 2: Status Pills) */}
+          <Card className="p-3 sm:p-4 rounded-2xl shadow-sm space-y-3">
+            {/* Row 1: Search Bar + Action Buttons */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              {/* 1. Search Bar */}
+              <div className="relative w-full md:w-72 lg:w-80 shrink-0">
+                <Input
+                  icon={Search}
+                  size="sm"
+                  className="!gap-0 !h-10 w-full"
+                  inputClassName="!h-10 !min-h-[40px] text-xs rounded-xl"
+                  placeholder="Qidirish (ism, raqam, matn)..."
+                  value={queueSearch}
+                  onChange={(e) => setQueueSearch(e.target.value)}
+                />
               </div>
 
-              {/* Right Group: Action Buttons (Responsive on mobile: flexible height, no clipping) */}
-              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 shrink-0 [&>*:last-child:nth-child(odd)]:col-span-2">
+              {/* 2. Action Buttons Group (Cleanly wraps on smaller screens, never collides) */}
+              <div className="flex flex-wrap items-center gap-2 justify-start md:justify-end">
                 <Button
                   variant="outline"
                   size="sm"
@@ -2639,7 +2891,7 @@ export default function SmsManagementPage() {
                   isLoading={reconcilingStatus}
                   disabled={reconcilingStatus || processingQueue}
                   onClick={handleReconcileDeliveryStatus}
-                  className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-2.5 sm:px-3.5 rounded-xl py-1.5 sm:py-0"
+                  className="!h-10 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 cursor-pointer font-semibold text-xs px-3 rounded-xl"
                 >
                   <span className="hidden sm:inline">{reconcilingStatus ? 'Tekshirilmoqda...' : 'Hisobotlarni tekshirish'}</span>
                   <span className="sm:hidden">{reconcilingStatus ? 'Tekshirish...' : 'Hisobotlar'}</span>
@@ -2651,7 +2903,7 @@ export default function SmsManagementPage() {
                   isLoading={refreshingQueue}
                   disabled={refreshingQueue}
                   onClick={handleRefreshData}
-                  className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-2.5 sm:px-3.5 rounded-xl py-1.5 sm:py-0"
+                  className="!h-10 cursor-pointer font-semibold text-xs px-3 rounded-xl"
                 >
                   Yangilash
                 </Button>
@@ -2663,7 +2915,7 @@ export default function SmsManagementPage() {
                     isLoading={retryingAll}
                     disabled={retryingAll}
                     onClick={handleRetryAllFailed}
-                    className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer font-semibold justify-center text-xs w-full sm:w-auto px-2.5 sm:px-3.5 rounded-xl py-1.5 sm:py-0"
+                    className="!h-10 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer font-semibold text-xs px-3 rounded-xl"
                   >
                     <span className="hidden sm:inline">Ketmaganlarni navbatga qo‘shish ({stats.failed})</span>
                     <span className="sm:hidden">Qayta qo‘shish ({stats.failed})</span>
@@ -2676,7 +2928,7 @@ export default function SmsManagementPage() {
                   isLoading={processingQueue}
                   disabled={(stats.pending + stats.dispatching) === 0 || processingQueue}
                   onClick={handleProcessQueue}
-                  className="min-h-[40px] sm:!h-10 sm:!min-h-[40px] sm:!max-h-[40px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer justify-center text-xs w-full sm:w-auto px-2.5 sm:px-4 rounded-xl py-1.5 sm:py-0"
+                  className="!h-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer text-xs px-4 rounded-xl shadow-xs"
                 >
                   <span className="hidden sm:inline">
                     {processingQueue
@@ -2691,6 +2943,42 @@ export default function SmsManagementPage() {
                 </Button>
               </div>
             </div>
+
+            {/* Row 2: Status Filter Segmented Pills (Own full-width row, 100% collision-free) */}
+            <div className="pt-2 border-t border-gray-100 dark:border-gray-800/80">
+              <div className="flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/90 dark:bg-surface-dark-secondary text-xs h-10 min-h-[40px] p-0 overflow-x-auto no-scrollbar divide-x divide-gray-200 dark:divide-gray-700 shadow-2xs w-full">
+                {[
+                  { key: 'ALL', label: 'Barchasi', count: queue.length },
+                  { key: 'PENDING', label: 'Kutilmoqda', count: stats.pending + stats.dispatching },
+                  { key: SMS_STATUS.SUBMITTED, label: 'Operatorga berildi', count: stats.submitted },
+                  { key: SMS_STATUS.DELIVERED, label: 'Yetkazildi', count: stats.delivered },
+                  { key: SMS_STATUS.UNKNOWN, label: 'Tasdiqsiz', count: stats.unknown },
+                  { key: SMS_STATUS.FAILED, label: 'Xatolik', count: stats.failed },
+                ].map((st) => (
+                  <button
+                    key={st.key}
+                    type="button"
+                    onClick={() => setQueueStatusFilter(st.key)}
+                    className={`h-full min-h-[40px] flex-1 flex items-center justify-center gap-1.5 px-3 sm:px-4 font-bold transition-all cursor-pointer whitespace-nowrap text-xs shrink-0 ${
+                      queueStatusFilter === st.key
+                        ? 'bg-blue-600 dark:bg-emerald-600 text-white font-black shadow-xs'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
+                    }`}
+                  >
+                    <span>{st.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                        queueStatusFilter === st.key
+                          ? 'bg-white/20 text-white'
+                          : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {st.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </Card>
 
           {/* Desktop Table View (Hidden on mobile) */}
@@ -2699,13 +2987,13 @@ export default function SmsManagementPage() {
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-gray-50/90 dark:bg-surface-dark-tertiary border-b border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 uppercase font-bold text-[11px] tracking-wider">
-                    <th className="py-3.5 pl-6 pr-4 min-w-[170px]">Qabul qiluvchi</th>
+                    <th className="py-3.5 pl-6 pr-4 min-w-[180px]">Qabul qiluvchi</th>
                     <th className="py-3.5 px-4 min-w-[130px]">Telefon</th>
-                    <th className="py-3.5 px-4 min-w-[120px]">Qarzdorlik</th>
-                    <th className="py-3.5 px-4 min-w-[240px]">SMS Matni</th>
-                    <th className="py-3.5 px-4 min-w-[140px]">Holat</th>
-                    <th className="py-3.5 px-4 min-w-[140px]">Kechikish / Bosqichlar</th>
-                    <th className="py-3.5 px-4 min-w-[80px]">Urinish</th>
+                    <th className="py-3.5 px-4 min-w-[130px]">Turi / Summa</th>
+                    <th className="py-3.5 px-4 min-w-[260px]">SMS Matni</th>
+                    <th className="py-3.5 px-4 min-w-[130px]">Holat</th>
+                    <th className="py-3.5 px-4 min-w-[160px]">Vaqt / Yetkazilish</th>
+                    <th className="py-3.5 px-4 min-w-[70px] text-center">Urinish</th>
                     <th className="py-3.5 pr-6 pl-4 text-right min-w-[110px]">Amal</th>
                   </tr>
                 </thead>
@@ -2721,62 +3009,105 @@ export default function SmsManagementPage() {
                       </td>
                     </tr>
                   ) : (
-                    filteredQueue.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40 transition-colors">
-                        <td className="py-3.5 pl-6 pr-4 font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                          {item.recipient_name}
-                        </td>
-                        <td className="py-3.5 px-4 font-mono text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">
-                          {item.recipient_phone}
-                        </td>
-                        <td className="py-3.5 px-4 font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap font-mono">
-                          {formatCurrency(item.amount_due)}
-                        </td>
-                        <td className="py-3.5 px-4 max-w-xs truncate text-gray-600 dark:text-gray-300 font-sans" title={item.message_text}>
-                          <div className="truncate">{item.message_text}</div>
-                          {item.tracking_id && (
-                            <div className="text-[10px] font-mono text-blue-600/80 dark:text-blue-400/80 truncate">
-                              ID: {item.tracking_id}
+                    filteredQueue.map((item) => {
+                      const isAttendance = item.category === 'attendance' || item.id?.startsWith('sms-att-') || item.attendance_status;
+                      const isTest = item.category === 'test' || item.category === 'manual' || item.recipient_type === 'test';
+
+                      return (
+                        <tr key={item.id} className="hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40 transition-colors">
+                          <td className="py-3.5 pl-6 pr-4 font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 ${
+                                isAttendance
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                                  : isTest
+                                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'
+                                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                              }`}>
+                                {isAttendance ? '📋' : isTest ? '🧪' : '👤'}
+                              </div>
+                              <div>
+                                <span className="font-bold text-gray-900 dark:text-gray-100 block">{item.recipient_name}</span>
+                                {item.course_name && (
+                                  <span className="text-[10px] text-gray-400 block font-normal">{item.course_name}</span>
+                                )}
+                              </div>
                             </div>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          {renderStatusBadge(item.status)}
-                        </td>
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          {renderLatencyInfo(item)}
-                        </td>
-                        <td className="py-3.5 px-4 font-mono text-gray-500 whitespace-nowrap">
-                          {item.attempts || 0} / {item.max_attempts || 3}
-                        </td>
-                        <td className="py-3.5 pr-6 pl-4 text-right whitespace-nowrap space-x-1">
-                          {(normalizeSmsStatus(item.status) === SMS_STATUS.FAILED || normalizeSmsStatus(item.status) === SMS_STATUS.UNKNOWN) && (
-                            <button
-                              type="button"
-                              disabled={retryingId === item.id}
-                              onClick={() => handleRetryItem(item.id)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 font-bold text-[10px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Qayta urinish"
-                            >
-                              {retryingId === item.id && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
-                              <span>{retryingId === item.id ? 'Yuborilmoqda...' : 'Qayta yuborish'}</span>
-                            </button>
-                          )}
-                          {(normalizeSmsStatus(item.status) === SMS_STATUS.PENDING || normalizeSmsStatus(item.status) === SMS_STATUS.DISPATCHING) && (
-                            <button
-                              type="button"
-                              disabled={cancellingId === item.id}
-                              onClick={() => handleCancelItem(item.id)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 font-bold text-[10px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Bekor qilish"
-                            >
-                              {cancellingId === item.id && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
-                              <span>{cancellingId === item.id ? 'Bekor qilinmoqda...' : 'Bekor qilish'}</span>
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">
+                            {item.recipient_phone}
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            {isAttendance ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/70">
+                                {item.attendance_status === 'present'
+                                  ? '🟢 Darsda'
+                                  : item.attendance_status === 'late'
+                                    ? '🟡 Kechikkan'
+                                    : item.attendance_status === 'absent'
+                                      ? '🔴 Kelmadi'
+                                      : item.attendance_status === 'excused'
+                                        ? 'ℹ️ Sababli'
+                                        : '📋 Davomat'}
+                              </span>
+                            ) : isTest ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70">
+                                🧪 Test SMS
+                              </span>
+                            ) : item.amount_due && item.amount_due > 0 ? (
+                              <span className="font-bold text-rose-600 dark:text-rose-400 font-mono text-xs">
+                                {formatCurrency(item.amount_due)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 font-mono text-xs">—</span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 max-w-sm text-gray-700 dark:text-gray-300 font-sans" title={item.message_text}>
+                            <p className="line-clamp-2 leading-relaxed text-xs font-sans">{item.message_text}</p>
+                            {item.tracking_id && (
+                              <span className="inline-block text-[9px] font-mono text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded mt-1">
+                                ID: {item.tracking_id}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            {renderStatusBadge(item.status)}
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            {renderLatencyInfo(item)}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-gray-500 whitespace-nowrap text-center">
+                            {item.attempts || 0} / {item.max_attempts || 3}
+                          </td>
+                          <td className="py-3.5 pr-6 pl-4 text-right whitespace-nowrap space-x-1">
+                            {(normalizeSmsStatus(item.status) === SMS_STATUS.FAILED || normalizeSmsStatus(item.status) === SMS_STATUS.UNKNOWN) && (
+                              <button
+                                type="button"
+                                disabled={retryingId === item.id}
+                                onClick={() => handleRetryItem(item.id)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 font-bold text-[10px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Qayta urinish"
+                              >
+                                {retryingId === item.id && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                                <span>{retryingId === item.id ? 'Yuborilmoqda...' : 'Qayta yuborish'}</span>
+                              </button>
+                            )}
+                            {(normalizeSmsStatus(item.status) === SMS_STATUS.PENDING || normalizeSmsStatus(item.status) === SMS_STATUS.DISPATCHING) && (
+                              <button
+                                type="button"
+                                disabled={cancellingId === item.id}
+                                onClick={() => handleCancelItem(item.id)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 font-bold text-[10px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Bekor qilish"
+                              >
+                                {cancellingId === item.id && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                                <span>{cancellingId === item.id ? 'Bekor qilinmoqda...' : 'Bekor qilish'}</span>
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -2798,52 +3129,64 @@ export default function SmsManagementPage() {
                 </div>
               </Card>
             ) : (
-              filteredQueue.map((item) => (
-                <Card key={item.id} className="p-4 space-y-3 border border-gray-200/80 dark:border-gray-800 rounded-2xl shadow-xs">
-                  {/* Card Top: Recipient & Status */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">
-                        {item.recipient_name}
-                      </h4>
-                      <a
-                        href={`tel:${item.recipient_phone}`}
-                        className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-blue-600 dark:text-emerald-400 mt-0.5 hover:underline"
-                      >
-                        <PhoneCall className="w-3 h-3" />
-                        <span>{item.recipient_phone}</span>
-                      </a>
-                    </div>
-                    <div>
-                      {renderStatusBadge(item.status)}
-                    </div>
-                  </div>
+              filteredQueue.map((item) => {
+                const isAttendance = item.category === 'attendance' || item.id?.startsWith('sms-att-') || item.attendance_status;
+                const isTest = item.category === 'test' || item.category === 'manual' || item.recipient_type === 'test';
 
-                  {/* Card Debt Amount */}
-                  <div className="flex items-center justify-between text-xs py-1.5 px-3 bg-gray-50 dark:bg-surface-dark-tertiary rounded-xl border border-gray-100 dark:border-gray-800/60">
-                    <span className="text-gray-500 font-medium">Qarzdorlik summasi:</span>
-                    <span className="font-bold text-rose-600 dark:text-rose-400 font-mono">
-                      {formatCurrency(item.amount_due)}
-                    </span>
-                  </div>
-
-                  {/* Card SMS Message preview & Tracking ID */}
-                  <div className="p-3 bg-blue-50/40 dark:bg-gray-800/60 rounded-xl text-xs text-gray-700 dark:text-gray-300 leading-relaxed border border-blue-100/50 dark:border-gray-700/60 space-y-1">
-                    <span className="block text-[10px] font-bold uppercase text-gray-400">SMS Matni:</span>
-                    <p className="line-clamp-3 font-sans">{item.message_text}</p>
-                    {item.tracking_id && (
-                      <div className="text-[10px] font-mono text-blue-600/80 dark:text-blue-400/80 pt-1 border-t border-blue-100 dark:border-gray-700/60">
-                        ID: {item.tracking_id}
+                return (
+                  <Card key={item.id} className="p-4 space-y-3 border border-gray-200/80 dark:border-gray-800 rounded-2xl shadow-xs">
+                    {/* Card Top: Recipient & Status */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                          {item.recipient_name}
+                        </h4>
+                        <a
+                          href={`tel:${item.recipient_phone}`}
+                          className="inline-flex items-center gap-1 text-xs font-mono font-semibold text-blue-600 dark:text-emerald-400 mt-0.5 hover:underline"
+                        >
+                          <PhoneCall className="w-3 h-3" />
+                          <span>{item.recipient_phone}</span>
+                        </a>
                       </div>
-                    )}
-                  </div>
+                      <div>
+                        {renderStatusBadge(item.status)}
+                      </div>
+                    </div>
 
-                  {/* Card Latency Breakdown */}
-                  {(item.total_latency_ms != null || item.lms_latency_ms != null || item.android_latency_ms != null) && (
+                    {/* Card Category / Amount */}
+                    <div className="flex items-center justify-between text-xs py-1.5 px-3 bg-gray-50 dark:bg-surface-dark-tertiary rounded-xl border border-gray-100 dark:border-gray-800/60">
+                      <span className="text-gray-500 font-medium">Xabar turi:</span>
+                      {isAttendance ? (
+                        <span className="font-bold text-blue-600 dark:text-blue-400">
+                          📋 Davomat ({item.attendance_status === 'present' ? 'Darsda' : item.attendance_status === 'late' ? 'Kechikkan' : item.attendance_status === 'absent' ? 'Kelmadi' : 'Davomat'})
+                        </span>
+                      ) : isTest ? (
+                        <span className="font-bold text-purple-600 dark:text-purple-400">🧪 Test SMS</span>
+                      ) : item.amount_due && item.amount_due > 0 ? (
+                        <span className="font-bold text-rose-600 dark:text-rose-400 font-mono">
+                          {formatCurrency(item.amount_due)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </div>
+
+                    {/* Card SMS Message preview & Tracking ID */}
+                    <div className="p-3 bg-blue-50/40 dark:bg-gray-800/60 rounded-xl text-xs text-gray-700 dark:text-gray-300 leading-relaxed border border-blue-100/50 dark:border-gray-700/60 space-y-1">
+                      <span className="block text-[10px] font-bold uppercase text-gray-400">SMS Matni:</span>
+                      <p className="line-clamp-3 font-sans">{item.message_text}</p>
+                      {item.tracking_id && (
+                        <div className="text-[10px] font-mono text-blue-600/80 dark:text-blue-400/80 pt-1 border-t border-blue-100 dark:border-gray-700/60">
+                          ID: {item.tracking_id}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Latency Breakdown */}
                     <div className="py-1 px-2.5 bg-gray-50/80 dark:bg-surface-dark-tertiary rounded-lg border border-gray-100 dark:border-gray-800/60">
                       {renderLatencyInfo(item)}
                     </div>
-                  )}
 
                   {/* Card Footer: Attempts & Action Buttons */}
                   <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800/80 text-xs">
@@ -2877,8 +3220,9 @@ export default function SmsManagementPage() {
                     </div>
                   </div>
                 </Card>
-              ))
-            )}
+              );
+            })
+          )}
           </div>
         </div>
       )}
@@ -3212,6 +3556,325 @@ export default function SmsManagementPage() {
           </form>
         </Modal>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: SMS LIFECYCLE 5-STAGE LATENCY DETAILS                            */}
+      {/* ========================================================================= */}
+      {selectedLatencyItem && (
+        <Modal
+          isOpen={Boolean(selectedLatencyItem)}
+          onClose={() => setSelectedLatencyItem(null)}
+          title="SMS Yetkazilish Bosqichlari va Vaqtlari"
+          maxWidth="md"
+        >
+          <div className="space-y-4 text-xs">
+            <div className="p-3.5 bg-gray-50 dark:bg-surface-dark-tertiary rounded-xl border border-gray-200 dark:border-gray-700 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 font-medium">Qabul qiluvchi:</span>
+                <span className="font-bold text-gray-900 dark:text-gray-100">{selectedLatencyItem.recipient_name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 font-medium">Telefon raqam:</span>
+                <span className="font-mono font-semibold text-gray-800 dark:text-gray-200">{selectedLatencyItem.recipient_phone}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 font-medium">Holat:</span>
+                {renderStatusBadge(selectedLatencyItem.status)}
+              </div>
+              {selectedLatencyItem.tracking_id && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-500 font-medium">Tracking ID:</span>
+                  <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{selectedLatencyItem.tracking_id}</span>
+                </div>
+              )}
+            </div>
+
+            {/* 5-Step Pipeline Visual Tracker */}
+            <div className="space-y-3 pt-2">
+              <h4 className="font-bold uppercase tracking-wider text-[11px] text-gray-400">
+                5 Bosqichli Yetkazish Yo‘li:
+              </h4>
+
+              <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-200 dark:before:bg-gray-700">
+                {/* Step 1 */}
+                <div className="relative">
+                  <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">1</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">1. LMS Navbatiga Qo‘shildi</div>
+                  <div className="text-gray-500 font-mono text-[11px]">
+                    {selectedLatencyItem.queued_at || selectedLatencyItem.created_at ? formatDate(selectedLatencyItem.queued_at || selectedLatencyItem.created_at) : '—'}
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="relative">
+                  <div className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${selectedLatencyItem.dispatched_at ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>2</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">2. Cloud SMS Shlyuziga Uzatildi</div>
+                  <div className="text-gray-500 font-mono text-[11px]">
+                    {selectedLatencyItem.dispatched_at ? formatDate(selectedLatencyItem.dispatched_at) : 'Kutilmoqda...'}
+                    {selectedLatencyItem.lms_latency_ms != null && (
+                      <span className="text-gray-400 ml-1">({(selectedLatencyItem.lms_latency_ms / 1000).toFixed(1)}s)</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="relative">
+                  <div className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${selectedLatencyItem.android_received_at || selectedLatencyItem.android_sent_at ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>3</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">3. Android Telefon Qabul Qildi</div>
+                  <div className="text-gray-500 font-mono text-[11px]">
+                    {selectedLatencyItem.android_received_at || selectedLatencyItem.android_sent_at ? formatDate(selectedLatencyItem.android_received_at || selectedLatencyItem.android_sent_at) : 'Kutilmoqda...'}
+                    {selectedLatencyItem.cloud_to_phone_latency_ms != null && (
+                      <span className="text-emerald-600 font-bold ml-1">({(selectedLatencyItem.cloud_to_phone_latency_ms / 1000).toFixed(1)}s)</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div className="relative">
+                  <div className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${selectedLatencyItem.android_sent_at ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>4</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">4. Mobil Operator Tarmog‘iga Berildi (SMS_SENT)</div>
+                  <div className="text-gray-500 font-mono text-[11px]">
+                    {selectedLatencyItem.android_sent_at ? formatDate(selectedLatencyItem.android_sent_at) : 'Kutilmoqda...'}
+                  </div>
+                </div>
+
+                {/* Step 5 */}
+                <div className="relative">
+                  <div className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${selectedLatencyItem.delivered_at ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}`}>5</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">5. Ota-onaga Yetkazildi (DELIVRD)</div>
+                  <div className="text-gray-500 font-mono text-[11px]">
+                    {selectedLatencyItem.delivered_at ? (
+                      <span className="text-emerald-600 font-bold">{formatDate(selectedLatencyItem.delivered_at)}</span>
+                    ) : 'Yetkazilish hisoboti kutilmoqda...'}
+                    {selectedLatencyItem.total_latency_ms != null && (
+                      <span className="text-emerald-600 font-bold block mt-0.5">Jami yetkazish vaqti: {(selectedLatencyItem.total_latency_ms / 1000).toFixed(1)}s</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+              <Button variant="secondary" size="sm" onClick={() => setSelectedLatencyItem(null)}>
+                Yopish
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* DEDICATED DEBTOR SMS MODAL IN SMS MANAGEMENT PAGE */}
+      <Modal
+        isOpen={isDebtorSmsModalOpen}
+        onClose={() => {
+          if (!isSendingDebtorSms) {
+            setIsDebtorSmsModalOpen(false);
+            setDebtorSmsList([]);
+          }
+        }}
+        title="📲 Qarzdor talabalarga SMS xabarnoma yuborish"
+        size="lg"
+      >
+        <div className="space-y-4">
+          {/* Header Summary */}
+          <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                {debtorSmsList.length}
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                  {debtorSmsList.length} ta qarzdor talaba tanlangan
+                </h4>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Jami qarzdorlik summasi: <span className="font-bold text-red-600 dark:text-red-400">{formatCurrency(debtorSmsList.reduce((acc, curr) => acc + Number(curr.balance || 0), 0))}</span>
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+              Antispam himoyasi faol
+            </span>
+          </div>
+
+          {/* Recipient Target Radio */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              Xabar qaysi raqamga yuborilsin?
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <label
+                className={`p-3 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-colors ${
+                  debtorSmsRecipientType === 'parent_preferred'
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-100 font-semibold'
+                    : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="smsRecipientTypeInSms"
+                  value="parent_preferred"
+                  checked={debtorSmsRecipientType === 'parent_preferred'}
+                  onChange={() => setDebtorSmsRecipientType('parent_preferred')}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <div>
+                  <div className="font-bold">👨‍👩‍👦 Ota-onasi telefoniga (Tavsiya etiladi)</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
+                    Ota yoki ona raqami, bo‘lmasa talabaning o‘ziga boradi
+                  </div>
+                </div>
+              </label>
+
+              <label
+                className={`p-3 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-colors ${
+                  debtorSmsRecipientType === 'student'
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-100 font-semibold'
+                    : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="smsRecipientTypeInSms"
+                  value="student"
+                  checked={debtorSmsRecipientType === 'student'}
+                  onChange={() => setDebtorSmsRecipientType('student')}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <div>
+                  <div className="font-bold">📱 Talabaning o‘ziga</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
+                    Faqat talabaning shaxsiy login raqamiga boradi
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Selected Students List Preview */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-400">
+              <span>Tanlangan qabul qiluvchilar ro‘yxati:</span>
+              <span>{debtorSmsList.length} ta</span>
+            </div>
+            <div className="max-h-36 overflow-y-auto border border-gray-200 dark:border-gray-800 rounded-xl divide-y divide-gray-100 dark:divide-gray-800 bg-gray-50/40 dark:bg-surface-dark-tertiary/40 p-1 text-xs">
+              {debtorSmsList.map((st) => {
+                const targetPhone =
+                  debtorSmsRecipientType === 'student'
+                    ? st.studentPhone
+                    : st.fatherPhone || st.motherPhone || st.studentPhone || st.targetPhone;
+                return (
+                  <div key={st.studentId} className="p-2 flex items-center justify-between gap-2">
+                    <div className="truncate">
+                      <span className="font-bold text-gray-900 dark:text-gray-100">{st.studentName}</span>
+                      <span className="text-gray-500 ml-1.5">• {st.courseName} ({st.groupName})</span>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className="font-bold text-red-600 dark:text-red-400">{formatCurrency(st.balance)}</span>
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400 block font-mono">{targetPhone || 'Raqamsiz'}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SMS Template Editor */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                SMS Xabar matni:
+              </label>
+              <button
+                type="button"
+                onClick={() => setDebtorSmsTemplate(DEFAULT_DEBTOR_TEMPLATE)}
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 underline font-medium cursor-pointer"
+              >
+                🔄 Standart matnga qaytarish
+              </button>
+            </div>
+            <textarea
+              rows={4}
+              value={debtorSmsTemplate}
+              onChange={(e) => setDebtorSmsTemplate(e.target.value)}
+              className="w-full text-xs p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+              placeholder="SMS matnini kiriting..."
+            />
+            {/* Template Variables Helper Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px] text-gray-500">
+              <span className="font-semibold">O‘zgaruvchilar:</span>
+              {['{student_name}', '{course_name}', '{amount}', '{due_date}'].map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setDebtorSmsTemplate((prev) => `${prev} ${v}`)}
+                  className="px-2 py-0.5 rounded bg-gray-100 dark:bg-surface-dark-tertiary hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-[10px] cursor-pointer"
+                  title="Matnga qo‘shish"
+                >
+                  +{v}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* LIVE PREVIEW BOX */}
+          <div className="space-y-1.5">
+            <div className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Namuna: 1-talabaga ketadigan jonli SMS ko‘rinishi</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-gray-900 text-emerald-400 font-mono text-xs whitespace-pre-wrap leading-relaxed shadow-inner border border-gray-800">
+              {livePreviewDebtorSmsSample}
+            </div>
+          </div>
+
+          {/* Sending Progress Bar */}
+          {isSendingDebtorSms && (
+            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs space-y-2">
+              <div className="flex items-center justify-between font-bold text-blue-900 dark:text-blue-100">
+                <span>SMS yuborilmoqda...</span>
+                <span>{debtorSmsProgress.current} / {debtorSmsProgress.total}</span>
+              </div>
+              <div className="w-full bg-blue-200 dark:bg-blue-900 h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-blue-600 h-2 transition-all duration-300"
+                  style={{
+                    width: `${debtorSmsProgress.total > 0 ? (debtorSmsProgress.current / debtorSmsProgress.total) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+              {debtorSmsProgress.studentName && (
+                <div className="text-[11px] text-blue-700 dark:text-blue-300">
+                  Navbatdagi talaba: <span className="font-semibold">{debtorSmsProgress.studentName}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Modal Actions */}
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsDebtorSmsModalOpen(false);
+                setDebtorSmsList([]);
+              }}
+              disabled={isSendingDebtorSms}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              variant="primary"
+              icon={Send}
+              onClick={handleSendDebtorSmsInSms}
+              disabled={isSendingDebtorSms || debtorSmsList.length === 0}
+              isLoading={isSendingDebtorSms}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2 px-4 shadow-md cursor-pointer"
+            >
+              {isSendingDebtorSms ? "Yuborilmoqda..." : `📲 SMS Yuborish (${debtorSmsList.length} ta)`}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

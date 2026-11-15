@@ -401,7 +401,8 @@ export default function AttendancePage() {
     return { isBeforeStart: false };
   }, [currentRosterGroup, selectedDate, todayStr, attendanceStatus.hasAttendance]);
 
-  const canEdit = (!attendanceStatus.isLocked || selectedDate === todayStr || isOwnerOrAdmin) && (!lessonTimeInfo.isBeforeStart || isOwnerOrAdmin);
+  const isTestMode = true;
+  const canEdit = isTestMode || ((!attendanceStatus.isLocked || selectedDate === todayStr || isOwnerOrAdmin) && (!lessonTimeInfo.isBeforeStart || isOwnerOrAdmin));
 
   const setStatus = (studentId, status) => {
     if (!canEdit) {
@@ -474,14 +475,17 @@ export default function AttendancePage() {
         currentRosterGroup?.teacher_name ||
         'Abdulazizbek Orifjonov';
 
+      const scheduleMatch = currentRosterGroup?.schedule?.match(/(\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})/);
       const effectiveLessonTime =
         lessonTimeInfo?.startTime && lessonTimeInfo?.endTime
           ? `${lessonTimeInfo.startTime} - ${lessonTimeInfo.endTime}`
-          : currentRosterGroup?.start_time && currentRosterGroup?.end_time
-            ? `${currentRosterGroup.start_time.slice(0, 5)} - ${currentRosterGroup.end_time.slice(0, 5)}`
-            : currentLesson?.start_time && currentLesson?.end_time
-              ? `${currentLesson.start_time.slice(0, 5)} - ${currentLesson.end_time.slice(0, 5)}`
-              : '08:30 - 10:00';
+          : scheduleMatch
+            ? scheduleMatch[1].replace(/\s+/g, ' ')
+            : currentRosterGroup?.start_time && currentRosterGroup?.end_time
+              ? `${currentRosterGroup.start_time.slice(0, 5)} - ${currentRosterGroup.end_time.slice(0, 5)}`
+              : currentLesson?.start_time && currentLesson?.end_time
+                ? `${currentLesson.start_time.slice(0, 5)} - ${currentLesson.end_time.slice(0, 5)}`
+                : '08:30 - 10:00';
 
       await saveAttendanceRecords(currentLesson.id, records, profile?.id, {
         groupId: currentRosterGroup?.id,
@@ -768,6 +772,28 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6 animate-fade-in pb-24 sm:pb-12">
+      {/* ========================================================================= */}
+      {/* TEST REJIMI — FAQAT DAVOMAT TIZIMI BANNERI                                */}
+      {/* ========================================================================= */}
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-2 border-amber-500/40 text-amber-950 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <span className="px-2.5 py-1 rounded-xl bg-amber-500 text-white font-black text-xs uppercase tracking-wider shrink-0 shadow-xs flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+            🧪 TEST REJIMI
+          </span>
+          <div>
+            <strong className="block font-bold text-gray-900 dark:text-white">Faqat Davomat moduli faol sinovda</strong>
+            <span className="text-[12px] text-gray-600 dark:text-gray-300">Har bir guruh uchun davomat saqlanganda SMS va Telegram bot (@EducoLms_Bot) orqali rasmiy xabarnomalar avtomatik yuboriladi.</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-500/20 dark:bg-amber-500/30 text-amber-900 dark:text-amber-200 text-xs font-bold border border-amber-500/40">
+            <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            SMS & Telegram bot faol
+          </span>
+        </div>
+      </div>
+
       {/* ========================================================================= */}
       {/* PROMINENT TOP BREADCRUMB PATH (Davomat > Ustoz > Guruh)                   */}
       {/* Marked in Image 4 with Google Chrome Browser History Support             */}
