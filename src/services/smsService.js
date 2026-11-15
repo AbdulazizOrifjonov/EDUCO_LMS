@@ -1244,10 +1244,9 @@ export async function enqueueAttendanceSms({
       recipientType = father ? 'father' : mother ? 'mother' : 'parent';
     }
 
-    // Ota-ona telefon raqami bo'lmasa, sinov/test rejimida talabaning o'z raqamiga yuboriladi
+    // Ota-ona telefon raqami bo'lmasa, SMS yuborilmaydi (xabarnoma ota-onaga mo'ljallangan)
     if (!targetPhone) {
-      targetPhone = student.phone || student.parent_phone || '+998901234567';
-      recipientType = student.phone ? 'student' : 'parent';
+      return null;
     }
 
     // --- MANTIQIY TEKSHIRUV: Qayta saqlash va Status O'zgarishi (30 daqiqa ichida) ---

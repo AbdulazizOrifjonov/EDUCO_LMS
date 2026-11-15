@@ -420,19 +420,26 @@ function formatUzDatePretty(dateStr) {
 }
 
 function getGroupLessonTime(group) {
-  if (group && group.schedule) {
-    const parts = group.schedule.split(',');
-    if (parts.length > 1 && parts[1].includes('-')) {
-      return parts[1].trim();
+  if (group) {
+    if (group.schedule) {
+      const parts = group.schedule.split(',');
+      if (parts.length > 1 && parts[1].includes('-')) {
+        return parts[1].trim();
+      }
+      if (group.schedule.includes('-')) {
+        return group.schedule.trim();
+      }
     }
-    if (group.schedule.includes('-')) {
-      return group.schedule.trim();
+    if (group.schedule_time) {
+      return group.schedule_time.trim();
+    }
+    if (group.start_time && group.end_time) {
+      const s = group.start_time.slice(0, 5);
+      const e = group.end_time.slice(0, 5);
+      return `${s} - ${e}`;
     }
   }
-  if (group && group.schedule_time) {
-    return group.schedule_time.trim();
-  }
-  return '09:30 - 10:50';
+  return '08:30 - 10:00';
 }
 
 function parseGroupScheduleText(group) {
@@ -879,68 +886,123 @@ async function renderGroupGradingPanel(botToken, chatId, messageId, groupId, toa
 }
 
 // Notifications Dispatcher
-async function sendAttendanceTelegramNotification({ studentId, status, remark, courseName = 'Dars', teacherName = 'Fan mentori', lessonTime = '09:30 - 10:50' }, db, botToken) {
+async function sendAttendanceTelegramNotification({ studentId, status, remark, courseName = 'Matematika 1.2', teacherName = 'Abdulazizbek Orifjonov', lessonTime = '08:30 - 10:00' }, db, botToken) {
   const users = db.educo_db_users || [];
   const student = users.find((u) => u.id === studentId);
   if (!student) return;
 
-  const studentName = student.fullName || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim();
-  const statusLabels = {
-    present: { title: 'Darsda qatnashdingiz ✅', icon: '🟢', parentTitle: 'darsda to‘liq qatnashdi ✅' },
-    late: { title: 'Darsga kech qolib keldingiz ⚠️', icon: '🟡', parentTitle: 'darsga kech qolib keldi ⚠️' },
-    absent: { title: 'Darsga qatnashmadingiz ❌', icon: '🔴', parentTitle: 'bugun darsga qatnashmadi (kelmadi) ❌' },
-  };
-  const config = statusLabels[status] || statusLabels.present;
+  const studentName = student.fullName || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Talaba';
   const todayStr = formatUzDatePretty(formatTashkentDate(getTashkentNow()));
 
+  const effectiveCourse = courseName && courseName !== 'Dars' ? courseName : 'Matematika 1.2';
+  const effectiveTeacher = teacherName && teacherName !== 'Fan mentori' ? teacherName : 'Abdulazizbek Orifjonov';
+  const effectiveTime = lessonTime && lessonTime !== 'Dars vaqtida' ? lessonTime : '08:30 - 10:00';
+
+  let studentMsg = '';
+  let parentMsg = '';
+
+  if (status === 'present') {
+    studentMsg = `🟢 Hurmatli <b>${studentName}</b>!\n\n` +
+      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> darsida to‘liq qatnashdingiz.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Bilim olishdagi intilishingizni qo‘llab-quvvatlaymiz!\n` +
+      `Hurmat bilan, EDUCO LMS`;
+
+    parentMsg = `🟢 Hurmatli ota-ona!\n\n` +
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> darsida to‘liq qatnashdi.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!\n` +
+      `Hurmat bilan, EDUCO LMS`;
+  } else if (status === 'late') {
+    studentMsg = `🟡 Hurmatli <b>${studentName}</b>!\n\n` +
+      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> darsiga KECHIKIB yetib keldingiz va ayni vaqtda mashg‘ulotda qatnashmoqdasiz.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Iltimos, darslarga o‘z vaqtida qatnashishingizni so‘raymiz.\n` +
+      `Hurmat bilan, EDUCO LMS`;
+
+    parentMsg = `🟡 Hurmatli ota-ona!\n\n` +
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> darsiga KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n` +
+      `Hurmat bilan, EDUCO LMS`;
+  } else if (status === 'excused') {
+    studentMsg = `ℹ️ Hurmatli <b>${studentName}</b>!\n\n` +
+      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> darsini SABABLI holatda qoldirishingiz qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Hurmat bilan, EDUCO LMS`;
+
+    parentMsg = `ℹ️ Hurmatli ota-ona!\n\n` +
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> darsini SABABLI holatda qoldirishi qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Hurmat bilan, EDUCO LMS`;
+  } else {
+    studentMsg = `🔴 DIQQAT: Hurmatli <b>${studentName}</b>!\n\n` +
+      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> fanidan darsda QATNASHMADINGIZ (Darsga kelmadingiz).\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+      `Hurmat bilan, EDUCO LMS`;
+
+    parentMsg = `🔴 DIQQAT: Hurmatli ota-ona!\n\n` +
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> fanidan darsda QATNASHMADI (Darsga kelmadi).\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n` +
+      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+      `Hurmat bilan, EDUCO LMS`;
+  }
+
   if (student.telegram_chat_id) {
-    const studentMsg = `${config.icon} <b>Davomat xabarnomasi:</b>\n\n` +
-      `Hurmatli <b>${studentName}</b>, siz bugun (${todayStr}) <b>${courseName}</b> fanidan ${config.title}.\n\n` +
-      `🕒 <b>Dars vaqti:</b> ${lessonTime}\n` +
-      `👨‍🏫 <b>Ustoz:</b> ${teacherName}\n` +
-      (remark ? `📝 <b>Izoh:</b> ${remark}\n\n` : '\n') +
-      `<i>EDUCO LMS avtomatik nazorat xizmati</i>`;
     await sendMessage(botToken, student.telegram_chat_id, studentMsg);
   }
 
   if (student.parent_telegram_chat_id) {
-    const parentMsg = `${config.icon} <b>Hurmatli ota-ona!</b>\n\n` +
-      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${courseName}</b> fanidan ${config.parentTitle}.\n\n` +
-      `🕒 <b>Dars vaqti:</b> ${lessonTime}\n` +
-      `👨‍🏫 <b>Ustoz:</b> ${teacherName}\n` +
-      (remark ? `📝 <b>Ustoz izohi:</b> ${remark}\n\n` : '\n') +
-      `<i>EDUCO LMS ta'lim monitoring markazi</i>`;
     await sendMessage(botToken, student.parent_telegram_chat_id, parentMsg);
   }
 }
 
-async function sendGradeTelegramNotification({ studentId, gradeValue, topic, feedback, teacherName = 'Fan mentori', courseName = 'Dars' }, db, botToken) {
+async function sendGradeTelegramNotification({ studentId, gradeValue, topic, feedback, teacherName = 'Abdulazizbek Orifjonov', courseName = 'Matematika 1.2' }, db, botToken) {
   const users = db.educo_db_users || [];
   const student = users.find((u) => u.id === studentId);
   if (!student) return;
 
-  const studentName = student.fullName || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim();
+  const studentName = student.fullName || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'Talaba';
   const todayStr = formatUzDatePretty(formatTashkentDate(getTashkentNow()));
-  const scoreBadge = '⭐'.repeat(gradeValue);
+  const scoreNum = Number(gradeValue) || 5;
+  const scoreStars = '⭐'.repeat(Math.max(1, Math.min(5, scoreNum)));
+
+  const effectiveCourse = courseName && courseName !== 'Dars' ? courseName : 'Matematika 1.2';
+  const effectiveTeacher = teacherName && teacherName !== 'Fan mentori' ? teacherName : 'Abdulazizbek Orifjonov';
 
   if (student.telegram_chat_id) {
-    const studentMsg = `🌟 <b>Yangi baho qo‘yildi!</b>\n\n` +
-      `Hurmatli <b>${studentName}</b>, siz bugun (${todayStr}) <b>${courseName}</b> fanidan baholandingiz:\n\n` +
-      `⭐ <b>Olingan baho:</b> <b>${gradeValue} ball</b> (${scoreBadge})\n` +
-      `📚 <b>Mavzu:</b> ${topic || 'Dars mashg‘uloti'}\n` +
-      `👨‍🏫 <b>Ustoz:</b> ${teacherName}\n` +
-      `💬 <b>Ustoz fikri:</b> <i>"${feedback || 'Darsda qatnashdi'}"</i>\n\n` +
-      `<i>O‘qishlaringizda doimo muvaffaqiyat tilaymiz!</i>`;
+    const studentMsg = `⭐ <b>Dars natijangiz baholandi!</b>\n\n` +
+      `Hurmatli <b>${studentName}</b>, siz bugungi <b>${effectiveCourse}</b> darsidagi faolligingiz uchun baholandingiz:\n\n` +
+      `🎯 <b>Natija:</b> ${scoreNum} ball ${scoreStars}\n` +
+      `📅 <b>Sana:</b> ${todayStr}\n` +
+      `📝 <b>Mavzu:</b> ${topic || 'Dars mashg‘uloti'}\n` +
+      `💬 <b>Ustoz fikri:</b> <i>"${feedback || 'A\'lo darajada'}"</i>\n\n` +
+      `👨‍🏫 <b>O‘qituvchi:</b> ${effectiveTeacher}\n\n` +
+      `Hurmat bilan, EDUCO LMS`;
     await sendMessage(botToken, student.telegram_chat_id, studentMsg);
   }
 
   if (student.parent_telegram_chat_id) {
-    const parentMsg = `🌟 <b>Farzandingiz yangi baho oldi!</b>\n\n` +
-      `Hurmatli ota-ona, farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${courseName}</b> fanidan baholandi:\n\n` +
-      `⭐ <b>Baho:</b> <b>${gradeValue} ball</b> (${scoreBadge})\n` +
-      `📚 <b>Mavzu:</b> ${topic || 'Dars mashg‘uloti'}\n` +
-      `👨‍🏫 <b>Ustoz:</b> ${teacherName}\n` +
-      `💬 <b>Ustoz izohi:</b> <i>"${feedback || 'Darsda qatnashdi'}"</i>\n\n` +
+    const parentMsg = `⭐ <b>Farzandingiz darsda baholandi!</b>\n\n` +
+      `Hurmatli ota-ona! Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> darsida yangi natijaga erishdi:\n\n` +
+      `🎯 <b>Baho:</b> ${scoreNum} ball ${scoreStars}\n` +
+      `📅 <b>Sana:</b> ${todayStr}\n` +
+      `📝 <b>Mavzu:</b> ${topic || 'Dars mashg‘uloti'}\n` +
+      `💬 <b>Ustoz fikri:</b> <i>"${feedback || 'A\'lo darajada'}"</i>\n\n` +
+      `👨‍🏫 <b>O‘qituvchi:</b> ${effectiveTeacher}\n\n` +
+      `Hurmat bilan, EDUCO LMS`;
+    await sendMessage(botToken, student.parent_telegram_chat_id, parentMsg);
+  }
+}
       `<i>EDUCO LMS ta'lim monitoring markazi</i>`;
     await sendMessage(botToken, student.parent_telegram_chat_id, parentMsg);
   }
@@ -1168,8 +1230,8 @@ async function handleTelegramCallbackQuery(cq, env, botToken) {
       await sendAttendanceTelegramNotification({
         studentId,
         status: nextStatus,
-        courseName: group.course_name || group.name,
-        teacherName: group.teacher_name || session.fullName,
+        courseName: group.course_name || group.name || 'Matematika 1.2',
+        teacherName: group.teacher_name || session.fullName || 'Abdulazizbek Orifjonov',
         lessonTime: getGroupLessonTime(group),
       }, db, botToken);
     }
@@ -1204,8 +1266,8 @@ async function handleTelegramCallbackQuery(cq, env, botToken) {
 
     if (!db.educo_db_attendance) db.educo_db_attendance = [];
     const lessonTime = getGroupLessonTime(group);
-    const teacherName = group.teacher_name || session.fullName || 'Fan mentori';
-    const courseName = group.course_name || group.name;
+    const teacherName = group.teacher_name || session.fullName || 'Abdulazizbek Orifjonov';
+    const courseName = group.course_name || group.name || 'Matematika 1.2';
 
     let presentCount = 0;
     let lateCount = 0;
@@ -1402,7 +1464,7 @@ async function handleTelegramCallbackQuery(cq, env, botToken) {
       feedback,
       date: todayStr,
       teacher_id: session.userId || group.teacher_id || 'teacher',
-      teacher_name: session.fullName || group.teacher_name || 'Fan mentori',
+      teacher_name: session.fullName || group.teacher_name || 'Abdulazizbek Orifjonov',
       created_at: existingIdx >= 0 ? db.educo_db_grades[existingIdx].created_at : new Date().toISOString(),
       updated_at: new Date().toISOString(),
       lessons: {
@@ -1430,8 +1492,8 @@ async function handleTelegramCallbackQuery(cq, env, botToken) {
       gradeValue: score,
       topic: 'Dars amaliy mashg‘uloti',
       feedback,
-      teacherName: session.fullName || group.teacher_name || 'Fan mentori',
-      courseName: group.course_name || group.name,
+      teacherName: session.fullName || group.teacher_name || 'Abdulazizbek Orifjonov',
+      courseName: group.course_name || group.name || 'Matematika 1.2',
     }, db, botToken);
 
     await renderGroupGradingPanel(botToken, chatId, messageId, groupId, `${studentName}: ${score} ball qo‘yildi! ⭐`, cq.id, false, env);

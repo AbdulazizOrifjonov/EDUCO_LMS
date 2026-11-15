@@ -460,23 +460,8 @@ export default function Sidebar({
                   <span className="flex-1 truncate tracking-wide">{label}</span>
                 )}
 
-                {/* Test Rejimi badge for Attendance */}
-                {item.path && item.path.includes('/attendance') && (
-                  collapsed && !mobileOpen ? (
-                    <span
-                      className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-amber-400 ring-2 ring-white dark:ring-gray-900 animate-ping"
-                      title="Test Rejimi: Davomat faol"
-                    />
-                  ) : (
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-amber-950 shadow-xs border border-amber-300 shrink-0">
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-900 animate-ping" />
-                      TEST
-                    </span>
-                  )
-                )}
-
                 {/* Badge if present */}
-                {(!item.path || !item.path.includes('/attendance')) && badgeCount !== undefined && badgeCount !== null && badgeCount > 0 && (
+                {badgeCount !== undefined && badgeCount !== null && badgeCount > 0 && (
                   <span
                     className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-black
                       ${

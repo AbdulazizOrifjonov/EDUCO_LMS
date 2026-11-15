@@ -249,39 +249,6 @@ export default function OwnerDashboard() {
         </div>
       )}
 
-      {/* Sinov / Test Rejimi: Davomat Tizimi */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-2 border-amber-500/40 dark:border-amber-500/30 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-500 text-white shrink-0 shadow-sm">
-            <ClipboardCheck className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                🧪 Test Rejimi: Markaz bo‘yicha Davomat tizimi faol
-              </h3>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500 text-white">
-                Faqat Davomat
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
-              O‘quv markaz barcha ustozlar, guruhlar va xodimlar davomatini sinovdan o‘tkazmoqda. Har bir o‘quvchi va o‘qituvchining davomat foizini monitoring qilish, SMS va Telegram bot (@EducoLms_Bot) xabarnomalarini yuborish to‘liq faol.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5 shrink-0 w-full md:w-auto">
-          <Button
-            onClick={() => navigate('/owner/attendance')}
-            variant="primary"
-            size="md"
-            icon={ClipboardCheck}
-            className="!bg-amber-600 hover:!bg-amber-700 text-white font-bold w-full md:w-auto shadow-md"
-          >
-            Davomat nazoratiga o‘tish
-          </Button>
-        </div>
-      </div>
-
       {/* Quick Action Buttons Row (Colorful and welcoming) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 animate-slide-up-soft [animation-delay:80ms]">
         <span className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mr-2 shrink-0">

@@ -175,39 +175,6 @@ export default function TeacherDashboard() {
         </div>
       )}
 
-      {/* Sinov / Test Rejimi: Davomat Tizimi */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 border-2 border-amber-500/40 dark:border-amber-500/30 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-500 text-white shrink-0 shadow-sm">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                🧪 Test Rejimi: Faqat Davomat tizimi faol
-              </h3>
-              <span className="px-2 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500 text-white">
-                Sinov bosqichi
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
-              Hozirda barcha guruhlaringiz uchun kunlik davomatni to‘liq sinab ko‘rishingiz mumkin. Ota-onalar uchun SMS xabarlar va Telegram bot (@EducoLms_Bot) xabarnomalari xavfsiz sinov rejimida ishlaydi.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5 shrink-0 w-full md:w-auto">
-          <Button
-            onClick={() => navigate('/teacher/attendance')}
-            variant="primary"
-            size="md"
-            icon={CheckCircle2}
-            className="!bg-amber-600 hover:!bg-amber-700 text-white font-bold w-full md:w-auto shadow-md"
-          >
-            Davomat olishga o‘tish
-          </Button>
-        </div>
-      </div>
-
       {/* Quick Action Buttons */}
       <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 pt-0.5 animate-slide-up-soft [animation-delay:80ms]">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-emerald-400 mr-1 shrink-0 flex items-center gap-1.5">

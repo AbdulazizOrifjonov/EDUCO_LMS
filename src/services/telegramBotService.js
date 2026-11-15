@@ -222,11 +222,11 @@ export async function notifyStudentAttendance({
 export async function notifyStudentGrade({
   studentId,
   studentName = '',
-  courseName = 'Dars',
+  courseName = 'Matematika 1.2',
   gradeValue = 5,
   topic = '',
   feedback = '',
-  teacherName = 'Fan mentori',
+  teacherName = 'Abdulazizbek Orifjonov',
 }) {
   try {
     const users = localStore.getUsers() || [];
@@ -234,20 +234,26 @@ export async function notifyStudentGrade({
     if (!student) return;
 
     const sName = studentName || student.fullName || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim();
+    const effectiveTeacher = teacherName && teacherName !== 'Fan mentori' ? teacherName : 'Abdulazizbek Orifjonov';
+    const effectiveCourse = courseName && courseName !== 'Dars' ? courseName : 'Matematika 1.2';
+    const scoreNum = Number(gradeValue) || 5;
+    const scoreStars = '⭐'.repeat(Math.max(1, Math.min(5, scoreNum)));
 
     const studentMsg = `⭐ <b>Yangi Baho!</b>\n\n` +
-      `Hurmatli <b>${sName}</b>, siz <b>${courseName}</b> fanidan yangi baho oldingiz:\n\n` +
-      `🎯 <b>Natija:</b> ${gradeValue} ball\n` +
+      `Hurmatli <b>${sName}</b>, siz <b>${effectiveCourse}</b> fanidan yangi baho oldingiz:\n\n` +
+      `🎯 <b>Natija:</b> ${scoreNum} ball ${scoreStars}\n` +
       `📝 <b>Mavzu:</b> ${topic || 'Amaliy mashg‘ulot'}\n` +
-      `💬 <b>Ustoz izohi:</b> <i>"${feedback || 'A\'lo darajada'}"</i>\n\n` +
-      `Hurmat bilan, Fan mentori <b>${teacherName}</b>`;
+      `💬 <b>Ustoz izohi:</b> <i>"${feedback || 'A\'lo darajada'}"</i>\n` +
+      `👨‍🏫 <b>O‘qituvchi:</b> ${effectiveTeacher}\n\n` +
+      `Hurmat bilan, EDUCO LMS`;
 
     const parentMsg = `⭐ <b>Farzandingiz Yangi Baho Oldi!</b>\n\n` +
-      `Hurmatli Ota-ona, farzandingiz <b>${sName}</b> <b>${courseName}</b> fanidan ajoyib natija qayd etdi:\n\n` +
-      `🎯 <b>Natija:</b> ${gradeValue} ball\n` +
+      `Hurmatli ota-ona! Farzandingiz <b>${sName}</b> <b>${effectiveCourse}</b> fanidan ajoyib natija qayd etdi:\n\n` +
+      `🎯 <b>Natija:</b> ${scoreNum} ball ${scoreStars}\n` +
       `📝 <b>Mavzu:</b> ${topic || 'Dars amaliyoti'}\n` +
-      `💬 <b>Ustoz fikri:</b> <i>"${feedback || 'A\'lo'}"</i>\n\n` +
-      `Hurmat bilan, Fan mentori <b>${teacherName}</b>`;
+      `💬 <b>Ustoz fikri:</b> <i>"${feedback || 'A\'lo darajada'}"</i>\n` +
+      `👨‍🏫 <b>O‘qituvchi:</b> ${effectiveTeacher}\n\n` +
+      `Hurmat bilan, EDUCO LMS`;
 
     if (student.telegram_chat_id) {
       await sendTelegramMessage(student.telegram_chat_id, studentMsg);

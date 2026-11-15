@@ -40,7 +40,7 @@ const OWNER_NAV_ITEMS = [
   },
   {
     labelKey: 'nav.attendance',
-    label: 'Davomat (Test)',
+    label: 'Davomat',
     path: '/owner/attendance',
     icon: CheckSquare,
   },

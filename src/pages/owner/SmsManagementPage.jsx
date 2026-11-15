@@ -2983,24 +2983,28 @@ export default function SmsManagementPage() {
 
           {/* Desktop Table View (Hidden on mobile) */}
           <Card noPadding className="hidden md:block overflow-hidden rounded-2xl shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+            <div className="w-full overflow-hidden">
+              <table className="w-full table-fixed text-left border-collapse text-xs">
+                <colgroup>
+                  <col className="w-[28%]" />
+                  <col className="w-[18%]" />
+                  <col className="w-[32%]" />
+                  <col className="w-[14%]" />
+                  <col className="w-[8%]" />
+                </colgroup>
                 <thead>
                   <tr className="bg-gray-50/90 dark:bg-surface-dark-tertiary border-b border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 uppercase font-bold text-[11px] tracking-wider">
-                    <th className="py-3.5 pl-6 pr-4 min-w-[180px]">Qabul qiluvchi</th>
-                    <th className="py-3.5 px-4 min-w-[130px]">Telefon</th>
-                    <th className="py-3.5 px-4 min-w-[130px]">Turi / Summa</th>
-                    <th className="py-3.5 px-4 min-w-[260px]">SMS Matni</th>
-                    <th className="py-3.5 px-4 min-w-[130px]">Holat</th>
-                    <th className="py-3.5 px-4 min-w-[160px]">Vaqt / Yetkazilish</th>
-                    <th className="py-3.5 px-4 min-w-[70px] text-center">Urinish</th>
-                    <th className="py-3.5 pr-6 pl-4 text-right min-w-[110px]">Amal</th>
+                    <th className="py-3.5 pl-6 pr-4">Qabul qiluvchi</th>
+                    <th className="py-3.5 px-4">Telefon</th>
+                    <th className="py-3.5 px-4">SMS Matni</th>
+                    <th className="py-3.5 px-4">Holat & Vaqt</th>
+                    <th className="py-3.5 pr-6 pl-4 text-right">Amal</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredQueue.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-14 text-center text-gray-400">
+                      <td colSpan={5} className="py-14 text-center text-gray-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <ListOrdered className="w-8 h-8 text-gray-300 dark:text-gray-600" />
                           <span className="font-medium text-sm text-gray-600 dark:text-gray-300">Navbatda SMS xabarlari mavjud emas</span>
@@ -3015,8 +3019,8 @@ export default function SmsManagementPage() {
 
                       return (
                         <tr key={item.id} className="hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40 transition-colors">
-                          <td className="py-3.5 pl-6 pr-4 font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                            <div className="flex items-center gap-2.5">
+                          <td className="py-3.5 pl-6 pr-4 font-bold text-gray-900 dark:text-gray-100">
+                            <div className="flex items-center gap-2.5 min-w-0">
                               <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 ${
                                 isAttendance
                                   ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
@@ -3026,58 +3030,64 @@ export default function SmsManagementPage() {
                               }`}>
                                 {isAttendance ? '📋' : isTest ? '🧪' : '👤'}
                               </div>
-                              <div>
-                                <span className="font-bold text-gray-900 dark:text-gray-100 block">{item.recipient_name}</span>
-                                {item.course_name && (
-                                  <span className="text-[10px] text-gray-400 block font-normal">{item.course_name}</span>
-                                )}
+                              <div className="min-w-0 flex-1">
+                                <span className="font-bold text-gray-900 dark:text-gray-100 block truncate text-xs" title={item.recipient_name}>
+                                  {item.recipient_name}
+                                </span>
+                                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                  {isAttendance ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/70">
+                                      {item.attendance_status === 'present'
+                                        ? '🟢 Darsda'
+                                        : item.attendance_status === 'late'
+                                          ? '🟡 Kechikkan'
+                                          : item.attendance_status === 'absent'
+                                            ? '🔴 Kelmadi'
+                                            : item.attendance_status === 'excused'
+                                              ? 'ℹ️ Sababli'
+                                              : '📋 Davomat'}
+                                    </span>
+                                  ) : isTest ? (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70">
+                                      🧪 Test SMS
+                                    </span>
+                                  ) : item.amount_due && item.amount_due > 0 ? (
+                                    <span className="font-bold text-rose-600 dark:text-rose-400 font-mono text-[10px] bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.5 rounded border border-rose-200 dark:border-rose-800">
+                                      {formatCurrency(item.amount_due)}
+                                    </span>
+                                  ) : null}
+                                  {item.course_name && (
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[120px]" title={item.course_name}>
+                                      {item.course_name}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </td>
-                          <td className="py-3.5 px-4 font-mono text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap">
+                          <td className="py-3.5 px-4 font-mono text-gray-700 dark:text-gray-300 font-semibold whitespace-nowrap text-xs">
                             {item.recipient_phone}
                           </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap">
-                            {isAttendance ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/70">
-                                {item.attendance_status === 'present'
-                                  ? '🟢 Darsda'
-                                  : item.attendance_status === 'late'
-                                    ? '🟡 Kechikkan'
-                                    : item.attendance_status === 'absent'
-                                      ? '🔴 Kelmadi'
-                                      : item.attendance_status === 'excused'
-                                        ? 'ℹ️ Sababli'
-                                        : '📋 Davomat'}
-                              </span>
-                            ) : isTest ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/70 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/70">
-                                🧪 Test SMS
-                              </span>
-                            ) : item.amount_due && item.amount_due > 0 ? (
-                              <span className="font-bold text-rose-600 dark:text-rose-400 font-mono text-xs">
-                                {formatCurrency(item.amount_due)}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 font-mono text-xs">—</span>
-                            )}
-                          </td>
-                          <td className="py-3.5 px-4 max-w-sm text-gray-700 dark:text-gray-300 font-sans" title={item.message_text}>
-                            <p className="line-clamp-2 leading-relaxed text-xs font-sans">{item.message_text}</p>
+                          <td className="py-3.5 px-4 text-gray-700 dark:text-gray-300 font-sans" title={item.message_text}>
+                            <p className="line-clamp-2 leading-relaxed text-xs font-sans break-words">{item.message_text}</p>
                             {item.tracking_id && (
                               <span className="inline-block text-[9px] font-mono text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded mt-1">
                                 ID: {item.tracking_id}
                               </span>
                             )}
                           </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap">
-                            {renderStatusBadge(item.status)}
-                          </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap">
-                            {renderLatencyInfo(item)}
-                          </td>
-                          <td className="py-3.5 px-4 font-mono text-gray-500 whitespace-nowrap text-center">
-                            {item.attempts || 0} / {item.max_attempts || 3}
+                          <td className="py-3.5 px-4">
+                            <div className="space-y-1">
+                              <div>{renderStatusBadge(item.status)}</div>
+                              <div className="flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                <span>{renderLatencyInfo(item)}</span>
+                                {(item.attempts > 0 || item.status === 'failed') && (
+                                  <span className="font-mono text-[9px] px-1 rounded bg-gray-100 dark:bg-gray-800 font-bold">
+                                    ({item.attempts || 0}/{item.max_attempts || 3})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </td>
                           <td className="py-3.5 pr-6 pl-4 text-right whitespace-nowrap space-x-1">
                             {(normalizeSmsStatus(item.status) === SMS_STATUS.FAILED || normalizeSmsStatus(item.status) === SMS_STATUS.UNKNOWN) && (
@@ -3242,16 +3252,24 @@ export default function SmsManagementPage() {
                 Yangilash
               </Button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+            <div className="w-full overflow-hidden">
+              <table className="w-full table-fixed text-left border-collapse text-xs">
+                <colgroup>
+                  <col className="w-[18%]" />
+                  <col className="w-[24%]" />
+                  <col className="w-[18%]" />
+                  <col className="w-[16%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[14%]" />
+                </colgroup>
                 <thead>
                   <tr className="bg-gray-50/90 dark:bg-surface-dark-tertiary border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase font-bold text-[11px] tracking-wider">
-                    <th className="py-3.5 pl-6 pr-4 min-w-[130px]">Vaqt</th>
-                    <th className="py-3.5 px-4 min-w-[160px]">Qabul qiluvchi</th>
-                    <th className="py-3.5 px-4 min-w-[140px]">Telefon</th>
-                    <th className="py-3.5 px-4 min-w-[140px]">Qurilma / Kanal</th>
-                    <th className="py-3.5 px-4 min-w-[110px]">Natija</th>
-                    <th className="py-3.5 pr-6 pl-4 min-w-[200px]">Izoh / Tafsilot</th>
+                    <th className="py-3.5 pl-6 pr-3">Vaqt</th>
+                    <th className="py-3.5 px-3">Qabul qiluvchi</th>
+                    <th className="py-3.5 px-3">Telefon</th>
+                    <th className="py-3.5 px-3">Qurilma / Kanal</th>
+                    <th className="py-3.5 px-3">Natija</th>
+                    <th className="py-3.5 pr-6 pl-3">Izoh / Tafsilot</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -3267,22 +3285,22 @@ export default function SmsManagementPage() {
                   ) : (
                     logs.map((log) => (
                       <tr key={log.id} className="hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/40">
-                        <td className="py-3.5 pl-6 pr-4 font-mono text-gray-500 whitespace-nowrap">
+                        <td className="py-3.5 pl-6 pr-3 font-mono text-gray-500 whitespace-nowrap">
                           {formatDate(log.created_at)}
                         </td>
-                        <td className="py-3.5 px-4 font-bold text-gray-900 dark:text-gray-100">
+                        <td className="py-3.5 px-3 font-bold text-gray-900 dark:text-gray-100 truncate" title={log.recipient_name}>
                           {log.recipient_name || 'Noma‘lum'}
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-semibold text-gray-700 dark:text-gray-300">
+                        <td className="py-3.5 px-3 font-mono font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
                           {log.recipient_phone}
                         </td>
-                        <td className="py-3.5 px-4 text-gray-600 dark:text-gray-300">
+                        <td className="py-3.5 px-3 text-gray-600 dark:text-gray-300 truncate" title={log.response_payload?.delivered_via || 'SIM Gateway'}>
                           {log.response_payload?.delivered_via || 'SIM Gateway'}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-3">
                           {renderStatusBadge(log.status)}
                         </td>
-                        <td className="py-3.5 pr-6 pl-4 text-gray-500 truncate max-w-xs">
+                        <td className="py-3.5 pr-6 pl-3 text-gray-500 truncate" title={log.error_details || 'Muvaffaqiyatli yetkazildi'}>
                           {log.error_details || 'Muvaffaqiyatli yetkazildi'}
                         </td>
                       </tr>

@@ -148,8 +148,8 @@ export async function saveGrade({
   try {
     const allGroups = typeof localStore.getGroups === 'function' ? localStore.getGroups() : [];
     const group = allGroups.find((g) => g.id === resolvedGroupId);
-    const courseName = group?.course_name || group?.name || 'Dars';
-    const teacherName = group?.teacher_name || 'Fan mentori';
+    const courseName = group?.course_name || group?.name || 'Matematika 1.2';
+    const teacherName = group?.teacher_name || 'Abdulazizbek Orifjonov';
 
     notifyStudentGrade({
       studentId,

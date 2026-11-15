@@ -920,30 +920,6 @@ export default function DashboardLayout({
       )}
     </header>
 
-        {/* Test Rejimi: Faqat Davomat tizimi faol banner */}
-        {!isChatPage && (
-          <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 dark:from-amber-600 dark:via-orange-600 dark:to-yellow-600 text-white px-3 sm:px-6 py-2 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 shadow-md z-30">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/20 text-white font-extrabold text-[11px] uppercase tracking-wider border border-white/30 shrink-0 shadow-xs">
-                🧪 TEST REJIMI
-              </span>
-              <span className="truncate">
-                Hozirda markaz uchun <strong className="underline decoration-white/70 font-bold">Faqat Davomat tizimi</strong> sinovdan o‘tkazilmoqda (SMS va @EducoLms_Bot orqali).
-              </span>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Link
-                to={`/${userRole}/attendance`}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white text-amber-900 font-bold text-xs hover:bg-amber-50 active:scale-95 transition-all shadow-xs"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
-                <span className="hidden xs:inline">Davomatga o‘tish</span>
-                <span className="xs:hidden">Davomat</span>
-              </Link>
-            </div>
-          </div>
-        )}
-
         {/* Main Content Area */}
         <main
           ref={mainRef}

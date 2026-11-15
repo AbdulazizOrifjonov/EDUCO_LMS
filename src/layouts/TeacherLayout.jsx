@@ -27,7 +27,7 @@ const TEACHER_NAV_ITEMS = [
   },
   {
     labelKey: 'nav.attendance',
-    label: 'Davomat (Test)',
+    label: 'Davomat',
     path: '/teacher/attendance',
     icon: CheckSquare,
   },

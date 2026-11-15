@@ -39,7 +39,7 @@ const ADMIN_NAV_ITEMS = [
   },
   {
     labelKey: 'nav.attendance',
-    label: 'Davomat (Test)',
+    label: 'Davomat',
     path: '/admin/attendance',
     icon: CheckSquare,
   },
