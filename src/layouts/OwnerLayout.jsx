@@ -39,6 +39,12 @@ const OWNER_NAV_ITEMS = [
     icon: LayoutDashboard,
   },
   {
+    labelKey: 'nav.attendance',
+    label: 'Davomat (Test)',
+    path: '/owner/attendance',
+    icon: CheckSquare,
+  },
+  {
     labelKey: 'nav.users',
     label: 'Users',
     path: '/owner/users',
@@ -83,12 +89,6 @@ const OWNER_NAV_ITEMS = [
     label: 'Eslatmalar',
     path: '/owner/reminders',
     icon: BellRing,
-  },
-  {
-    labelKey: 'nav.attendance',
-    label: 'Attendance',
-    path: '/owner/attendance',
-    icon: CheckSquare,
   },
   {
     labelKey: 'nav.grades',

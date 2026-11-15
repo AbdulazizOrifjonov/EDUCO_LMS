@@ -26,10 +26,10 @@ const TEACHER_NAV_ITEMS = [
     icon: LayoutDashboard,
   },
   {
-    labelKey: 'nav.courses',
-    label: 'Kurslar & Yo‘nalishlar',
-    path: '/teacher/courses',
-    icon: BookOpen,
+    labelKey: 'nav.attendance',
+    label: 'Davomat (Test)',
+    path: '/teacher/attendance',
+    icon: CheckSquare,
   },
   {
     labelKey: 'dashboard.myGroups',
@@ -66,10 +66,10 @@ const TEACHER_NAV_ITEMS = [
     icon: BookOpen,
   },
   {
-    labelKey: 'nav.attendance',
-    label: 'Davomat',
-    path: '/teacher/attendance',
-    icon: CheckSquare,
+    labelKey: 'nav.courses',
+    label: 'Kurslar & Yo‘nalishlar',
+    path: '/teacher/courses',
+    icon: BookOpen,
   },
   {
     labelKey: 'nav.grades',

@@ -38,6 +38,12 @@ const ADMIN_NAV_ITEMS = [
     icon: LayoutDashboard,
   },
   {
+    labelKey: 'nav.attendance',
+    label: 'Davomat (Test)',
+    path: '/admin/attendance',
+    icon: CheckSquare,
+  },
+  {
     labelKey: 'nav.users',
     label: 'Users',
     path: '/admin/users',
@@ -82,12 +88,6 @@ const ADMIN_NAV_ITEMS = [
     label: 'Eslatmalar',
     path: '/admin/reminders',
     icon: BellRing,
-  },
-  {
-    labelKey: 'nav.attendance',
-    label: 'Attendance',
-    path: '/admin/attendance',
-    icon: CheckSquare,
   },
   {
     labelKey: 'nav.grades',
