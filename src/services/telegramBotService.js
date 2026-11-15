@@ -38,6 +38,17 @@ function formatUzDatePretty(dateStr) {
   return `${year}-yil ${day}-${UZ_MONTHS[monthIdx] || ''}`;
 }
 
+function formatUzDateDigits(dateStr) {
+  if (!dateStr) {
+    const now = new Date();
+    dateStr = now.toISOString().split('T')[0];
+  }
+  const parts = dateStr.split('-');
+  if (parts.length < 3) return dateStr;
+  const [y, m, d] = parts;
+  return `${d}.${m}.${y}`;
+}
+
 export async function sendTelegramMessage(chatId, text) {
   if (!chatId || !text) return false;
   try {
@@ -67,50 +78,82 @@ export async function notifyStudentAttendance({
   courseName = 'Dars',
   lessonTime = 'Dars vaqtida',
   teacherName = 'Fan mentori',
-  status = 'present', // 'present' | 'late' | 'absent'
+  status = 'present', // 'present' | 'late' | 'absent' | 'excused'
+  prevStatus = null,
   date = null,
+  remark = '',
 }) {
   try {
     const users = localStore.getUsers() || [];
     const student = users.find((u) => u.id === studentId);
     if (!student) return;
 
-    const sName = studentName || student.fullName || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim();
-    const dateFormatted = formatUzDatePretty(date);
+    const sName = studentName || student.fullName || student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim() || 'O‘quvchi';
+    const prettyDate = formatUzDateDigits(date);
+
+    const effectiveCourseName = courseName && courseName !== 'Dars' ? courseName : 'Matematika 1.2';
+    const effectiveTeacherName = teacherName && teacherName !== 'Fan mentori' ? teacherName : 'Abdulazizbek Orifjonov';
+    const effectiveLessonTime = lessonTime && lessonTime !== 'Dars vaqtida' ? lessonTime : '08:30 - 10:00';
 
     let studentMsg = '';
     let parentMsg = '';
 
     if (status === 'present') {
-      studentMsg = `🟢 Hurmatli <b>${sName}</b>,\n\n` +
-        `Siz <b>${courseName}</b> fanidan ${dateFormatted} sanasidagi darsga qatnashdingiz. Dars ${lessonTime} oralig‘ida o‘tkazildi.\n\n` +
-        `Biz sizning bilim olishdagi qat'iyatingiz va ishtiyoqingizni yuqori baholaymiz.\n\n` +
-        `Hurmat bilan, Fan mentori <b>${teacherName}</b>`;
+      studentMsg = `🟢 <b>Hurmatli ${sName}!</b>\n\n` +
+        `Siz bugun (${prettyDate}) <b>${effectiveCourseName}</b> darsida to‘liq qatnashdingiz.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Bilim olishdagi intilishingizni qo‘llab-quvvatlaymiz!\n` +
+        `Hurmat bilan, EDUCO LMS`;
 
-      parentMsg = `🟢 Hurmatli Ota-ona,\n\n` +
-        `Farzandingiz <b>${sName}</b> <b>${courseName}</b> fanidan ${dateFormatted} sanasidagi darsga qatnashdi. Dars ${lessonTime} oralig‘ida o‘tkazildi.\n\n` +
-        `Biz farzandingizning bilim olishdagi intilishi va ishtiyoqini yuqori baholaymiz.\n\n` +
-        `Hurmat bilan, Fan mentori <b>${teacherName}</b>`;
+      parentMsg = `🟢 <b>Hurmatli ota-ona!</b>\n\n` +
+        `Farzandingiz <b>${sName}</b> bugun (${prettyDate}) <b>${effectiveCourseName}</b> darsida to‘liq qatnashdi.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!\n` +
+        `Hurmat bilan, EDUCO LMS`;
     } else if (status === 'late') {
-      studentMsg = `🟡 Hurmatli <b>${sName}</b>,\n\n` +
-        `Siz <b>${courseName}</b> fanidan ${dateFormatted} kungi darsga KECH QOLIB keldingiz. Dars ${lessonTime} oralig‘ida o‘tkazilmoqda.\n\n` +
-        `Iltimos, darslarga o‘z vaqtida kelishingizni so‘raymiz.\n\n` +
-        `Hurmat bilan, Fan mentori <b>${teacherName}</b>`;
+      studentMsg = `🟡 <b>Hurmatli ${sName}!</b>\n\n` +
+        `Siz bugun (${prettyDate}) <b>${effectiveCourseName}</b> darsiga KECHIKIB yetib keldingiz va ayni vaqtda mashg‘ulotda qatnashmoqdasiz.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Iltimos, darslarga o‘z vaqtida kelishingizni so‘raymiz.\n` +
+        `Hurmat bilan, EDUCO LMS`;
 
-      parentMsg = `🟡 Hurmatli Ota-ona,\n\n` +
-        `Farzandingiz <b>${sName}</b> <b>${courseName}</b> fanidan ${dateFormatted} kungi darsga KECH QOLIB yetib keldi. Dars ${lessonTime} oralig‘ida o‘tkazilmoqda.\n\n` +
-        `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n\n` +
-        `Hurmat bilan, Fan mentori <b>${teacherName}</b>`;
+      parentMsg = `🟡 <b>Hurmatli ota-ona!</b>\n\n` +
+        `Farzandingiz <b>${sName}</b> bugun (${prettyDate}) <b>${effectiveCourseName}</b> darsiga KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n` +
+        `Hurmat bilan, EDUCO LMS`;
+    } else if (status === 'excused') {
+      const reasonText = remark ? ` (Sababi: ${remark})` : '';
+      studentMsg = `ℹ️ <b>Hurmatli ${sName}!</b>\n\n` +
+        `Sizning bugun (${prettyDate}) <b>${effectiveCourseName}</b> darsini SABABLI holatda qoldirishingiz qayd etildi${reasonText}.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Hurmat bilan, EDUCO LMS`;
+
+      parentMsg = `ℹ️ <b>Hurmatli ota-ona!</b>\n\n` +
+        `Farzandingiz <b>${sName}</b> bugun (${prettyDate}) <b>${effectiveCourseName}</b> darsini SABABLI holatda qoldirishi qayd etildi${reasonText}.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Hurmat bilan, EDUCO LMS`;
     } else {
-      studentMsg = `🔴 DIQQAT: Hurmatli <b>${sName}</b>,\n\n` +
-        `Siz bugun (${dateFormatted}) <b>${courseName}</b> fanidan darsda QATNASHMADINGIZ (Darsga kelmadingiz). Dars vaqti: ${lessonTime}.\n\n` +
-        `Sababini ma’muriyatga ma’lum qilishingizni so‘raymiz.\n\n` +
-        `Hurmat bilan, EDUCO LMS Ma’muriyati`;
+      // absent
+      studentMsg = `🔴 <b>DIQQAT: Hurmatli ${sName}!</b>\n\n` +
+        `Siz bugun (${prettyDate}) <b>${effectiveCourseName}</b> fanidan darsda QATNASHMADINGIZ (Darsga kelmadingiz).\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+        `Hurmat bilan, EDUCO LMS`;
 
-      parentMsg = `🔴 DIQQAT: Hurmatli Ota-ona,\n\n` +
-        `Farzandingiz <b>${sName}</b> bugun (${dateFormatted}) <b>${courseName}</b> fanidan darsda QATNASHMADI (Darsga kelmadi). Dars vaqti: ${lessonTime}.\n\n` +
-        `Sababini aniqlashtirish uchun o‘quv markazi ma’muriyati bilan bog‘lanishingizni so‘raymiz.\n\n` +
-        `Hurmat bilan, EDUCO LMS Ma’muriyati`;
+      parentMsg = `🔴 <b>DIQQAT: Hurmatli ota-ona!</b>\n\n` +
+        `Farzandingiz <b>${sName}</b> bugun (${prettyDate}) <b>${effectiveCourseName}</b> fanidan darsda QATNASHMADI (Darsga kelmadi).\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: <b>${effectiveTeacherName}</b>\n\n` +
+        `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+        `Hurmat bilan, EDUCO LMS`;
     }
 
     // 1. Direct Telegram chat_id if student linked their account

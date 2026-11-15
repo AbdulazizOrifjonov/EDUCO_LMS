@@ -40,6 +40,17 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
     localStore.setItem('educo_db_sms_queue', []);
     localStore.setItem('educo_db_sms_logs', []);
     localStore.setItem('educo_db_student_attendance', []);
+    localStore.setItem('educo_db_sms_devices', [
+      {
+        id: 'dev-demo-test',
+        name: 'Demo SMS Gateway',
+        device_role: 'primary',
+        gateway_url: 'https://example.com/placeholder',
+        api_token: 'demo_token_educo',
+        is_active: true,
+        status: 'online',
+      },
+    ]);
     localStore.setItem('educo_db_sms_settings', {
       id: 'sms-settings-1',
       is_enabled: true,
@@ -169,8 +180,8 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
 
     expect(lateUpdate).toBeDefined();
     expect(lateUpdate.attendance_status).toBe('late');
-    expect(lateUpdate.message_text).toContain('KECHIKIB yetib keldi');
-    expect(lateUpdate.message_text).toContain('Avvalroq darsga kelmadi deb qayd etilgan edi');
+    expect(lateUpdate.message_text).toContain('KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda');
+    expect(lateUpdate.message_text).toContain('Hurmat bilan, EDUCO LMS');
   });
 
   it('5. Students without parent phones: silently skips without error', async () => {

@@ -190,7 +190,7 @@ export async function getGroupAttendanceStatus(groupId, date = null) {
 /**
  * Save / Upsert student attendance records
  */
-export async function saveAttendanceRecords(lessonId, records = [], recordedBy = null) {
+export async function saveAttendanceRecords(lessonId, records = [], recordedBy = null, meta = {}) {
   const now = new Date().toISOString();
 
   // Avvalgi holatlarni o'qib olish (status o'zgarishi, kechikkanlarni aniqlash va dublikat SMS oldini olish uchun)
@@ -247,10 +247,33 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
     const allLessons = typeof localStore.getLessons === 'function' ? localStore.getLessons() : [];
     const lesson = allLessons.find((l) => l.id === lessonId);
     const allGroups = typeof localStore.getGroups === 'function' ? localStore.getGroups() : [];
-    const group = allGroups.find((g) => g.id === lesson?.group_id);
-    const courseName = group?.course_name || group?.name || 'Dars';
-    const teacherName = group?.teacher_name || 'Fan mentori';
-    const lessonTime = lesson ? `${lesson.start_time?.slice(0, 5) || '09:30'} - ${lesson.end_time?.slice(0, 5) || '10:50'}` : 'Dars vaqtida';
+    const parsedGroupId = meta.groupId || lesson?.group_id || (lessonId && lessonId.startsWith('lsn-') ? lessonId.split('-')[1] : null);
+    const group = allGroups.find((g) => g.id === parsedGroupId);
+
+    // Get Teacher Full Name
+    const allUsers = typeof localStore.getUsers === 'function' ? localStore.getUsers() : [];
+    const teacherUser = recordedBy ? allUsers.find((u) => u.id === recordedBy) : null;
+    const teacherName =
+      meta.teacherName ||
+      (teacherUser ? `${teacherUser.first_name || ''} ${teacherUser.last_name || ''}`.trim() || teacherUser.name : '') ||
+      group?.teacher_name ||
+      'Abdulazizbek Orifjonov';
+
+    // Get Course / Subject Name
+    const courseName =
+      meta.courseName ||
+      group?.name ||
+      group?.course_name ||
+      'Matematika 1.2';
+
+    // Get Lesson Time
+    const lessonTime =
+      meta.lessonTime ||
+      (lesson?.start_time && lesson?.end_time ? `${lesson.start_time.slice(0, 5)} - ${lesson.end_time.slice(0, 5)}` : null) ||
+      (group?.start_time && group?.end_time ? `${group.start_time.slice(0, 5)} - ${group.end_time.slice(0, 5)}` : null) ||
+      '08:30 - 10:00';
+
+    const lessonDate = meta.date || lesson?.lesson_date || new Date().toISOString().split('T')[0];
 
     const notifyPromises = records.map(async (r) => {
       const prevStatus = prevStatusMap[r.student_id] || null;
@@ -263,7 +286,7 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
         teacherName,
         status: r.status,
         prevStatus,
-        date: lesson?.lesson_date || null,
+        date: lessonDate,
         remark: r.remark || '',
       }).catch(() => {});
 
@@ -275,7 +298,7 @@ export async function saveAttendanceRecords(lessonId, records = [], recordedBy =
         teacherName,
         status: r.status,
         prevStatus,
-        date: lesson?.lesson_date || null,
+        date: lessonDate,
         remark: r.remark || '',
       }).catch((err) => {
         console.warn('[attendanceService] enqueueAttendanceSms failed:', err);

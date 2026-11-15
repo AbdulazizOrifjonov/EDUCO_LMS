@@ -136,6 +136,7 @@ export async function getTuitionSummary(filters = {}) {
     const lastPayment = sortedPayments[0];
 
     const studentFullName = `${student.first_name || ''} ${student.last_name || ''}`.trim() || student.fullName || student.username;
+    const primaryTeacherName = primaryGroup?.teacher_name || primaryGroup?.teacherName || primaryGroup?.primaryTeacher?.fullName || (allUsers.find((u) => u.id === (primaryGroup?.teacher_id || primaryGroup?.teacherId))?.fullName) || '';
 
     return {
       id: student.id,
@@ -148,6 +149,7 @@ export async function getTuitionSummary(filters = {}) {
       groupId: primaryGroup?.id || null,
       groupName: primaryGroup?.name || "Biriktirilmagan",
       courseName: primaryGroup?.course_name || primaryCourse?.name || "Umumiy ta'lim",
+      teacherName: primaryTeacherName || '',
       baseFee: totalBaseFee,
       discountAmount: totalDiscount,
       discountDetails,
@@ -373,10 +375,94 @@ export async function deleteAllPayments() {
   }
 }
 
+/**
+ * Mark a specific student's remaining tuition balance as paid (1-click quick pay).
+ */
+export async function markStudentAsPaid(studentId, customAmount = null, paymentMethod = 'Naqd pul', notes = 'To‘liq to‘landi (1-bosishda)') {
+  try {
+    const summaryList = await getTuitionSummary({ status: 'ALL' });
+    const normId = localStore.normalizeUserId ? localStore.normalizeUserId(studentId) : String(studentId);
+    const target = summaryList.find((s) => (localStore.normalizeUserId ? localStore.normalizeUserId(s.studentId || s.id) : String(s.studentId || s.id)) === normId);
+
+    if (!target) {
+      throw new Error('Talaba to‘lov ma‘lumotlari topilmadi');
+    }
+
+    const payAmount = customAmount !== null && customAmount !== undefined ? Number(customAmount) : Number(target.balance || 0);
+
+    if (payAmount <= 0) {
+      return { success: true, message: 'Ushbu talabaning qarzdorligi yo‘q, to‘lov talab etilmaydi.', alreadyPaid: true, studentName: target.studentName };
+    }
+
+    const payment = await recordPayment({
+      student_id: target.studentId || studentId,
+      amount: payAmount,
+      payment_method: paymentMethod || 'Naqd pul',
+      notes: notes || 'To‘liq to‘landi (1-bosishda)',
+      payment_date: new Date().toISOString().split('T')[0],
+    });
+
+    return {
+      success: true,
+      payment,
+      paidAmount: payAmount,
+      studentName: target.studentName,
+    };
+  } catch (err) {
+    console.error('markStudentAsPaid error:', err);
+    throw err;
+  }
+}
+
+/**
+ * Mark all debtors (or selected debtors) as paid in batch.
+ */
+export async function markAllStudentsAsPaid(studentIds = 'ALL', notes = 'Dekabr oyigacha qarzdorliklar to‘liq yopildi (Barchasi to‘langan)') {
+  try {
+    const summaryList = await getTuitionSummary({ status: 'ALL' });
+    let debtors = summaryList.filter((s) => Number(s.balance || 0) > 0);
+
+    if (Array.isArray(studentIds) && studentIds.length > 0) {
+      const allowedSet = new Set(studentIds.map((id) => (localStore.normalizeUserId ? localStore.normalizeUserId(id) : String(id))));
+      debtors = debtors.filter((s) => allowedSet.has(localStore.normalizeUserId ? localStore.normalizeUserId(s.studentId || s.id) : String(s.studentId || s.id)));
+    }
+
+    let clearedCount = 0;
+    let totalClearedAmount = 0;
+    const today = new Date().toISOString().split('T')[0];
+
+    for (const d of debtors) {
+      const bal = Number(d.balance || 0);
+      if (bal > 0) {
+        await recordPayment({
+          student_id: d.studentId,
+          amount: bal,
+          payment_method: 'Naqd pul',
+          notes: notes || 'Dekabr oyigacha qarzdorliklar to‘liq yopildi (Barchasi to‘langan)',
+          payment_date: today,
+        });
+        clearedCount += 1;
+        totalClearedAmount += bal;
+      }
+    }
+
+    return {
+      success: true,
+      clearedCount,
+      totalClearedAmount,
+    };
+  } catch (err) {
+    console.error('markAllStudentsAsPaid error:', err);
+    throw err;
+  }
+}
+
 export default {
   getTuitionSummary,
   getTuitionPayments,
   recordPayment,
+  markStudentAsPaid,
+  markAllStudentsAsPaid,
   exportTuitionCSV,
   deletePayment,
   deleteSelectedPayments,

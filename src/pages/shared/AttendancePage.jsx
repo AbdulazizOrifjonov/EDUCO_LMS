@@ -461,7 +461,36 @@ export default function AttendancePage() {
         remark: data.remark,
       }));
 
-      await saveAttendanceRecords(currentLesson.id, records, profile?.id);
+      const effectiveCourseName =
+        currentRosterGroup?.name ||
+        currentRosterGroup?.course_name ||
+        currentRosterGroup?.courses?.name ||
+        'Matematika 1.2';
+
+      const teacherFullName =
+        `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
+        profile?.name ||
+        profile?.fullName ||
+        currentRosterGroup?.teacher_name ||
+        'Abdulazizbek Orifjonov';
+
+      const effectiveLessonTime =
+        lessonTimeInfo?.startTime && lessonTimeInfo?.endTime
+          ? `${lessonTimeInfo.startTime} - ${lessonTimeInfo.endTime}`
+          : currentRosterGroup?.start_time && currentRosterGroup?.end_time
+            ? `${currentRosterGroup.start_time.slice(0, 5)} - ${currentRosterGroup.end_time.slice(0, 5)}`
+            : currentLesson?.start_time && currentLesson?.end_time
+              ? `${currentLesson.start_time.slice(0, 5)} - ${currentLesson.end_time.slice(0, 5)}`
+              : '08:30 - 10:00';
+
+      await saveAttendanceRecords(currentLesson.id, records, profile?.id, {
+        groupId: currentRosterGroup?.id,
+        groupName: currentRosterGroup?.name,
+        courseName: effectiveCourseName,
+        teacherName: teacherFullName,
+        lessonTime: effectiveLessonTime,
+        date: selectedDate,
+      });
       const now = new Date().toISOString();
       setAttendanceStatus({
         hasAttendance: true,

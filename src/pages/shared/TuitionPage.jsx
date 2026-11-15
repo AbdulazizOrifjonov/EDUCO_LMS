@@ -17,6 +17,12 @@ import {
   Percent,
   Trash2,
   AlertTriangle,
+  Send,
+  Check,
+  MessageSquare,
+  Phone,
+  Sparkles,
+  Users,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { Button, Card, Badge, Modal, Input, EmptyState, LoadingSpinner } from '@/components/ui';
@@ -26,11 +32,18 @@ import {
   getTuitionSummary,
   getTuitionPayments,
   recordPayment,
+  markStudentAsPaid,
+  markAllStudentsAsPaid,
   exportTuitionCSV,
   deletePayment,
   deleteSelectedPayments,
   deleteAllPayments,
 } from '@/services/tuitionService';
+import {
+  sendDirectDebtorSmsList,
+  formatDebtorSmsMessage,
+  DEFAULT_DEBTOR_TEMPLATE,
+} from '@/services/smsService';
 import { updateStudentDiscount } from '@/services/groupService';
 import { formatCurrency, formatDate } from '@/utils/csvExport';
 import { useSearch } from '@/context/SearchContext';
@@ -52,6 +65,21 @@ export default function TuitionPage() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Debtor Selection States (for selective SMS and selective payment)
+  const [selectedDebtors, setSelectedDebtors] = useState(new Set());
+
+  // Debtor SMS Modal States
+  const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
+  const [smsRecipientsList, setSmsRecipientsList] = useState([]);
+  const [smsRecipientType, setSmsRecipientType] = useState('parent_preferred'); // 'parent_preferred' | 'student'
+  const [smsTemplateText, setSmsTemplateText] = useState(DEFAULT_DEBTOR_TEMPLATE);
+  const [isSendingSms, setIsSendingSms] = useState(false);
+  const [smsProgress, setSmsProgress] = useState({ current: 0, total: 0, studentName: '' });
+
+  // Mark all paid (December reset) state
+  const [showAllPaidConfirm, setShowAllPaidConfirm] = useState(false);
+  const [isMarkingAllPaid, setIsMarkingAllPaid] = useState(false);
 
   // Delete states
   const [selectedPayments, setSelectedPayments] = useState(new Set());
@@ -223,6 +251,174 @@ export default function TuitionPage() {
     return list;
   }, [paymentHistory, searchQuery, isStudent, profile?.id]);
 
+  // Debtor selection & calculation helpers
+  const eligibleDebtors = useMemo(() => {
+    return filteredStudents.filter((s) => Number(s.balance || 0) > 0);
+  }, [filteredStudents]);
+
+  const totalSelectedDebt = useMemo(() => {
+    return filteredStudents
+      .filter((s) => selectedDebtors.has(s.studentId))
+      .reduce((sum, s) => sum + Number(s.balance || 0), 0);
+  }, [filteredStudents, selectedDebtors]);
+
+  const handleToggleSelectDebtor = (studentId, balance) => {
+    if (Number(balance || 0) <= 0) {
+      toast.info("Ushbu talabaning qarzdorligi yo‘q (to‘langan), uni tanlab bo‘lmaydi.");
+      return;
+    }
+    setSelectedDebtors((prev) => {
+      const next = new Set(prev);
+      if (next.has(studentId)) {
+        next.delete(studentId);
+      } else {
+        next.add(studentId);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSelectAllDebtors = () => {
+    if (selectedDebtors.size === eligibleDebtors.length && eligibleDebtors.length > 0) {
+      setSelectedDebtors(new Set());
+    } else {
+      setSelectedDebtors(new Set(eligibleDebtors.map((s) => s.studentId)));
+    }
+  };
+
+  // 1-Click Quick Payment Handler for single row
+  const handleQuickPay = async (student) => {
+    if (actionLoading) return;
+    if (!student || Number(student.balance || 0) <= 0) {
+      toast.info("Ushbu talabaning to‘lanmagan qarzdorligi yo‘q.");
+      return;
+    }
+    try {
+      setActionLoading(true);
+      await markStudentAsPaid(student.studentId, student.balance, 'Naqd pul', 'To‘liq to‘landi (1-bosishda)');
+      toast.success(
+        `✅ ${student.studentName} uchun ${formatCurrency(student.balance)} to‘lov qabul qilindi va qarzdorlik to‘liq yopildi!`
+      );
+      setSelectedDebtors((prev) => {
+        const next = new Set(prev);
+        next.delete(student.studentId);
+        return next;
+      });
+      await loadData(true);
+    } catch (err) {
+      console.error('handleQuickPay error:', err);
+      toast.error(err.message || 'To‘lovni qabul qilishda xatolik yuz berdi');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Batch Payment for Selected Debtors
+  const handleBatchPaySelected = async () => {
+    if (actionLoading || selectedDebtors.size === 0) return;
+    try {
+      setActionLoading(true);
+      const ids = Array.from(selectedDebtors);
+      const res = await markAllStudentsAsPaid(ids, 'Tanlangan talabalar qarzdorligi to‘liq yopildi');
+      toast.success(
+        `✅ Tanlangan ${res.clearedCount} ta talabaning qarzdorligi (${formatCurrency(res.totalClearedAmount)}) to‘liq to‘landi deb belgilandi!`
+      );
+      setSelectedDebtors(new Set());
+      await loadData(true);
+    } catch (err) {
+      console.error('handleBatchPaySelected error:', err);
+      toast.error(err.message || 'To‘lovlarni yopishda xatolik yuz berdi');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Mark all students as paid (December fresh start)
+  const handleConfirmMarkAllPaid = async () => {
+    if (isMarkingAllPaid) return;
+    try {
+      setIsMarkingAllPaid(true);
+      const res = await markAllStudentsAsPaid('ALL', 'Dekabr oyigacha barcha qarzdorliklar to‘liq yopildi (Noyabrgacha yopish)');
+      toast.success(
+        `✅ Barcha ${res.clearedCount} ta talabaning jami ${formatCurrency(res.totalClearedAmount)} qarzdorligi to‘liq to‘landi deb qayd etildi! Dekabr oyiga toza hisob bilan tayyor.`
+      );
+      setShowAllPaidConfirm(false);
+      setSelectedDebtors(new Set());
+      await loadData(true);
+    } catch (err) {
+      console.error('handleConfirmMarkAllPaid error:', err);
+      toast.error(err.message || 'Barchasini to‘langan qilishda xatolik');
+    } finally {
+      setIsMarkingAllPaid(false);
+    }
+  };
+
+  // Debtor SMS Modal Handlers
+  const handleOpenSmsModal = (debtorsList) => {
+    const validDebtors = debtorsList.filter((s) => Number(s.balance || 0) > 0 && s.status !== 'paid');
+    if (validDebtors.length === 0) {
+      toast.warning("Tanlangan talabalar orasida qarzdorlik mavjud talabalar topilmadi. To‘langan talabalarga SMS yuborilmaydi!");
+      return;
+    }
+    setSmsRecipientsList(validDebtors);
+    setSmsTemplateText(DEFAULT_DEBTOR_TEMPLATE);
+    setIsSmsModalOpen(true);
+  };
+
+  const handleSendDebtorSms = async () => {
+    if (isSendingSms || smsRecipientsList.length === 0) return;
+    try {
+      setIsSendingSms(true);
+      setSmsProgress({ current: 0, total: smsRecipientsList.length, studentName: '' });
+
+      const result = await sendDirectDebtorSmsList({
+        debtors: smsRecipientsList,
+        customTemplate: smsTemplateText,
+        recipientType: smsRecipientType,
+        onProgress: (p) => setSmsProgress(p),
+      });
+
+      if (result.sentCount > 0) {
+        toast.success(`📲 ${result.sentCount} ta qarzdorlik SMS xabarnomasi muvaffaqiyatli yuborildi!`);
+      }
+      if (result.skippedPaidCount > 0) {
+        toast.info(`ℹ️ ${result.skippedPaidCount} ta to‘langan talaba o‘tkazib yuborildi (SMS bormaydi).`);
+      }
+      if (result.failedCount > 0) {
+        toast.warning(`⚠️ ${result.failedCount} ta xabar telefon raqami noto‘g‘ri bo‘lgani uchun yuborilmadi.`);
+      }
+
+      setIsSmsModalOpen(false);
+      setSmsRecipientsList([]);
+    } catch (err) {
+      console.error('handleSendDebtorSms error:', err);
+      toast.error(err.message || 'SMS yuborishda xatolik yuz berdi');
+    } finally {
+      setIsSendingSms(false);
+      setSmsProgress({ current: 0, total: 0, studentName: '' });
+    }
+  };
+
+  const livePreviewSample = useMemo(() => {
+    if (!smsRecipientsList || smsRecipientsList.length === 0) return '';
+    const sample = smsRecipientsList[0];
+    const recipientSalutation =
+      smsRecipientType === 'student'
+        ? sample.studentName || 'Hurmatli talaba'
+        : sample.fatherPhone || sample.motherPhone
+        ? 'Hurmatli ota-ona'
+        : sample.studentName || 'Hurmatli talaba';
+
+    return formatDebtorSmsMessage(smsTemplateText, {
+      student_name: sample.studentName,
+      parent_name: recipientSalutation,
+      course_name: sample.courseName,
+      group_name: sample.groupName,
+      teacher_name: sample.teacherName || 'Fan ustozi',
+      amount: formatCurrency(sample.balance),
+    });
+  }, [smsRecipientsList, smsTemplateText, smsRecipientType]);
+
 
   // Selection & Delete Handlers for Payment History
   const handleSelectPayment = (id) => {
@@ -325,7 +521,19 @@ export default function TuitionPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {canDeletePayments && !isStudent && (
+            <Button
+              variant="outline"
+              icon={CheckCircle2}
+              onClick={() => setShowAllPaidConfirm(true)}
+              className="border-emerald-400 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300 font-semibold text-xs sm:text-sm"
+              title="Dekabr oyiga toza hisob bilan o‘tish uchun barcha talabalar qoldiq qarzini to‘langan deb belgilash"
+            >
+              ✅ Barchasini to‘langan qilish (Noyabrgacha yopish)
+            </Button>
+          )}
+
           <Button
             variant="outline"
             icon={Download}
@@ -535,6 +743,27 @@ export default function TuitionPage() {
             <table className="w-full text-left rtl:text-right text-sm">
               <thead className="bg-gray-50 dark:bg-surface-dark-tertiary text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
                 <tr>
+                  {!isStudent && (
+                    <th className="px-4 py-3.5 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={
+                          eligibleDebtors.length > 0 &&
+                          selectedDebtors.size === eligibleDebtors.length
+                        }
+                        onChange={handleToggleSelectAllDebtors}
+                        className="w-4 h-4 rounded text-blue-600 dark:text-emerald-500 focus:ring-blue-500 dark:focus:ring-emerald-400 border-gray-300 dark:border-gray-700 cursor-pointer"
+                        title={
+                          eligibleDebtors.length === 0
+                            ? "Qarzdor talabalar yo‘q"
+                            : selectedDebtors.size === eligibleDebtors.length
+                            ? "Tanlovni bekor qilish"
+                            : "Barcha qarzdorlarni tanlash"
+                        }
+                        disabled={eligibleDebtors.length === 0}
+                      />
+                    </th>
+                  )}
                   <th className="px-5 py-3.5">{t('users.student', 'Talaba')}</th>
                   <th className="px-5 py-3.5">Kurs va Guruh</th>
                   <th className="px-5 py-3.5">Asosiy to‘lov</th>
@@ -550,14 +779,14 @@ export default function TuitionPage() {
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-surface-dark-secondary">
                 {loading ? (
                   <tr>
-                    <td colSpan={isStudent ? 9 : 10} className="py-12 text-center text-gray-500">
+                    <td colSpan={isStudent ? 9 : 11} className="py-12 text-center text-gray-500">
                       <LoadingSpinner size="md" />
                       <p className="mt-2 text-xs">Loading tuition statements...</p>
                     </td>
                   </tr>
                 ) : filteredStudents.length === 0 ? (
                   <tr>
-                    <td colSpan={isStudent ? 9 : 10} className="py-10">
+                    <td colSpan={isStudent ? 9 : 11} className="py-10">
                       <EmptyState
                         icon={CreditCard}
                         title="No tuition records found"
@@ -566,71 +795,154 @@ export default function TuitionPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredStudents.map((st) => (
-                    <tr key={st.id} className="hover:bg-gray-50/50 dark:hover:bg-surface-dark-tertiary/50">
-                      <td className="px-5 py-4">
-                        <div className="font-semibold text-gray-900 dark:text-gray-100">{st.studentName}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">{st.studentPhone || st.studentEmail}</div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="font-medium text-gray-900 dark:text-gray-100 text-xs">{st.courseName}</div>
-                        <div className="text-[11px] text-gray-500 dark:text-gray-400">{st.groupName}</div>
-                      </td>
-                      <td className="px-5 py-4 text-gray-700 dark:text-gray-300 text-xs font-semibold">
-                        {formatCurrency(st.baseFee)}
-                      </td>
-                      <td className="px-5 py-4">
-                        {st.discountAmount > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-500/20">
-                            <Tag className="w-3 h-3 text-amber-600" />
-                            -{formatCurrency(st.discountAmount)}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-gray-400">Standart</span>
+                  filteredStudents.map((st) => {
+                    const isDebtor = Number(st.balance || 0) > 0;
+                    const isSelected = selectedDebtors.has(st.studentId);
+                    const parentPhone = st.fatherPhone || st.motherPhone;
+
+                    return (
+                      <tr
+                        key={st.id}
+                        className={`hover:bg-gray-50/70 dark:hover:bg-surface-dark-tertiary/60 transition-colors ${
+                          isSelected ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
+                        }`}
+                      >
+                        {!isStudent && (
+                          <td className="px-4 py-4 text-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleToggleSelectDebtor(st.studentId, st.balance)}
+                              disabled={!isDebtor}
+                              className={`w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 ${
+                                !isDebtor ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+                              }`}
+                              title={
+                                !isDebtor
+                                  ? "Ushbu talabaning qarzdorligi yo‘q (to‘langan talabaga SMS bormaydi)"
+                                  : "Ushbu qarzdor talabani tanlash"
+                              }
+                            />
+                          </td>
                         )}
-                      </td>
-                      <td className="px-5 py-4 text-gray-900 dark:text-gray-100 font-bold">
-                        {formatCurrency(st.amountDue)}
-                      </td>
-                      <td className="px-5 py-4 text-emerald-600 dark:text-emerald-400 font-semibold">
-                        {formatCurrency(st.amountPaid)}
-                      </td>
-                      <td className="px-5 py-4 font-bold text-brand-red dark:text-red-400">
-                        {formatCurrency(st.balance)}
-                      </td>
-                      <td className="px-5 py-4">
-                        {getStatusBadge(st.status)}
-                      </td>
-                      <td className="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">
-                        {st.lastPaymentDate ? formatDate(st.lastPaymentDate) : '-'}
-                      </td>
-                      {!isStudent && (
-                        <td className="px-5 py-4 text-right rtl:text-left">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                              title="Chegirmani sozlash"
-                              onClick={() => handleOpenDiscountModal(st)}
-                            >
-                              <Percent className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedStudentForPayment(st.studentId);
-                                setIsPaymentModalOpen(true);
-                              }}
-                            >
-                              {t('tuition.pay', 'Pay')}
-                            </Button>
+
+                        <td className="px-5 py-4">
+                          <div className="font-semibold text-gray-900 dark:text-gray-100">{st.studentName}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 font-mono flex items-center gap-1 mt-0.5">
+                            <span>📞 {st.studentPhone || st.studentEmail || '-'}</span>
                           </div>
+                          {parentPhone && (
+                            <div className="text-[11px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1 mt-0.5">
+                              <span>👨‍👩‍👦 Ota-onasi: {parentPhone}</span>
+                            </div>
+                          )}
                         </td>
-                      )}
-                    </tr>
-                  ))
+
+                        <td className="px-5 py-4">
+                          <div className="font-medium text-gray-900 dark:text-gray-100 text-xs">{st.courseName}</div>
+                          <div className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{st.groupName}</div>
+                          {st.teacherName && (
+                            <div className="text-[11px] text-purple-700 dark:text-purple-300 font-semibold flex items-center gap-1 mt-1 bg-purple-50 dark:bg-purple-950/40 px-1.5 py-0.5 rounded border border-purple-400/20 w-fit">
+                              <span>👨‍🏫 Ustoz: {st.teacherName}</span>
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="px-5 py-4 text-gray-700 dark:text-gray-300 text-xs font-semibold">
+                          {formatCurrency(st.baseFee)}
+                        </td>
+                        <td className="px-5 py-4">
+                          {st.discountAmount > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-500/20">
+                              <Tag className="w-3 h-3 text-amber-600" />
+                              -{formatCurrency(st.discountAmount)}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">Standart</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-4 text-gray-900 dark:text-gray-100 font-bold">
+                          {formatCurrency(st.amountDue)}
+                        </td>
+                        <td className="px-5 py-4 text-emerald-600 dark:text-emerald-400 font-semibold">
+                          {formatCurrency(st.amountPaid)}
+                        </td>
+                        <td className="px-5 py-4 font-bold text-brand-red dark:text-red-400">
+                          {formatCurrency(st.balance)}
+                        </td>
+                        <td className="px-5 py-4">
+                          {getStatusBadge(st.status)}
+                        </td>
+                        <td className="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">
+                          {st.lastPaymentDate ? formatDate(st.lastPaymentDate) : '-'}
+                        </td>
+
+                        {!isStudent && (
+                          <td className="px-5 py-4 text-right rtl:text-left">
+                            <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                              {/* 1-Click To'landi Button */}
+                              {isDebtor ? (
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs !py-1 !px-2.5 shadow-xs flex items-center gap-1"
+                                  title="Qoldiq qarzni to‘liq to‘langan deb qabul qilish (1-bosishda)"
+                                  onClick={() => handleQuickPay(st)}
+                                  disabled={actionLoading}
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>To‘landi</span>
+                                </Button>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-md border border-emerald-500/20" title="To‘lov to‘liq yopilgan">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>To‘langan</span>
+                                </span>
+                              )}
+
+                              {/* Debtor SMS Button */}
+                              {isDebtor && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-xs !py-1 !px-2 flex items-center gap-1"
+                                  title="Ushbu talabaga / ota-onasiga qarzdorlik SMS yuborish"
+                                  onClick={() => handleOpenSmsModal([st])}
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>SMS</span>
+                                </Button>
+                              )}
+
+                              {/* Discount Button */}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                                title="Chegirmani sozlash"
+                                onClick={() => handleOpenDiscountModal(st)}
+                              >
+                                <Percent className="w-4 h-4" />
+                              </Button>
+
+                              {/* Custom Payment Modal Button */}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs !py-1 !px-2"
+                                onClick={() => {
+                                  setSelectedStudentForPayment(st.studentId);
+                                  setIsPaymentModalOpen(true);
+                                }}
+                              >
+                                {t('tuition.pay', 'Pay')}
+                              </Button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -650,80 +962,195 @@ export default function TuitionPage() {
                 description="There are currently no student records matching the filter criteria."
               />
             ) : (
-              filteredStudents.map((st) => (
-                <div
-                  key={st.id}
-                  className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200 dark:border-gray-800 shadow-xs space-y-3"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">{st.studentName}</h4>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{st.studentPhone || st.studentEmail}</p>
-                    </div>
-                    {getStatusBadge(st.status)}
-                  </div>
+              filteredStudents.map((st) => {
+                const isDebtor = Number(st.balance || 0) > 0;
+                const isSelected = selectedDebtors.has(st.studentId);
+                const parentPhone = st.fatherPhone || st.motherPhone;
 
-                  <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary flex items-center justify-between text-xs">
-                    <div>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">{st.courseName}</span>
-                      <span className="text-gray-400 ml-1.5">• {st.groupName}</span>
-                    </div>
-                    {st.discountAmount > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-500/20">
-                        <Tag className="w-2.5 h-2.5 text-amber-600" />
-                        -{formatCurrency(st.discountAmount)}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs border-t border-b border-gray-100 dark:border-gray-800/80 py-2">
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">To‘lanishi kerak</span>
-                      <span className="font-bold text-gray-900 dark:text-gray-100">{formatCurrency(st.amountDue)}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">To‘langan</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(st.amountPaid)}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-gray-400 block uppercase">Qoldiq qarz</span>
-                      <span className="font-bold text-brand-red dark:text-red-400">{formatCurrency(st.balance)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-gray-400">
-                      So‘nggi to‘lov: {st.lastPaymentDate ? formatDate(st.lastPaymentDate) : '-'}
-                    </span>
-                    {!isStudent && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                          title="Chegirmani sozlash"
-                          onClick={() => handleOpenDiscountModal(st)}
-                        >
-                          <Percent className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedStudentForPayment(st.studentId);
-                            setIsPaymentModalOpen(true);
-                          }}
-                        >
-                          {t('tuition.pay', 'Pay')}
-                        </Button>
+                return (
+                  <div
+                    key={st.id}
+                    className={`p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200 dark:border-gray-800 shadow-xs space-y-3 ${
+                      isSelected ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-2.5">
+                        {!isStudent && (
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleSelectDebtor(st.studentId, st.balance)}
+                            disabled={!isDebtor}
+                            className={`w-4 h-4 rounded text-blue-600 mt-0.5 ${
+                              !isDebtor ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+                            }`}
+                          />
+                        )}
+                        <div>
+                          <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">{st.studentName}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">📞 {st.studentPhone || st.studentEmail}</p>
+                          {parentPhone && (
+                            <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">👨‍👩‍👦 Ota-onasi: {parentPhone}</p>
+                          )}
+                        </div>
                       </div>
-                    )}
+                      {getStatusBadge(st.status)}
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary flex flex-col gap-1 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{st.courseName}</span>
+                          <span className="text-gray-400 ml-1.5">• {st.groupName}</span>
+                        </div>
+                        {st.discountAmount > 0 && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-500/20">
+                            <Tag className="w-2.5 h-2.5 text-amber-600" />
+                            -{formatCurrency(st.discountAmount)}
+                          </span>
+                        )}
+                      </div>
+                      {st.teacherName && (
+                        <div className="text-[11px] text-purple-700 dark:text-purple-300 font-semibold">
+                          👨‍🏫 Ustoz: {st.teacherName}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs border-t border-b border-gray-100 dark:border-gray-800/80 py-2">
+                      <div>
+                        <span className="text-[10px] text-gray-400 block uppercase">To‘lanishi kerak</span>
+                        <span className="font-bold text-gray-900 dark:text-gray-100">{formatCurrency(st.amountDue)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-gray-400 block uppercase">To‘langan</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(st.amountPaid)}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-gray-400 block uppercase">Qoldiq qarz</span>
+                        <span className="font-bold text-brand-red dark:text-red-400">{formatCurrency(st.balance)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
+                      <span className="text-[11px] text-gray-400">
+                        So‘nggi to‘lov: {st.lastPaymentDate ? formatDate(st.lastPaymentDate) : '-'}
+                      </span>
+                      {!isStudent && (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {isDebtor ? (
+                            <Button
+                              variant="success"
+                              size="sm"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs !py-1 !px-2 flex items-center gap-1"
+                              onClick={() => handleQuickPay(st)}
+                              disabled={actionLoading}
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>To‘landi</span>
+                            </Button>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              <span>To‘langan</span>
+                            </span>
+                          )}
+
+                          {isDebtor && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-blue-600 border-blue-200 text-xs !py-1 !px-2 flex items-center gap-1"
+                              onClick={() => handleOpenSmsModal([st])}
+                            >
+                              <Send className="w-3 h-3" />
+                              <span>SMS</span>
+                            </Button>
+                          )}
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                            title="Chegirmani sozlash"
+                            onClick={() => handleOpenDiscountModal(st)}
+                          >
+                            <Percent className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs !py-1 !px-2"
+                            onClick={() => {
+                              setSelectedStudentForPayment(st.studentId);
+                              setIsPaymentModalOpen(true);
+                            }}
+                          >
+                            {t('tuition.pay', 'Pay')}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </Card>
+      )}
+
+      {/* Sticky Floating Action Bar for Selected Debtors */}
+      {selectedDebtors.size > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95%] max-w-4xl bg-white dark:bg-surface-dark-secondary rounded-2xl shadow-2xl border border-blue-500/40 p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 animate-slide-up backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm shrink-0">
+              {selectedDebtors.size}
+            </div>
+            <div>
+              <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                {selectedDebtors.size} ta qarzdor talaba tanlandi
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Tanlanganlar jami qarzdorligi: <span className="font-bold text-red-600 dark:text-red-400">{formatCurrency(totalSelectedDebt)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+            <Button
+              variant="primary"
+              size="sm"
+              icon={Send}
+              onClick={() => {
+                const list = filteredStudents.filter((s) => selectedDebtors.has(s.studentId));
+                handleOpenSmsModal(list);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2 px-3 shadow-md flex items-center gap-1.5"
+            >
+              📲 Tanlanganlarga SMS yuborish ({selectedDebtors.size} ta)
+            </Button>
+
+            <Button
+              variant="success"
+              size="sm"
+              icon={CheckCircle2}
+              onClick={handleBatchPaySelected}
+              disabled={actionLoading}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-3 shadow-md flex items-center gap-1.5"
+            >
+              ✅ Tanlanganlarni to‘langan qilish ({selectedDebtors.size} ta)
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedDebtors(new Set())}
+              className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 underline px-2 cursor-pointer font-medium"
+            >
+              Bekor qilish
+            </button>
+          </div>
+        </div>
       )}
 
       {/* HISTORY TABLE */}
@@ -1163,6 +1590,267 @@ export default function TuitionPage() {
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {isDeleting ? "O‘chirilmoqda..." : "Ha, o‘chirilsin"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* DEBTOR SMS DISPATCH MODAL WITH LIVE PREVIEW */}
+      <Modal
+        isOpen={isSmsModalOpen}
+        onClose={() => {
+          if (!isSendingSms) {
+            setIsSmsModalOpen(false);
+            setSmsRecipientsList([]);
+          }
+        }}
+        title="📲 Qarzdor talabalarga SMS xabarnoma yuborish"
+        size="lg"
+      >
+        <div className="space-y-4">
+          {/* Header Summary */}
+          <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                {smsRecipientsList.length}
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                  {smsRecipientsList.length} ta qarzdor talaba tanlangan
+                </h4>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Jami qarzdorlik summasi: <span className="font-bold text-red-600 dark:text-red-400">{formatCurrency(smsRecipientsList.reduce((acc, curr) => acc + Number(curr.balance || 0), 0))}</span>
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+              Antispam himoyasi faol
+            </span>
+          </div>
+
+          {/* Recipient Target Radio */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              Xabar qaysi raqamga yuborilsin?
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <label
+                className={`p-3 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-colors ${
+                  smsRecipientType === 'parent_preferred'
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-100 font-semibold'
+                    : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-surface-dark-tertiary'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="recipientType"
+                  value="parent_preferred"
+                  checked={smsRecipientType === 'parent_preferred'}
+                  onChange={() => setSmsRecipientType('parent_preferred')}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <div>
+                  <div className="font-bold">👨‍👩‍👦 Ota-onasi telefoniga (Tavsiya etiladi)</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
+                    Ota yoki ona raqami, bo‘lmasa talabaning o‘ziga boradi
+                  </div>
+                </div>
+              </label>
+
+              <label
+                className={`p-3 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-colors ${
+                  smsRecipientType === 'student'
+                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-100 font-semibold'
+                    : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-surface-dark-tertiary'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="recipientType"
+                  value="student"
+                  checked={smsRecipientType === 'student'}
+                  onChange={() => setSmsRecipientType('student')}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <div>
+                  <div className="font-bold">📱 Talabaning o‘ziga</div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 font-normal">
+                    Faqat talabaning shaxsiy login raqamiga boradi
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Selected Students List Preview */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-400">
+              <span>Tanlangan qabul qiluvchilar ro‘yxati:</span>
+              <span>{smsRecipientsList.length} ta</span>
+            </div>
+            <div className="max-h-36 overflow-y-auto border border-gray-200 dark:border-gray-800 rounded-xl divide-y divide-gray-100 dark:divide-gray-800 bg-gray-50/40 dark:bg-surface-dark-tertiary/40 p-1 text-xs">
+              {smsRecipientsList.map((st) => {
+                const targetPhone =
+                  smsRecipientType === 'student'
+                    ? st.studentPhone
+                    : st.fatherPhone || st.motherPhone || st.studentPhone;
+                return (
+                  <div key={st.studentId} className="p-2 flex items-center justify-between gap-2">
+                    <div className="truncate">
+                      <span className="font-bold text-gray-900 dark:text-gray-100">{st.studentName}</span>
+                      <span className="text-gray-500 ml-1.5">• {st.courseName} ({st.groupName})</span>
+                      {st.teacherName && (
+                        <span className="text-purple-600 dark:text-purple-400 font-medium ml-1.5">• Ustoz: {st.teacherName}</span>
+                      )}
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className="font-bold text-red-600 dark:text-red-400">{formatCurrency(st.balance)}</span>
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400 block font-mono">{targetPhone || 'Raqamsiz'}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SMS Template Editor */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                SMS Xabar matni:
+              </label>
+              <button
+                type="button"
+                onClick={() => setSmsTemplateText(DEFAULT_DEBTOR_TEMPLATE)}
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 underline font-medium cursor-pointer"
+              >
+                🔄 Standart muloyim matnga qaytarish
+              </button>
+            </div>
+            <textarea
+              rows={5}
+              value={smsTemplateText}
+              onChange={(e) => setSmsTemplateText(e.target.value)}
+              className="w-full text-xs p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+              placeholder="SMS matnini kiriting..."
+            />
+            {/* Template Variables Helper Chips */}
+            <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px] text-gray-500">
+              <span className="font-semibold">O‘zgaruvchilar:</span>
+              {['{student_name}', '{course_name}', '{group_name}', '{teacher_name}', '{amount}'].map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setSmsTemplateText((prev) => `${prev} ${v}`)}
+                  className="px-2 py-0.5 rounded bg-gray-100 dark:bg-surface-dark-tertiary hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-mono text-[10px] cursor-pointer"
+                  title="Matnga qo‘shish"
+                >
+                  +{v}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* LIVE PREVIEW BOX */}
+          <div className="space-y-1.5">
+            <div className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Namuna: 1-talabaga ketadigan jonli SMS ko‘rinishi</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-gray-900 text-emerald-400 font-mono text-xs whitespace-pre-wrap leading-relaxed shadow-inner border border-gray-800">
+              {livePreviewSample}
+            </div>
+          </div>
+
+          {/* Sending Progress Bar */}
+          {isSendingSms && (
+            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs space-y-2">
+              <div className="flex items-center justify-between font-bold text-blue-900 dark:text-blue-100">
+                <span>SMS yuborilmoqda...</span>
+                <span>{smsProgress.current} / {smsProgress.total}</span>
+              </div>
+              <div className="w-full bg-blue-200 dark:bg-blue-900 h-2 rounded-full overflow-hidden">
+                <div
+                  className="bg-blue-600 h-2 transition-all duration-300"
+                  style={{
+                    width: `${smsProgress.total > 0 ? (smsProgress.current / smsProgress.total) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+              {smsProgress.studentName && (
+                <div className="text-[11px] text-blue-700 dark:text-blue-300">
+                  Navbatdagi talaba: <span className="font-semibold">{smsProgress.studentName}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Modal Actions */}
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setIsSmsModalOpen(false);
+                setSmsRecipientsList([]);
+              }}
+              disabled={isSendingSms}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              variant="primary"
+              icon={Send}
+              onClick={handleSendDebtorSms}
+              disabled={isSendingSms || smsRecipientsList.length === 0}
+              isLoading={isSendingSms}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2 px-4 shadow-md"
+            >
+              {isSendingSms ? "Yuborilmoqda..." : `📲 SMS Yuborish (${smsRecipientsList.length} ta)`}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* CONFIRMATION MODAL: MARK ALL AS PAID (DECEMBER FRESH START) */}
+      <Modal
+        isOpen={showAllPaidConfirm}
+        onClose={() => {
+          if (!isMarkingAllPaid) setShowAllPaidConfirm(false);
+        }}
+        title="Barcha talabalarni to‘langan deb belgilash (Noyabrgacha yopish)"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100 space-y-2">
+            <div className="flex items-center gap-2 font-bold text-sm">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <span>Dekabr oyidan toza hisob bilan boshlash</span>
+            </div>
+            <p className="text-xs leading-relaxed text-emerald-800 dark:text-emerald-200">
+              Ushbu amal barcha 143 ta talabaning mavjud barcha eski/dummi qarzdorliklarini <strong>«Dekabr oyigacha qarzdorliklar to‘liq yopildi»</strong> deb kvitansiya bilan rasmiylashtiradi.
+            </p>
+            <p className="text-xs font-semibold text-emerald-900 dark:text-emerald-100">
+              Natijada barcha qoldiq qarzlar 0 so‘m bo‘ladi, tizim to‘liq yashil holatga o‘tadi va Dekabr oyidan boshlab real hisob-kitoblar boshlanadi.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <Button
+              variant="ghost"
+              onClick={() => setShowAllPaidConfirm(false)}
+              disabled={isMarkingAllPaid}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              variant="success"
+              icon={CheckCircle2}
+              onClick={handleConfirmMarkAllPaid}
+              disabled={isMarkingAllPaid}
+              isLoading={isMarkingAllPaid}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-4 shadow-md"
+            >
+              {isMarkingAllPaid ? "To‘lovlar qayd etilmoqda..." : "Ha, barchasini to‘langan deb belgilash"}
             </Button>
           </div>
         </div>

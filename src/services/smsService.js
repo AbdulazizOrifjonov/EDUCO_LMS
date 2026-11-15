@@ -812,6 +812,39 @@ export async function sendTestSms({ phone, message, deviceId }) {
 }
 
 /**
+ * Professional Debtor SMS template requested by user:
+ * polite, respectful, with student name, subject, group name, teacher name, debt amount, and call center info.
+ */
+export const DEFAULT_DEBTOR_TEMPLATE =
+  `Assalomu alaykum, hurmatli ota-ona!\n\n` +
+  `Farzandingiz {student_name} ning "{course_name}" kursi ({group_name}, ustozi: {teacher_name}) uchun o‘qish to‘lovidan {amount} so‘m qarzdorlik mavjud.\n\n` +
+  `Farzandingizning uzluksiz ta’lim olishi uchun to‘lovni o‘z vaqtida amalga oshirishingizni so‘raymiz.\n\n` +
+  `Hurmat bilan, EDUCO ta’lim markazi.\n` +
+  `Ma’lumot uchun: +998 98 800 14 15`;
+
+export function formatDebtorSmsMessage(template, variables = {}) {
+  const {
+    student_name = 'Talaba',
+    parent_name = 'Ota-ona',
+    course_name = 'Kurs',
+    group_name = 'Guruh',
+    teacher_name = 'Fan ustozi',
+    amount = '0',
+    due_date = formatDate(new Date()),
+  } = variables;
+
+  const tpl = (template || DEFAULT_DEBTOR_TEMPLATE);
+  return tpl
+    .replace(/{student_name}/g, student_name)
+    .replace(/{parent_name}/g, parent_name)
+    .replace(/{course_name}/g, course_name)
+    .replace(/{group_name}/g, group_name)
+    .replace(/{teacher_name}/g, teacher_name)
+    .replace(/{amount}/g, typeof amount === 'number' ? formatCurrency(amount) : amount)
+    .replace(/{due_date}/g, due_date);
+}
+
+/**
  * Parses message template with dynamic debtor variables
  */
 export function formatSmsMessage(template, variables) {
@@ -819,6 +852,8 @@ export function formatSmsMessage(template, variables) {
     student_name = 'Talaba',
     parent_name = 'Ota-ona',
     course_name = 'Kurs',
+    group_name = 'Guruh',
+    teacher_name = 'Fan ustozi',
     amount = '0',
     due_date = formatDate(new Date()),
   } = variables;
@@ -827,8 +862,153 @@ export function formatSmsMessage(template, variables) {
     .replace(/{student_name}/g, student_name)
     .replace(/{parent_name}/g, parent_name)
     .replace(/{course_name}/g, course_name)
+    .replace(/{group_name}/g, group_name)
+    .replace(/{teacher_name}/g, teacher_name)
     .replace(/{amount}/g, typeof amount === 'number' ? formatCurrency(amount) : amount)
     .replace(/{due_date}/g, due_date);
+}
+
+/**
+ * Sends direct Debtor Reminder SMS to a list of debtor students.
+ * Enforces strict anti-spam rule: Paid students (balance <= 0 or status === 'paid')
+ * are NEVER sent debt reminder SMS!
+ */
+export async function sendDirectDebtorSmsList({
+  debtors = [],
+  customTemplate = null,
+  recipientType = 'parent_preferred', // 'parent_preferred' | 'student'
+  onProgress = null,
+}) {
+  const devices = await getSmsDevices();
+  let targetDevice =
+    devices.find((d) => d.device_role === 'primary' && d.is_active) ||
+    devices.find((d) => d.device_role === 'backup' && d.is_active) ||
+    devices[0] || {
+      id: 'dev-demo-primary',
+      name: 'Android SMS Gateway (Primary)',
+      device_role: 'primary',
+      gateway_url: 'https://api.sms-gate.app/3rdparty/v1/message',
+      api_token: 'demo_token_educo',
+      is_active: true,
+      status: 'online',
+    };
+
+  const results = [];
+  let sentCount = 0;
+  let skippedPaidCount = 0;
+  let failedCount = 0;
+
+  for (let i = 0; i < debtors.length; i++) {
+    const debtor = debtors[i];
+
+    // CRITICAL: NEVER send debt reminder SMS to students with balance <= 0 or paid status
+    const bal = Number(debtor.balance ?? 0);
+    if (bal <= 0 || debtor.status === 'paid') {
+      skippedPaidCount++;
+      results.push({
+        studentId: debtor.studentId,
+        studentName: debtor.studentName,
+        status: 'skipped_paid',
+        message: 'Talabaning qarzdorligi yo‘q (to‘langan), SMS yuborilmadi.',
+      });
+      continue;
+    }
+
+    // Determine target recipient phone
+    let rawPhone = '';
+    let recipientSalutation = 'Hurmatli ota-ona';
+
+    if (recipientType === 'student') {
+      rawPhone = debtor.studentPhone || '';
+      recipientSalutation = debtor.studentName || 'Hurmatli talaba';
+    } else {
+      // Parent preferred: father_phone > mother_phone > studentPhone
+      rawPhone = debtor.fatherPhone || debtor.motherPhone || debtor.studentPhone || '';
+      recipientSalutation = debtor.fatherPhone || debtor.motherPhone ? 'Hurmatli ota-ona' : (debtor.studentName || 'Hurmatli talaba');
+    }
+
+    const normalizedPhone = normalizePhone(rawPhone);
+    if (!normalizedPhone) {
+      failedCount++;
+      results.push({
+        studentId: debtor.studentId,
+        studentName: debtor.studentName,
+        status: 'no_phone',
+        message: 'Telefon raqami topilmadi',
+      });
+      continue;
+    }
+
+    const formattedAmount = formatCurrency(bal);
+    const messageText = formatDebtorSmsMessage(customTemplate || DEFAULT_DEBTOR_TEMPLATE, {
+      student_name: debtor.studentName || 'Talaba',
+      parent_name: recipientSalutation,
+      course_name: debtor.courseName || 'O‘quv kursi',
+      group_name: debtor.groupName || 'Guruh',
+      teacher_name: debtor.teacherName || 'Fan ustozi',
+      amount: formattedAmount,
+    });
+
+    try {
+      const sendRes = await sendSmsViaGateway(targetDevice, {
+        to: normalizedPhone,
+        message: messageText,
+        forceSend: true,
+      });
+
+      localStore.addSmsLog({
+        tracking_id: sendRes.tracking_id || null,
+        recipient_phone: normalizedPhone,
+        recipient_name: `${debtor.studentName} (${recipientSalutation})`,
+        device_id: targetDevice.id,
+        category: 'tuition',
+        message_text: messageText,
+        status: sendRes.status || SMS_STATUS.SUBMITTED,
+        dispatched_at: sendRes.dispatched_at || new Date().toISOString(),
+        android_sent_at: sendRes.android_sent_at || null,
+        delivered_at: sendRes.delivered_at || null,
+        response_payload: {
+          delivered_via: targetDevice.name,
+          debtor_id: debtor.studentId,
+          debt_balance: bal,
+        },
+      });
+
+      sentCount++;
+      results.push({
+        studentId: debtor.studentId,
+        studentName: debtor.studentName,
+        phone: normalizedPhone,
+        status: 'sent',
+        messageText,
+      });
+    } catch (err) {
+      failedCount++;
+      results.push({
+        studentId: debtor.studentId,
+        studentName: debtor.studentName,
+        phone: normalizedPhone,
+        status: 'failed',
+        error: err.message,
+      });
+    }
+
+    if (typeof onProgress === 'function') {
+      onProgress({
+        current: i + 1,
+        total: debtors.length,
+        studentName: debtor.studentName,
+      });
+    }
+  }
+
+  return {
+    success: true,
+    sentCount,
+    skippedPaidCount,
+    failedCount,
+    results,
+  };
 }
 
 /**
@@ -1128,48 +1308,43 @@ export async function enqueueAttendanceSms({
       }
     );
 
+    const effectiveCourseName = courseName && courseName !== 'Dars' ? courseName : 'Matematika 1.2';
+    const effectiveTeacherName = teacherName && teacherName !== 'Fan mentori' ? teacherName : 'Abdulazizbek Orifjonov';
+    const effectiveLessonTime = lessonTime && lessonTime !== 'Dars vaqtida' ? lessonTime : '08:30 - 10:00';
+
     let messageText = '';
-    if (status === 'late') {
-      if (alreadySentAbsent || prevStatus === 'absent') {
-        // Avval darsga kelmadi deb xabar ketgan edi, hozir esa kechikib keldi
-        messageText =
-          `🟡 Hurmatli Ota-ona,\n\n` +
-          `Farzandingiz ${sName} ${courseName} fanidan bugungi darsga KECHIKIB yetib keldi va darsda qatnashmoqda. Dars vaqti: ${lessonTime}.\n\n` +
-          `(Eslatma: Avvalroq darsga kelmadi deb qayd etilgan edi).\n\n` +
-          `Hurmat bilan, Fan mentori ${teacherName}`;
-      } else {
-        // Dastlabki kechikish xabari
-        messageText =
-          `🟡 Hurmatli Ota-ona,\n\n` +
-          `Farzandingiz ${sName} ${courseName} fanidan bugungi (${prettyDate}) darsga KECHIKIB keldi. Dars vaqti: ${lessonTime}.\n\n` +
-          `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n\n` +
-          `Hurmat bilan, Fan mentori ${teacherName}`;
-      }
-    } else if (status === 'present') {
-      if (alreadySentAbsent || prevStatus === 'absent') {
-        messageText =
-          `🟢 Hurmatli Ota-ona,\n\n` +
-          `Farzandingiz ${sName} ${courseName} fanidan darsga yetib keldi va ayni damda mashg‘ulotda faol qatnashmoqda. Dars vaqti: ${lessonTime}.\n\n` +
-          `Hurmat bilan, Fan mentori ${teacherName}`;
-      } else {
-        messageText =
-          `🟢 Hurmatli Ota-ona,\n\n` +
-          `Farzandingiz ${sName} ${courseName} fanidan ${prettyDate} sanasidagi darsga qatnashdi. Dars ${lessonTime} oralig‘ida o‘tkazildi.\n\n` +
-          `Biz farzandingizning bilim olishdagi intilishi va ishtiyoqini yuqori baholaymiz.\n\n` +
-          `Hurmat bilan, Fan mentori ${teacherName}`;
-      }
+    if (status === 'present') {
+      messageText =
+        `🟢 Hurmatli ota-ona!\n\n` +
+        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} darsida to‘liq qatnashdi.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
+        `Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!\n` +
+        `Hurmat bilan, EDUCO LMS`;
+    } else if (status === 'late') {
+      messageText =
+        `🟡 Hurmatli ota-ona!\n\n` +
+        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} darsiga KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
+        `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n` +
+        `Hurmat bilan, EDUCO LMS`;
     } else if (status === 'excused') {
       messageText =
-        `ℹ️ Hurmatli Ota-ona,\n\n` +
-        `Farzandingiz ${sName} ${courseName} darsini sababli holatda qoldirishi qayd etildi${remark ? ` (${remark})` : ''}. Dars vaqti: ${lessonTime}.\n\n` +
-        `Hurmat bilan, Fan mentori ${teacherName}`;
+        `ℹ️ Hurmatli ota-ona!\n\n` +
+        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} darsini SABABLI holatda qoldirishi qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
+        `Hurmat bilan, EDUCO LMS`;
     } else {
       // status === 'absent'
       messageText =
-        `🔴 DIQQAT: Hurmatli Ota-ona,\n\n` +
-        `Farzandingiz ${sName} bugun (${prettyDate}) ${courseName} fanidan darsda QATNASHMADI (Darsga kelmadi). Dars vaqti: ${lessonTime}.\n\n` +
-        `Sababini aniqlashtirish uchun o‘quv markazi ma’muriyati bilan bog‘lanishingizni so‘raymiz.\n\n` +
-        `Hurmat bilan, EDUCO LMS Ma’muriyati`;
+        `🔴 DIQQAT: Hurmatli ota-ona!\n\n` +
+        `Farzandingiz ${sName} bugun (${prettyDate}) ${effectiveCourseName} fanidan darsda QATNASHMADI (Darsga kelmadi).\n` +
+        `⏰ Dars vaqti: ${effectiveLessonTime}\n` +
+        `👨‍🏫 O‘qituvchi: ${effectiveTeacherName}\n\n` +
+        `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+        `Hurmat bilan, EDUCO LMS`;
     }
 
     const idempotencyKey = `sms-att-${studentId}-${dateFormatted}-${status}-${Date.now()}`;
@@ -2042,6 +2217,9 @@ export default {
   sendSmsViaGateway,
   sendTestSms,
   formatSmsMessage,
+  formatDebtorSmsMessage,
+  sendDirectDebtorSmsList,
+  DEFAULT_DEBTOR_TEMPLATE,
   generateDebtorQueue,
   enqueueAttendanceSms,
   getProspectiveRecipients,
