@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { enqueueAttendanceSms, normalizePhone, SMS_STATUS } from '../src/services/smsService';
 import { saveAttendanceRecords } from '../src/services/attendanceService';
 import { localStore } from '../src/lib/localStore';
+import { buildAttendanceNotificationText } from '../src/services/telegramBotService';
+import { enqueueAttendanceSmsInBot } from '../scripts/telegram-bot';
 
 describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
   const mockStudents = [
@@ -256,5 +258,50 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
     const checkedDebtor = queue.find((q) => q.id === 'sms-bill-debtor-test');
     expect(checkedDebtor).toBeDefined();
     expect(checkedDebtor.status).toBe(SMS_STATUS.PENDING);
+  });
+
+  it('8. Attendance SMS Formatting: Verifies exact clean format and fallbacks requested by user', () => {
+    const msg = buildAttendanceNotificationText({
+      status: 'present',
+      studentName: 'Zafarbek Karimov',
+      courseName: 'Matematika 1.2',
+      lessonTime: '08:30 - 10:00',
+      teacherName: 'Abdulazizbek Orifjonov',
+      date: '2026-11-14',
+      isHtml: false,
+    });
+
+    expect(msg).toContain('🟢 Hurmatli ota-ona!');
+    expect(msg).toContain('Farzandingiz Zafarbek Karimov bugun (14.11.2026) Matematika 1.2 darsida to‘liq qatnashdi.');
+    expect(msg).toContain('⏰ Dars vaqti: 08:30 - 10:00');
+    expect(msg).toContain('👨‍🏫 O‘qituvchi: Abdulazizbek Orifjonov');
+    expect(msg).toContain('Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!');
+    expect(msg).toContain('Hurmat bilan, EDUCO LMS');
+    expect(msg).not.toContain('oralig‘ida');
+    expect(msg).not.toContain('Fan mentori Fan mentori');
+  });
+
+  it('9. Bot enqueueAttendanceSmsInBot: Generates clean, professional SMS and falls back properly', () => {
+    const db = { educo_db_sms_queue: [] };
+    const mockStudent = {
+      id: 'st-zafarbek-1',
+      fullName: 'Zafarbek Karimov',
+      father_phone: '+998936101774',
+    };
+
+    // Call with empty/fallback inputs
+    enqueueAttendanceSmsInBot(db, mockStudent, 'present', 'Dars', 'Dars vaqtida', '14.11.2026', 'Fan mentori');
+
+    expect(db.educo_db_sms_queue.length).toBe(1);
+    const item = db.educo_db_sms_queue[0];
+    expect(item.recipient_phone).toBe('+998936101774');
+    expect(item.message_text).toContain('🟢 Hurmatli ota-ona!');
+    expect(item.message_text).toContain('Farzandingiz Zafarbek Karimov bugun (14.11.2026) Matematika 1.2 darsida to‘liq qatnashdi.');
+    expect(item.message_text).toContain('⏰ Dars vaqti: 08:30 - 10:00');
+    expect(item.message_text).toContain('👨‍🏫 O‘qituvchi: Abdulazizbek Orifjonov');
+    expect(item.message_text).toContain('Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!');
+    expect(item.message_text).toContain('Hurmat bilan, EDUCO LMS');
+    expect(item.message_text).not.toContain('Fan mentori Fan mentori');
+    expect(item.message_text).not.toContain('oralig‘ida');
   });
 });
