@@ -120,7 +120,7 @@ export default function ChatSidebar({
             <button
               type="button"
               onClick={() => setCategoryFilter('all')}
-              className={`py-1.5 px-1.5 rounded-lg text-xs font-bold transition-all text-center ${
+              className={`py-1.5 px-1 sm:px-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-center truncate ${
                 categoryFilter === 'all'
                   ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs font-black'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
@@ -132,34 +132,34 @@ export default function ChatSidebar({
               <button
                 type="button"
                 onClick={() => setCategoryFilter('announcements')}
-                className={`py-1.5 px-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                className={`py-1.5 px-1 sm:px-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 truncate ${
                   categoryFilter === 'announcements'
                     ? 'bg-rose-500 text-white shadow-xs font-black'
                     : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30'
                 }`}
               >
                 <Megaphone className="w-3 h-3 shrink-0" />
-                <span>E'lonlar</span>
+                <span className="truncate">E'lonlar</span>
               </button>
             )}
             {isStaffUser && (
               <button
                 type="button"
                 onClick={() => setCategoryFilter('staff')}
-                className={`py-1.5 px-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                className={`py-1.5 px-1 sm:px-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center gap-1 truncate ${
                   categoryFilter === 'staff'
                     ? 'bg-amber-500 text-white shadow-xs font-black'
                     : 'text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30'
                 }`}
               >
                 <Briefcase className="w-3 h-3 shrink-0" />
-                <span>Xodimlar</span>
+                <span className="truncate">Xodimlar</span>
               </button>
             )}
             <button
               type="button"
               onClick={() => setCategoryFilter('groups')}
-              className={`py-1.5 px-1.5 rounded-lg text-xs font-bold transition-all text-center ${
+              className={`py-1.5 px-1 sm:px-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all text-center truncate ${
                 categoryFilter === 'groups'
                   ? 'bg-blue-600 dark:bg-emerald-600 text-white shadow-xs font-black'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-surface-dark-tertiary'

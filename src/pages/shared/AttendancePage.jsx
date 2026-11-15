@@ -1494,26 +1494,26 @@ export default function AttendancePage() {
 
                     {/* Teacher KPI Badges */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-white dark:bg-surface-dark-tertiary p-3 rounded-2xl border border-gray-200/70 dark:border-gray-700/70">
-                      <div className="text-center px-3">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block">Ustoz davomati</span>
+                      <div className="text-center px-2 sm:px-3">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block truncate">Ustoz davomati</span>
                         <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
                           {drillTeacher.teacherSelfRate || 98}%
                         </span>
                       </div>
-                      <div className="text-center px-3 border-l border-gray-200 dark:border-gray-700">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block">O'tgan darslari</span>
+                      <div className="text-center px-2 sm:px-3 border-l border-gray-200 dark:border-gray-700">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block truncate">O'tgan darslari</span>
                         <span className="text-lg font-black text-gray-900 dark:text-white">
                           {drillTeacher.lessonsTaughtCount || 24} ta
                         </span>
                       </div>
-                      <div className="text-center px-3 border-l border-gray-200 dark:border-gray-700">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block">Guruhlari</span>
+                      <div className="text-center px-2 sm:px-3 border-t sm:border-t-0 sm:border-l border-gray-200 dark:border-gray-700 pt-2 sm:pt-0">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block truncate">Guruhlari</span>
                         <span className="text-lg font-black text-brand-navy dark:text-blue-400">
                           {drillTeacher.groupsCount} ta
                         </span>
                       </div>
-                      <div className="text-center px-3 border-l border-gray-200 dark:border-gray-700">
-                        <span className="text-[10px] uppercase font-bold text-gray-400 block">Guruhlar davomati</span>
+                      <div className="text-center px-2 sm:px-3 border-t sm:border-t-0 border-l border-gray-200 dark:border-gray-700 pt-2 sm:pt-0">
+                        <span className="text-[10px] uppercase font-bold text-gray-400 block truncate">Guruhlar davomati</span>
                         <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
                           {drillTeacher.teacherRate}%
                         </span>
@@ -2202,7 +2202,7 @@ export default function AttendancePage() {
             </div>
 
             {/* Attendance Summary Counters */}
-            <div className="grid grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
               <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 text-center">
                 <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-300 block">Kelgan</span>
                 <span className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">

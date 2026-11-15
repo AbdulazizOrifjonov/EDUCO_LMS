@@ -251,8 +251,8 @@ export default function PayrollPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-800">
-        <nav className="flex space-x-6 rtl:space-x-reverse" aria-label="Tabs">
+      <div className="border-b border-gray-200 dark:border-gray-800 overflow-x-auto no-scrollbar">
+        <nav className="flex space-x-4 sm:space-x-6 rtl:space-x-reverse min-w-max pb-px" aria-label="Tabs">
           {[
             { id: 'rules', label: t('payroll.salaryRules'), icon: Users, count: rules.length },
             { id: 'periods', label: t('payroll.salaryPeriods'), icon: Calendar, count: periods.length },
@@ -652,7 +652,7 @@ export default function PayrollPage() {
                         {c.method?.replace('_', ' ')}
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 text-xs bg-gray-50 dark:bg-surface-dark-tertiary p-2 rounded-lg text-center">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs bg-gray-50 dark:bg-surface-dark-tertiary p-2.5 rounded-xl text-center">
                       <div>
                         <span className="text-[10px] text-gray-500 block">{t('payroll.baseSalary')}</span>
                         <span className="font-medium text-gray-800 dark:text-gray-200">{formatCurrency(c.baseSalary)}</span>

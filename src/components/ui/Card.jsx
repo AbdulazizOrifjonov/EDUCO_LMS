@@ -9,7 +9,7 @@ export default function Card({
   footer,
   variant = 'default',
   noPadding = false,
-  overflow = 'visible',
+  overflow = 'hidden',
   onClick,
   ...props
 }) {
@@ -58,20 +58,20 @@ export default function Card({
       {...props}
     >
       {hasHeader && (
-        <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-          <div>
+        <div className="px-3.5 sm:px-5 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3 min-w-0">
+          <div className="min-w-0 flex-1">
             {title && (
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                 {subtitle}
               </p>
             )}
           </div>
-          {headerAction && <div className="ml-4 shrink-0">{headerAction}</div>}
+          {headerAction && <div className="shrink-0">{headerAction}</div>}
         </div>
       )}
 

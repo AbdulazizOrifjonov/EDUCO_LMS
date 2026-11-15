@@ -527,10 +527,11 @@ export default function TuitionPage() {
               variant="outline"
               icon={CheckCircle2}
               onClick={() => setShowAllPaidConfirm(true)}
-              className="border-emerald-400 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300 font-semibold text-xs sm:text-sm"
+              className="border-emerald-400 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300 font-semibold text-xs sm:text-sm w-full sm:w-auto"
               title="Dekabr oyiga toza hisob bilan o‘tish uchun barcha talabalar qoldiq qarzini to‘langan deb belgilash"
             >
-              ✅ Barchasini to‘langan qilish (Noyabrgacha yopish)
+              <span className="hidden sm:inline">✅ Barchasini to‘langan qilish (Noyabrgacha yopish)</span>
+              <span className="sm:hidden">✅ Barchasini yopish</span>
             </Button>
           )}
 
@@ -1018,18 +1019,18 @@ export default function TuitionPage() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 text-center text-xs border-t border-b border-gray-100 dark:border-gray-800/80 py-2">
-                      <div>
-                        <span className="text-[10px] text-gray-400 block uppercase">To‘lanishi kerak</span>
-                        <span className="font-bold text-gray-900 dark:text-gray-100">{formatCurrency(st.amountDue)}</span>
+                    <div className="grid grid-cols-3 gap-1 sm:gap-2 text-center text-xs border-t border-b border-gray-100 dark:border-gray-800/80 py-2">
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-gray-400 block uppercase truncate">To‘lanishi kerak</span>
+                        <span className="font-bold text-gray-900 dark:text-gray-100 text-[11px] sm:text-xs truncate block">{formatCurrency(st.amountDue)}</span>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-gray-400 block uppercase">To‘langan</span>
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(st.amountPaid)}</span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-gray-400 block uppercase truncate">To‘langan</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs truncate block">{formatCurrency(st.amountPaid)}</span>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-gray-400 block uppercase">Qoldiq qarz</span>
-                        <span className="font-bold text-brand-red dark:text-red-400">{formatCurrency(st.balance)}</span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-gray-400 block uppercase truncate">Qoldiq qarz</span>
+                        <span className="font-bold text-brand-red dark:text-red-400 text-[11px] sm:text-xs truncate block">{formatCurrency(st.balance)}</span>
                       </div>
                     </div>
 

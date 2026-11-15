@@ -553,8 +553,14 @@ export default function StudentAttendancePage() {
           </span>
         </div>
 
+        {/* Mobile Swipe Hint */}
+        <div className="flex sm:hidden items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 px-1 pb-1">
+          <span>Oylik taqvim</span>
+          <span className="font-semibold">Barcha kunlarni ko‘rish uchun suring →</span>
+        </div>
+
         {/* Calendar Grid */}
-        <div className="overflow-x-auto p-1">
+        <div className="overflow-x-auto p-1 scroll-smooth">
           <div className="min-w-[640px]">
             {/* Weekday Labels */}
             <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-black uppercase tracking-wider">

@@ -298,7 +298,7 @@ export default function StudentDashboard() {
           </div>
 
           {/* Breakdown stat pills */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
             <div className="p-3 rounded-xl bg-blue-50 dark:bg-emerald-950/40 border border-blue-100 dark:border-emerald-900/40">
               <span className="text-[11px] font-semibold uppercase text-blue-800 dark:text-emerald-300 block">
                 {t('attendance.present', 'Present')}

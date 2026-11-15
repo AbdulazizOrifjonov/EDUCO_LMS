@@ -666,17 +666,22 @@ export default function PasswordsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             size="md"
             icon={showAllPasswords ? EyeOff : Eye}
             onClick={handleToggleAll}
-            className="h-10 !rounded-xl font-semibold text-xs sm:text-sm"
+            className="h-10 !rounded-xl font-semibold text-xs sm:text-sm flex-1 sm:flex-initial"
           >
-            {showAllPasswords
-              ? t('passwords.hideAll', 'Parollarni yashirish')
-              : t('passwords.showAll', 'Parollarni ko‘rsatish')}
+            <span className="hidden sm:inline">
+              {showAllPasswords
+                ? t('passwords.hideAll', 'Parollarni yashirish')
+                : t('passwords.showAll', 'Parollarni ko‘rsatish')}
+            </span>
+            <span className="sm:hidden">
+              {showAllPasswords ? 'Yashirish' : 'Ko‘rsatish'}
+            </span>
           </Button>
           <Button
             variant="outline"
@@ -690,7 +695,7 @@ export default function PasswordsPage() {
               exportUsersMasterExcel(users);
               toast.success('Barcha xodimlar va o‘quvchilar parollar bazasi Excel formatida (dashboard va formulalari bilan) yuklab olindi!');
             }}
-            className="h-10 !rounded-xl font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-xs sm:text-sm shadow-xs"
+            className="h-10 !rounded-xl font-bold text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-xs sm:text-sm shadow-xs flex-1 sm:flex-initial"
             title="Parollar va xodimlar bazasini Excel formatida yuklab olish"
           >
             <span className="hidden sm:inline">Excel Baza</span>
@@ -703,7 +708,7 @@ export default function PasswordsPage() {
             onClick={fetchCredentials}
             className="h-10 !rounded-xl font-semibold text-xs sm:text-sm"
           >
-            {t('common.refresh', 'Yangilash')}
+            <span className="hidden sm:inline">{t('common.refresh', 'Yangilash')}</span>
           </Button>
         </div>
       </div>

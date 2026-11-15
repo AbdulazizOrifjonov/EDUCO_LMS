@@ -923,7 +923,7 @@ export default function DashboardLayout({
         {/* Main Content Area */}
         <main
           ref={mainRef}
-          className={`flex-1 min-w-0 w-full ${
+          className={`flex-1 min-w-0 w-full overflow-x-clip ${
             isChatPage
               ? 'p-0 md:p-3 overflow-hidden flex flex-col flex-1 min-h-0 h-full max-h-full'
               : 'p-3 sm:p-5 lg:p-6 pb-24 sm:pb-8'

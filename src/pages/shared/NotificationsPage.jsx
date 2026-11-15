@@ -223,8 +223,8 @@ export default function NotificationsPage() {
 
                   {/* Body */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <h4
                           className={`text-sm font-semibold truncate ${
                             isUnread
@@ -238,7 +238,7 @@ export default function NotificationsPage() {
                           <span className="w-2 h-2 rounded-full bg-brand-red shrink-0" />
                         )}
                       </div>
-                      <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                      <span className="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 shrink-0">
                         {formatDate(item.created_at, getLocale(), {
                           month: 'short',
                           day: 'numeric',

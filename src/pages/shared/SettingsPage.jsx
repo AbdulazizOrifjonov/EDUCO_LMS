@@ -185,8 +185,8 @@ export default function SettingsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-800">
-        <nav className="flex space-x-6 rtl:space-x-reverse" aria-label="Settings Tabs">
+      <div className="border-b border-gray-200 dark:border-gray-800 overflow-x-auto no-scrollbar">
+        <nav className="flex space-x-4 sm:space-x-6 rtl:space-x-reverse min-w-max pb-px" aria-label="Settings Tabs">
           <button
             onClick={() => setActiveTab('profile')}
             className={`

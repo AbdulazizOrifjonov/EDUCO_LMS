@@ -1959,14 +1959,14 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-2">
                 {t('common.theme', 'Displey mavzusi')}
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {['light', 'dark', 'system'].map((m) => (
                   <button
                     key={m}
                     type="button"
                     onClick={() => setTheme(m)}
                     className={`
-                      py-2 px-3 text-xs font-bold rounded-xl capitalize border transition-all cursor-pointer
+                      py-2 px-1.5 sm:px-3 text-[11px] sm:text-xs font-bold rounded-xl capitalize border transition-all cursor-pointer truncate
                       ${
                         theme === m
                           ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-600'
@@ -1984,7 +1984,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
               <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 block mb-2">
                 {t('common.language', 'Til')}
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {[
                   { code: 'uz', label: "O'zbek" },
                   { code: 'ru', label: 'Русский' },
@@ -1995,7 +1995,7 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                     type="button"
                     onClick={() => handleLanguageChange(lang.code)}
                     className={`
-                      py-2 px-2 text-xs font-bold rounded-xl border transition-all flex items-center justify-center gap-1.5 cursor-pointer
+                      py-2 px-1 sm:px-2 text-[11px] sm:text-xs font-bold rounded-xl border transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer truncate
                       ${
                         i18n.language === lang.code
                           ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-600'
@@ -2003,8 +2003,8 @@ export default function ProfilePage({ targetUserId: propTargetUserId } = {}) {
                       }
                     `}
                   >
-                    <LanguageFlag code={lang.code} className="w-4 h-3" />
-                    <span>{lang.label}</span>
+                    <LanguageFlag code={lang.code} className="w-3.5 h-2.5 sm:w-4 sm:h-3 shrink-0" />
+                    <span className="truncate">{lang.label}</span>
                   </button>
                 ))}
               </div>

@@ -238,7 +238,7 @@ export default function Sidebar({
         className={`fixed top-0 bottom-0 z-50 flex flex-col bg-gradient-to-b from-[#123D78] via-[#1b4b8a] to-[#2563EB] text-white shadow-2xl transition-all duration-300 ease-in-out dark:bg-none dark:bg-[#101827] dark:border-r dark:border-gray-800/80
           ${isRtl ? 'right-0' : 'left-0'}
           ${collapsed ? 'lg:w-20' : 'lg:w-64'}
-          w-72
+          w-72 max-w-[85vw]
           ${
             mobileOpen
               ? 'translate-x-0'

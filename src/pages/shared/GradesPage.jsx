@@ -1354,14 +1354,19 @@ export default function GradesPage() {
                 icon={bulkSaving ? LoadingSpinner : CheckCircle2}
                 disabled={bulkSaving || gradedCount === 0}
                 onClick={handleCompleteAndSaveAll}
-                className="w-full sm:w-auto justify-center text-sm sm:text-base font-black py-3.5 px-7 rounded-2xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-xl shadow-blue-600/25 dark:shadow-emerald-600/25 active:scale-95 transition-all cursor-pointer"
+                className="w-full sm:w-auto justify-center text-xs sm:text-base font-black py-3 sm:py-3.5 px-4 sm:px-7 rounded-2xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-xl shadow-blue-600/25 dark:shadow-emerald-600/25 active:scale-95 transition-all cursor-pointer"
               >
                 {bulkSaving ? (
                   <span>Baholar saqlanmoqda...</span>
                 ) : (
-                  <span>
-                    🎓 Baholashni yakunlash va barchasini saqlash ({gradedCount})
-                  </span>
+                  <>
+                    <span className="hidden sm:inline">
+                      🎓 Baholashni yakunlash va barchasini saqlash ({gradedCount})
+                    </span>
+                    <span className="sm:hidden">
+                      🎓 Yakunlash va saqlash ({gradedCount})
+                    </span>
+                  </>
                 )}
               </Button>
             </div>
@@ -1369,20 +1374,20 @@ export default function GradesPage() {
 
           {/* STICKY BOTTOM BAR FOR MOBILE */}
           {displayedStudents.length > 0 && (
-            <div className="fixed bottom-0 left-0 right-0 z-40 p-3 bg-white/95 dark:bg-surface-dark-secondary/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl block sm:hidden">
+            <div className="fixed bottom-0 left-0 right-0 z-40 p-2.5 sm:p-3 bg-white/95 dark:bg-surface-dark-secondary/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 shadow-2xl block sm:hidden">
               <Button
                 variant="primary"
                 size="md"
                 icon={bulkSaving ? LoadingSpinner : CheckCircle2}
                 disabled={bulkSaving || gradedCount === 0}
                 onClick={handleCompleteAndSaveAll}
-                className="w-full justify-center text-sm font-black py-3 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-lg shadow-blue-600/20 dark:shadow-emerald-600/20 active:scale-98 cursor-pointer"
+                className="w-full justify-center text-xs font-black py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-lg shadow-blue-600/20 dark:shadow-emerald-600/20 active:scale-98 cursor-pointer"
               >
                 {bulkSaving ? (
                   <span>Saqlanmoqda...</span>
                 ) : (
-                  <span>
-                    🎓 Baholashni yakunlash ({gradedCount}/{displayedStudents.length})
+                  <span className="truncate">
+                    🎓 Yakunlash ({gradedCount}/{displayedStudents.length})
                   </span>
                 )}
               </Button>

@@ -147,7 +147,7 @@ export default function GradeForm({
           <label className="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
             {t('grades.gradeValue', 'Performance Score (1 - 5 Scale)')}
           </label>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
             {gradeOptions.map((opt) => {
               const isSelected = Number(selectedGrade) === opt.val;
               return (
@@ -156,7 +156,7 @@ export default function GradeForm({
                   type="button"
                   onClick={() => setValue('gradeValue', opt.val)}
                   className={`
-                    py-3 px-2 rounded-xl flex flex-col items-center justify-center font-bold text-white transition-all
+                    py-2 sm:py-3 px-1 sm:px-2 rounded-xl flex flex-col items-center justify-center font-bold text-white transition-all
                     ${opt.bg}
                     ${
                       isSelected
@@ -165,8 +165,8 @@ export default function GradeForm({
                     }
                   `}
                 >
-                  <span className="text-xl leading-none">{opt.val}</span>
-                  <span className="text-[10px] mt-1 text-center font-medium opacity-90 line-clamp-1">
+                  <span className="text-lg sm:text-xl leading-none">{opt.val}</span>
+                  <span className="text-[9px] sm:text-[10px] mt-1 text-center font-medium opacity-90 line-clamp-1">
                     {opt.label}
                   </span>
                 </button>

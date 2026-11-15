@@ -523,12 +523,12 @@ export default function CourseManagement() {
                       )}
                     </div>
                     {isOwnerOrAdmin && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
                         <Button
                           variant="outline"
                           size="sm"
                           icon={Edit2}
-                          className="text-xs py-1 px-2 text-emerald-600 dark:text-emerald-400"
+                          className="text-[11px] sm:text-xs py-1 px-1.5 sm:px-2 text-emerald-600 dark:text-emerald-400"
                           onClick={() => navigate(`/${currentUserRole}/courses/edit/${course.id}`)}
                         >
                           Tahrirlash
@@ -537,7 +537,7 @@ export default function CourseManagement() {
                           variant="ghost"
                           size="sm"
                           icon={course.is_active ? Archive : RotateCcw}
-                          className={`text-xs py-1 px-2 ${
+                          className={`text-[11px] sm:text-xs py-1 px-1.5 sm:px-2 ${
                             course.is_active
                               ? 'text-amber-600 hover:bg-amber-500/10'
                               : 'text-emerald-600 hover:bg-emerald-500/10'
@@ -550,7 +550,7 @@ export default function CourseManagement() {
                           variant="ghost"
                           size="sm"
                           icon={Trash2}
-                          className="text-xs py-1 px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15"
+                          className="text-[11px] sm:text-xs py-1 px-1.5 sm:px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15"
                           onClick={() => handleDeleteCourse(course)}
                         >
                           O‘chirish

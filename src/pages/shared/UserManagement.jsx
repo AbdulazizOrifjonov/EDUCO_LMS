@@ -948,31 +948,33 @@ export default function UserManagement() {
 
       {/* Owner Mode Switcher: Standard List vs Live Master Excel Sheet */}
       {currentUserRole === ROLES.OWNER && (
-        <div className="flex items-center justify-between gap-3 p-1.5 rounded-2xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
-          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+        <div className="flex items-center justify-between gap-2 p-1 sm:p-1.5 rounded-2xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
+          <div className="flex items-center gap-1 sm:gap-1.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`flex-1 sm:flex-initial px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
                 viewMode === 'list'
                   ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-xs'
                   : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              <Users className="w-4 h-4 shrink-0" />
-              <span>Standart Ro‘yxat</span>
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="hidden xs:inline">Standart </span>
+              <span>Ro‘yxat</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode('live-sheet')}
-              className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
+              className={`flex-1 sm:flex-initial px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
                 viewMode === 'live-sheet'
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/30 ring-1 ring-emerald-400/40'
                   : 'text-gray-600 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white'
               }`}
             >
-              <FileSpreadsheet className="w-4 h-4 shrink-0" />
-              <span className="truncate">Jonli Master Excel</span>
+              <FileSpreadsheet className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="hidden xs:inline">Jonli </span>
+              <span className="truncate">Master Excel</span>
               <span
                 className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black shrink-0 transition-colors ${
                   viewMode === 'live-sheet'
