@@ -24,11 +24,29 @@ import fs from 'fs';
 import path from 'path';
 import http from 'http';
 import https from 'https';
+import net from 'net';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
+
+// Bitta kompyuterda faqat 1 ta @EducoLms_Bot nusxasi ishlashini ta'minlash (Singleton Mutex)
+const LMS_LOCK_PORT = 59124;
+function acquireLmsLock() {
+  return new Promise((resolve) => {
+    const s = net.createServer();
+    s.once('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log('ℹ️ [@EducoLms_Bot] Boshqa nusxa allaqachon ishlab turibdi. Ushbu nusxa to‘xtatildi.');
+        process.exit(0);
+      }
+      resolve(false);
+    });
+    s.once('listening', () => resolve(true));
+    s.listen(LMS_LOCK_PORT, '127.0.0.1');
+  });
+}
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '9049935207:AAG2b-t507eJCpf31RMDIm4gFpbUuhFOI7g';
 const DB_PATH = path.resolve(ROOT_DIR, '.data', 'db.json');
@@ -3020,6 +3038,8 @@ async function pollUpdates() {
 
 // --- START BOT SERVICE ---
 export async function startBot() {
+  await acquireLmsLock();
+
   console.log('=====================================================');
   console.log('🤖 EDUCO LMS Ko‘p Rolli Telegram Bot (@EducoLms_Bot)');
   console.log('=====================================================');

@@ -5,6 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import net from 'net';
+import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -768,29 +769,67 @@ async function main() {
   await acquireSingletonLock();
 
   console.log('====================================================');
-  console.log('🚀 EDUCO LMS SMS & Telegram Bot xizmati ishga tushdi!');
+  console.log('🚀 EDUCO LMS Telegram Botlar & SMS Xizmati');
   console.log(`📱 SMS Gateway: ${SMS_USER} (${SMS_API})`);
-  console.log(`🤖 Telegram Bot: ${BOT_TOKEN.slice(0, 10)}...`);
+  console.log(`🤖 Bot 1: @EcommerceDatabot (SMS & Shlyuz Integratori)`);
+  console.log(`🤖 Bot 2: @EducoLms_Bot (Davomat, Baholar va LMS Boti)`);
   console.log('====================================================');
 
-  // Telefon holatini konsolda ko'rsatish
-  const initialDev = await checkDeviceStatus();
-  console.log(`[SMS Gateway] 📱 Ulanish: ${initialDev.name || 'Android Gateway'} (Faol)`);
+  // Telefon holatini konsolda orqa fonda tekshirish
+  checkDeviceStatus()
+    .then((initialDev) => {
+      console.log(`[SMS Gateway] 📱 Ulanish: ${initialDev.name || 'Android Gateway'} (Faol)`);
+    })
+    .catch(() => {});
 
   // 1. KETMA-KET SMS NAVBATINI TEKSHIRIB TURISH (har 3 soniyada)
   setInterval(() => {
     processSequentialQueue().catch((e) => console.error('[Queue Interval Error]', e.message));
   }, 3000);
 
-  // 2. KUNDALIK QARZDORLIKNI TEKSHIRISH (TO'XTATILGAN)
-  // setInterval(() => {
-  //   populateDebtorsToQueue();
-  // }, 30 * 60 * 1000);
-
   // Dastlabki navbat tekshiruvi
   processSequentialQueue();
 
-  // 3. TELEGRAMDAN XABARLARNI OLISH (LONG POLLING)
+  // 2. @EducoLms_Bot (LMS Ko'p Rolli Telegram Boti) ni parallel ishga tushirish!
+  let lmsBotChild = null;
+  const lmsBotScript = path.resolve(__dirname, 'scripts', 'telegram-bot.js');
+
+  function startLmsBot() {
+    if (!fs.existsSync(lmsBotScript) || process.env.NO_LMS_BOT) return;
+
+    console.log('🚀 [EducoLms_Bot] @EducoLms_Bot xizmati parallel ishga tushirilmoqda...');
+    lmsBotChild = spawn(process.execPath, [lmsBotScript], {
+      stdio: 'inherit',
+      cwd: __dirname,
+      env: { ...process.env, EDUCO_SPAWNED_BY_BOTJS: '1' },
+    });
+
+    lmsBotChild.on('error', (err) => {
+      console.error('❌ [@EducoLms_Bot Xatosi]:', err.message);
+    });
+
+    lmsBotChild.on('exit', (code, signal) => {
+      if (signal === 'SIGINT' || signal === 'SIGTERM') return;
+      console.warn(`⚠️ [@EducoLms_Bot] Jarayon to‘xtadi (kod: ${code}). 3 soniyada qayta ishga tushiriladi...`);
+      setTimeout(startLmsBot, 3000);
+    });
+  }
+
+  startLmsBot();
+
+  const cleanup = () => {
+    if (lmsBotChild && !lmsBotChild.killed) {
+      try {
+        lmsBotChild.kill('SIGINT');
+      } catch (_) {}
+    }
+    process.exit(0);
+  };
+  process.on('SIGINT', cleanup);
+  process.on('SIGTERM', cleanup);
+  process.on('exit', cleanup);
+
+  // 3. TELEGRAMDAN XABARLARNI OLISH (LONG POLLING - @EcommerceDatabot)
   let offset = 0;
   while (true) {
     try {
