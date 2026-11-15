@@ -99,21 +99,16 @@ async function syncCloudStore() {
 
     if (Array.isArray(cloudData.educo_db_sms_queue)) {
       db.educo_db_sms_queue = db.educo_db_sms_queue || [];
-      if (cloudData.educo_db_sms_queue.length === 0 && db.educo_db_sms_queue.length > 0) {
-        db.educo_db_sms_queue = [];
-        changed = true;
-      } else {
-        for (const cloudItem of cloudData.educo_db_sms_queue) {
-          if (cloudDeleted.has(cloudItem.id)) continue;
-          const localIdx = db.educo_db_sms_queue.findIndex((q) => q.id === cloudItem.id);
-          if (localIdx === -1) {
-            db.educo_db_sms_queue.push(cloudItem);
+      for (const cloudItem of cloudData.educo_db_sms_queue) {
+        if (!cloudItem || !cloudItem.id || cloudDeleted.has(cloudItem.id)) continue;
+        const localIdx = db.educo_db_sms_queue.findIndex((q) => q.id === cloudItem.id);
+        if (localIdx === -1) {
+          db.educo_db_sms_queue.push(cloudItem);
+          changed = true;
+        } else if (cloudItem.status && localIdx >= 0) {
+          if (db.educo_db_sms_queue[localIdx].status === 'pending' && cloudItem.status !== 'pending') {
+            db.educo_db_sms_queue[localIdx] = cloudItem;
             changed = true;
-          } else if (cloudItem.status && localIdx >= 0) {
-            if (db.educo_db_sms_queue[localIdx].status === 'pending' && cloudItem.status !== 'pending') {
-              db.educo_db_sms_queue[localIdx] = cloudItem;
-              changed = true;
-            }
           }
         }
       }

@@ -10,11 +10,19 @@ echo   [1] @EcommerceDatabot - SMS Gateway va Idempotent Navbat Boti
 echo   [2] @EducoLms_Bot     - Davomat, Baholar va LMS Xabarnoma Boti
 echo ======================================================================
 echo.
-echo Server ishga tushmoqda... (Oynani yopmang, botlar fonda ishlaydi)
+
+:: Agar eski qotib qolgan bot jarayoni portni band qilib turgan bo'lsa, uni tozalash
+powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 59123,59124 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }" >nul 2>&1
+
+echo Server ishga tushmoqda... (Oynani yopmang, botlar ushbu oynada ishlaydi)
 echo.
 
 node bot.js
 
 echo.
-echo ⚠️ Botlar to'xtadi. Qayta ishga tushirish uchun ixtiyoriy tugmani bosing...
-pause
+echo ======================================================================
+echo ⚠️ Bot xizmati to'xtadi!
+echo Qaytadan ishga tushirish uchun ixtiyoriy tugmani bosing...
+echo ======================================================================
+pause >nul
+goto :start

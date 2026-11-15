@@ -4705,6 +4705,28 @@ class LocalStore {
       list = [...INITIAL_SMS_DEVICES];
       this.setItem(STORAGE_KEYS.SMS_DEVICES, list);
     }
+    // Auto-migrate any stale/expired device tokens to the active EMTIDA credentials
+    let updated = false;
+    list = list.map((dev) => {
+      if (dev && dev.device_role === 'primary') {
+        if (!dev.api_token || dev.api_token.includes('SXP6_F') || dev.api_token.includes('demo_token')) {
+          updated = true;
+          return {
+            ...dev,
+            name: 'Android SMS Gateway (EMTIDA)',
+            gateway_url: 'https://api.sms-gate.app/3rdparty/v1/messages',
+            api_token: 'EMTIDA:3x7k46xkpavev_',
+            status: 'online',
+            is_active: true,
+          };
+        }
+      }
+      return dev;
+    });
+    if (updated) {
+      this.setItem(STORAGE_KEYS.SMS_DEVICES, list);
+      this.pushToServer({ [STORAGE_KEYS.SMS_DEVICES]: list }).catch(() => {});
+    }
     return list;
   }
 
