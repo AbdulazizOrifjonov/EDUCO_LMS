@@ -4827,6 +4827,26 @@ class LocalStore {
     return true;
   }
 
+  clearSmsQueue() {
+    const list = this.getSmsQueue();
+    const ids = list.map((q) => q.id).filter(Boolean);
+    const deleted = new Set(this._getDeletedIds ? this._getDeletedIds() : this.getItem('_deleted_ids', []));
+    ids.forEach((id) => deleted.add(String(id)));
+    const deletedArr = Array.from(deleted);
+    this.setItem('_deleted_ids', deletedArr);
+    try {
+      if (typeof window !== 'undefined' && window.localStorage?.setItem) {
+        window.localStorage.setItem('educo_deleted_ids', JSON.stringify(deletedArr));
+      }
+    } catch (_) {}
+    this.setItem(STORAGE_KEYS.SMS_QUEUE, []);
+    this.pushToServer({
+      [STORAGE_KEYS.SMS_QUEUE]: [],
+      _deleted_ids: deletedArr,
+    }).catch(() => {});
+    return true;
+  }
+
   getSmsLogs() {
     return this.getItem(STORAGE_KEYS.SMS_LOGS, []);
   }

@@ -1538,6 +1538,26 @@ export async function getSmsQueue(filters = {}) {
 }
 
 /**
+ * Clears entire SMS queue and propagates deletion to server and cloud
+ */
+export async function clearSmsQueue() {
+  const q = localStore.getSmsQueue() || [];
+  const ids = q.map((item) => item.id).filter(Boolean);
+  localStore.clearSmsQueue();
+  try {
+    await fetch('/api/sync-store', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        educo_db_sms_queue: [],
+        _deleted_ids: ids,
+      }),
+    });
+  } catch (_) {}
+  return { success: true, clearedCount: ids.length };
+}
+
+/**
  * Gets SMS delivery audit logs
  */
 export async function getSmsLogs(limit = 100) {
@@ -2199,6 +2219,7 @@ export default {
   enqueueAttendanceSms,
   getProspectiveRecipients,
   getSmsQueue,
+  clearSmsQueue,
   getSmsLogs,
   processQueueBatch,
   retryQueueItem,

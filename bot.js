@@ -83,17 +83,37 @@ async function syncCloudStore() {
     const db = getDb();
     let changed = false;
 
-    if (Array.isArray(cloudData.educo_db_sms_queue) && cloudData.educo_db_sms_queue.length > 0) {
-      db.educo_db_sms_queue = db.educo_db_sms_queue || [];
-      for (const cloudItem of cloudData.educo_db_sms_queue) {
-        const localIdx = db.educo_db_sms_queue.findIndex((q) => q.id === cloudItem.id);
-        if (localIdx === -1) {
-          db.educo_db_sms_queue.push(cloudItem);
+    const cloudDeleted = new Set(Array.isArray(cloudData._deleted_ids) ? cloudData._deleted_ids : []);
+    if (cloudDeleted.size > 0) {
+      const localDeleted = new Set(db._deleted_ids || []);
+      cloudDeleted.forEach((id) => localDeleted.add(id));
+      db._deleted_ids = Array.from(localDeleted);
+      if (Array.isArray(db.educo_db_sms_queue) && db.educo_db_sms_queue.length > 0) {
+        const filtered = db.educo_db_sms_queue.filter((q) => !cloudDeleted.has(q.id));
+        if (filtered.length !== db.educo_db_sms_queue.length) {
+          db.educo_db_sms_queue = filtered;
           changed = true;
-        } else if (cloudItem.status && localIdx >= 0) {
-          if (db.educo_db_sms_queue[localIdx].status === 'pending' && cloudItem.status !== 'pending') {
-            db.educo_db_sms_queue[localIdx] = cloudItem;
+        }
+      }
+    }
+
+    if (Array.isArray(cloudData.educo_db_sms_queue)) {
+      db.educo_db_sms_queue = db.educo_db_sms_queue || [];
+      if (cloudData.educo_db_sms_queue.length === 0 && db.educo_db_sms_queue.length > 0) {
+        db.educo_db_sms_queue = [];
+        changed = true;
+      } else {
+        for (const cloudItem of cloudData.educo_db_sms_queue) {
+          if (cloudDeleted.has(cloudItem.id)) continue;
+          const localIdx = db.educo_db_sms_queue.findIndex((q) => q.id === cloudItem.id);
+          if (localIdx === -1) {
+            db.educo_db_sms_queue.push(cloudItem);
             changed = true;
+          } else if (cloudItem.status && localIdx >= 0) {
+            if (db.educo_db_sms_queue[localIdx].status === 'pending' && cloudItem.status !== 'pending') {
+              db.educo_db_sms_queue[localIdx] = cloudItem;
+              changed = true;
+            }
           }
         }
       }

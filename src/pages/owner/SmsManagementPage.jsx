@@ -63,6 +63,7 @@ import smsService, {
   generateDebtorQueue,
   getProspectiveRecipients,
   getSmsQueue,
+  clearSmsQueue,
   getSmsLogs,
   processQueueBatch,
   retryQueueItem,
@@ -653,6 +654,26 @@ export default function SmsManagementPage() {
       toast.error(`Xatolik: ${err.message}`);
     } finally {
       setRefreshingQueue(false);
+    }
+  };
+
+  const [clearingQueue, setClearingQueue] = useState(false);
+
+  // Clear entire SMS queue to 0 state
+  const handleClearQueue = async () => {
+    if (clearingQueue) return;
+    if (!window.confirm("Barcha navbatdagi SMS xabarlarni tozalab, 0 holatiga keltirmoqchimisiz?")) {
+      return;
+    }
+    try {
+      setClearingQueue(true);
+      await clearSmsQueue();
+      setQueue([]);
+      toast.success("SMS navbati to‘liq tozalandi! Barcha bo‘limlar 0 holatiga keltirildi.");
+    } catch (err) {
+      toast.error(`Tozalashda xatolik: ${err.message}`);
+    } finally {
+      setClearingQueue(false);
     }
   };
 
@@ -2907,6 +2928,21 @@ export default function SmsManagementPage() {
                 >
                   Yangilash
                 </Button>
+                {queue.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={Trash2}
+                    isLoading={clearingQueue}
+                    disabled={clearingQueue}
+                    onClick={handleClearQueue}
+                    className="!h-10 border-rose-300 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer font-semibold text-xs px-3 rounded-xl"
+                    title="Barcha navbatdagi SMS xabarlarni tozalab, 0 holatiga keltirish"
+                  >
+                    <span className="hidden sm:inline">Tozalash (0 holat)</span>
+                    <span className="sm:hidden">Tozalash</span>
+                  </Button>
+                )}
                 {stats.failed > 0 && (
                   <Button
                     variant="outline"
@@ -3007,8 +3043,8 @@ export default function SmsManagementPage() {
                       <td colSpan={5} className="py-14 text-center text-gray-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <ListOrdered className="w-8 h-8 text-gray-300 dark:text-gray-600" />
-                          <span className="font-medium text-sm text-gray-600 dark:text-gray-300">Navbatda SMS xabarlari mavjud emas</span>
-                          <span className="text-xs text-gray-400">Qarzdorlarni tekshirish tugmasini bosib yangi navbat hosil qilishingiz mumkin</span>
+                          <span className="font-medium text-sm text-gray-600 dark:text-gray-300">Navbatda SMS xabarlari mavjud emas (0 ta)</span>
+                          <span className="text-xs text-gray-400 max-w-md">Barcha bo‘limlar 0 holatida. To‘lov eslatmalari keyingi oyda (to‘lov muddati kelganda) avtomatik ishga tushadi. Davomat xabarlari esa ustoz davomatni saqlaganda darhol jo‘natiladi.</span>
                         </div>
                       </td>
                     </tr>
@@ -3131,10 +3167,10 @@ export default function SmsManagementPage() {
                 <div className="flex flex-col items-center justify-center gap-2">
                   <ListOrdered className="w-8 h-8 text-gray-300 dark:text-gray-600" />
                   <span className="font-semibold text-sm text-gray-600 dark:text-gray-300">
-                    Navbatda SMS xabarlari mavjud emas
+                    Navbatda SMS xabarlari mavjud emas (0 ta)
                   </span>
                   <span className="text-xs text-gray-400">
-                    Qarzdorlarni tekshirish tugmasini bosib yangi navbat shakllantirishingiz mumkin
+                    Barcha bo‘limlar 0 holatida. To‘lov eslatmalari keyingi oyda avtomatik ishga tushadi.
                   </span>
                 </div>
               </Card>
