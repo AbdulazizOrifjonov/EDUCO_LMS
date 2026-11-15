@@ -1044,16 +1044,16 @@ export default function TuitionPage() {
                             <Button
                               variant="success"
                               size="sm"
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs !py-1 !px-2 flex items-center gap-1"
+                              icon={CheckCircle2}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-1.5 px-2.5 rounded-xl cursor-pointer"
                               onClick={() => handleQuickPay(st)}
                               disabled={actionLoading}
                             >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>To‘landi</span>
+                              To‘landi
                             </Button>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-xl border border-emerald-500/20">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                               <span>To‘langan</span>
                             </span>
                           )}
@@ -1062,27 +1062,26 @@ export default function TuitionPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-blue-600 border-blue-200 text-xs !py-1 !px-2 flex items-center gap-1"
+                              icon={Send}
+                              className="text-blue-600 border-blue-200 text-xs py-1.5 px-2.5 rounded-xl cursor-pointer"
                               onClick={() => handleOpenSmsModal([st])}
                             >
-                              <Send className="w-3 h-3" />
-                              <span>SMS</span>
+                              SMS
                             </Button>
                           )}
 
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="!p-1.5 h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                            icon={Percent}
+                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-xl"
                             title="Chegirmani sozlash"
                             onClick={() => handleOpenDiscountModal(st)}
-                          >
-                            <Percent className="w-4 h-4" />
-                          </Button>
+                          />
                           <Button
                             variant="outline"
                             size="sm"
-                            className="text-xs !py-1 !px-2"
+                            className="text-xs py-1.5 px-3 rounded-xl font-semibold cursor-pointer"
                             onClick={() => {
                               setSelectedStudentForPayment(st.studentId);
                               setIsPaymentModalOpen(true);

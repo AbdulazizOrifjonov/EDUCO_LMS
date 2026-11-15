@@ -492,23 +492,23 @@ export default function CourseManagement() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-1.5 flex-wrap">
-                    <div className="flex items-center gap-1.5">
+                  <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                    <div className={`grid ${isOwnerOrAdmin ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
                       <Button
                         variant="outline"
                         size="sm"
                         icon={Eye}
-                        className="text-xs py-1 px-2.5 text-blue-600 dark:text-blue-400"
+                        className="w-full justify-center text-xs py-2 h-9 font-semibold text-blue-600 dark:text-blue-400 rounded-xl cursor-pointer"
                         onClick={() => setSelectedCourseForView(course)}
                       >
-                        Batafsil
+                        {t('common.view', 'Batafsil')}
                       </Button>
                       {isOwnerOrAdmin && (
                         <Button
                           variant="outline"
                           size="sm"
                           icon={FolderPlus}
-                          className="text-xs py-1 px-2 text-emerald-600 dark:text-emerald-400 font-bold border-emerald-300 dark:border-emerald-800"
+                          className="w-full justify-center text-xs py-2 h-9 font-semibold text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 rounded-xl cursor-pointer"
                           title="Ushbu kurs ostida yangi guruh ochish"
                           onClick={() =>
                             navigate(
@@ -523,12 +523,12 @@ export default function CourseManagement() {
                       )}
                     </div>
                     {isOwnerOrAdmin && (
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+                      <div className="grid grid-cols-3 gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           icon={Edit2}
-                          className="text-[11px] sm:text-xs py-1 px-1.5 sm:px-2 text-emerald-600 dark:text-emerald-400"
+                          className="w-full justify-center text-xs py-2 h-9 font-semibold text-emerald-600 dark:text-emerald-400 rounded-xl cursor-pointer"
                           onClick={() => navigate(`/${currentUserRole}/courses/edit/${course.id}`)}
                         >
                           Tahrirlash
@@ -537,10 +537,10 @@ export default function CourseManagement() {
                           variant="ghost"
                           size="sm"
                           icon={course.is_active ? Archive : RotateCcw}
-                          className={`text-[11px] sm:text-xs py-1 px-1.5 sm:px-2 ${
+                          className={`w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl border cursor-pointer ${
                             course.is_active
-                              ? 'text-amber-600 hover:bg-amber-500/10'
-                              : 'text-emerald-600 hover:bg-emerald-500/10'
+                              ? 'text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/60 hover:bg-amber-50'
+                              : 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50'
                           }`}
                           onClick={() => handleToggleArchive(course)}
                         >
@@ -550,7 +550,7 @@ export default function CourseManagement() {
                           variant="ghost"
                           size="sm"
                           icon={Trash2}
-                          className="text-[11px] sm:text-xs py-1 px-1.5 sm:px-2 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15"
+                          className="w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 cursor-pointer"
                           onClick={() => handleDeleteCourse(course)}
                         >
                           O‘chirish

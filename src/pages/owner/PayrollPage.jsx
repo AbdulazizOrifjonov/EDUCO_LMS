@@ -341,12 +341,13 @@ export default function PayrollPage() {
                       {formatCurrency(rule.rate)}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
                     <span>{formatDate(rule.effectiveDate)}</span>
                     <Button
                       variant="ghost"
                       size="sm"
                       icon={Edit2}
+                      className="h-9 px-3.5 font-semibold text-xs rounded-xl cursor-pointer"
                       onClick={() => {
                         setEditingRule(rule);
                         setRuleModalOpen(true);
@@ -484,10 +485,11 @@ export default function PayrollPage() {
                       <span>{formatDate(period.endDate)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-end gap-2 pt-1">
+                  <div className={`grid ${period.status !== 'closed' ? 'grid-cols-2' : 'grid-cols-1'} gap-2 pt-1`}>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
+                      className="w-full justify-center text-xs h-9 font-semibold rounded-xl cursor-pointer"
                       onClick={() => {
                         setSelectedPeriodId(period.id);
                         setActiveTab('calculations');
@@ -499,6 +501,7 @@ export default function PayrollPage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="w-full justify-center text-xs h-9 font-semibold rounded-xl border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 cursor-pointer"
                         onClick={() => handleClosePeriod(period.id)}
                         isLoading={actionLoading}
                       >
@@ -785,14 +788,15 @@ export default function PayrollPage() {
                         variant="primary"
                         size="sm"
                         icon={CheckCircle}
+                        className="h-9 px-3.5 rounded-xl font-semibold text-xs cursor-pointer"
                         onClick={() => handleMarkAsPaid(p.id)}
                         isLoading={actionLoading}
                       >
                         {t('payroll.markPaid')}
                       </Button>
                     ) : (
-                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5" /> {t('payroll.settled')}
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> {t('payroll.settled')}
                       </span>
                     )}
                   </div>

@@ -736,54 +736,56 @@ export default function GroupManagement() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center gap-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        icon={Eye}
-                        className="flex-1 justify-center text-xs py-1.5"
-                        onClick={() => navigate(detailPath)}
-                      >
-                        {t('common.view', 'Batafsil')}
-                      </Button>
-                      {!isTeacher && (
-                        <>
+                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                      <div className={`grid ${!isTeacher ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          icon={Eye}
+                          className="w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl cursor-pointer"
+                          onClick={() => navigate(detailPath)}
+                        >
+                          {t('common.view', 'Batafsil')}
+                        </Button>
+                        {!isTeacher && (
                           <Button
                             variant="outline"
                             size="sm"
                             icon={Edit2}
-                            className="flex-1 justify-center text-xs py-1.5"
+                            className="w-full justify-center text-xs py-2 h-9 font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-xl cursor-pointer"
                             onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
                           >
                             {t('common.edit', 'Tahrirlash')}
                           </Button>
+                        )}
+                      </div>
+                      {!isTeacher && (
+                        <div className="grid grid-cols-2 gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className={`!p-2 shrink-0 ${
+                            icon={group.status === 'archived' ? RotateCcw : Archive}
+                            className={`w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl border cursor-pointer ${
                               group.status === 'archived'
-                                ? 'text-gray-500 hover:text-emerald-600'
-                                : 'text-gray-500 hover:text-brand-red'
+                                ? 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50'
+                                : 'text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50'
                             }`}
                             title={group.status === 'archived' ? t('common.restore', 'Tiklash') : t('common.archive', 'Arxivlash')}
                             onClick={() => handleToggleArchive(group)}
                           >
-                            {group.status === 'archived' ? (
-                              <RotateCcw className="w-4 h-4" />
-                            ) : (
-                              <Archive className="w-4 h-4" />
-                            )}
+                            <span>{group.status === 'archived' ? t('common.restore', 'Tiklash') : t('common.archive', 'Arxiv')}</span>
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="!p-2 shrink-0 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15"
+                            icon={Trash2}
+                            className="w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 cursor-pointer"
                             title={t('common.delete', 'Butunlay o‘chirish')}
                             onClick={() => handleDeleteGroup(group)}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <span>{t('common.delete', 'O‘chirish')}</span>
                           </Button>
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>

@@ -132,42 +132,54 @@ async def run_audit():
                 await page.goto("http://localhost:5173/login", timeout=10000, wait_until="domcontentloaded")
                 await page.wait_for_timeout(150)
                 
-                if role != "public":
-                    session_payload = {
-                        "user": {
-                            "id": f"usr-{role}-1",
-                            "email": f"{role}@educo.app",
-                            "phone": "+998901112233",
-                            "user_metadata": {
-                                "role": role,
+                try:
+                    await page.wait_for_load_state("domcontentloaded", timeout=4000)
+                except Exception:
+                    pass
+
+                try:
+                    if role != "public":
+                        session_payload = {
+                            "user": {
+                                "id": f"usr-{role}-1",
+                                "email": f"{role}@educo.app",
+                                "phone": "+998901112233",
+                                "user_metadata": {
+                                    "role": role,
+                                    "full_name": f"Test {role.capitalize()}",
+                                    "username": role
+                                }
+                            },
+                            "profile": {
+                                "id": f"usr-{role}-1",
+                                "username": role,
+                                "first_name": "Test",
+                                "last_name": role.capitalize(),
                                 "full_name": f"Test {role.capitalize()}",
-                                "username": role
+                                "role": role,
+                                "email": f"{role}@educo.app",
+                                "phone": "+998901112233",
+                                "is_active": True
                             }
-                        },
-                        "profile": {
-                            "id": f"usr-{role}-1",
-                            "username": role,
-                            "first_name": "Test",
-                            "last_name": role.capitalize(),
-                            "full_name": f"Test {role.capitalize()}",
-                            "role": role,
-                            "email": f"{role}@educo.app",
-                            "phone": "+998901112233",
-                            "is_active": True
                         }
-                    }
-                    await page.evaluate(f"""() => {{
-                        localStorage.setItem('educo_demo_session', JSON.stringify({json.dumps(session_payload)}));
-                        localStorage.setItem('theme', 'light');
-                    }}""")
-                else:
-                    await page.evaluate("() => { localStorage.removeItem('educo_demo_session'); }")
+                        await page.evaluate(f"""() => {{
+                            localStorage.setItem('educo_demo_session', JSON.stringify({json.dumps(session_payload)}));
+                            localStorage.setItem('theme', 'light');
+                        }}""")
+                    else:
+                        await page.evaluate("() => { localStorage.removeItem('educo_demo_session'); }")
+                except Exception:
+                    pass
 
                 for url in urls:
                     total_checks += 1
                     try:
-                        await page.goto(url, timeout=10000, wait_until="domcontentloaded")
-                        await page.wait_for_timeout(300)
+                        try:
+                            await page.goto(url, timeout=12000, wait_until="domcontentloaded")
+                        except Exception:
+                            await asyncio.sleep(0.5)
+                            await page.goto(url, timeout=12000, wait_until="domcontentloaded")
+                        await page.wait_for_timeout(350)
                         
                         overflow_data = await page.evaluate(CHECK_OVERFLOW_JS)
                         

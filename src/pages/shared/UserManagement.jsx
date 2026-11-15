@@ -1559,37 +1559,38 @@ export default function UserManagement() {
                           variant="outline"
                           size="sm"
                           icon={Eye}
-                          className="w-full justify-center text-xs py-2 font-medium text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                          className="w-full justify-center text-xs py-2 h-9 font-semibold text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl cursor-pointer"
                           onClick={() => navigate(`/${currentUserRole}/users/profile/${row.id}`)}
                         >
-                          {t('common.view', 'Batafsil')}
+                          {t('common.view', "Ko'rish")}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           icon={Edit2}
-                          className="w-full justify-center text-xs py-2 font-medium text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+                          className="w-full justify-center text-xs py-2 h-9 font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-xl cursor-pointer"
                           onClick={() => navigate(`/${currentUserRole}/users/edit/${row.id}`)}
                         >
                           {t('common.edit', 'Tahrirlash')}
                         </Button>
                       </div>
 
-                      <div className="flex items-center gap-1.5">
+                      <div className={`grid ${canDeleteUser(row) ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
                         <Button
                           variant="ghost"
                           size="sm"
                           icon={KeyRound}
-                          className="flex-1 justify-center text-xs py-1.5 font-medium whitespace-nowrap text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50"
+                          className="w-full justify-center text-xs py-2 h-9 font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 rounded-xl cursor-pointer"
                           title={t('users.resetPassword', 'Parolni tiklash')}
                           onClick={() => handleResetPassword(row)}
                         >
-                          <span>{t('users.resetPasswordShort', 'Parol')}</span>
+                          {t('users.resetPasswordShort', 'Parol')}
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`flex-1 justify-center px-2 py-1.5 text-xs font-medium whitespace-nowrap rounded-lg border flex items-center gap-1.5 ${
+                          icon={row.is_active ? XCircle : CheckCircle}
+                          className={`w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl border cursor-pointer ${
                             row.is_active
                               ? 'text-rose-600 dark:text-rose-400 border-rose-200/80 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40'
                               : 'text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
@@ -1597,18 +1598,18 @@ export default function UserManagement() {
                           title={row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faollashtirish')}
                           onClick={() => handleToggleStatus(row)}
                         >
-                          {row.is_active ? <XCircle className="w-3.5 h-3.5 shrink-0" /> : <CheckCircle className="w-3.5 h-3.5 shrink-0" />}
-                          <span>{row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faol')}</span>
+                          {row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faol')}
                         </Button>
                         {canDeleteUser(row) && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="!p-2 shrink-0 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50"
+                            icon={Trash2}
+                            className="w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50 cursor-pointer"
                             title={t('common.delete', 'O‘chirish')}
                             onClick={() => handleDeleteUser(row)}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <span className="hidden xs:inline">{t('common.delete', 'O‘chirish')}</span>
                           </Button>
                         )}
                       </div>

@@ -356,7 +356,7 @@ export default function HomeworkPage() {
                         variant="primary"
                         size="sm"
                         icon={Eye}
-                        className="flex-1 justify-center text-xs py-1.5"
+                        className="flex-1 justify-center text-xs py-2 h-9 font-semibold rounded-xl cursor-pointer"
                         onClick={() => navigate(detailPath)}
                       >
                         {t('common.view', 'Batafsil')}
@@ -368,7 +368,7 @@ export default function HomeworkPage() {
                             variant="outline"
                             size="sm"
                             icon={Edit2}
-                            className="flex-1 justify-center text-xs py-1.5"
+                            className="flex-1 justify-center text-xs py-2 h-9 font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-xl cursor-pointer"
                             onClick={() => {
                               setSelectedHw(hw);
                               setIsFormOpen(true);
@@ -379,12 +379,11 @@ export default function HomeworkPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="!p-2 text-gray-500 hover:text-brand-red shrink-0"
+                            icon={Trash2}
+                            className="!p-2 h-9 w-9 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-xl shrink-0 cursor-pointer"
                             title={t('common.delete', 'O‘chirish')}
                             onClick={() => handleDelete(hw.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          />
                         </>
                       )}
                     </div>

@@ -1191,7 +1191,7 @@ export default function GradesPage() {
                               <span className="text-base sm:text-lg font-black leading-none">
                                 {btn.val}
                               </span>
-                              <span className="text-[10px] sm:text-xs font-semibold leading-tight mt-1 line-clamp-1">
+                              <span className="text-[9px] xs:text-[10px] sm:text-xs font-semibold leading-tight mt-1 truncate max-w-full px-0.5">
                                 {btn.label}
                               </span>
                             </button>

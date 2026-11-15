@@ -70,7 +70,7 @@ export default function Button({
       {!isLoading && Icon && iconPosition === 'left' && (
         <Icon className="w-4 h-4 shrink-0" />
       )}
-      <span>{children}</span>
+      <span className="inline-flex items-center justify-center gap-1.5 shrink-0 min-w-0">{children}</span>
       {!isLoading && Icon && iconPosition === 'right' && (
         <Icon className="w-4 h-4 shrink-0" />
       )}
