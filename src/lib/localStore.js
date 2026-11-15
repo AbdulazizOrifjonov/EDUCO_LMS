@@ -4856,6 +4856,36 @@ class LocalStore {
     this.pushToServer({ [STORAGE_KEYS.SMS_LOGS]: list }).catch(() => {});
     return newLog;
   }
+
+  getSystemMode() {
+    try {
+      const stored = localStorage.getItem('educo_system_mode');
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (_) {}
+    return {
+      isTestMode: true,
+      activeModule: 'attendance',
+      moduleName: 'Davomat tizimi',
+      allowAnyDateAttendance: true,
+      simulateSms: true,
+    };
+  }
+
+  setSystemMode(mode) {
+    try {
+      localStorage.setItem('educo_system_mode', JSON.stringify(mode));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('educo-system-mode-changed', { detail: mode }));
+      }
+    } catch (_) {}
+    return mode;
+  }
+
+  isTestMode() {
+    return this.getSystemMode()?.isTestMode ?? true;
+  }
 }
 
 export const localStore = new LocalStore();
