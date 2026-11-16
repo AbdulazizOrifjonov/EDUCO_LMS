@@ -2659,6 +2659,28 @@ export default {
           ];
         }
 
+        // Default: Ensure SMS debtor start date is strictly December 1, 2026 (November in stock 0 state)
+        if (!store['educo_db_sms_settings']) {
+          store['educo_db_sms_settings'] = {
+            id: 'sms-settings-1',
+            is_enabled: true,
+            debtor_sms_enabled: false,
+            debtor_sms_start_date: '2026-12-01',
+            debtor_sms_start_day: 5,
+            schedule_days: [1, 5, 10, 15, 20, 25],
+            schedule_time: '10:00',
+            target_recipient: 'father_first',
+            send_interval_seconds: 4,
+            max_retries: 3,
+            anti_duplicate_days: 15,
+            sender_name: 'EDUCO',
+            notify_owner_on_failure: true,
+          };
+        } else if (!store['educo_db_sms_settings'].debtor_sms_start_date || store['educo_db_sms_settings'].debtor_sms_start_date < '2026-12-01') {
+          store['educo_db_sms_settings'].debtor_sms_start_date = '2026-12-01';
+          store['educo_db_sms_settings'].debtor_sms_enabled = false;
+        }
+
         return new Response(JSON.stringify(store), {
           status: 200,
           headers: {

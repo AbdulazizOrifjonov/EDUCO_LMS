@@ -263,9 +263,9 @@ async function processSequentialQueue() {
     const queue = db.educo_db_sms_queue || [];
     const settings = db.educo_db_sms_settings || {};
     const debtorSmsEnabled = Boolean(settings.debtor_sms_enabled);
-    const debtorStartDate = settings.debtor_sms_start_date || '';
+    const debtorStartDate = settings.debtor_sms_start_date || '2026-12-01';
     const todayStr = new Date().toISOString().split('T')[0];
-    const dateReached = !debtorStartDate || todayStr >= debtorStartDate;
+    const dateReached = todayStr >= debtorStartDate;
     const allowDebtorSms = debtorSmsEnabled && dateReached;
 
     // Davomat xabarlarini aniqlash (Davomat SMS lari HECH QACHON to'xtatilmaydi, zudlik bilan ketadi!)
@@ -533,9 +533,9 @@ async function populateDebtorsToQueue() {
     const db = getDb();
     const settings = db.educo_db_sms_settings || {};
     const debtorSmsEnabled = Boolean(settings.debtor_sms_enabled);
-    const debtorStartDate = settings.debtor_sms_start_date || '';
+    const debtorStartDate = settings.debtor_sms_start_date || '2026-12-01';
     const todayStr = new Date().toISOString().split('T')[0];
-    const dateReached = !debtorStartDate || todayStr >= debtorStartDate;
+    const dateReached = todayStr >= debtorStartDate;
 
     // Tugma yoqilmagan yoki belgilangan sana hali kelmagan bo'lsa, qat'iy 0 qaytariladi!
     if (!debtorSmsEnabled || !dateReached) {
@@ -704,9 +704,9 @@ async function handleTelegramMessage(msg) {
     const db = getDb();
     const settings = db.educo_db_sms_settings || {};
     const debtorSmsEnabled = Boolean(settings.debtor_sms_enabled);
-    const debtorStartDate = settings.debtor_sms_start_date || '';
+    const debtorStartDate = settings.debtor_sms_start_date || '2026-12-01';
     const todayStr = new Date().toISOString().split('T')[0];
-    const dateReached = !debtorStartDate || todayStr >= debtorStartDate;
+    const dateReached = todayStr >= debtorStartDate;
 
     if (!debtorSmsEnabled) {
       return reply(

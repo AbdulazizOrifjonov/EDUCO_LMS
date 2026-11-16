@@ -540,6 +540,32 @@ export default function SmsManagementPage() {
     }
   };
 
+  // 1-bosishda Noyabrni toza stok (0 qarz) holatiga keltirish
+  const [isResettingStock, setIsResettingStock] = useState(false);
+  const handleResetNovemberStock = async () => {
+    if (isResettingStock) return;
+    try {
+      setIsResettingStock(true);
+      const res = await markAllStudentsAsPaid('ALL', 'Dekabr oyigacha qarzdorliklar to‘liq yopildi (Barchasi to‘langan)');
+      const updatedSettings = {
+        ...(settings || {}),
+        debtor_sms_start_date: '2026-12-01',
+        debtor_sms_enabled: false,
+      };
+      await updateSmsSettings(updatedSettings);
+      setSettings(updatedSettings);
+      await loadData();
+      toast.success(
+        `✅ Barcha ${res.clearedCount || 143} ta talabaning Noyabr qarzdorligi toza stok (0 qarz) holatiga keltirildi! Rasmiy to‘lov monitoringi 1-dekabrdan boshlanadi.`
+      );
+    } catch (err) {
+      console.error('handleResetNovemberStock error:', err);
+      toast.error(err.message || 'Stok holatiga qaytarishda xatolik yuz berdi');
+    } finally {
+      setIsResettingStock(false);
+    }
+  };
+
   // Process Batch (Jismoniy tugma bosilganda)
   const handleProcessQueue = async () => {
     if (isProcessingQueueRef.current || processingQueue) return;
@@ -1985,12 +2011,22 @@ export default function SmsManagementPage() {
                       <h3 className="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg">
                         SMS Jo‘natiladigan Qabul Qiluvchilar Ro‘yxati
                       </h3>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800">
-                        {prospectiveStats.debtorsCount} ta qarzdorga SMS boradi
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-black ${
+                        prospectiveStats.debtorsCount > 0
+                          ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
+                          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                      }`}>
+                        {prospectiveStats.debtorsCount > 0
+                          ? `${prospectiveStats.debtorsCount} ta qarzdorga SMS boradi`
+                          : '0 ta qarzdor (Stok holatda)'}
                       </span>
-                      {prospectiveStats.totalDebt > 0 && (
+                      {prospectiveStats.totalDebt > 0 ? (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                           Jami qarz: {formatCurrency(prospectiveStats.totalDebt)}
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                          Noyabr oyi: Stok (0 qarz) • Dekabrdan boshlanadi
                         </span>
                       )}
                     </div>
@@ -2001,6 +2037,18 @@ export default function SmsManagementPage() {
                 </div>
 
                 <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={CheckCircle2}
+                    isLoading={isResettingStock}
+                    disabled={isResettingStock}
+                    onClick={handleResetNovemberStock}
+                    title="Noyabr oyini toza stok (0 qarz) holatiga o‘tkazish (Dekabrgacha to‘liq yopish)"
+                    className="!h-10 !min-h-[40px] px-3.5 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+                  >
+                    Stok holati (0 qarz)
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -2113,10 +2161,24 @@ export default function SmsManagementPage() {
                       <tr>
                         <td colSpan={7} className="py-12 text-center text-gray-400">
                           <div className="flex flex-col items-center justify-center gap-2">
-                            <Users className="w-8 h-8 text-gray-300 dark:text-gray-600" />
-                            <span className="font-medium text-sm text-gray-600 dark:text-gray-300">
-                              Ushbu filtr bo‘yicha qabul qiluvchilar topilmadi
-                            </span>
+                            {recipientFilter === 'debtors' ? (
+                              <>
+                                <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                                <span className="font-bold text-base text-gray-900 dark:text-gray-100">
+                                  Qarzdor talabalar mavjud emas (0 ta qarzdor)
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 max-w-md text-center">
+                                  Noyabr oyi to‘lovlari toza stok (0 qarz) holatiga keltirilgan. Rasmiy to‘lov nazorati va qarzdorlik SMS xabarnomalari 1-dekabrdan boshlanadi.
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <Users className="w-8 h-8 text-gray-300 dark:text-gray-600" />
+                                <span className="font-medium text-sm text-gray-600 dark:text-gray-300">
+                                  Ushbu filtr bo‘yicha qabul qiluvchilar topilmadi
+                                </span>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -2372,111 +2434,132 @@ export default function SmsManagementPage() {
 
               {/* Mobile Cards View */}
               <div className="grid grid-cols-1 gap-3 md:hidden mt-3">
-                {filteredProspectiveRecipients.map((item) => {
-                  const isDebtor = Boolean(item.isDebtor && Number(item.balance || 0) > 0);
-                  const isSelected = selectedDebtors.has(item.studentId);
-
-                  return (
-                    <Card
-                      key={item.studentId}
-                      className={`p-3.5 space-y-3 rounded-xl border border-gray-200 dark:border-gray-700 ${
-                        isSelected ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-2">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleToggleSelectDebtor(item.studentId, item.balance)}
-                            disabled={!isDebtor}
-                            className={`w-4 h-4 rounded text-blue-600 mt-0.5 ${
-                              !isDebtor ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
-                            }`}
-                          />
-                          <div>
-                            <h4 className="font-bold text-gray-900 dark:text-gray-100 text-sm">
-                              {item.studentName}
-                            </h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {item.courseName} • {item.groupName}
-                            </p>
-                          </div>
-                        </div>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                            isDebtor
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
-                              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                          }`}
-                        >
-                          {isDebtor ? `Qarz: ${formatCurrency(item.balance)}` : 'To‘langan'}
+                {filteredProspectiveRecipients.length === 0 ? (
+                  <Card className="p-8 text-center flex flex-col items-center justify-center gap-2 border border-gray-200 dark:border-gray-700">
+                    {recipientFilter === 'debtors' ? (
+                      <>
+                        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                        <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                          Qarzdor talabalar mavjud emas (0 ta qarzdor)
                         </span>
-                      </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                          Noyabr oyi to‘lovlari toza stok (0 qarz) holatiga keltirilgan. Rasmiy to‘lov nazorati va qarzdorlik SMS xabarnomalari 1-dekabrdan boshlanadi.
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-8 h-8 text-gray-400" />
+                        <span className="text-xs text-gray-500">Qabul qiluvchilar topilmadi</span>
+                      </>
+                    )}
+                  </Card>
+                ) : (
+                  filteredProspectiveRecipients.map((item) => {
+                    const isDebtor = Boolean(item.isDebtor && Number(item.balance || 0) > 0);
+                    const isSelected = selectedDebtors.has(item.studentId);
 
-                      <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-surface-dark-tertiary text-xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-500">Qabul qiluvchi:</span>
-                          <span className="font-bold text-gray-800 dark:text-gray-200">
-                            {item.recipientLabel}: {item.targetPhone || 'Telefon yo‘q'}
+                    return (
+                      <Card
+                        key={item.studentId}
+                        className={`p-3.5 space-y-3 rounded-xl border border-gray-200 dark:border-gray-700 ${
+                          isSelected ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleToggleSelectDebtor(item.studentId, item.balance)}
+                              disabled={!isDebtor}
+                              className={`w-4 h-4 rounded text-blue-600 mt-0.5 ${
+                                !isDebtor ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+                              }`}
+                            />
+                            <div>
+                              <h4 className="font-bold text-gray-900 dark:text-gray-100 text-sm">
+                                {item.studentName}
+                              </h4>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {item.courseName} • {item.groupName}
+                              </p>
+                            </div>
+                          </div>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                              isDebtor
+                                ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                            }`}
+                          >
+                            {isDebtor ? `Qarz: ${formatCurrency(item.balance)}` : 'To‘langan'}
                           </span>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-400 text-[11px] line-clamp-2 pt-1 border-t border-gray-200 dark:border-gray-700">
-                          {item.messageText}
-                        </p>
-                      </div>
 
-                      <div className="flex items-center justify-end gap-1.5 pt-1 flex-wrap">
-                        {isDebtor && (
+                        <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-surface-dark-tertiary text-xs space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-500">Qabul qiluvchi:</span>
+                            <span className="font-bold text-gray-800 dark:text-gray-200">
+                              {item.recipientLabel}: {item.targetPhone || 'Telefon yo‘q'}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-400 text-[11px] line-clamp-2 pt-1 border-t border-gray-200 dark:border-gray-700">
+                            {item.messageText}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-1.5 pt-1 flex-wrap">
+                          {isDebtor && (
+                            <button
+                              type="button"
+                              onClick={() => handleQuickPayInSms(item)}
+                              className="p-1 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                              disabled={actionLoading}
+                            >
+                              <CheckCircle2 className="w-3 h-3 shrink-0" />
+                              <span>To‘landi</span>
+                            </button>
+                          )}
+                          {isDebtor && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDebtorSmsModal([item])}
+                              className="p-1 px-2.5 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                            >
+                              <Send className="w-3 h-3 shrink-0" />
+                              <span>SMS</span>
+                            </button>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon={Eye}
+                            onClick={() => handleViewInPhone(item.studentId, item.studentName)}
+                            className="text-xs px-2 py-1"
+                          >
+                            Telefonda
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon={Send}
+                            onClick={() => handleOpenRecipientTestSms(item)}
+                            className="text-xs px-2 py-1"
+                          >
+                            Sinov
+                          </Button>
                           <button
                             type="button"
-                            onClick={() => handleQuickPayInSms(item)}
-                            className="p-1 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
-                            disabled={actionLoading}
+                            onClick={() => handleToggleExclude(item.studentId, item.studentName)}
+                            className="text-xs font-semibold px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 cursor-pointer"
                           >
-                            <CheckCircle2 className="w-3 h-3 shrink-0" />
-                            <span>To‘landi</span>
+                            {item.isExcluded ? 'Kiritish' : 'Chetlash'}
                           </button>
-                        )}
-                        {isDebtor && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenDebtorSmsModal([item])}
-                            className="p-1 px-2.5 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 font-bold text-xs flex items-center gap-1 cursor-pointer"
-                          >
-                            <Send className="w-3 h-3 shrink-0" />
-                            <span>SMS</span>
-                          </button>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={Eye}
-                          onClick={() => handleViewInPhone(item.studentId, item.studentName)}
-                          className="text-xs px-2 py-1"
-                        >
-                          Telefonda
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={Send}
-                          onClick={() => handleOpenRecipientTestSms(item)}
-                          className="text-xs px-2 py-1"
-                        >
-                          Sinov
-                        </Button>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleExclude(item.studentId, item.studentName)}
-                          className="text-xs font-semibold px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 cursor-pointer"
-                        >
-                          {item.isExcluded ? 'Kiritish' : 'Chetlash'}
-                        </button>
-                      </div>
-                    </Card>
-                  );
-                })}
+                        </div>
+                      </Card>
+                    );
+                  })
+                )}
               </div>
 
               {/* Floating Action Bar for Selected Debtors in SMS page */}

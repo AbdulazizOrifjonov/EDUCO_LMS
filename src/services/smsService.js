@@ -115,7 +115,7 @@ export async function updateSmsSettings(settingsData) {
       ...settingsData,
       is_enabled: Boolean(settingsData.is_enabled),
       debtor_sms_enabled: Boolean(settingsData.debtor_sms_enabled),
-      debtor_sms_start_date: settingsData.debtor_sms_start_date || '',
+      debtor_sms_start_date: settingsData.debtor_sms_start_date || '2026-12-01',
       debtor_sms_start_day: Number(settingsData.debtor_sms_start_day || 5),
       schedule_days: settingsData.schedule_days || [1, 5, 10, 15, 20, 25],
       schedule_time: settingsData.schedule_time || '10:00',

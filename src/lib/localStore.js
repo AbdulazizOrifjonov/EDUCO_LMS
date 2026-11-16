@@ -41,7 +41,7 @@ const INITIAL_SMS_SETTINGS = {
   id: 'sms-settings-1',
   is_enabled: true,
   debtor_sms_enabled: false,
-  debtor_sms_start_date: '',
+  debtor_sms_start_date: '2026-12-01',
   debtor_sms_start_day: 5,
   schedule_days: [1, 5, 10, 15, 20, 25],
   schedule_time: '10:00',
@@ -3355,7 +3355,17 @@ class LocalStore {
       let totalDue = 0;
       enrolledGroups.forEach((g) => {
         const course = allCourses.find((c) => c.id === g.course_id);
-        totalDue += Number(g.monthly_price || g.monthly_fee || course?.monthly_fee || 0);
+        const baseFee = Number(g.monthly_price || g.monthly_fee || course?.monthly_fee || 0);
+        const mem = studentMemberships.find((m) => m.group_id === g.id);
+        let groupDue = baseFee;
+        if (mem?.custom_price != null && mem?.custom_price !== '') {
+          groupDue = Number(mem.custom_price);
+        } else if (Number(mem?.discount_percent) > 0) {
+          groupDue = Math.max(0, baseFee - Math.round(baseFee * (Number(mem?.discount_percent) / 100)));
+        } else if (Number(mem?.discount_amount) > 0) {
+          groupDue = Math.max(0, baseFee - Number(mem?.discount_amount));
+        }
+        totalDue += groupDue;
       });
 
       const currentPaid = raw
@@ -3381,6 +3391,7 @@ class LocalStore {
 
     if (needsUpdate) {
       this.setItem(STORAGE_KEYS.PAYMENTS, raw);
+      this.pushToServer({ [STORAGE_KEYS.PAYMENTS]: raw }).catch(() => {});
     }
     return raw;
   }
@@ -4672,8 +4683,8 @@ class LocalStore {
         settings.debtor_sms_enabled = false;
         changed = true;
       }
-      if (settings.debtor_sms_start_date === undefined) {
-        settings.debtor_sms_start_date = '';
+      if (!settings.debtor_sms_start_date || settings.debtor_sms_start_date < '2026-12-01') {
+        settings.debtor_sms_start_date = '2026-12-01';
         changed = true;
       }
       if (settings.debtor_sms_start_day === undefined) {
