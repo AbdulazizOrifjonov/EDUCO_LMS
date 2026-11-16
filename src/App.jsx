@@ -85,10 +85,10 @@ function RoleRedirectRoute({ segment, fallback = 'dashboard' }) {
   if (segment === 'tuition' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
   if (segment === 'reports' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
   if (segment === 'website' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
-  if ((segment === 'teacher-ratings' || segment === 'ratings') && role === 'student') return <Navigate to="/student/teacher-feedback" replace />;
-  if ((segment === 'teacher-ratings' || segment === 'ratings') && role === 'teacher') return <Navigate to="/teacher/ratings" replace />;
-  if ((segment === 'teacher-feedback' || segment === 'feedback') && (role === 'owner' || role === 'admin')) return <Navigate to={`/${role}/teacher-ratings`} replace />;
-  if ((segment === 'teacher-feedback' || segment === 'feedback') && role === 'teacher') return <Navigate to="/teacher/ratings" replace />;
+  if ((segment === 'teacher-ratings' || segment === 'teacher_ratings' || segment === 'ratings') && role === 'student') return <Navigate to="/student/teacher-feedback" replace />;
+  if ((segment === 'teacher-ratings' || segment === 'teacher_ratings' || segment === 'ratings') && role === 'teacher') return <Navigate to="/teacher/ratings" replace />;
+  if ((segment === 'teacher-feedback' || segment === 'teacher_feedback' || segment === 'feedback') && (role === 'owner' || role === 'admin')) return <Navigate to={`/${role}/teacher-ratings`} replace />;
+  if ((segment === 'teacher-feedback' || segment === 'teacher_feedback' || segment === 'feedback') && role === 'teacher') return <Navigate to="/teacher/ratings" replace />;
 
   return <Navigate to={`/${role}/${segment || fallback}`} replace />;
 }
@@ -193,6 +193,7 @@ export default function App() {
             <Route path="sms" element={<SmsManagementPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="teacher-ratings" element={<TeacherRatingsPage />} />
+            <Route path="teacher_ratings" element={<TeacherRatingsPage />} />
             <Route path="ratings" element={<TeacherRatingsPage />} />
             <Route path="audit" element={<AuditLogPage />} />
             <Route path="settings" element={<SettingsPage />} />
@@ -248,6 +249,7 @@ export default function App() {
             <Route path="sms" element={<SmsManagementPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="teacher-ratings" element={<TeacherRatingsPage />} />
+            <Route path="teacher_ratings" element={<TeacherRatingsPage />} />
             <Route path="ratings" element={<TeacherRatingsPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="website" element={<WebsiteManagementPage />} />
@@ -320,6 +322,7 @@ export default function App() {
             <Route path="grades" element={<GradesPage />} />
             <Route path="attendance" element={<StudentAttendancePage />} />
             <Route path="teacher-feedback" element={<StudentTeacherFeedbackPage />} />
+            <Route path="teacher_feedback" element={<StudentTeacherFeedbackPage />} />
             <Route path="feedback" element={<StudentTeacherFeedbackPage />} />
             <Route path="homework" element={<HomeworkPage />} />
             <Route path="homework/:id" element={<HomeworkDetail />} />
@@ -352,8 +355,10 @@ export default function App() {
           <Route path="/tuition" element={<RoleRedirectRoute segment="tuition" />} />
           <Route path="/reports" element={<RoleRedirectRoute segment="reports" />} />
           <Route path="/teacher-ratings" element={<RoleRedirectRoute segment="teacher-ratings" />} />
+          <Route path="/teacher_ratings" element={<RoleRedirectRoute segment="teacher_ratings" />} />
           <Route path="/ratings" element={<RoleRedirectRoute segment="teacher-ratings" />} />
           <Route path="/teacher-feedback" element={<RoleRedirectRoute segment="teacher-feedback" />} />
+          <Route path="/teacher_feedback" element={<RoleRedirectRoute segment="teacher_feedback" />} />
           <Route path="/feedback" element={<RoleRedirectRoute segment="teacher-feedback" />} />
           <Route path="/reminders" element={<RoleRedirectRoute segment="reminders" />} />
           <Route path="/sms" element={<RoleRedirectRoute segment="sms" />} />

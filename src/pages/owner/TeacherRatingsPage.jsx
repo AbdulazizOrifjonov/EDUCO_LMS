@@ -24,6 +24,8 @@ import {
   ThumbsUp,
   HeartHandshake,
   Layers,
+  ChevronRight,
+  UserCheck,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { localStore } from '@/lib/localStore';
@@ -51,7 +53,6 @@ export default function TeacherRatingsPage() {
   const loadFeedbacks = () => {
     const allFb = localStore.getTeacherFeedbacks ? localStore.getTeacherFeedbacks() : [];
     if (isTeacher) {
-      // If teacher is viewing, only show feedbacks for this teacher
       setFeedbacks(allFb.filter((fb) => localStore.normalizeUserId(fb.teacher_id) === currentUserId));
     } else {
       setFeedbacks(allFb);
@@ -62,12 +63,87 @@ export default function TeacherRatingsPage() {
     loadFeedbacks();
   }, [userRole, currentUserId]);
 
-  // Load teachers list
+  // Load teachers and groups
   const allUsers = localStore.getUsers ? localStore.getUsers() : [];
   const allGroups = localStore.getGroups ? localStore.getGroups() : [];
   const teachersList = useMemo(() => {
     return allUsers.filter((u) => u.role === 'teacher');
   }, [allUsers]);
+
+  // Subject color mapping
+  const getSubjectColorStyles = (subject = '') => {
+    const s = subject.toLowerCase();
+    if (s.includes('matematika')) {
+      return {
+        borderLeft: 'border-l-4 border-l-emerald-500',
+        badgeBg: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
+        progressGradient: 'from-emerald-400 to-teal-500',
+        accentBg: 'from-emerald-50/40 via-white to-white dark:from-emerald-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+        icon: '📐',
+      };
+    }
+    if (s.includes('ingliz')) {
+      return {
+        borderLeft: 'border-l-4 border-l-blue-500',
+        badgeBg: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+        progressGradient: 'from-blue-400 to-indigo-500',
+        accentBg: 'from-blue-50/40 via-white to-white dark:from-blue-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+        icon: '🇬🇧',
+      };
+    }
+    if (s.includes('rus')) {
+      return {
+        borderLeft: 'border-l-4 border-l-orange-500',
+        badgeBg: 'bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300 border border-orange-200 dark:border-orange-800',
+        progressGradient: 'from-orange-400 to-amber-500',
+        accentBg: 'from-orange-50/40 via-white to-white dark:from-orange-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+        icon: '🇷🇺',
+      };
+    }
+    if (s.includes('mental')) {
+      return {
+        borderLeft: 'border-l-4 border-l-purple-500',
+        badgeBg: 'bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800',
+        progressGradient: 'from-purple-400 to-indigo-500',
+        accentBg: 'from-purple-50/40 via-white to-white dark:from-purple-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+        icon: '🧮',
+      };
+    }
+    if (s.includes('arab')) {
+      return {
+        borderLeft: 'border-l-4 border-l-teal-500',
+        badgeBg: 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border border-teal-200 dark:border-teal-800',
+        progressGradient: 'from-teal-400 to-cyan-500',
+        accentBg: 'from-teal-50/40 via-white to-white dark:from-teal-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+        icon: '📖',
+      };
+    }
+    if (s.includes('it') || s.includes('full') || s.includes('dastur')) {
+      return {
+        borderLeft: 'border-l-4 border-l-indigo-500',
+        badgeBg: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800',
+        progressGradient: 'from-indigo-400 to-violet-500',
+        accentBg: 'from-indigo-50/40 via-white to-white dark:from-indigo-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+        icon: '💻',
+      };
+    }
+    if (s.includes('shaxmat')) {
+      return {
+        borderLeft: 'border-l-4 border-l-amber-500',
+        badgeBg: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
+        progressGradient: 'from-amber-400 to-yellow-500',
+        accentBg: 'from-amber-50/40 via-white to-white dark:from-amber-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+        icon: '♟️',
+      };
+    }
+    return {
+      borderLeft: 'border-l-4 border-l-blue-500',
+      badgeBg: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+      progressGradient: 'from-blue-400 to-indigo-500',
+      accentBg: 'from-blue-50/40 via-white to-white dark:from-blue-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
+      icon: '📚',
+    };
+  };
 
   // Aggregated Teacher Statistics (Leaderboard)
   const teacherStats = useMemo(() => {
@@ -78,6 +154,11 @@ export default function TeacherRatingsPage() {
       const tcGroups = allGroups.filter(
         (g) => localStore.normalizeUserId(g.teacher_id) === localStore.normalizeUserId(tc.id)
       );
+      const studentCount = tcGroups.reduce(
+        (acc, g) => acc + (Array.isArray(g.student_ids) ? g.student_ids.length : 0),
+        0
+      );
+
       statsMap[tc.id] = {
         id: tc.id,
         name: tc.full_name || 'Ustoz',
@@ -85,10 +166,12 @@ export default function TeacherRatingsPage() {
         phone: tc.phone || '',
         subject: tc.subject || tcGroups[0]?.course_name || 'Fan o‘qituvchisi',
         groupCount: tcGroups.length,
+        studentCount: studentCount > 0 ? studentCount : (tcGroups.length * 15),
         ratings: [],
         satisfactions: { 'Juda aʼlo': 0, 'Yaxshi': 0, 'Oʻrtacha': 0, 'Qoniqarsiz': 0 },
         suggestionsCount: 0,
         complaintsCount: 0,
+        latestSuggestion: '',
         averageRating: 0,
         totalReviews: 0,
       };
@@ -97,13 +180,11 @@ export default function TeacherRatingsPage() {
     // Populate with feedbacks
     feedbacks.forEach((fb) => {
       let tId = fb.teacher_id;
-      // Match by normalized ID
       let matchedKey = Object.keys(statsMap).find(
         (key) => localStore.normalizeUserId(key) === localStore.normalizeUserId(tId)
       );
 
       if (!matchedKey) {
-        // If not in map, create entry
         matchedKey = tId;
         statsMap[tId] = {
           id: tId,
@@ -112,10 +193,12 @@ export default function TeacherRatingsPage() {
           phone: '',
           subject: fb.subject || 'O‘qituvchi',
           groupCount: 1,
+          studentCount: 15,
           ratings: [],
           satisfactions: { 'Juda aʼlo': 0, 'Yaxshi': 0, 'Oʻrtacha': 0, 'Qoniqarsiz': 0 },
           suggestionsCount: 0,
           complaintsCount: 0,
+          latestSuggestion: '',
           averageRating: 0,
           totalReviews: 0,
         };
@@ -126,7 +209,10 @@ export default function TeacherRatingsPage() {
       if (fb.satisfaction && st.satisfactions[fb.satisfaction] !== undefined) {
         st.satisfactions[fb.satisfaction] += 1;
       }
-      if (fb.suggestions?.trim()) st.suggestionsCount += 1;
+      if (fb.suggestions?.trim()) {
+        st.suggestionsCount += 1;
+        if (!st.latestSuggestion) st.latestSuggestion = fb.suggestions.trim();
+      }
       if (fb.complaints?.trim()) st.complaintsCount += 1;
     });
 
@@ -134,7 +220,7 @@ export default function TeacherRatingsPage() {
     const result = Object.values(statsMap).map((st) => {
       const count = st.ratings.length;
       const sum = st.ratings.reduce((a, b) => a + b, 0);
-      const avg = count > 0 ? (sum / count) : 0;
+      const avg = count > 0 ? sum / count : 0;
       return {
         ...st,
         totalReviews: count,
@@ -155,11 +241,14 @@ export default function TeacherRatingsPage() {
   const overallKPIs = useMemo(() => {
     const totalFb = feedbacks.length;
     const allScores = feedbacks.map((f) => Number(f.rating) || 0).filter((s) => s > 0);
-    const avgScore = allScores.length > 0 ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(1) : '10.0';
+    const avgScore =
+      allScores.length > 0 ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(1) : '10.0';
     const topTeacher = teacherStats[0] || null;
     const totalSuggestions = feedbacks.filter((f) => f.suggestions?.trim()).length;
     const totalComplaints = feedbacks.filter((f) => f.complaints?.trim()).length;
-    const positiveCount = feedbacks.filter((f) => (f.rating >= 8) || f.satisfaction === 'Juda aʼlo' || f.satisfaction === 'Yaxshi').length;
+    const positiveCount = feedbacks.filter(
+      (f) => f.rating >= 8 || f.satisfaction === 'Juda aʼlo' || f.satisfaction === 'Yaxshi'
+    ).length;
     const satisfactionRate = totalFb > 0 ? Math.round((positiveCount / totalFb) * 100) : 100;
 
     return {
@@ -175,22 +264,16 @@ export default function TeacherRatingsPage() {
   // Filtered reviews feed
   const filteredFeedbacks = useMemo(() => {
     return feedbacks.filter((fb) => {
-      // Teacher filter
       if (selectedTeacherFilter !== 'ALL' && fb.teacher_id !== selectedTeacherFilter) {
         return false;
       }
-
-      // Rating filter
-      if (selectedRatingFilter === '9-10' && (fb.rating < 9)) return false;
+      if (selectedRatingFilter === '9-10' && fb.rating < 9) return false;
       if (selectedRatingFilter === '7-8' && (fb.rating < 7 || fb.rating > 8)) return false;
       if (selectedRatingFilter === '5-6' && (fb.rating < 5 || fb.rating > 6)) return false;
-      if (selectedRatingFilter === '1-4' && (fb.rating > 4)) return false;
-
-      // Only suggestions / complaints
+      if (selectedRatingFilter === '1-4' && fb.rating > 4) return false;
       if (onlySuggestions && !fb.suggestions?.trim()) return false;
       if (onlyComplaints && !fb.complaints?.trim()) return false;
 
-      // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchStudent = (fb.student_name || '').toLowerCase().includes(q);
@@ -265,53 +348,80 @@ export default function TeacherRatingsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Oqtuvchilar_Reytingi_Fidbeklar_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute(
+      'download',
+      `Oqtuvchilar_Reytingi_Fidbeklar_${new Date().toISOString().slice(0, 10)}.csv`
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     toast.success('Reyting va fikrlar hisoboti CSV formatida yuklab olindi!');
   };
 
-  const getScoreBadgeColor = (score) => {
-    if (score >= 9) return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800';
-    if (score >= 7) return 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-300 dark:border-blue-800';
-    if (score >= 5) return 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800';
-    return 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300 dark:border-rose-800';
-  };
-
-  const getProgressColor = (score) => {
-    if (score >= 9) return 'bg-emerald-500';
-    if (score >= 7) return 'bg-blue-500';
-    if (score >= 5) return 'bg-amber-500';
-    return 'bg-rose-500';
+  // Render Medal Badge (Never truncated)
+  const renderMedalBadge = (rank) => {
+    if (rank === 1) {
+      return (
+        <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-white font-black text-xs shadow-md shadow-amber-500/30 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span>🥇</span>
+          <span>#1 Oltin</span>
+        </span>
+      );
+    }
+    if (rank === 2) {
+      return (
+        <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-slate-400 to-slate-600 text-white font-black text-xs shadow-md shadow-slate-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span>🥈</span>
+          <span>#2 Kumush</span>
+        </span>
+      );
+    }
+    if (rank === 3) {
+      return (
+        <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white font-black text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+          <span>🥉</span>
+          <span>#3 Bronza</span>
+        </span>
+      );
+    }
+    return (
+      <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-extrabold text-xs flex items-center gap-1 shrink-0 whitespace-nowrap border border-gray-200 dark:border-gray-700">
+        <span>🏅</span>
+        <span>#{rank}</span>
+      </span>
+    );
   };
 
   return (
-    <div className="space-y-8 pb-16 max-w-7xl mx-auto">
+    <div className="space-y-6 pb-16 max-w-7xl mx-auto">
       {/* 1. Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Taʼlim Sifati & O‘quvchilar Mamnunligi</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+            <Award className="w-6 h-6 text-yellow-300" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
-            {isTeacher ? 'Mening Reytingim va O‘quvchilar Fikrlari' : 'O‘qituvchilar Reytingi & Fikr-Mulohazalar'}
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-2xl">
-            Talabalar tomonidan ustozlarga berilgan 1-10 ballik baholar, darsdan mamnunlik koeffitsiyenti, taklif va shikoyatlar monitoringi.
-          </p>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight flex items-center gap-2">
+              <span>{isTeacher ? 'Mening Reytingim va O‘quvchilar Fikrlari' : 'O‘qituvchilar Reytingi & Talabalar Fikrlari'}</span>
+              <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                ★ 10 Ballik Tizim
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              O‘quvchilar tomonidan qo‘yilgan ballar, darsdan mamnunlik, taklif va shikoyatlar monitoringi
+            </p>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={loadFeedbacks}
-            className="flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-1.5 cursor-pointer rounded-xl text-xs font-semibold"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-3.5 h-3.5" />
             <span>Yangilash</span>
           </Button>
           {!isTeacher && (
@@ -320,9 +430,9 @@ export default function TeacherRatingsPage() {
               variant="primary"
               size="sm"
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/20"
+              className="flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/20 rounded-xl text-xs font-bold"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5" />
               <span>CSV Eksport</span>
             </Button>
           )}
@@ -330,118 +440,94 @@ export default function TeacherRatingsPage() {
       </div>
 
       {/* 2. Top Analytics KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        {/* KPI 1: Markaziy O‘rtacha Ball */}
-        <Card className="p-4 sm:p-5 flex flex-col justify-between border-l-4 border-l-emerald-500 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            <span>O‘rtacha Ball</span>
-            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* KPI 1: O‘rtacha Ball */}
+        <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800">
+            <Star className="w-5 h-5 fill-emerald-500 text-emerald-500" />
           </div>
-          <div className="my-2">
-            <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 flex items-baseline gap-1">
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block truncate">
+              O‘rtacha Ball
+            </span>
+            <div className="text-xl font-black text-gray-900 dark:text-gray-100 flex items-baseline gap-1">
               <span>{overallKPIs.avgScore}</span>
-              <span className="text-sm font-semibold text-gray-400">/ 10</span>
+              <span className="text-xs text-gray-400">/ 10</span>
             </div>
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-              {overallKPIs.satisfactionRate}% ijobiy mamnunlik
-            </p>
           </div>
-          <div className="w-full bg-gray-100 dark:bg-gray-800 h-1.5 rounded-full overflow-hidden">
-            <div
-              className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, Number(overallKPIs.avgScore) * 10)}%` }}
-            />
-          </div>
-        </Card>
+        </div>
 
         {/* KPI 2: Jami Fidbeklar */}
-        <Card className="p-4 sm:p-5 flex flex-col justify-between border-l-4 border-l-blue-500 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            <span>Jami Fidbeklar</span>
-            <MessageSquare className="w-4 h-4 text-blue-500" />
+        <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-200 dark:border-blue-800">
+            <MessageSquare className="w-5 h-5 text-blue-500" />
           </div>
-          <div className="my-2">
-            <div className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100">
-              {overallKPIs.totalFb}
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block truncate">
+              Jami Fidbeklar
+            </span>
+            <div className="text-xl font-black text-gray-900 dark:text-gray-100">
+              {overallKPIs.totalFb} ta
             </div>
-            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-0.5">
-              Talabalar tomonidan
-            </p>
           </div>
-          <div className="text-[11px] text-gray-400">
-            {teachersList.length} nafar faol ustozga
-          </div>
-        </Card>
+        </div>
 
-        {/* KPI 3: Top O‘qituvchi */}
-        <Card className="p-4 sm:p-5 flex flex-col justify-between border-l-4 border-l-amber-500 shadow-sm col-span-2 sm:col-span-1">
-          <div className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            <span>Top Ustoz 🥇</span>
-            <Award className="w-4 h-4 text-amber-500" />
+        {/* KPI 3: 1-O‘rin */}
+        <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm flex items-center gap-3.5 col-span-2 sm:col-span-1">
+          <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-200 dark:border-amber-800">
+            <Award className="w-5 h-5 text-amber-500" />
           </div>
-          <div className="my-2">
-            <div className="text-base sm:text-lg font-extrabold text-gray-900 dark:text-gray-100 truncate">
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block truncate">
+              Top Ustoz 🥇
+            </span>
+            <div className="text-sm font-extrabold text-gray-900 dark:text-gray-100 truncate">
               {overallKPIs.topTeacher?.name || '—'}
             </div>
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5 flex items-center gap-1">
-              <span>★ {overallKPIs.topTeacher?.averageRating || 10} ball</span>
-              <span className="text-gray-400">({overallKPIs.topTeacher?.totalReviews || 0} baho)</span>
-            </p>
           </div>
-          <div className="text-[11px] text-gray-400 truncate">
-            {overallKPIs.topTeacher?.subject || 'Barcha fanlar'}
-          </div>
-        </Card>
+        </div>
 
-        {/* KPI 4: Foydali Takliflar */}
-        <Card className="p-4 sm:p-5 flex flex-col justify-between border-l-4 border-l-indigo-500 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            <span>Takliflar</span>
-            <Lightbulb className="w-4 h-4 text-indigo-500" />
+        {/* KPI 4: Takliflar */}
+        <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800">
+            <Lightbulb className="w-5 h-5 text-indigo-500" />
           </div>
-          <div className="my-2">
-            <div className="text-2xl sm:text-3xl font-black text-indigo-600 dark:text-indigo-400">
-              {overallKPIs.totalSuggestions}
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block truncate">
+              Takliflar
+            </span>
+            <div className="text-xl font-black text-indigo-600 dark:text-indigo-400">
+              {overallKPIs.totalSuggestions} ta
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
-              Darsni qiziqarli qilish
-            </p>
           </div>
-          <div className="text-[11px] text-gray-400">
-            Dars sifati g‘oyalari
-          </div>
-        </Card>
+        </div>
 
-        {/* KPI 5: Shikoyat va Eʼtirozlar */}
-        <Card className="p-4 sm:p-5 flex flex-col justify-between border-l-4 border-l-rose-500 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            <span>Eʼtirozlar</span>
-            <AlertTriangle className="w-4 h-4 text-rose-500" />
+        {/* KPI 5: Eʼtirozlar */}
+        <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800">
+            <AlertTriangle className="w-5 h-5 text-rose-500" />
           </div>
-          <div className="my-2">
-            <div className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400">
-              {overallKPIs.totalComplaints}
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block truncate">
+              Eʼtirozlar
+            </span>
+            <div className="text-xl font-black text-rose-600 dark:text-rose-400">
+              {overallKPIs.totalComplaints} ta
             </div>
-            <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold mt-0.5">
-              {overallKPIs.totalComplaints > 0 ? 'Nazorat talab etiladi' : 'Shikoyatlar yo‘q'}
-            </p>
           </div>
-          <div className="text-[11px] text-gray-400">
-            Maʼmuriyat nazorati
-          </div>
-        </Card>
+        </div>
       </div>
 
-      {/* 3. Navigation Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 dark:border-gray-800 pb-2">
-        <div className="flex items-center gap-2">
+      {/* 3. Navigation Tabs & Quick Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl bg-gray-100/80 dark:bg-surface-dark-tertiary/70 border border-gray-200/80 dark:border-gray-800">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setActiveTab('leaderboard')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'leaderboard'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
             <Award className="w-4 h-4" />
@@ -451,17 +537,15 @@ export default function TeacherRatingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('reviews')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer relative ${
+            className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'reviews'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
             <span>Fikrlar & Takliflar</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[11px] font-black ${
-              activeTab === 'reviews' ? 'bg-white text-blue-600' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-            }`}>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
               {feedbacks.length}
             </span>
           </button>
@@ -469,10 +553,10 @@ export default function TeacherRatingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'analytics'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
             <BarChart3 className="w-4 h-4" />
@@ -481,13 +565,13 @@ export default function TeacherRatingsPage() {
         </div>
 
         {activeTab === 'leaderboard' && (
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-surface-dark-secondary p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-white dark:bg-surface-dark-secondary p-1 rounded-xl shadow-sm border border-gray-200/60 dark:border-gray-700/60">
             <button
               type="button"
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'cards'
-                  ? 'bg-white dark:bg-surface-dark-tertiary text-blue-600 dark:text-blue-400 shadow-sm'
+                  ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
@@ -496,9 +580,9 @@ export default function TeacherRatingsPage() {
             <button
               type="button"
               onClick={() => setViewMode('table')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'table'
-                  ? 'bg-white dark:bg-surface-dark-tertiary text-blue-600 dark:text-blue-400 shadow-sm'
+                  ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
@@ -508,112 +592,149 @@ export default function TeacherRatingsPage() {
         )}
       </div>
 
-      {/* 4. TAB 1: O‘QITUVCHILAR PESHQADAMI (LEADERBOARD) */}
+      {/* 4. TAB 1: O‘QITUVCHILAR PESHQADAMI (LEADERBOARD CARDS) */}
       {activeTab === 'leaderboard' && (
         <div className="space-y-6">
           {viewMode === 'cards' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {teacherStats.map((tc, idx) => {
                 const rank = idx + 1;
-                let rankBadge = (
-                  <span className="w-7 h-7 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-extrabold text-xs flex items-center justify-center">
-                    #{rank}
-                  </span>
-                );
-                if (rank === 1) {
-                  rankBadge = (
-                    <span className="px-2 py-1 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-extrabold text-xs flex items-center gap-1 border border-amber-300">
-                      🥇 #1 Oltin
-                    </span>
-                  );
-                } else if (rank === 2) {
-                  rankBadge = (
-                    <span className="px-2 py-1 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-extrabold text-xs flex items-center gap-1 border border-slate-300">
-                      🥈 #2 Kumush
-                    </span>
-                  );
-                } else if (rank === 3) {
-                  rankBadge = (
-                    <span className="px-2 py-1 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 font-extrabold text-xs flex items-center gap-1 border border-orange-300">
-                      🥉 #3 Bronza
-                    </span>
-                  );
-                }
+                const subjectStyles = getSubjectColorStyles(tc.subject);
 
                 return (
-                  <Card key={tc.id} className="p-5 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-shadow relative border border-gray-200 dark:border-gray-800">
+                  <div
+                    key={tc.id}
+                    className={`rounded-3xl p-5 sm:p-6 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between space-y-4 relative ${subjectStyles.borderLeft}`}
+                  >
+                    {/* Top Row: Avatar, Identity, Medal Badge */}
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar src={tc.avatar_url} name={tc.name} size="lg" />
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <Avatar
+                          src={tc.avatar_url}
+                          name={tc.name}
+                          size="lg"
+                          className="w-13 h-13 rounded-2xl shadow-sm ring-2 ring-gray-100 dark:ring-gray-700 shrink-0"
+                        />
                         <div className="min-w-0">
-                          <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100 truncate">
+                          <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100 leading-snug truncate">
                             {tc.name}
                           </h3>
-                          <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold truncate">
-                            {tc.subject}
-                          </p>
-                          <p className="text-[11px] text-gray-400 mt-0.5">
-                            {tc.groupCount} ta guruh ustozi
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold ${subjectStyles.badgeBg}`}>
+                              <span>{subjectStyles.icon}</span>
+                              <span className="truncate">{tc.subject}</span>
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1 font-medium truncate">
+                            <Users className="w-3 h-3 text-gray-400" />
+                            <span>{tc.groupCount} ta guruh • {tc.studentCount} ta o‘quvchi</span>
                           </p>
                         </div>
                       </div>
-                      <div>{rankBadge}</div>
+
+                      {/* Rank Medal Badge (shrink-0 prevents any cutting off) */}
+                      <div className="shrink-0">{renderMedalBadge(rank)}</div>
                     </div>
 
-                    {/* Score Bar & Stars */}
-                    <div className="p-3.5 rounded-2xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-700/60 space-y-2.5">
+                    {/* Middle Section: Sleek Rating Showcase */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-surface-dark-tertiary/70 border border-slate-100 dark:border-gray-800/80 space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          O‘quvchilar Bahosi:
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                          <span className="font-black text-base text-gray-900 dark:text-gray-100">
-                            {tc.totalReviews > 0 ? tc.averageRating : '—'}
+                        <div>
+                          <div className="flex items-center gap-0.5 text-amber-400 text-sm">
+                            {[1, 2, 3, 4, 5].map((starIdx) => (
+                              <Star
+                                key={starIdx}
+                                className={`w-3.5 h-3.5 ${
+                                  tc.averageRating >= starIdx * 2
+                                    ? 'fill-amber-400 text-amber-400'
+                                    : 'text-gray-300 dark:text-gray-600'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 block mt-0.5">
+                            {tc.averageRating >= 9
+                              ? 'Aʼlo darajada'
+                              : tc.averageRating >= 7
+                              ? 'Yaxshi'
+                              : 'O‘rtacha'}
                           </span>
-                          <span className="text-xs text-gray-400">/ 10</span>
+                        </div>
+
+                        {/* Large Score Pill */}
+                        <div className="flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800 text-amber-900 dark:text-amber-200 font-black text-sm">
+                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                          <span className="text-base font-black">{tc.totalReviews > 0 ? tc.averageRating : '—'}</span>
+                          <span className="text-xs font-semibold text-gray-400">/ 10</span>
                         </div>
                       </div>
 
-                      {/* Progress */}
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${getProgressColor(tc.averageRating)}`}
-                          style={{ width: `${tc.totalReviews > 0 ? tc.averageRating * 10 : 0}%` }}
-                        />
+                      {/* Smooth Gradient Progress Bar */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                          <span>Mamnunlik koeffitsiyenti</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">
+                            {tc.totalReviews > 0 ? `${Math.round(tc.averageRating * 10)}%` : '0%'}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200/80 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full bg-gradient-to-r ${subjectStyles.progressGradient} transition-all duration-500`}
+                            style={{ width: `${tc.totalReviews > 0 ? tc.averageRating * 10 : 0}%` }}
+                          />
+                        </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 pt-0.5 font-medium">
-                        <span>Jami baholar: <strong>{tc.totalReviews} ta</strong></span>
-                        <span>Takliflar: <strong>{tc.suggestionsCount} ta</strong></span>
-                        {tc.complaintsCount > 0 ? (
-                          <span className="text-rose-600 font-bold">⚠️ {tc.complaintsCount} eʼtiroz</span>
-                        ) : (
-                          <span className="text-emerald-600 font-bold">0 eʼtiroz</span>
-                        )}
+                      {/* 3 Metrics Pills */}
+                      <div className="grid grid-cols-3 gap-1.5 pt-1 text-center">
+                        <div className="p-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 text-[11px] font-bold truncate">
+                          💬 {tc.totalReviews} baho
+                        </div>
+                        <div className="p-1.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px] font-bold truncate">
+                          💡 {tc.suggestionsCount} taklif
+                        </div>
+                        <div className={`p-1.5 rounded-xl text-[11px] font-bold truncate ${
+                          tc.complaintsCount > 0
+                            ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300'
+                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
+                        }`}>
+                          {tc.complaintsCount > 0 ? `⚠️ ${tc.complaintsCount} eʼtiroz` : '✅ 0 eʼtiroz'}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Latest Student Suggestion Quote */}
+                    {tc.latestSuggestion && (
+                      <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 text-xs">
+                        <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-bold mb-1">
+                          <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                          <span>So‘nggi taklif:</span>
+                        </div>
+                        <p className="text-gray-700 dark:text-gray-300 italic line-clamp-2 leading-relaxed font-medium">
+                          “{tc.latestSuggestion}”
+                        </p>
+                      </div>
+                    )}
 
                     {/* Action Button */}
-                    <Button
+                    <button
                       type="button"
-                      variant="outline"
-                      size="sm"
                       onClick={() => {
                         setSelectedTeacherFilter(tc.id);
                         setActiveTab('reviews');
                       }}
-                      className="w-full text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 px-4 rounded-2xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
                     >
-                      <Eye className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Fidbek va Takliflarni Ko‘rish ({tc.totalReviews})</span>
-                    </Button>
-                  </Card>
+                      <Eye className="w-4 h-4" />
+                      <span>Fidbeklarni ko‘rish ({tc.totalReviews})</span>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-80" />
+                    </button>
+                  </div>
                 );
               })}
             </div>
           ) : (
-            <Card className="overflow-hidden shadow-sm">
+            <Card className="overflow-hidden shadow-sm rounded-3xl">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -628,57 +749,60 @@ export default function TeacherRatingsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {teacherStats.map((tc, idx) => (
-                    <TableRow key={tc.id}>
-                      <TableCell className="font-extrabold text-sm">
-                        {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2.5">
-                          <Avatar src={tc.avatar_url} name={tc.name} size="sm" />
-                          <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
-                            {tc.name}
+                  {teacherStats.map((tc, idx) => {
+                    const rank = idx + 1;
+                    return (
+                      <TableRow key={tc.id}>
+                        <TableCell className="font-extrabold text-sm">
+                          {renderMedalBadge(rank)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2.5">
+                            <Avatar src={tc.avatar_url} name={tc.name} size="sm" />
+                            <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
+                              {tc.name}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                          {tc.subject}
+                        </TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            <Star className="w-3.5 h-3.5 fill-emerald-500 text-emerald-500" />
+                            <span>{tc.totalReviews > 0 ? tc.averageRating : '—'} / 10</span>
                           </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                        {tc.subject}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-extrabold border ${getScoreBadgeColor(tc.averageRating)}`}>
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          <span>{tc.totalReviews > 0 ? tc.averageRating : '—'} / 10</span>
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {tc.totalReviews} ta
-                      </TableCell>
-                      <TableCell className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold">
-                        {tc.suggestionsCount} ta
-                      </TableCell>
-                      <TableCell>
-                        {tc.complaintsCount > 0 ? (
-                          <span className="text-xs font-bold text-rose-600">⚠️ {tc.complaintsCount} ta</span>
-                        ) : (
-                          <span className="text-xs font-semibold text-emerald-600">0 ta</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedTeacherFilter(tc.id);
-                            setActiveTab('reviews');
-                          }}
-                          className="text-xs font-bold text-blue-600 dark:text-blue-400 cursor-pointer"
-                        >
-                          Ko‘rish
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                          {tc.totalReviews} ta
+                        </TableCell>
+                        <TableCell className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold">
+                          {tc.suggestionsCount} ta
+                        </TableCell>
+                        <TableCell>
+                          {tc.complaintsCount > 0 ? (
+                            <span className="text-xs font-bold text-rose-600">⚠️ {tc.complaintsCount} ta</span>
+                          ) : (
+                            <span className="text-xs font-semibold text-emerald-600">0 ta</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTeacherFilter(tc.id);
+                              setActiveTab('reviews');
+                            }}
+                            className="text-xs font-bold text-blue-600 dark:text-blue-400 cursor-pointer"
+                          >
+                            Ko‘rish
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </Card>
@@ -690,17 +814,17 @@ export default function TeacherRatingsPage() {
       {activeTab === 'reviews' && (
         <div className="space-y-6">
           {/* Filter Bar */}
-          <Card className="p-4 sm:p-5 shadow-sm space-y-4">
+          <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Search */}
               <div className="relative">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+                <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="O‘quvchi, ustoz yoki taklif matni..."
-                  className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="O‘quvchi, ustoz yoki taklif..."
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-xs sm:text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -709,7 +833,7 @@ export default function TeacherRatingsPage() {
                 <select
                   value={selectedTeacherFilter}
                   onChange={(e) => setSelectedTeacherFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-xs sm:text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-xs sm:text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ALL">Barcha ustozlar ({teachersList.length})</option>
                   {teachersList.map((t) => (
@@ -725,7 +849,7 @@ export default function TeacherRatingsPage() {
                 <select
                   value={selectedRatingFilter}
                   onChange={(e) => setSelectedRatingFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-xs sm:text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-tertiary text-xs sm:text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ALL">Barcha ballar (1-10)</option>
                   <option value="9-10">🌟 9 - 10 ball (Aʼlo)</option>
@@ -736,7 +860,7 @@ export default function TeacherRatingsPage() {
               </div>
 
               {/* Checkboxes */}
-              <div className="flex flex-col justify-center space-y-1.5 text-xs text-gray-700 dark:text-gray-300">
+              <div className="flex flex-col justify-center space-y-1.5 text-xs text-gray-700 dark:text-gray-300 pl-1">
                 <label className="flex items-center gap-2 cursor-pointer font-medium">
                   <input
                     type="checkbox"
@@ -760,7 +884,7 @@ export default function TeacherRatingsPage() {
 
             {(selectedTeacherFilter !== 'ALL' || selectedRatingFilter !== 'ALL' || onlySuggestions || onlyComplaints || searchQuery) && (
               <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
-                <span className="text-gray-500">
+                <span className="text-gray-500 font-medium">
                   Topilgan natijalar: <strong>{filteredFeedbacks.length} ta</strong>
                 </span>
                 <button
@@ -772,17 +896,17 @@ export default function TeacherRatingsPage() {
                     setOnlyComplaints(false);
                     setSearchQuery('');
                   }}
-                  className="text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer"
+                  className="text-blue-600 dark:text-blue-400 font-bold hover:underline cursor-pointer"
                 >
                   Filtrlarni tozalash
                 </button>
               </div>
             )}
-          </Card>
+          </div>
 
           {/* Feedbacks Grid */}
           {filteredFeedbacks.length === 0 ? (
-            <Card className="p-12 text-center shadow-sm space-y-3">
+            <div className="p-12 text-center rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-3">
               <MessageSquare className="w-12 h-12 text-gray-400 mx-auto" />
               <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">
                 Fikr-mulohazalar topilmadi
@@ -790,21 +914,21 @@ export default function TeacherRatingsPage() {
               <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
                 Tanlangan filtrlar bo‘yicha hozircha fidbek mavjud emas. Filtrlarni o‘zgartirib ko‘ring.
               </p>
-            </Card>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {filteredFeedbacks.map((fb) => (
-                <Card
+                <div
                   key={fb.id}
-                  className="p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-800 flex flex-col justify-between"
+                  className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4"
                 >
                   {/* Top Bar: Student info & Teacher */}
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
                           {fb.is_anonymous ? (
-                            <span className="px-2 py-0.5 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 text-xs font-bold flex items-center gap-1">
+                            <span className="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 text-xs font-bold flex items-center gap-1">
                               <Lock className="w-3 h-3" /> 🎭 Anonim O‘quvchi
                             </span>
                           ) : (
@@ -816,25 +940,25 @@ export default function TeacherRatingsPage() {
                             {new Date(fb.created_at).toLocaleDateString('uz-UZ')}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           Guruh: <strong className="text-gray-700 dark:text-gray-300">{fb.group_name || 'Guruh'}</strong>
                         </p>
                       </div>
 
                       {/* Rating Badge */}
-                      <span className={`px-3 py-1.5 rounded-2xl text-xs font-black border flex items-center gap-1 shrink-0 ${getScoreBadgeColor(fb.rating)}`}>
-                        <Star className="w-3.5 h-3.5 fill-current" />
+                      <span className="px-3 py-1.5 rounded-2xl text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1 shrink-0">
+                        <Star className="w-3.5 h-3.5 fill-emerald-500 text-emerald-500" />
                         <span>{fb.rating} / 10</span>
                       </span>
                     </div>
 
                     {/* Teacher Mention Badge */}
-                    <div className="flex items-center gap-2 p-2 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-700/60 text-xs">
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-700/60 text-xs">
                       <GraduationCap className="w-4 h-4 text-blue-500 shrink-0" />
                       <span className="text-gray-500 dark:text-gray-400">Ustoz:</span>
                       <strong className="text-gray-900 dark:text-gray-100">{fb.teacher_name}</strong>
                       <span className="text-gray-400">•</span>
-                      <span className="text-blue-600 dark:text-blue-400 font-medium">{fb.subject}</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-semibold">{fb.subject}</span>
                     </div>
                   </div>
 
@@ -842,7 +966,7 @@ export default function TeacherRatingsPage() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-gray-500 dark:text-gray-400">Darsdan mamnunligi:</span>
-                      <span className="font-bold text-gray-800 dark:text-gray-200 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800">
+                      <span className="font-bold text-gray-800 dark:text-gray-200 px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800">
                         {fb.satisfaction}
                       </span>
                       {fb.status === 'reviewed' ? (
@@ -909,7 +1033,7 @@ export default function TeacherRatingsPage() {
                       </button>
                     </div>
                   )}
-                </Card>
+                </div>
               ))}
             </div>
           )}
@@ -921,7 +1045,7 @@ export default function TeacherRatingsPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Score distribution */}
-            <Card className="p-6 space-y-4 shadow-sm">
+            <div className="p-6 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-4">
               <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <span>1-10 Ballik Shkala Taqsimoti</span>
@@ -941,7 +1065,7 @@ export default function TeacherRatingsPage() {
                       </span>
                       <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-3 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${getProgressColor(sc)}`}
+                          className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500"
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -952,10 +1076,10 @@ export default function TeacherRatingsPage() {
                   );
                 })}
               </div>
-            </Card>
+            </div>
 
             {/* Common Student Suggestions */}
-            <Card className="p-6 space-y-4 shadow-sm">
+            <div className="p-6 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-4">
               <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-amber-500" />
                 <span>O‘quvchilar Eng Ko‘p So‘rayotgan Takliflar</span>
@@ -990,7 +1114,7 @@ export default function TeacherRatingsPage() {
               <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 mt-4 text-xs text-blue-900 dark:text-blue-200 leading-relaxed">
                 💡 <strong>Xulosa va Tavsiya:</strong> Talabalar darslarda amaliyot va interaktiv o‘yinli bellashuvlarni juda yaxshi kutib olmoqda. Har bir fanga haftada kamida 1 marta mini-viktorina yoki amaliy mashg‘ulot qo‘shish umumiy o‘zlashtirishni sezilarli oshiradi.
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       )}
