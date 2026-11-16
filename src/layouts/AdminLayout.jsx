@@ -27,6 +27,7 @@ import {
   Megaphone,
   ShieldAlert,
   Smartphone,
+  Star,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -123,6 +124,12 @@ const ADMIN_NAV_ITEMS = [
     label: 'Reports',
     path: '/admin/reports',
     icon: BarChart3,
+  },
+  {
+    labelKey: 'nav.teacherRatings',
+    label: 'O‘qituvchilar reytingi',
+    path: '/admin/teacher-ratings',
+    icon: Star,
   },
   {
     label: 'Audit jurnali',

@@ -126,7 +126,9 @@
       "reports": "Отчеты",
       "audit": "Журнал аудита",
       "settings": "Настройки",
-      "profile": "Профиль"
+      "profile": "Профиль",
+      "teacherRatings": "Рейтинг учителей",
+      "teacherFeedback": "Отзыв учителю"
     },
     "dashboard": {
       "welcome": "С возвращением, {{name}}",

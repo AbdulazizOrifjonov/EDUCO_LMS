@@ -28,6 +28,7 @@ import {
   Megaphone,
   DollarSign,
   ShieldAlert,
+  Star,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -129,6 +130,12 @@ const OWNER_NAV_ITEMS = [
     label: 'Reports',
     path: '/owner/reports',
     icon: BarChart3,
+  },
+  {
+    labelKey: 'nav.teacherRatings',
+    label: 'O‘qituvchilar reytingi',
+    path: '/owner/teacher-ratings',
+    icon: Star,
   },
   {
     label: 'Audit jurnali',

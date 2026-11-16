@@ -12,6 +12,7 @@ import {
   FileCheck,
   BookOpen,
   Megaphone,
+  HeartHandshake,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -55,6 +56,12 @@ const STUDENT_NAV_ITEMS = [
     label: 'Attendance',
     path: '/student/attendance',
     icon: CheckSquare,
+  },
+  {
+    labelKey: 'nav.teacherFeedback',
+    label: 'O‘qituvchimga fikr-mulohaza',
+    path: '/student/teacher-feedback',
+    icon: HeartHandshake,
   },
   {
     label: 'Eʼlonlar',

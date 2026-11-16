@@ -61,6 +61,8 @@ const MaterialsPage = React.lazy(() => import('@/pages/shared/MaterialsPage'));
 const AnnouncementsPage = React.lazy(() => import('@/pages/shared/AnnouncementsPage'));
 const AuditLogPage = React.lazy(() => import('@/pages/owner/AuditLogPage'));
 const PayrollPage = React.lazy(() => import('@/pages/owner/PayrollPage'));
+const TeacherRatingsPage = React.lazy(() => import('@/pages/owner/TeacherRatingsPage'));
+const StudentTeacherFeedbackPage = React.lazy(() => import('@/pages/student/StudentTeacherFeedbackPage'));
 
 function RoleRedirectRoute({ segment, fallback = 'dashboard' }) {
   const { user, profile, loading } = useAuth();
@@ -83,6 +85,10 @@ function RoleRedirectRoute({ segment, fallback = 'dashboard' }) {
   if (segment === 'tuition' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
   if (segment === 'reports' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
   if (segment === 'website' && role !== 'owner' && role !== 'admin') return <Navigate to={`/${role}/dashboard`} replace />;
+  if ((segment === 'teacher-ratings' || segment === 'ratings') && role === 'student') return <Navigate to="/student/teacher-feedback" replace />;
+  if ((segment === 'teacher-ratings' || segment === 'ratings') && role === 'teacher') return <Navigate to="/teacher/ratings" replace />;
+  if ((segment === 'teacher-feedback' || segment === 'feedback') && (role === 'owner' || role === 'admin')) return <Navigate to={`/${role}/teacher-ratings`} replace />;
+  if ((segment === 'teacher-feedback' || segment === 'feedback') && role === 'teacher') return <Navigate to="/teacher/ratings" replace />;
 
   return <Navigate to={`/${role}/${segment || fallback}`} replace />;
 }
@@ -186,6 +192,8 @@ export default function App() {
             <Route path="tuition" element={<TuitionPage />} />
             <Route path="sms" element={<SmsManagementPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="teacher-ratings" element={<TeacherRatingsPage />} />
+            <Route path="ratings" element={<TeacherRatingsPage />} />
             <Route path="audit" element={<AuditLogPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="website" element={<WebsiteManagementPage />} />
@@ -239,6 +247,8 @@ export default function App() {
             <Route path="tuition" element={<TuitionPage />} />
             <Route path="sms" element={<SmsManagementPage />} />
             <Route path="reports" element={<ReportsPage />} />
+            <Route path="teacher-ratings" element={<TeacherRatingsPage />} />
+            <Route path="ratings" element={<TeacherRatingsPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="website" element={<WebsiteManagementPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
@@ -286,6 +296,8 @@ export default function App() {
             <Route path="homework/:id" element={<HomeworkDetail />} />
             <Route path="materials" element={<MaterialsPage />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="ratings" element={<TeacherRatingsPage />} />
+            <Route path="teacher-ratings" element={<TeacherRatingsPage />} />
             <Route path="reminders" element={<RemindersPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
@@ -307,6 +319,8 @@ export default function App() {
             <Route path="group" element={<StudentGroupPage />} />
             <Route path="grades" element={<GradesPage />} />
             <Route path="attendance" element={<StudentAttendancePage />} />
+            <Route path="teacher-feedback" element={<StudentTeacherFeedbackPage />} />
+            <Route path="feedback" element={<StudentTeacherFeedbackPage />} />
             <Route path="homework" element={<HomeworkPage />} />
             <Route path="homework/:id" element={<HomeworkDetail />} />
             <Route path="materials" element={<MaterialsPage />} />
@@ -337,6 +351,10 @@ export default function App() {
           <Route path="/audit" element={<RoleRedirectRoute segment="audit" />} />
           <Route path="/tuition" element={<RoleRedirectRoute segment="tuition" />} />
           <Route path="/reports" element={<RoleRedirectRoute segment="reports" />} />
+          <Route path="/teacher-ratings" element={<RoleRedirectRoute segment="teacher-ratings" />} />
+          <Route path="/ratings" element={<RoleRedirectRoute segment="teacher-ratings" />} />
+          <Route path="/teacher-feedback" element={<RoleRedirectRoute segment="teacher-feedback" />} />
+          <Route path="/feedback" element={<RoleRedirectRoute segment="teacher-feedback" />} />
           <Route path="/reminders" element={<RoleRedirectRoute segment="reminders" />} />
           <Route path="/sms" element={<RoleRedirectRoute segment="sms" />} />
           <Route path="/settings" element={<RoleRedirectRoute segment="settings" />} />

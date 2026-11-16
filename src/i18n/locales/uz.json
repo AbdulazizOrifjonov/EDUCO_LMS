@@ -126,7 +126,9 @@
       "reports": "Hisobotlar",
       "audit": "Audit jurnali",
       "settings": "Sozlamalar",
-      "profile": "Profil"
+      "profile": "Profil",
+      "teacherRatings": "O‘qituvchilar reytingi",
+      "teacherFeedback": "O‘qituvchimga fikr-mulohaza"
     },
     "dashboard": {
       "welcome": "Xush kelibsiz, {{name}}",

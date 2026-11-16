@@ -126,7 +126,9 @@
       "reports": "Reports",
       "audit": "Audit Log",
       "settings": "Settings",
-      "profile": "Profile"
+      "profile": "Profile",
+      "teacherRatings": "Teacher Ratings",
+      "teacherFeedback": "Teacher Feedback"
     },
     "dashboard": {
       "welcome": "Welcome back, {{name}}",

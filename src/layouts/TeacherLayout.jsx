@@ -15,6 +15,7 @@ import {
   GraduationCap,
   FileCheck,
   Megaphone,
+  Star,
 } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 
@@ -81,6 +82,11 @@ const TEACHER_NAV_ITEMS = [
     label: 'Eʼlonlar',
     path: '/teacher/announcements',
     icon: Megaphone,
+  },
+  {
+    label: 'Reytingim & Fidbeklar',
+    path: '/teacher/ratings',
+    icon: Star,
   },
   {
     labelKey: 'nav.chat',

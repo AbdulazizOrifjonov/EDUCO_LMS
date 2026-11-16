@@ -35,7 +35,155 @@ export const STORAGE_KEYS = {
   WEBSITE_VIDEOS: 'educo_db_website_videos',
   WEBSITE_NEWS: 'educo_db_website_news',
   WEBSITE_TESTIMONIALS: 'educo_db_website_testimonials',
+  TEACHER_FEEDBACK: 'educo_db_teacher_feedback',
 };
+
+const INITIAL_TEACHER_FEEDBACK = [
+  {
+    id: 'tf-1',
+    teacher_id: 'usr-1793603060709',
+    teacher_name: 'Beknazarov Bexruz',
+    subject: 'Matematika',
+    group_id: 'grp-matematika',
+    group_name: 'Matematika 1.1 (MAT-1.1)',
+    student_id: 'usr-student-1',
+    student_name: 'Ismoil Arslonov',
+    rating: 10,
+    satisfaction: 'Juda aʼlo',
+    suggestions: 'Darslar juda zo‘r o‘tmoqda! Har haftada bitta mini-olimpiada yoki tezkor misol yechish musobaqasi o‘tkazilsa, darslar yanada qiziqarli bo‘lardi.',
+    complaints: '',
+    is_anonymous: false,
+    status: 'reviewed',
+    created_at: '2026-11-14T10:30:00.000Z',
+    updated_at: '2026-11-14T10:30:00.000Z',
+  },
+  {
+    id: 'tf-2',
+    teacher_id: 'usr-teacher-toshtemirova',
+    teacher_name: 'Toshtemirova Madina Shuxrat qizi',
+    subject: 'Ingliz tili',
+    group_id: 'grp-ingliz-tili',
+    group_name: 'Ingliz tili 1.1 (ENG-1.1)',
+    student_id: 'usr-student-997249967',
+    student_name: 'Mubina Botirova',
+    rating: 10,
+    satisfaction: 'Juda aʼlo',
+    suggestions: 'Speaking klublar ko‘proq bo‘lsin, ingliz tilida video va filmlardan parchalar ko‘rib jonli muhokama qilsak juda foydali bo‘ladi.',
+    complaints: '',
+    is_anonymous: false,
+    status: 'reviewed',
+    created_at: '2026-11-15T09:15:00.000Z',
+    updated_at: '2026-11-15T09:15:00.000Z',
+  },
+  {
+    id: 'tf-3',
+    teacher_id: 'usr-1793466843425',
+    teacher_name: 'Abdulazizbek Orifjonov',
+    subject: 'Full Stack IT',
+    group_id: 'grp-full-stack',
+    group_name: 'Full Stack guruhi (IT-1.1)',
+    student_id: 'usr-student-rustambek',
+    student_name: 'Rustambek Yo\'ldoshev',
+    rating: 10,
+    satisfaction: 'Juda aʼlo',
+    suggestions: 'Real startap loyihalar ustida ko‘proq amaliyot qilsak va GitHub portfolio yaratish bo‘yicha master-klass bo‘lsa ajoyib bo‘lardi.',
+    complaints: '',
+    is_anonymous: false,
+    status: 'reviewed',
+    created_at: '2026-11-15T14:20:00.000Z',
+    updated_at: '2026-11-15T14:20:00.000Z',
+  },
+  {
+    id: 'tf-4',
+    teacher_id: 'usr-teacher-yusupjonova',
+    teacher_name: 'Yusupjonova Umida Sunnatulloh qizi',
+    subject: 'Arab tili',
+    group_id: 'grp-arab-tili',
+    group_name: 'Arab tili 1.1 (ARB-1.1)',
+    student_id: 'usr-student-parizoda',
+    student_name: 'Parizoda Xurshidova',
+    rating: 9,
+    satisfaction: 'Juda aʼlo',
+    suggestions: 'Qiroat va yangi so‘zlarni yodlash bo‘yicha kartochkali o‘yinlar va audio mashqlar ko‘paytirilsa juda yaxshi bo‘lardi.',
+    complaints: '',
+    is_anonymous: false,
+    status: 'reviewed',
+    created_at: '2026-11-15T16:00:00.000Z',
+    updated_at: '2026-11-15T16:00:00.000Z',
+  },
+  {
+    id: 'tf-5',
+    teacher_id: 'usr-1793622773288',
+    teacher_name: 'Fayoza Karimberdiyeva',
+    subject: 'Mental Arifmetika',
+    group_id: 'grp-1793623583736',
+    group_name: 'Mental Arifmetika 1.2 (MNT-1.2)',
+    student_id: 'usr-student-anon1',
+    student_name: 'Anonim o‘quvchi',
+    rating: 9,
+    satisfaction: 'Yaxshi',
+    suggestions: 'Tez hisoblash bo‘yicha taymer bilan bellashuvlar ko‘proq o‘tkazilsa bolalar ko‘proq qiziqadi va tezroq o‘rganadi.',
+    complaints: 'Dars vaqtida baʼzida 5 daqiqa kechikish bo‘ladi, iltimos o‘z vaqtida boshlansa yaxshi bo‘lardi.',
+    is_anonymous: true,
+    status: 'new',
+    created_at: '2026-11-16T08:45:00.000Z',
+    updated_at: '2026-11-16T08:45:00.000Z',
+  },
+  {
+    id: 'tf-6',
+    teacher_id: 'usr-1793622233829',
+    teacher_name: 'Ismatova Shaxnoza',
+    subject: 'Rus tili',
+    group_id: 'grp-1793622453272',
+    group_name: 'Rus tili 1.3 (RUS-1.3)',
+    student_id: 'usr-student-qudratilla',
+    student_name: 'Qudratilla Negmatov',
+    rating: 8,
+    satisfaction: 'Yaxshi',
+    suggestions: 'Rus tilida so‘zlashuv mashqlari va grammatikani interaktiv slaydlar orqali ko‘proq tushuntirish berilsa ajoyib bo‘lardi.',
+    complaints: '',
+    is_anonymous: false,
+    status: 'reviewed',
+    created_at: '2026-11-16T09:10:00.000Z',
+    updated_at: '2026-11-16T09:10:00.000Z',
+  },
+  {
+    id: 'tf-7',
+    teacher_id: 'usr-teacher-qosimov',
+    teacher_name: 'Shuxrat Qosimov',
+    subject: 'Shaxmat',
+    group_id: 'grp-shaxmat',
+    group_name: 'Shaxmat guruhi (CHESS-1.1)',
+    student_id: 'usr-student-anon2',
+    student_name: 'Anonim o‘quvchi',
+    rating: 9,
+    satisfaction: 'Juda aʼlo',
+    suggestions: 'Mashhur grossmeysterlarning tarixiy partiyalarini tahlil qilish va o‘zaro mini-turnir o‘tkazilsa zo‘r bo‘lardi.',
+    complaints: '',
+    is_anonymous: true,
+    status: 'reviewed',
+    created_at: '2026-11-16T10:00:00.000Z',
+    updated_at: '2026-11-16T10:00:00.000Z',
+  },
+  {
+    id: 'tf-8',
+    teacher_id: 'usr-1793603060709',
+    teacher_name: 'Beknazarov Bexruz',
+    subject: 'Matematika',
+    group_id: 'grp-1793615416295',
+    group_name: 'Matematika 1.2 (MAT-1.2)',
+    student_id: 'usr-student-firdavs',
+    student_name: 'Firdavs Raimanberdiyev',
+    rating: 9,
+    satisfaction: 'Juda aʼlo',
+    suggestions: 'Mantiqiy jumboqlar va qiziqarli geometrik amallar ko‘proq berilsa dars yanada jonli bo‘ladi.',
+    complaints: '',
+    is_anonymous: false,
+    status: 'reviewed',
+    created_at: '2026-11-16T11:20:00.000Z',
+    updated_at: '2026-11-16T11:20:00.000Z',
+  },
+];
 
 const INITIAL_SMS_SETTINGS = {
   id: 'sms-settings-1',
@@ -4668,6 +4816,85 @@ class LocalStore {
       return n;
     });
     this.setItem(STORAGE_KEYS.NOTIFICATIONS, updated);
+    return true;
+  }
+
+  // --- TEACHER FEEDBACK & RATINGS ---
+  getTeacherFeedbacks(filter = {}) {
+    let list = this.getItem(STORAGE_KEYS.TEACHER_FEEDBACK, INITIAL_TEACHER_FEEDBACK);
+    if (!Array.isArray(list) || list.length === 0) {
+      list = INITIAL_TEACHER_FEEDBACK;
+      this.setItem(STORAGE_KEYS.TEACHER_FEEDBACK, list);
+    }
+    return list.filter((fb) => {
+      if (filter.teacher_id && String(fb.teacher_id) !== String(filter.teacher_id)) return false;
+      if (filter.student_id && this.normalizeUserId(fb.student_id) !== this.normalizeUserId(filter.student_id)) return false;
+      if (filter.group_id && String(fb.group_id) !== String(filter.group_id)) return false;
+      if (filter.min_rating && fb.rating < filter.min_rating) return false;
+      if (filter.max_rating && fb.rating > filter.max_rating) return false;
+      if (filter.has_complaints && !fb.complaints?.trim()) return false;
+      if (filter.has_suggestions && !fb.suggestions?.trim()) return false;
+      if (filter.status && fb.status !== filter.status) return false;
+      return true;
+    });
+  }
+
+  saveTeacherFeedback(feedbackData) {
+    const list = this.getItem(STORAGE_KEYS.TEACHER_FEEDBACK, INITIAL_TEACHER_FEEDBACK);
+    const id = feedbackData.id || `tf-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const now = new Date().toISOString();
+
+    const existingIndex = list.findIndex((fb) => fb.id === id);
+    let updatedRecord;
+
+    if (existingIndex >= 0) {
+      updatedRecord = {
+        ...list[existingIndex],
+        ...feedbackData,
+        updated_at: now,
+      };
+      list[existingIndex] = updatedRecord;
+    } else {
+      updatedRecord = {
+        id,
+        teacher_id: feedbackData.teacher_id,
+        teacher_name: feedbackData.teacher_name || '',
+        subject: feedbackData.subject || '',
+        group_id: feedbackData.group_id || '',
+        group_name: feedbackData.group_name || '',
+        student_id: feedbackData.student_id || '',
+        student_name: feedbackData.student_name || 'O‘quvchi',
+        rating: Math.max(1, Math.min(10, Number(feedbackData.rating) || 10)),
+        satisfaction: feedbackData.satisfaction || 'Juda aʼlo',
+        suggestions: feedbackData.suggestions || '',
+        complaints: feedbackData.complaints || '',
+        is_anonymous: Boolean(feedbackData.is_anonymous),
+        status: feedbackData.status || 'new',
+        created_at: feedbackData.created_at || now,
+        updated_at: now,
+      };
+      list.unshift(updatedRecord);
+    }
+
+    this.setItem(STORAGE_KEYS.TEACHER_FEEDBACK, list);
+    return updatedRecord;
+  }
+
+  updateTeacherFeedbackStatus(id, status = 'reviewed') {
+    const list = this.getItem(STORAGE_KEYS.TEACHER_FEEDBACK, INITIAL_TEACHER_FEEDBACK);
+    const idx = list.findIndex((fb) => fb.id === id);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], status, updated_at: new Date().toISOString() };
+      this.setItem(STORAGE_KEYS.TEACHER_FEEDBACK, list);
+      return list[idx];
+    }
+    return null;
+  }
+
+  deleteTeacherFeedback(id) {
+    const list = this.getItem(STORAGE_KEYS.TEACHER_FEEDBACK, INITIAL_TEACHER_FEEDBACK);
+    const filtered = list.filter((fb) => fb.id !== id);
+    this.setItem(STORAGE_KEYS.TEACHER_FEEDBACK, filtered);
     return true;
   }
 
