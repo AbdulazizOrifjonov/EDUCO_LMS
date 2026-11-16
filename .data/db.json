@@ -3915,20 +3915,29 @@
       "teacher_name": "Shaxnoza Ismatova",
       "room": "Xona 108",
       "capacity": 35,
-      "enrolled_count": 0,
+      "enrolled_count": 6,
       "status": "active",
       "monthly_price": 500000,
-      "schedule": "Sesh-Pay-Shan, 10:00 - 11:30",
+      "schedule": "Dush-Chor-Jum, 09:07 - 11:00",
       "avatar_url": "",
       "image_url": "",
       "created_at": "2026-11-02T12:27:33.272Z",
-      "updated_at": "2026-11-04T12:19:37.240Z",
+      "updated_at": "2026-11-16T07:19:07.386Z",
       "direction": "Rus tili",
       "teacherName": "Shaxnoza Ismatova",
       "is_active": true,
-      "start_time": "10:00:00",
-      "end_time": "11:30:00",
-      "student_ids": []
+      "start_time": "09:07",
+      "end_time": "11:00",
+      "student_ids": [
+        "usr-student-930098339",
+        "usr-student-901236463",
+        "usr-student-998580121",
+        "usr-student-998580121-abdula",
+        "usr-student-998822309",
+        "usr-student-977608589"
+      ],
+      "schedule_days": "Dush-Chor-Jum",
+      "schedule_time": "09:07 - 11:00"
     },
     {
       "id": "grp-1793615416295",
@@ -6579,7 +6588,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "2",
-      "created_at": "2026-11-02T10:31:00.774Z"
+      "created_at": "2026-11-02T10:31:00.774Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615460774-3-47zw",
@@ -6588,7 +6631,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "2",
-      "created_at": "2026-11-02T10:31:00.774Z"
+      "created_at": "2026-11-02T10:31:00.774Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615460774-5-ca18",
@@ -6597,7 +6674,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "2",
-      "created_at": "2026-11-02T10:31:00.774Z"
+      "created_at": "2026-11-02T10:31:00.774Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615537310-2-sepk",
@@ -6606,7 +6717,41 @@
       "start_time": "08:30:00",
       "end_time": "10:00:00",
       "room": "2",
-      "created_at": "2026-11-02T10:32:17.310Z"
+      "created_at": "2026-11-02T10:32:17.310Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615537310-4-gh4w",
@@ -6615,7 +6760,41 @@
       "start_time": "08:30:00",
       "end_time": "10:00:00",
       "room": "2",
-      "created_at": "2026-11-02T10:32:17.310Z"
+      "created_at": "2026-11-02T10:32:17.310Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615537310-6-2kg1",
@@ -6624,7 +6803,41 @@
       "start_time": "08:30:00",
       "end_time": "10:00:00",
       "room": "2",
-      "created_at": "2026-11-02T10:32:17.310Z"
+      "created_at": "2026-11-02T10:32:17.310Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615599498-2-diqd",
@@ -6633,7 +6846,41 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:33:19.498Z"
+      "created_at": "2026-11-02T10:33:19.498Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615599498-4-w0qr",
@@ -6642,7 +6889,41 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:33:19.498Z"
+      "created_at": "2026-11-02T10:33:19.498Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615599498-6-mets",
@@ -6651,7 +6932,41 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:33:19.498Z"
+      "created_at": "2026-11-02T10:33:19.498Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615629488-2-z6if",
@@ -6660,7 +6975,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:33:49.488Z"
+      "created_at": "2026-11-02T10:33:49.488Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615629488-4-rvvg",
@@ -6669,7 +7018,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:33:49.488Z"
+      "created_at": "2026-11-02T10:33:49.488Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615629488-6-0a87",
@@ -6678,7 +7061,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:33:49.488Z"
+      "created_at": "2026-11-02T10:33:49.488Z",
+      "groupName": "Matematika 1.2 (MAT-1.2)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793615416295",
+        "name": "Matematika 1.2 (MAT-1.2)",
+        "room": "Xona 105",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793615745980-1-8xs4",
@@ -6687,7 +7104,14 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:35:45.980Z"
+      "created_at": "2026-11-02T10:35:45.980Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793615745980-3-irnj",
@@ -6696,7 +7120,14 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:35:45.980Z"
+      "created_at": "2026-11-02T10:35:45.980Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793615745980-5-ta2p",
@@ -6705,7 +7136,14 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "2",
-      "created_at": "2026-11-02T10:35:45.980Z"
+      "created_at": "2026-11-02T10:35:45.980Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793622462666-1-3qh6",
@@ -6822,7 +7260,41 @@
       "start_time": "16:00:00",
       "end_time": "17:30:00",
       "room": "3",
-      "created_at": "2026-11-02T12:52:57.465Z"
+      "created_at": "2026-11-02T12:52:57.465Z",
+      "groupName": "Mental Arifmetika 1.2 (MNT-1.2)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793623583736",
+        "name": "Mental Arifmetika 1.2 (MNT-1.2)",
+        "room": "Xona 203",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793623977465-3-58na",
@@ -6831,7 +7303,41 @@
       "start_time": "16:00:00",
       "end_time": "17:30:00",
       "room": "3",
-      "created_at": "2026-11-02T12:52:57.465Z"
+      "created_at": "2026-11-02T12:52:57.465Z",
+      "groupName": "Mental Arifmetika 1.2 (MNT-1.2)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793623583736",
+        "name": "Mental Arifmetika 1.2 (MNT-1.2)",
+        "room": "Xona 203",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793623977465-5-621l",
@@ -6840,7 +7346,41 @@
       "start_time": "16:00:00",
       "end_time": "17:30:00",
       "room": "3",
-      "created_at": "2026-11-02T12:52:57.465Z"
+      "created_at": "2026-11-02T12:52:57.465Z",
+      "groupName": "Mental Arifmetika 1.2 (MNT-1.2)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793623583736",
+        "name": "Mental Arifmetika 1.2 (MNT-1.2)",
+        "room": "Xona 203",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793442329903-1-swex",
@@ -6849,7 +7389,14 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "3",
-      "created_at": "2026-10-31T10:25:29.903Z"
+      "created_at": "2026-10-31T10:25:29.903Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442329903-3-nvey",
@@ -6858,7 +7405,14 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "3",
-      "created_at": "2026-10-31T10:25:29.903Z"
+      "created_at": "2026-10-31T10:25:29.903Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442329903-5-immk",
@@ -6867,7 +7421,14 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "3",
-      "created_at": "2026-10-31T10:25:29.903Z"
+      "created_at": "2026-10-31T10:25:29.903Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442375252-1-6m2s",
@@ -6876,7 +7437,14 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "3",
-      "created_at": "2026-10-31T10:26:15.252Z"
+      "created_at": "2026-10-31T10:26:15.252Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442375252-3-v3me",
@@ -6885,7 +7453,14 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "3",
-      "created_at": "2026-10-31T10:26:15.252Z"
+      "created_at": "2026-10-31T10:26:15.252Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442375252-5-aw4m",
@@ -6894,7 +7469,14 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "3",
-      "created_at": "2026-10-31T10:26:15.252Z"
+      "created_at": "2026-10-31T10:26:15.252Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442401464-2-oi2m",
@@ -6903,7 +7485,14 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "3",
-      "created_at": "2026-10-31T10:26:41.464Z"
+      "created_at": "2026-10-31T10:26:41.464Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442401464-4-wpes",
@@ -6912,7 +7501,14 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "3",
-      "created_at": "2026-10-31T10:26:41.464Z"
+      "created_at": "2026-10-31T10:26:41.464Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442401464-6-gcfc",
@@ -6921,7 +7517,14 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "3",
-      "created_at": "2026-10-31T10:26:41.464Z"
+      "created_at": "2026-10-31T10:26:41.464Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442434630-2-spsf",
@@ -6930,7 +7533,14 @@
       "start_time": "17:30:00",
       "end_time": "19:00:00",
       "room": "3",
-      "created_at": "2026-10-31T10:27:14.630Z"
+      "created_at": "2026-10-31T10:27:14.630Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442434630-4-63tn",
@@ -6939,7 +7549,14 @@
       "start_time": "17:30:00",
       "end_time": "19:00:00",
       "room": "3",
-      "created_at": "2026-10-31T10:27:14.630Z"
+      "created_at": "2026-10-31T10:27:14.630Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793442434630-6-laiw",
@@ -6948,7 +7565,14 @@
       "start_time": "17:30:00",
       "end_time": "19:00:00",
       "room": "3",
-      "created_at": "2026-10-31T10:27:14.630Z"
+      "created_at": "2026-10-31T10:27:14.630Z",
+      "groupName": "Group",
+      "courseName": "",
+      "color": "#123D78",
+      "teacher_id": "",
+      "teacher_name": "",
+      "teachers": [],
+      "groups": null
     },
     {
       "id": "sch-1793768367672-1-e3l3",
@@ -6957,7 +7581,41 @@
       "start_time": "09:00:00",
       "end_time": "10:30:00",
       "room": "1",
-      "created_at": "2026-11-04T04:59:27.672Z"
+      "created_at": "2026-11-04T04:59:27.672Z",
+      "groupName": "Ingliz tili 1.1 (ENG-1.1)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili",
+        "name": "Ingliz tili 1.1 (ENG-1.1)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768367672-3-c1hc",
@@ -6966,7 +7624,41 @@
       "start_time": "09:00:00",
       "end_time": "10:30:00",
       "room": "1",
-      "created_at": "2026-11-04T04:59:27.672Z"
+      "created_at": "2026-11-04T04:59:27.672Z",
+      "groupName": "Ingliz tili 1.1 (ENG-1.1)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili",
+        "name": "Ingliz tili 1.1 (ENG-1.1)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768367672-5-483d",
@@ -6975,7 +7667,41 @@
       "start_time": "09:00:00",
       "end_time": "10:30:00",
       "room": "1",
-      "created_at": "2026-11-04T04:59:27.672Z"
+      "created_at": "2026-11-04T04:59:27.672Z",
+      "groupName": "Ingliz tili 1.1 (ENG-1.1)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili",
+        "name": "Ingliz tili 1.1 (ENG-1.1)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768409056-1-dqll",
@@ -6984,7 +7710,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "3",
-      "created_at": "2026-11-04T05:00:09.056Z"
+      "created_at": "2026-11-04T05:00:09.056Z",
+      "groupName": "Mental Arifmetika 1.2 (MNT-1.2)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793623583736",
+        "name": "Mental Arifmetika 1.2 (MNT-1.2)",
+        "room": "Xona 203",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768409056-3-2hdq",
@@ -6993,7 +7753,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "3",
-      "created_at": "2026-11-04T05:00:09.056Z"
+      "created_at": "2026-11-04T05:00:09.056Z",
+      "groupName": "Mental Arifmetika 1.2 (MNT-1.2)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793623583736",
+        "name": "Mental Arifmetika 1.2 (MNT-1.2)",
+        "room": "Xona 203",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768409056-5-byxa",
@@ -7002,7 +7796,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "3",
-      "created_at": "2026-11-04T05:00:09.056Z"
+      "created_at": "2026-11-04T05:00:09.056Z",
+      "groupName": "Mental Arifmetika 1.2 (MNT-1.2)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793623583736",
+        "name": "Mental Arifmetika 1.2 (MNT-1.2)",
+        "room": "Xona 203",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768500898-1-zsfp",
@@ -7011,7 +7839,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "3",
-      "created_at": "2026-11-04T05:02:05.786Z"
+      "created_at": "2026-11-04T05:02:05.786Z",
+      "groupName": "Ingliz tili 1.1 (ENG-1.1)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili",
+        "name": "Ingliz tili 1.1 (ENG-1.1)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768500898-3-72ld",
@@ -7020,7 +7882,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "3",
-      "created_at": "2026-11-04T05:02:05.786Z"
+      "created_at": "2026-11-04T05:02:05.786Z",
+      "groupName": "Ingliz tili 1.1 (ENG-1.1)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili",
+        "name": "Ingliz tili 1.1 (ENG-1.1)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-1793768500898-5-3rc2",
@@ -7029,7 +7925,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "3",
-      "created_at": "2026-11-04T05:02:05.786Z"
+      "created_at": "2026-11-04T05:02:05.786Z",
+      "groupName": "Ingliz tili 1.1 (ENG-1.1)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili",
+        "name": "Ingliz tili 1.1 (ENG-1.1)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng12-d1",
@@ -7038,7 +7968,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-2",
+        "name": "Ingliz tili 1.2 (ENG-1.2)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng12-d3",
@@ -7047,7 +8011,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-2",
+        "name": "Ingliz tili 1.2 (ENG-1.2)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng12-d5",
@@ -7056,7 +8054,41 @@
       "start_time": "10:30:00",
       "end_time": "12:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.2 (ENG-1.2)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-2",
+        "name": "Ingliz tili 1.2 (ENG-1.2)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng13-d2",
@@ -7065,7 +8097,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.3 (ENG-1.3)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-3",
+        "name": "Ingliz tili 1.3 (ENG-1.3)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng13-d4",
@@ -7074,7 +8140,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.3 (ENG-1.3)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-3",
+        "name": "Ingliz tili 1.3 (ENG-1.3)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng13-d6",
@@ -7083,7 +8183,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.3 (ENG-1.3)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-3",
+        "name": "Ingliz tili 1.3 (ENG-1.3)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng14-d2",
@@ -7092,7 +8226,41 @@
       "start_time": "11:00:00",
       "end_time": "12:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.4 (ENG-1.4)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-4",
+        "name": "Ingliz tili 1.4 (ENG-1.4)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng14-d4",
@@ -7101,7 +8269,41 @@
       "start_time": "11:00:00",
       "end_time": "12:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.4 (ENG-1.4)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-4",
+        "name": "Ingliz tili 1.4 (ENG-1.4)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng14-d6",
@@ -7110,7 +8312,41 @@
       "start_time": "11:00:00",
       "end_time": "12:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.4 (ENG-1.4)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-4",
+        "name": "Ingliz tili 1.4 (ENG-1.4)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng15-d2",
@@ -7119,7 +8355,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.5 (ENG-1.5)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-5",
+        "name": "Ingliz tili 1.5 (ENG-1.5)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng15-d4",
@@ -7128,7 +8398,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.5 (ENG-1.5)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-5",
+        "name": "Ingliz tili 1.5 (ENG-1.5)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng15-d6",
@@ -7137,7 +8441,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.5 (ENG-1.5)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-5",
+        "name": "Ingliz tili 1.5 (ENG-1.5)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng16-d2",
@@ -7146,7 +8484,41 @@
       "start_time": "15:30:00",
       "end_time": "17:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.6 (ENG-1.6)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-6",
+        "name": "Ingliz tili 1.6 (ENG-1.6)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng16-d4",
@@ -7155,7 +8527,41 @@
       "start_time": "15:30:00",
       "end_time": "17:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.6 (ENG-1.6)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-6",
+        "name": "Ingliz tili 1.6 (ENG-1.6)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng16-d6",
@@ -7164,7 +8570,41 @@
       "start_time": "15:30:00",
       "end_time": "17:00:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.6 (ENG-1.6)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-6",
+        "name": "Ingliz tili 1.6 (ENG-1.6)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng17-d2",
@@ -7173,7 +8613,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.7 (ENG-1.7)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-7",
+        "name": "Ingliz tili 1.7 (ENG-1.7)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng17-d4",
@@ -7182,7 +8656,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.7 (ENG-1.7)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-7",
+        "name": "Ingliz tili 1.7 (ENG-1.7)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-madina-eng17-d6",
@@ -7191,7 +8699,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "102",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Ingliz tili 1.7 (ENG-1.7)",
+      "courseName": "Ingliz tili",
+      "color": "#8b5cf6",
+      "teacher_id": "usr-teacher-toshtemirova",
+      "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-toshtemirova",
+          "first_name": "Toshtemirova Madina Shuxrat qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-ingliz-tili-7",
+        "name": "Ingliz tili 1.7 (ENG-1.7)",
+        "room": "102",
+        "teacher_id": "usr-teacher-toshtemirova",
+        "teacher_name": "Toshtemirova Madina Shuxrat qizi",
+        "courses": {
+          "id": "crs-ingliz-tili",
+          "name": "Ingliz tili",
+          "color": "#8b5cf6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-toshtemirova",
+            "profiles": {
+              "id": "usr-teacher-toshtemirova",
+              "first_name": "Toshtemirova Madina Shuxrat qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb11-d1",
@@ -7200,7 +8742,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Arab tili 1.1 (ARB-1.1)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili",
+        "name": "Arab tili 1.1 (ARB-1.1)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb11-d3",
@@ -7209,7 +8785,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Arab tili 1.1 (ARB-1.1)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili",
+        "name": "Arab tili 1.1 (ARB-1.1)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb11-d5",
@@ -7218,7 +8828,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Arab tili 1.1 (ARB-1.1)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili",
+        "name": "Arab tili 1.1 (ARB-1.1)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb12-d2",
@@ -7227,7 +8871,41 @@
       "start_time": "07:00:00",
       "end_time": "08:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Arab tili 1.2 (ARB-1.2)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili-2",
+        "name": "Arab tili 1.2 (ARB-1.2)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb12-d4",
@@ -7236,7 +8914,41 @@
       "start_time": "07:00:00",
       "end_time": "08:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Arab tili 1.2 (ARB-1.2)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili-2",
+        "name": "Arab tili 1.2 (ARB-1.2)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb12-d6",
@@ -7245,7 +8957,41 @@
       "start_time": "07:00:00",
       "end_time": "08:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Arab tili 1.2 (ARB-1.2)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili-2",
+        "name": "Arab tili 1.2 (ARB-1.2)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb13-d2",
@@ -7254,7 +9000,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.834Z"
+      "created_at": "2026-11-04T07:55:24.834Z",
+      "groupName": "Arab tili 1.3 (ARB-1.3)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili-3",
+        "name": "Arab tili 1.3 (ARB-1.3)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb13-d4",
@@ -7263,7 +9043,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Arab tili 1.3 (ARB-1.3)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili-3",
+        "name": "Arab tili 1.3 (ARB-1.3)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-umida-arb13-d6",
@@ -7272,7 +9086,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "103",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Arab tili 1.3 (ARB-1.3)",
+      "courseName": "Arab tili",
+      "color": "#10b981",
+      "teacher_id": "usr-teacher-yusupjonova",
+      "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+      "teachers": [
+        {
+          "id": "usr-teacher-yusupjonova",
+          "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-arab-tili-3",
+        "name": "Arab tili 1.3 (ARB-1.3)",
+        "room": "103",
+        "teacher_id": "usr-teacher-yusupjonova",
+        "teacher_name": "Yusupjonova Umida Sunnatulloh qizi",
+        "courses": {
+          "id": "crs-arab-tili",
+          "name": "Arab tili",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-yusupjonova",
+            "profiles": {
+              "id": "usr-teacher-yusupjonova",
+              "first_name": "Yusupjonova Umida Sunnatulloh qizi",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus11-d1",
@@ -7281,7 +9129,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.1 (RUS-1.1)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili",
+        "name": "Rus tili 1.1 (RUS-1.1)",
+        "room": "Xona 104",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus11-d3",
@@ -7290,7 +9172,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.1 (RUS-1.1)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili",
+        "name": "Rus tili 1.1 (RUS-1.1)",
+        "room": "Xona 104",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus11-d5",
@@ -7299,7 +9215,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.1 (RUS-1.1)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili",
+        "name": "Rus tili 1.1 (RUS-1.1)",
+        "room": "Xona 104",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus12-d1",
@@ -7308,7 +9258,41 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.2 (RUS-1.2)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili-2",
+        "name": "Rus tili 1.2 (RUS-1.2)",
+        "room": "Xona 106",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus12-d3",
@@ -7317,7 +9301,41 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.2 (RUS-1.2)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili-2",
+        "name": "Rus tili 1.2 (RUS-1.2)",
+        "room": "Xona 106",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus12-d5",
@@ -7326,7 +9344,41 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.2 (RUS-1.2)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili-2",
+        "name": "Rus tili 1.2 (RUS-1.2)",
+        "room": "Xona 106",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus14-d2",
@@ -7335,7 +9387,41 @@
       "start_time": "17:30:00",
       "end_time": "19:00:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.4 (RUS-1.4)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Ismatova Shaxnoza",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Ismatova Shaxnoza",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili-4",
+        "name": "Rus tili 1.4 (RUS-1.4)",
+        "room": "104",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Ismatova Shaxnoza",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Ismatova Shaxnoza",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus14-d4",
@@ -7344,7 +9430,41 @@
       "start_time": "17:30:00",
       "end_time": "19:00:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.4 (RUS-1.4)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Ismatova Shaxnoza",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Ismatova Shaxnoza",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili-4",
+        "name": "Rus tili 1.4 (RUS-1.4)",
+        "room": "104",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Ismatova Shaxnoza",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Ismatova Shaxnoza",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shaxnoza-rus14-d6",
@@ -7353,7 +9473,41 @@
       "start_time": "17:30:00",
       "end_time": "19:00:00",
       "room": "104",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Rus tili 1.4 (RUS-1.4)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Ismatova Shaxnoza",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Ismatova Shaxnoza",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-rus-tili-4",
+        "name": "Rus tili 1.4 (RUS-1.4)",
+        "room": "104",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Ismatova Shaxnoza",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Ismatova Shaxnoza",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-fayoza-mnt11-d1",
@@ -7362,7 +9516,41 @@
       "start_time": "16:00:00",
       "end_time": "17:30:00",
       "room": "202",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Mental Arifmetika 1.1 (MNT-1.1)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-mental",
+        "name": "Mental Arifmetika 1.1 (MNT-1.1)",
+        "room": "Xona 202",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-fayoza-mnt11-d3",
@@ -7371,7 +9559,41 @@
       "start_time": "16:00:00",
       "end_time": "17:30:00",
       "room": "202",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Mental Arifmetika 1.1 (MNT-1.1)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-mental",
+        "name": "Mental Arifmetika 1.1 (MNT-1.1)",
+        "room": "Xona 202",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-fayoza-mnt11-d5",
@@ -7380,7 +9602,41 @@
       "start_time": "16:00:00",
       "end_time": "17:30:00",
       "room": "202",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Mental Arifmetika 1.1 (MNT-1.1)",
+      "courseName": "Mental Arifmetika",
+      "color": "#ec4899",
+      "teacher_id": "usr-1793622773288",
+      "teacher_name": "Fayoza Karimberdiyeva",
+      "teachers": [
+        {
+          "id": "usr-1793622773288",
+          "first_name": "Fayoza Karimberdiyeva",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-mental",
+        "name": "Mental Arifmetika 1.1 (MNT-1.1)",
+        "room": "Xona 202",
+        "teacher_id": "usr-1793622773288",
+        "teacher_name": "Fayoza Karimberdiyeva",
+        "courses": {
+          "id": "crs-1793623377912",
+          "name": "Mental Arifmetika",
+          "color": "#ec4899"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622773288",
+            "profiles": {
+              "id": "usr-1793622773288",
+              "first_name": "Fayoza Karimberdiyeva",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat11-d1",
@@ -7389,7 +9645,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.1 (MAT-1.1)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika",
+        "name": "Matematika 1.1 (MAT-1.1)",
+        "room": "Xona 101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat11-d3",
@@ -7398,7 +9688,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.1 (MAT-1.1)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika",
+        "name": "Matematika 1.1 (MAT-1.1)",
+        "room": "Xona 101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat11-d5",
@@ -7407,7 +9731,41 @@
       "start_time": "09:30:00",
       "end_time": "11:00:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.1 (MAT-1.1)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Bexruz Beknazarov",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Bexruz Beknazarov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika",
+        "name": "Matematika 1.1 (MAT-1.1)",
+        "room": "Xona 101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Bexruz Beknazarov",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Bexruz Beknazarov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat13-d2",
@@ -7416,7 +9774,41 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.3 (MAT-1.3)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-3",
+        "name": "Matematika 1.3 (MAT-1.3)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat13-d4",
@@ -7425,7 +9817,41 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.3 (MAT-1.3)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-3",
+        "name": "Matematika 1.3 (MAT-1.3)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat13-d6",
@@ -7434,7 +9860,41 @@
       "start_time": "10:00:00",
       "end_time": "11:30:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.3 (MAT-1.3)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-3",
+        "name": "Matematika 1.3 (MAT-1.3)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat14-d2",
@@ -7443,7 +9903,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.4 (MAT-1.4)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-4",
+        "name": "Matematika 1.4 (MAT-1.4)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat14-d4",
@@ -7452,7 +9946,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.4 (MAT-1.4)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-4",
+        "name": "Matematika 1.4 (MAT-1.4)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat14-d6",
@@ -7461,7 +9989,41 @@
       "start_time": "14:00:00",
       "end_time": "15:30:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.4 (MAT-1.4)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-4",
+        "name": "Matematika 1.4 (MAT-1.4)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat15-d2",
@@ -7470,7 +10032,41 @@
       "start_time": "15:30:00",
       "end_time": "17:00:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.5 (MAT-1.5)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-5",
+        "name": "Matematika 1.5 (MAT-1.5)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat15-d4",
@@ -7479,7 +10075,41 @@
       "start_time": "15:30:00",
       "end_time": "17:00:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.5 (MAT-1.5)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-5",
+        "name": "Matematika 1.5 (MAT-1.5)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-bexruz-mat15-d6",
@@ -7488,7 +10118,41 @@
       "start_time": "15:30:00",
       "end_time": "17:00:00",
       "room": "101",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Matematika 1.5 (MAT-1.5)",
+      "courseName": "Matematika",
+      "color": "#3b82f6",
+      "teacher_id": "usr-1793603060709",
+      "teacher_name": "Beknazarov Bexruz",
+      "teachers": [
+        {
+          "id": "usr-1793603060709",
+          "first_name": "Beknazarov Bexruz",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-matematika-5",
+        "name": "Matematika 1.5 (MAT-1.5)",
+        "room": "101",
+        "teacher_id": "usr-1793603060709",
+        "teacher_name": "Beknazarov Bexruz",
+        "courses": {
+          "id": "crs-matematika",
+          "name": "Matematika",
+          "color": "#3b82f6"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793603060709",
+            "profiles": {
+              "id": "usr-1793603060709",
+              "first_name": "Beknazarov Bexruz",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shuxrat-chess11-d2",
@@ -7497,7 +10161,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "203",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Shaxmat guruhi (CHESS-1.1)",
+      "courseName": "Shaxmat",
+      "color": "#64748b",
+      "teacher_id": "usr-teacher-qosimov",
+      "teacher_name": "Shuxrat Qosimov",
+      "teachers": [
+        {
+          "id": "usr-teacher-qosimov",
+          "first_name": "Shuxrat Qosimov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-shaxmat",
+        "name": "Shaxmat guruhi (CHESS-1.1)",
+        "room": "203",
+        "teacher_id": "usr-teacher-qosimov",
+        "teacher_name": "Shuxrat Qosimov",
+        "courses": {
+          "id": "crs-shaxmat",
+          "name": "Shaxmat",
+          "color": "#64748b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-qosimov",
+            "profiles": {
+              "id": "usr-teacher-qosimov",
+              "first_name": "Shuxrat Qosimov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shuxrat-chess11-d4",
@@ -7506,7 +10204,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "203",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Shaxmat guruhi (CHESS-1.1)",
+      "courseName": "Shaxmat",
+      "color": "#64748b",
+      "teacher_id": "usr-teacher-qosimov",
+      "teacher_name": "Shuxrat Qosimov",
+      "teachers": [
+        {
+          "id": "usr-teacher-qosimov",
+          "first_name": "Shuxrat Qosimov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-shaxmat",
+        "name": "Shaxmat guruhi (CHESS-1.1)",
+        "room": "203",
+        "teacher_id": "usr-teacher-qosimov",
+        "teacher_name": "Shuxrat Qosimov",
+        "courses": {
+          "id": "crs-shaxmat",
+          "name": "Shaxmat",
+          "color": "#64748b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-qosimov",
+            "profiles": {
+              "id": "usr-teacher-qosimov",
+              "first_name": "Shuxrat Qosimov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-shuxrat-chess11-d6",
@@ -7515,7 +10247,41 @@
       "start_time": "17:00:00",
       "end_time": "18:30:00",
       "room": "203",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Shaxmat guruhi (CHESS-1.1)",
+      "courseName": "Shaxmat",
+      "color": "#64748b",
+      "teacher_id": "usr-teacher-qosimov",
+      "teacher_name": "Shuxrat Qosimov",
+      "teachers": [
+        {
+          "id": "usr-teacher-qosimov",
+          "first_name": "Shuxrat Qosimov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-shaxmat",
+        "name": "Shaxmat guruhi (CHESS-1.1)",
+        "room": "203",
+        "teacher_id": "usr-teacher-qosimov",
+        "teacher_name": "Shuxrat Qosimov",
+        "courses": {
+          "id": "crs-shaxmat",
+          "name": "Shaxmat",
+          "color": "#64748b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-teacher-qosimov",
+            "profiles": {
+              "id": "usr-teacher-qosimov",
+              "first_name": "Shuxrat Qosimov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-abdulaziz-it11-d1",
@@ -7524,7 +10290,41 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "3-xona (IT Lab)",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Full Stack guruhi (IT-1.1)",
+      "courseName": "Full Stack",
+      "color": "#10b981",
+      "teacher_id": "usr-1793466843425",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "teachers": [
+        {
+          "id": "usr-1793466843425",
+          "first_name": "Abdulazizbek Orifjonov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-fullstack",
+        "name": "Full Stack guruhi (IT-1.1)",
+        "room": "3-xona (IT Lab)",
+        "teacher_id": "usr-1793466843425",
+        "teacher_name": "Abdulazizbek Orifjonov",
+        "courses": {
+          "id": "crs-fullstack",
+          "name": "Full Stack",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793466843425",
+            "profiles": {
+              "id": "usr-1793466843425",
+              "first_name": "Abdulazizbek Orifjonov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-abdulaziz-it11-d3",
@@ -7533,7 +10333,41 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "3-xona (IT Lab)",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Full Stack guruhi (IT-1.1)",
+      "courseName": "Full Stack",
+      "color": "#10b981",
+      "teacher_id": "usr-1793466843425",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "teachers": [
+        {
+          "id": "usr-1793466843425",
+          "first_name": "Abdulazizbek Orifjonov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-fullstack",
+        "name": "Full Stack guruhi (IT-1.1)",
+        "room": "3-xona (IT Lab)",
+        "teacher_id": "usr-1793466843425",
+        "teacher_name": "Abdulazizbek Orifjonov",
+        "courses": {
+          "id": "crs-fullstack",
+          "name": "Full Stack",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793466843425",
+            "profiles": {
+              "id": "usr-1793466843425",
+              "first_name": "Abdulazizbek Orifjonov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     },
     {
       "id": "sch-abdulaziz-it11-d5",
@@ -7542,7 +10376,215 @@
       "start_time": "18:00:00",
       "end_time": "19:30:00",
       "room": "3-xona (IT Lab)",
-      "created_at": "2026-11-04T07:55:24.835Z"
+      "created_at": "2026-11-04T07:55:24.835Z",
+      "groupName": "Full Stack guruhi (IT-1.1)",
+      "courseName": "Full Stack",
+      "color": "#10b981",
+      "teacher_id": "usr-1793466843425",
+      "teacher_name": "Abdulazizbek Orifjonov",
+      "teachers": [
+        {
+          "id": "usr-1793466843425",
+          "first_name": "Abdulazizbek Orifjonov",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-fullstack",
+        "name": "Full Stack guruhi (IT-1.1)",
+        "room": "3-xona (IT Lab)",
+        "teacher_id": "usr-1793466843425",
+        "teacher_name": "Abdulazizbek Orifjonov",
+        "courses": {
+          "id": "crs-fullstack",
+          "name": "Full Stack",
+          "color": "#10b981"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793466843425",
+            "profiles": {
+              "id": "usr-1793466843425",
+              "first_name": "Abdulazizbek Orifjonov",
+              "last_name": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "sch-1794813547209-1-62sc",
+      "group_id": "grp-1793622453272",
+      "group_name": "Rus tili 1.3 (RUS-1.3)",
+      "course_name": "Rus tili",
+      "day_of_week": 1,
+      "start_time": "09:07:00",
+      "end_time": "11:00:00",
+      "room": "Xona 108",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "created_at": "2026-11-16T07:19:07.216Z"
+    },
+    {
+      "id": "sch-1794813547217-3-fa9p",
+      "group_id": "grp-1793622453272",
+      "group_name": "Rus tili 1.3 (RUS-1.3)",
+      "course_name": "Rus tili",
+      "day_of_week": 3,
+      "start_time": "09:07:00",
+      "end_time": "11:00:00",
+      "room": "Xona 108",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "created_at": "2026-11-16T07:19:07.217Z"
+    },
+    {
+      "id": "sch-1794813547217-5-uiwr",
+      "group_id": "grp-1793622453272",
+      "group_name": "Rus tili 1.3 (RUS-1.3)",
+      "course_name": "Rus tili",
+      "day_of_week": 5,
+      "start_time": "09:07:00",
+      "end_time": "11:00:00",
+      "room": "Xona 108",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "created_at": "2026-11-16T07:19:07.217Z"
+    },
+    {
+      "id": "sch-1794813547346-1-uazw",
+      "group_id": "grp-1793622453272",
+      "group_name": "Rus tili 1.3 (RUS-1.3)",
+      "course_name": "Rus tili",
+      "day_of_week": 1,
+      "start_time": "09:07:00",
+      "end_time": "11:00:00",
+      "room": "Xona 108",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "created_at": "2026-11-16T07:19:07.346Z",
+      "groupName": "Rus tili 1.3 (RUS-1.3)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793622453272",
+        "name": "Rus tili 1.3 (RUS-1.3)",
+        "room": "Xona 108",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "sch-1794813547346-3-wvwo",
+      "group_id": "grp-1793622453272",
+      "group_name": "Rus tili 1.3 (RUS-1.3)",
+      "course_name": "Rus tili",
+      "day_of_week": 3,
+      "start_time": "09:07:00",
+      "end_time": "11:00:00",
+      "room": "Xona 108",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "created_at": "2026-11-16T07:19:07.346Z",
+      "groupName": "Rus tili 1.3 (RUS-1.3)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793622453272",
+        "name": "Rus tili 1.3 (RUS-1.3)",
+        "room": "Xona 108",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "sch-1794813547346-5-fmsx",
+      "group_id": "grp-1793622453272",
+      "group_name": "Rus tili 1.3 (RUS-1.3)",
+      "course_name": "Rus tili",
+      "day_of_week": 5,
+      "start_time": "09:07:00",
+      "end_time": "11:00:00",
+      "room": "Xona 108",
+      "teacher_id": "usr-1793622233829",
+      "teacher_name": "Shaxnoza Ismatova",
+      "created_at": "2026-11-16T07:19:07.346Z",
+      "groupName": "Rus tili 1.3 (RUS-1.3)",
+      "courseName": "Rus tili",
+      "color": "#f59e0b",
+      "teachers": [
+        {
+          "id": "usr-1793622233829",
+          "first_name": "Shaxnoza Ismatova",
+          "last_name": ""
+        }
+      ],
+      "groups": {
+        "id": "grp-1793622453272",
+        "name": "Rus tili 1.3 (RUS-1.3)",
+        "room": "Xona 108",
+        "teacher_id": "usr-1793622233829",
+        "teacher_name": "Shaxnoza Ismatova",
+        "courses": {
+          "id": "crs-rus-tili",
+          "name": "Rus tili",
+          "color": "#f59e0b"
+        },
+        "group_teachers": [
+          {
+            "teacher_id": "usr-1793622233829",
+            "profiles": {
+              "id": "usr-1793622233829",
+              "first_name": "Shaxnoza Ismatova",
+              "last_name": ""
+            }
+          }
+        ]
+      }
     }
   ],
   "educo_db_lessons": [],
@@ -9130,13 +12172,13 @@
     {
       "id": "pay-nov-cleared-usr-student-930098339",
       "student_id": "usr-student-930098339",
-      "amount": 1100000,
+      "amount": 500000,
       "payment_method": "Naqd pul",
       "reference_number": "KV-NOV-2026",
       "payment_date": "2026-11-15",
       "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
       "status": "paid",
-      "created_at": "2026-11-16T06:36:25.953Z"
+      "created_at": "2026-11-16T07:15:22.095Z"
     },
     {
       "id": "pay-nov-cleared-usr-student-997249967",
@@ -10263,13 +13305,13 @@
     {
       "id": "pay-nov-cleared-usr-student-770074732",
       "student_id": "usr-student-770074732",
-      "amount": 1000000,
+      "amount": 500000,
       "payment_method": "Naqd pul",
       "reference_number": "KV-NOV-2026",
       "payment_date": "2026-11-15",
       "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
       "status": "paid",
-      "created_at": "2026-11-16T06:36:25.956Z"
+      "created_at": "2026-11-16T07:15:22.103Z"
     },
     {
       "id": "pay-nov-cleared-usr-student-998580121-abdula",
@@ -10578,6 +13620,1546 @@
       "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
       "status": "paid",
       "created_at": "2026-11-16T06:36:25.956Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822026-mtxg2",
+      "student_id": "usr-student-930098339",
+      "amount": 1100000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.026Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822122-n5rmm",
+      "student_id": "usr-student-901236463",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.122Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822122-bby5s",
+      "student_id": "usr-student-998580121",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.122Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822122-wd2rn",
+      "student_id": "usr-student-998580121-abdula",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.122Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822123-dlp06",
+      "student_id": "usr-student-998822309",
+      "amount": 1500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.123Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822123-dgbmb",
+      "student_id": "usr-student-977608589",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.123Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822123-qfu2f",
+      "student_id": "usr-student-903494929",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.123Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822123-um26r",
+      "student_id": "usr-student-908189959",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.123Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822123-twepr",
+      "student_id": "usr-student-935436617",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.123Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-4eb40",
+      "student_id": "usr-student-903333554",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-slj23",
+      "student_id": "usr-student-939019588",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-ei2fg",
+      "student_id": "usr-student-939069588-shoxru",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-oosql",
+      "student_id": "usr-student-909474123",
+      "amount": 900000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-9l5xn",
+      "student_id": "usr-student-909474123-azamjo",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-01gap",
+      "student_id": "usr-student-977221252",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-a8ka5",
+      "student_id": "usr-student-977221252-salohi",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822124-0mohm",
+      "student_id": "usr-student-975190011",
+      "amount": 1500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.124Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-txzn8",
+      "student_id": "usr-student-948434905",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-mxbpo",
+      "student_id": "usr-student-992223052-malika",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-x7fni",
+      "student_id": "usr-student-999163660",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-c6wbd",
+      "student_id": "usr-student-957737392",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-4oz4p",
+      "student_id": "usr-student-999163660-firdav",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-8cb41",
+      "student_id": "usr-student-992778855",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-gaw2y",
+      "student_id": "usr-student-932901750-solixa",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-vuxqf",
+      "student_id": "usr-student-946142213",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-fd054",
+      "student_id": "usr-student-991091574",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-rlmnh",
+      "student_id": "usr-student-991091574-mirey",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-e0a4h",
+      "student_id": "usr-student-909332088",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-rfwqc",
+      "student_id": "usr-student-935066822",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-x0jvz",
+      "student_id": "usr-student-998528047",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-vh23m",
+      "student_id": "usr-student-997249967",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822125-57pos",
+      "student_id": "usr-student-936105518",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.125Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-iuav6",
+      "student_id": "usr-student-998559245",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-k9uh2",
+      "student_id": "usr-student-935755104",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-kyl23",
+      "student_id": "usr-student-944288894",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-m3uuu",
+      "student_id": "usr-student-998559245-shoxru",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-oof05",
+      "student_id": "usr-student-998559245-abdull",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-le78r",
+      "student_id": "usr-student-995488490",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-g50zc",
+      "student_id": "usr-student-990000001",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-f66rv",
+      "student_id": "usr-student-998250711",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-nmxwz",
+      "student_id": "usr-student-998250711-akbar",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-bnrvp",
+      "student_id": "usr-student-770225879",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-jhv88",
+      "student_id": "usr-student-944307035",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-gh60d",
+      "student_id": "usr-student-990887845",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-czs53",
+      "student_id": "usr-student-915600077",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-xpxyt",
+      "student_id": "usr-student-995488490-zarina",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-z1fo4",
+      "student_id": "usr-student-887749485",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-zyts2",
+      "student_id": "usr-student-935278822",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-lgqan",
+      "student_id": "usr-student-935278822-oybek",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822126-babzz",
+      "student_id": "usr-student-935278822-odil",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.126Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-ct7tw",
+      "student_id": "usr-student-951908080",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-ccdjf",
+      "student_id": "usr-student-935399393",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-r6j23",
+      "student_id": "usr-student-935399393-muhamm",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-w0p78",
+      "student_id": "usr-student-998492912",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-8bw6l",
+      "student_id": "usr-student-998272687",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-s3n1r",
+      "student_id": "usr-student-956161508-kumush",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-wuvmg",
+      "student_id": "usr-student-998352122-firdav",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-us0um",
+      "student_id": "usr-student-930789384",
+      "amount": 1000000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-pef9q",
+      "student_id": "usr-student-990394868",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-xce8y",
+      "student_id": "usr-student-997948421",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-mbrqg",
+      "student_id": "usr-student-997948421-dildor",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-se7jq",
+      "student_id": "usr-student-946914031",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-cody4",
+      "student_id": "usr-student-501959806",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-ceifm",
+      "student_id": "usr-student-990577366",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-mnjxe",
+      "student_id": "usr-student-909901059",
+      "amount": 998000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-b8ohj",
+      "student_id": "usr-student-770074732",
+      "amount": 1500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-uc5wh",
+      "student_id": "usr-student-994886110",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822127-rufnk",
+      "student_id": "usr-student-998093456",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.127Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-zxqua",
+      "student_id": "usr-student-994340077",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-kmv3s",
+      "student_id": "usr-student-958106969",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-0af6p",
+      "student_id": "usr-student-990019382",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-frrbv",
+      "student_id": "usr-student-990019382-muslim",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-s2g3q",
+      "student_id": "usr-student-946007181",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-02ffa",
+      "student_id": "usr-student-990000002",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-ysxbv",
+      "student_id": "usr-student-998822309-diyorb",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-6elm8",
+      "student_id": "usr-student-933938338",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-j25qn",
+      "student_id": "usr-student-998646396",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-x56ly",
+      "student_id": "usr-student-946891331",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-evrsr",
+      "student_id": "usr-student-990000003",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-2fsh1",
+      "student_id": "usr-student-946007181-shoman",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-xwgtp",
+      "student_id": "usr-student-883669392",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-1rrul",
+      "student_id": "usr-student-903565345",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-lszeb",
+      "student_id": "usr-student-950211252",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-31vi3",
+      "student_id": "usr-student-950211252-muhamm",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822128-0r0x0",
+      "student_id": "usr-student-950211252-abror",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.128Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-mgbvo",
+      "student_id": "usr-student-945463836",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-mdr5e",
+      "student_id": "usr-student-909588859",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-3h2r1",
+      "student_id": "usr-student-946275090",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-oxl1v",
+      "student_id": "usr-student-933020997",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-krxnb",
+      "student_id": "usr-student-999005615-zilola",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-c0ihp",
+      "student_id": "usr-student-998198187",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-jj08g",
+      "student_id": "usr-student-996389687",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-vxk97",
+      "student_id": "usr-student-997640094",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-g5hhl",
+      "student_id": "usr-student-997640094-mahfir",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-xnh65",
+      "student_id": "usr-student-984074950",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-4r91v",
+      "student_id": "usr-student-994340077-solixa",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-9p4im",
+      "student_id": "usr-student-973445313",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-2q4sx",
+      "student_id": "usr-student-933921552",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-2tcv0",
+      "student_id": "usr-student-933921552-ezoza",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-v70oi",
+      "student_id": "usr-student-998352122",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-phsb1",
+      "student_id": "usr-student-940508780",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-xi60z",
+      "student_id": "usr-student-947387535",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-19nel",
+      "student_id": "usr-student-998161774",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-a1s55",
+      "student_id": "usr-student-930054773",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-uasly",
+      "student_id": "usr-student-952228534",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-72g09",
+      "student_id": "usr-student-909709995",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-9i7mj",
+      "student_id": "usr-student-950462692",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822129-5uza9",
+      "student_id": "usr-student-902521414",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.129Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-gxwoj",
+      "student_id": "usr-student-949214280",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-3vwqk",
+      "student_id": "usr-student-935061991",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-hewld",
+      "student_id": "usr-student-932901750",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-gjyoj",
+      "student_id": "usr-student-990000004",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-kxizz",
+      "student_id": "usr-student-900095755",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-2t7u5",
+      "student_id": "usr-student-930096441",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-8sn4z",
+      "student_id": "usr-student-930096441-soliha",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-5aej4",
+      "student_id": "usr-student-930678890",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-fis29",
+      "student_id": "usr-student-975479606",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-vo1u6",
+      "student_id": "usr-student-975479606-mustaf",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-l01gc",
+      "student_id": "usr-student-956161508",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-35wtd",
+      "student_id": "usr-student-995387215",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-fleyt",
+      "student_id": "usr-student-946019500",
+      "amount": 900000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-cjskf",
+      "student_id": "usr-student-901594495",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-pisg4",
+      "student_id": "usr-student-773431899",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822130-kske3",
+      "student_id": "usr-student-943501407",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.130Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-7esje",
+      "student_id": "usr-student-945373716",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-v5o1o",
+      "student_id": "usr-student-971089595",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-wel2u",
+      "student_id": "usr-student-990000001-muhamm",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-gq77p",
+      "student_id": "usr-student-771564545",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-4j4t1",
+      "student_id": "usr-student-990202676",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-ft480",
+      "student_id": "usr-student-999009996",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-1sn5r",
+      "student_id": "usr-student-999226616",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-511e3",
+      "student_id": "usr-student-999220076",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-7lhls",
+      "student_id": "usr-student-977848807",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-9tw6k",
+      "student_id": "usr-student-990000006",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-zhedq",
+      "student_id": "usr-student-999005615-g_zal",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-m799q",
+      "student_id": "usr-student-943852253",
+      "amount": 600000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822147-99u7e",
+      "student_id": "usr-student-992223052",
+      "amount": 498000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.147Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822148-32hq2",
+      "student_id": "usr-student-935286718",
+      "amount": 498000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.148Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822148-q8quc",
+      "student_id": "usr-1793599332662",
+      "amount": 1100000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.148Z"
+    },
+    {
+      "id": "pay-dec-fresh-1794733822148-q7i4r",
+      "student_id": "usr-student-936101774",
+      "amount": 500000,
+      "payment_method": "Naqd pul",
+      "reference_number": "KV-NOV-2026",
+      "payment_date": "2026-11-15",
+      "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
+      "status": "paid",
+      "created_at": "2026-11-15T09:10:22.148Z"
     }
   ],
   "educo_db_student_reminders": [
@@ -37358,7 +41940,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 3600,
+  "_sync_version": 3894,
   "_deleted_ids": [
     "usr-1793468630979",
     "usr-test-sync-1",
@@ -37683,5 +42265,5 @@
     "sms-manual-1794666934485",
     "sms-att-1794675464959-ljbk0"
   ],
-  "_updated_at": 1794811811086
+  "_updated_at": 1794813732855
 }

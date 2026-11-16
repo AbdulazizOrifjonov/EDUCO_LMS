@@ -20,6 +20,8 @@ import {
   BookOpen,
   Split,
   AlertTriangle,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -40,6 +42,24 @@ import { getTeachers } from '@/services/userService';
 import { useSearch } from '@/context/SearchContext';
 import { useTwoStepConfirm } from '@/context/ConfirmContext';
 import { localStore } from '@/lib/localStore';
+
+const getSubjectColor = (groupName, courseName, existingColor) => {
+  if (existingColor && existingColor !== '#123D78' && existingColor !== '#064e3b' && existingColor !== '#000000') {
+    return existingColor;
+  }
+  const name = `${groupName || ''} ${courseName || ''}`.toLowerCase();
+  if (name.includes('matem') || name.includes('math')) return '#059669'; // Emerald Green
+  if (name.includes('rus') || name.includes('russian')) return '#ea580c'; // Vibrant Orange
+  if (name.includes('mental')) return '#d946ef'; // Magenta / Pink
+  if (name.includes('ingliz') || name.includes('english')) return '#2563eb'; // Royal Blue
+  if (name.includes('arab') || name.includes('arabic')) return '#0891b2'; // Cyan / Teal
+  if (name.includes('shaxmat') || name.includes('chess')) return '#7c3aed'; // Purple
+  if (name.includes('python') || name.includes('dastur') || name.includes('it') || name.includes('frontend') || name.includes('full stack')) return '#0284c7'; // Sky Blue
+  if (name.includes('fizika') || name.includes('physics')) return '#dc2626'; // Red
+  if (name.includes('ona tili') || name.includes('adabiyot')) return '#4f46e5'; // Indigo
+  if (name.includes('biolog') || name.includes('kimyo')) return '#16a34a'; // Green
+  return existingColor || '#2563eb';
+};
 
 export default function GroupManagement() {
   const { t } = useTranslation();
@@ -71,7 +91,13 @@ export default function GroupManagement() {
   const [courseFilter, setCourseFilter] = useState('all');
   const [teacherFilter, setTeacherFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [viewMode, setViewMode] = useState('table'); // 'table' or 'cards'
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      return localStorage.getItem('educo_groups_view_mode') || 'cards';
+    } catch (_) {
+      return 'cards';
+    }
+  }); // 'cards' (default) or 'table'
   const [page, setPage] = useState(1);
 
   // Synchronize with global navbar search bar
@@ -116,7 +142,7 @@ export default function GroupManagement() {
         teacherName: effectiveTeacherName,
         status: statusFilter,
         page,
-        limit: 12,
+        limit: 100,
       });
 
       let fetchedGroups = data.groups || [];
@@ -481,6 +507,42 @@ export default function GroupManagement() {
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
+          {/* View Mode Toggle: Cards (Kartalar) vs Table (Jadval) */}
+          <div className="inline-flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100/80 dark:bg-surface-dark-tertiary p-1 shrink-0 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('cards');
+                try { localStorage.setItem('educo_groups_view_mode', 'cards'); } catch (_) {}
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'cards'
+                  ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-emerald-400 shadow-xs'
+                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              title="Karta ko‘rinishi (to‘rtburchak kartlar)"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>Kartalar</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('table');
+                try { localStorage.setItem('educo_groups_view_mode', 'table'); } catch (_) {}
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-emerald-400 shadow-xs'
+                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              title="Jadval ko‘rinishi"
+            >
+              <List className="w-4 h-4" />
+              <span>Jadval</span>
+            </button>
+          </div>
+
           <Button
             variant="outline"
             size="md"
@@ -617,183 +679,241 @@ export default function GroupManagement() {
           />
         </div>
 
-        {/* Desktop Table View */}
-        <div className="hidden md:block">
-          <Table
-            columns={columns}
-            data={groups}
-            isLoading={loading}
-            emptyMessage={t('groups.noGroups', 'No study groups match your criteria.')}
-            className="border-0 rounded-none"
-          />
-        </div>
+        {/* Main Content: Rectangular Cards (Default) or Table View */}
+        {viewMode === 'cards' ? (
+          <div>
+            {loading ? (
+              <div className="py-20 text-center text-gray-500">
+                <div className="inline-block animate-spin rounded-full h-9 w-9 border-b-2 border-brand-navy"></div>
+                <p className="mt-2.5 text-xs font-semibold">{t('common.loading', 'Guruhlar yuklanmoqda...')}</p>
+              </div>
+            ) : groups.length === 0 ? (
+              <div className="py-16 text-center text-gray-500">
+                <Users className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <p className="text-base font-bold text-gray-800 dark:text-gray-200">{t('groups.noGroups', 'Guruhlar topilmadi.')}</p>
+                <p className="text-xs text-gray-400 mt-1">Qidiruv yoki filtrlash parametrlarini o‘zgartirib ko‘ring.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 p-4 sm:p-5">
+                {groups.map((group) => {
+                  const cardColor = getSubjectColor(group.name, group.courseName, group.courseColor || group.color);
+                  const count = group.studentCount || 0;
+                  const cap = group.capacity || 20;
+                  const percent = Math.min(Math.round((count / cap) * 100), 100);
+                  const isOverloaded = count >= cap;
+                  const currentRole = profile?.role || 'owner';
+                  const detailPath = `/${currentRole}/groups/${group.id}`;
+                  const fee = Number(group.monthly_price || group.monthly_fee || 0);
+                  const teacherFullNameStr = group.primaryTeacher?.fullName || group.teacher_name || group.teacherName || '';
+                  const teacherPhoneStr = group.primaryTeacher?.phone || group.teacherPhone || '';
+                  const scheduleStr = group.schedule || (group.schedules?.length ? `${group.schedules.length} ta dars / hafta` : null);
 
-        {/* Mobile Individual Group Cards (Zero horizontal scroll) */}
-        <div className="block md:hidden">
-          {loading ? (
-            <div className="py-12 text-center text-gray-500">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-navy"></div>
-              <p className="mt-2 text-xs">{t('common.loading', 'Guruhlar yuklanmoqda...')}</p>
-            </div>
-          ) : groups.length === 0 ? (
-            <div className="py-12 text-center text-gray-500">
-              <Users className="w-10 h-10 mx-auto mb-2 text-gray-400" />
-              <p className="text-sm font-semibold">{t('groups.noGroups', 'Guruhlar topilmadi.')}</p>
-            </div>
-          ) : (
-            <div className="p-3 space-y-3">
-              {groups.map((group) => {
-                const percent = Math.min(
-                  Math.round(((group.studentCount || 0) / (group.capacity || 20)) * 100),
-                  100
-                );
-                const currentRole = profile?.role || 'owner';
-                const detailPath = `/${currentRole}/groups/${group.id}`;
+                  return (
+                    <div
+                      key={group.id}
+                      className="group relative rounded-2xl p-5 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-700/80 shadow-xs hover:shadow-lg transition-all duration-200 hover:-translate-y-1 flex flex-col justify-between"
+                      style={{
+                        borderLeftWidth: '6px',
+                        borderLeftColor: cardColor,
+                        backgroundColor: `${cardColor}08`,
+                      }}
+                    >
+                      <div className="space-y-3.5">
+                        {/* Header: Course Icon, Group Name, Room, Status */}
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div
+                              className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 shadow-sm overflow-hidden"
+                              style={{ backgroundColor: cardColor }}
+                            >
+                              {group.avatar_url || group.image_url ? (
+                                <img
+                                  src={group.avatar_url || group.image_url}
+                                  alt={group.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Users className="w-6 h-6 text-white" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3
+                                onClick={() => navigate(detailPath)}
+                                className="font-extrabold text-base text-gray-950 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-emerald-400 transition-colors"
+                                title={group.name}
+                              >
+                                {group.name}
+                              </h3>
+                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate flex items-center gap-1">
+                                  <BookOpen className="w-3.5 h-3.5 shrink-0" style={{ color: cardColor }} />
+                                  {group.courseName || 'Kurs fani'}
+                                </span>
+                                {group.room && (
+                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-2xs">
+                                    🚪 {group.room.toLowerCase().includes('xona') ? group.room : `${group.room}-xona`}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
 
-                return (
-                  <div
-                    key={group.id}
-                    className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark-secondary p-4 shadow-sm space-y-3"
-                  >
-                    {/* Header: Icon, Group Name, Room, Status */}
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div
-                          className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm overflow-hidden"
-                          style={{ backgroundColor: group.courseColor || '#064e3b' }}
-                        >
-                          {group.avatar_url || group.image_url ? (
-                            <img
-                              src={group.avatar_url || group.image_url}
-                              alt={group.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Users className="w-5 h-5" />
+                          <Badge variant={getStatusBadgeVariant(group.status)} size="sm" className="shrink-0 font-bold uppercase tracking-wider text-[10px]">
+                            {t(`groups.${group.status}`, t(`common.${group.status}`, group.status))}
+                          </Badge>
+                        </div>
+
+                        {/* Information Chips: Schedule & Monthly Fee */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                          {/* Schedule Chip */}
+                          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-surface-dark-tertiary text-gray-900 dark:text-gray-100 border border-gray-200/90 dark:border-gray-700/80 shadow-2xs">
+                            <Calendar className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                            <span className="truncate">
+                              {scheduleStr || t('schedule.noSchedule', 'Jadvalsiz')}
+                            </span>
+                          </div>
+
+                          {/* Monthly Fee Chip */}
+                          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80 shadow-2xs">
+                            <span className="text-sm shrink-0">💰</span>
+                            <span className="truncate">
+                              {fee > 0 ? `${fee.toLocaleString()} so‘m` : 'To‘lov yo‘q'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Teacher row */}
+                        <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white/80 dark:bg-surface-dark-tertiary/70 border border-gray-200/70 dark:border-gray-700/60 text-xs">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div
+                              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0 shadow-2xs"
+                              style={{ backgroundColor: cardColor }}
+                            >
+                              {teacherFullNameStr ? teacherFullNameStr.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-[10px] uppercase font-bold text-gray-400 block leading-tight">Asosiy O‘qituvchi</span>
+                              <span className="font-bold text-gray-900 dark:text-gray-100 truncate block">
+                                {teacherFullNameStr || t('groups.unassigned', 'Biriktirilmagan')}
+                              </span>
+                            </div>
+                          </div>
+                          {teacherPhoneStr && (
+                            <span className="text-[11px] font-mono font-semibold text-gray-500 dark:text-gray-400 shrink-0">
+                              {teacherPhoneStr}
+                            </span>
                           )}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-bold text-base text-gray-900 dark:text-gray-100 truncate">
-                              {group.name}
-                            </h3>
-                            {group.room && (
-                              <span className="text-[11px] px-1.5 py-0.5 rounded font-medium bg-gray-100 dark:bg-surface-dark-tertiary text-gray-600 dark:text-gray-300">
-                                🚪 {group.room}
-                              </span>
-                            )}
+
+                        {/* Capacity Progress Bar */}
+                        <div className="space-y-1.5 pt-1">
+                          <div className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
+                            <span className="flex items-center gap-1.5">
+                              <Users className="w-3.5 h-3.5 text-gray-400" />
+                              <span>Sig‘im: <b className="text-gray-900 dark:text-white">{count}</b> / {cap} o‘quvchi</span>
+                            </span>
+                            <span className={`font-mono text-xs font-black ${isOverloaded ? 'text-rose-600' : 'text-gray-500'}`}>{percent}%</span>
                           </div>
-                          <p className="text-xs text-brand-navy dark:text-blue-400 font-medium truncate mt-0.5">
-                            📚 {group.courseName}
-                          </p>
+                          <div className="w-full bg-gray-200 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-300 rounded-full ${
+                                percent >= 100
+                                  ? 'bg-rose-600'
+                                  : percent > 80
+                                  ? 'bg-amber-500'
+                                  : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
 
-                      <Badge variant={getStatusBadgeVariant(group.status)} size="sm" className="shrink-0">
-                        <span className="capitalize">
-                          {t(`groups.${group.status}`, t(`common.${group.status}`, group.status))}
-                        </span>
-                      </Badge>
-                    </div>
-
-                    {/* Teacher & Schedule info */}
-                    <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-gray-100 dark:border-gray-800">
-                      <div>
-                        <span className="text-gray-400 block text-[10px] uppercase font-semibold">O‘qituvchi:</span>
-                        <span className="font-semibold text-gray-800 dark:text-gray-200 truncate block mt-0.5">
-                          👤 {group.primaryTeacher?.fullName || t('groups.unassigned', 'Biriktirilmagan')}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400 block text-[10px] uppercase font-semibold">Darslar:</span>
-                        <span className="font-semibold text-gray-800 dark:text-gray-200 truncate block mt-0.5">
-                          📅 {group.schedules?.length ? `${group.schedules.length} ta / hafta` : 'Jadvalsiz'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Capacity Progress Bar */}
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
-                      <div className="flex items-center justify-between text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        <span className="flex items-center gap-1.5">
-                          <Users className="w-3.5 h-3.5 text-gray-400" />
-                          <span>O‘quvchilar: <b>{group.studentCount || 0}</b> / {group.capacity || 20}</span>
-                        </span>
-                        <span className="font-mono text-xs font-semibold text-gray-500">{percent}%</span>
-                      </div>
-                      <div className="w-full bg-gray-100 dark:bg-surface-dark-tertiary h-2 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full transition-all rounded-full ${
-                            percent >= 100
-                              ? 'bg-brand-red'
-                              : percent > 80
-                              ? 'bg-amber-500'
-                              : 'bg-emerald-500 dark:bg-emerald-500'
-                          }`}
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800 space-y-2">
-                      <div className={`grid ${!isTeacher ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
+                      {/* Card Bottom / Action Buttons */}
+                      <div className="pt-4 mt-3 border-t border-gray-200/80 dark:border-gray-700/70 flex items-center justify-between gap-2">
                         <Button
                           variant="primary"
                           size="sm"
                           icon={Eye}
-                          className="w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl cursor-pointer"
+                          className="flex-1 justify-center text-xs h-9 font-bold rounded-xl shadow-xs cursor-pointer"
                           onClick={() => navigate(detailPath)}
                         >
                           {t('common.view', 'Batafsil')}
                         </Button>
-                        {!isTeacher && (
+
+                        <div className="flex items-center gap-1 shrink-0">
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            icon={Edit2}
-                            className="w-full justify-center text-xs py-2 h-9 font-semibold text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-xl cursor-pointer"
+                            className="!p-2 h-9 w-9 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl"
+                            title={t('common.edit', 'Tahrirlash')}
                             onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
                           >
-                            {t('common.edit', 'Tahrirlash')}
+                            <Edit2 className="w-4 h-4" />
                           </Button>
-                        )}
-                      </div>
-                      {!isTeacher && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={group.status === 'archived' ? RotateCcw : Archive}
-                            className={`w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl border cursor-pointer ${
-                              group.status === 'archived'
-                                ? 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50'
-                                : 'text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50'
-                            }`}
-                            title={group.status === 'archived' ? t('common.restore', 'Tiklash') : t('common.archive', 'Arxivlash')}
-                            onClick={() => handleToggleArchive(group)}
-                          >
-                            <span>{group.status === 'archived' ? t('common.restore', 'Tiklash') : t('common.archive', 'Arxiv')}</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={Trash2}
-                            className="w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 cursor-pointer"
-                            title={t('common.delete', 'Butunlay o‘chirish')}
-                            onClick={() => handleDeleteGroup(group)}
-                          >
-                            <span>{t('common.delete', 'O‘chirish')}</span>
-                          </Button>
+
+                          {!isTeacher && (
+                            <>
+                              {isOverloaded && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="!p-2 h-9 w-9 text-red-600 hover:bg-red-500/10 rounded-xl"
+                                  title="Guruhni 2-guruhga ajratish (Split)"
+                                  onClick={() => setSplitModalGroup(group)}
+                                >
+                                  <Split className="w-4 h-4" />
+                                </Button>
+                              )}
+
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className={`!p-2 h-9 w-9 rounded-xl ${
+                                  group.status === 'archived'
+                                    ? 'text-emerald-600 hover:bg-emerald-500/10'
+                                    : 'text-amber-600 hover:bg-amber-500/10'
+                                }`}
+                                title={group.status === 'archived' ? t('common.restore', 'Qayta tiklash') : t('common.archive', 'Arxivlash')}
+                                onClick={() => handleToggleArchive(group)}
+                              >
+                                {group.status === 'archived' ? (
+                                  <RotateCcw className="w-4 h-4" />
+                                ) : (
+                                  <Archive className="w-4 h-4" />
+                                )}
+                              </Button>
+
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="!p-2 h-9 w-9 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 rounded-xl"
+                                title={t('common.delete', 'O‘chirish')}
+                                onClick={() => handleDeleteGroup(group)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table
+              columns={columns}
+              data={groups}
+              isLoading={loading}
+              emptyMessage={t('groups.noGroups', 'No study groups match your criteria.')}
+              className="border-0 rounded-none"
+            />
+          </div>
+        )}
       </Card>
 
       {/* Group Split Modal (Split overflowing groups into 2nd group) */}
