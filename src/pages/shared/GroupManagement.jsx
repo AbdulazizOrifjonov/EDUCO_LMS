@@ -695,7 +695,7 @@ export default function GroupManagement() {
                 <p className="text-xs text-gray-400 mt-1">Qidiruv yoki filtrlash parametrlarini o‘zgartirib ko‘ring.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 p-4 sm:p-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 sm:p-5">
                 {groups.map((group) => {
                   const cardColor = getSubjectColor(group.name, group.courseName, group.courseColor || group.color);
                   const count = group.studentCount || (Array.isArray(group.student_ids) ? group.student_ids.length : 0);
@@ -716,19 +716,19 @@ export default function GroupManagement() {
                           navigate(detailPath);
                         }
                       }}
-                      className="group relative rounded-2xl p-5 sm:p-6 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-700/80 shadow-xs hover:shadow-xl hover:border-blue-400 dark:hover:border-emerald-500/60 transition-all duration-200 hover:-translate-y-1 cursor-pointer flex flex-col justify-between select-none"
+                      className="group relative rounded-xl p-4 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-700/80 shadow-2xs hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-150 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between select-none"
                       style={{
-                        borderLeftWidth: '6px',
+                        borderLeftWidth: '5px',
                         borderLeftColor: cardColor,
-                        backgroundColor: `${cardColor}0c`,
+                        backgroundColor: `${cardColor}08`,
                       }}
                     >
-                      <div className="space-y-4">
-                        {/* 1. Guruh nomi va Fan nomi */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div>
+                        {/* Header: Course Avatar, Group Name, Course Name, Status Badge */}
+                        <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-gray-100 dark:border-gray-800/80">
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
                             <div
-                              className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 shadow-sm mt-0.5 overflow-hidden"
+                              className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 shadow-2xs overflow-hidden"
                               style={{ backgroundColor: cardColor }}
                             >
                               {group.avatar_url || group.image_url ? (
@@ -738,75 +738,104 @@ export default function GroupManagement() {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <Users className="w-6 h-6 text-white" />
+                                <BookOpen className="w-4 h-4 text-white" />
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
                               <h3
-                                className="font-extrabold text-base sm:text-lg text-gray-950 dark:text-white leading-snug group-hover:text-blue-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2"
+                                className="font-extrabold text-sm text-gray-900 dark:text-white leading-tight truncate group-hover:text-blue-600 dark:group-hover:text-emerald-400 transition-colors"
                                 title={group.name}
                               >
                                 {group.name}
                               </h3>
-                              <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 mt-1">
-                                <BookOpen className="w-3.5 h-3.5 shrink-0" style={{ color: cardColor }} />
-                                <span className="truncate">{group.courseName || group.direction || t('courses.course', 'Kurs fani')}</span>
-                              </div>
+                              <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                                {group.courseName || group.direction || t('courses.course', 'Kurs fani')}
+                              </p>
                             </div>
                           </div>
 
-                          <div className="shrink-0 flex items-center gap-2">
-                            <Badge variant={getStatusBadgeVariant(group.status)} size="sm" className="font-bold uppercase tracking-wider text-[10px]">
-                              {t(`groups.${group.status}`, t(`common.${group.status}`, group.status))}
-                            </Badge>
-                            <div className="w-7 h-7 rounded-full bg-white dark:bg-surface-dark-tertiary border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-center text-gray-400 group-hover:text-blue-600 dark:group-hover:text-emerald-400 group-hover:border-blue-300 dark:group-hover:border-emerald-500/50 group-hover:translate-x-0.5 transition-all shadow-2xs">
-                              <ChevronRight className="w-4 h-4" />
-                            </div>
-                          </div>
+                          <Badge variant={getStatusBadgeVariant(group.status)} size="sm" className="shrink-0 text-[10px] font-bold px-1.5 py-0.5">
+                            {t(`groups.${group.status}`, t(`common.${group.status}`, group.status))}
+                          </Badge>
                         </div>
 
-                        {/* 2. O'qituvchining ismi */}
-                        <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/90 dark:bg-surface-dark-tertiary/80 border border-gray-200/80 dark:border-gray-700/70">
-                          <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0 shadow-2xs"
-                            style={{ backgroundColor: cardColor }}
-                          >
-                            {teacherFullNameStr ? teacherFullNameStr.charAt(0).toUpperCase() : 'O'}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 block leading-tight">
-                              O‘qituvchi
-                            </span>
-                            <span className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate block">
+                        {/* Info details: Ustoz, Dars vaqti, O'quvchilar soni */}
+                        <div className="space-y-2 py-3 text-xs">
+                          {/* Ustoz */}
+                          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <User className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <span className="text-gray-500 dark:text-gray-400 text-[11px]">Ustoz:</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                               {teacherFullNameStr || t('groups.unassigned', 'Biriktirilmagan')}
                             </span>
                           </div>
-                        </div>
 
-                        {/* 3. Dars vaqti va Guruhdagi talabalar soni */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                          {/* Vaqti */}
-                          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-white/90 dark:bg-surface-dark-tertiary/80 text-gray-800 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700/70 shadow-2xs">
-                            <Clock className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
-                            <span className="truncate">
+                          {/* Dars vaqti */}
+                          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                            <Clock className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 shrink-0" />
+                            <span className="text-gray-500 dark:text-gray-400 text-[11px]">Vaqti:</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                               {scheduleStr || t('schedule.noSchedule', 'Jadval belgilanmagan')}
                             </span>
                           </div>
 
-                          {/* Guruhda nechta talaba borligi */}
-                          <div className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold bg-white/90 dark:bg-surface-dark-tertiary/80 text-gray-800 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700/70 shadow-2xs">
-                            <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
-                              <Users className="w-4 h-4 shrink-0" style={{ color: cardColor }} />
-                              <span>Talabalar:</span>
-                            </span>
-                            <span
-                              className="font-extrabold text-xs px-2.5 py-1 rounded-lg font-mono"
-                              style={{ backgroundColor: `${cardColor}18`, color: cardColor }}
-                            >
-                              {count} ta talaba
-                            </span>
+                          {/* O'quvchilar soni & Xona */}
+                          <div className="flex items-center justify-between pt-0.5">
+                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                              <Users className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                              <span className="text-gray-500 dark:text-gray-400 text-[11px]">O‘quvchilar:</span>
+                              <span className="font-bold text-gray-900 dark:text-gray-100">
+                                {count} ta talaba
+                              </span>
+                            </div>
+                            {group.room && (
+                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700 shadow-2xs">
+                                🚪 {group.room.toLowerCase().includes('xona') ? group.room : `${group.room}-xona`}
+                              </span>
+                            )}
                           </div>
                         </div>
+                      </div>
+
+                      {/* Card Action Buttons (Batafsil, Tahrirlash, O'chirish) */}
+                      <div className="pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(detailPath);
+                          }}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-surface-dark-tertiary text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-emerald-400 border border-gray-200/80 dark:border-gray-700 shadow-2xs hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
+                          <span>{t('common.view', 'Batafsil')}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/${currentUserRole}/groups/edit/${group.id}`);
+                          }}
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-gray-200/80 dark:border-gray-700 shadow-2xs transition-colors cursor-pointer"
+                          title={t('common.edit', 'Tahrirlash')}
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+
+                        {!isTeacher && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteGroup(group);
+                            }}
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-gray-200/80 dark:border-gray-700 shadow-2xs transition-colors cursor-pointer"
+                            title={t('common.delete', 'O‘chirish')}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
