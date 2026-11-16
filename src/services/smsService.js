@@ -735,10 +735,26 @@ export async function sendSmsViaGateway(device, { to, message, forceSend = false
 }
 
 /**
+ * Ruxsat etilgan yagona ma'muriyat test raqamlari:
+ * Boshqa hech qaysi raqamga (ayniqsa talabalar yoki ota-onalarga) Test SMS ketishi qat'iyan taqiqlangan!
+ */
+export const AUTHORIZED_TEST_PHONES = ['+998936101774', '+998935821774'];
+const ALLOWED_TEST_DIGITS = ['998936101774', '998935821774', '936101774', '935821774'];
+
+/**
  * Sends a test SMS immediately to verify end-to-end delivery
+ * FAQAT va FAQAT ruxsat etilgan ma'muriyat raqamlariga (+998936101774, +998935821774) yuboriladi!
  */
 export async function sendTestSms({ phone, message, deviceId }) {
   const normalizedPhone = normalizePhone(phone);
+  const cleanDigits = (normalizedPhone || '').replace(/\D/g, '');
+
+  if (!ALLOWED_TEST_DIGITS.includes(cleanDigits) && !ALLOWED_TEST_DIGITS.includes(cleanDigits.slice(-9))) {
+    const errorMsg = `Xavfsizlik qoidasi: Test xabarlar FAQAT tasdiqlangan ma'muriyat raqamlariga (+998 93 610 17 74 yoki +998 93 582 17 74) yuborilishi mumkin! Boshqa hech qanday raqamga test yuborishga ruxsat berilmaydi.`;
+    console.error('[sendTestSms Blocked]', errorMsg, 'Phone attempted:', phone);
+    throw new Error(errorMsg);
+  }
+
   const cleanMsg = (message || '').trim();
 
   const devices = await getSmsDevices();

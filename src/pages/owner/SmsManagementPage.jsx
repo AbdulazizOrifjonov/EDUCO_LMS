@@ -123,8 +123,8 @@ export default function SmsManagementPage() {
 
   // Modals
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const [testPhone, setTestPhone] = useState('');
-  const [testMessage, setTestMessage] = useState('Bu Eskiz dan test');
+  const [testPhone, setTestPhone] = useState('+998936101774');
+  const [testMessage, setTestMessage] = useState('EDUCO LMS: Sinov xabarnomasi muvaffaqiyatli yetib bordi.');
   const [selectedTestDevice, setSelectedTestDevice] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
 
@@ -712,8 +712,10 @@ export default function SmsManagementPage() {
     }
 
     const cleanPhone = (testPhone || '').trim();
-    if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 9) {
-      toast.error('Test telefon raqamini to‘liq kiriting (+998...)');
+    const cleanDigits = cleanPhone.replace(/\D/g, '');
+    const allowed = ['998936101774', '998935821774', '936101774', '935821774'];
+    if (!allowed.includes(cleanDigits) && !allowed.includes(cleanDigits.slice(-9))) {
+      toast.error("Xavfsizlik: Test SMS faqat ma'muriyat raqamlariga (+998 93 610 17 74 yoki +998 93 582 17 74) yuborilishi mumkin!");
       return;
     }
     if (!testMessage.trim()) {
@@ -844,17 +846,9 @@ export default function SmsManagementPage() {
     });
   };
 
-  // Open Test SMS prefilled for specific recipient
-  const handleOpenRecipientTestSms = (recipient) => {
-    if (!recipient.targetPhone) {
-      toast.error(`"${recipient.studentName}" uchun qabul qiluvchi telefon raqami topilmadi!`);
-      return;
-    }
-    setTestPhone(recipient.targetPhone);
-    setTestMessage(recipient.messageText);
-    const primary = devices.find((d) => d.device_role === 'primary') || devices[0];
-    if (primary) setSelectedTestDevice(primary.id);
-    setIsTestModalOpen(true);
+  // Qarzdorlar uchun Test SMS qat'iyan man etiladi (faqat admin raqamiga ruxsat)
+  const handleOpenRecipientTestSms = () => {
+    toast.warning("Xavfsizlik: Qarzdorlar yoki talabalar raqamiga test SMS yuborish taqiqlangan! Test faqat ma'muriyat raqamiga yuboriladi.");
   };
 
   // Switch phone preview to specific recipient and scroll
@@ -2399,15 +2393,6 @@ export default function SmsManagementPage() {
 
                                 <button
                                   type="button"
-                                  onClick={() => handleOpenRecipientTestSms(item)}
-                                  className="p-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-gray-700 dark:text-gray-300 hover:bg-gray-100 text-xs font-semibold flex items-center justify-center transition-all cursor-pointer shadow-2xs shrink-0"
-                                  title="Ushbu raqamga Test SMS jo‘natish"
-                                >
-                                  <Send className="w-3 h-3 text-blue-600 dark:text-emerald-400 shrink-0" />
-                                </button>
-
-                                <button
-                                  type="button"
                                   onClick={() => handleToggleExclude(item.studentId, item.studentName)}
                                   className={`p-1 rounded-lg border text-xs font-bold flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                                     item.isExcluded
@@ -2538,15 +2523,6 @@ export default function SmsManagementPage() {
                             className="text-xs px-2 py-1"
                           >
                             Telefonda
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={Send}
-                            onClick={() => handleOpenRecipientTestSms(item)}
-                            className="text-xs px-2 py-1"
-                          >
-                            Sinov
                           </Button>
                           <button
                             type="button"
@@ -3497,9 +3473,10 @@ export default function SmsManagementPage() {
           maxWidth="md"
         >
           <form onSubmit={handleSendTestSms} className="space-y-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Telefon raqamingizni kiriting va <strong>Eskiz.uz</strong> orqali real SMS borishini tekshirib ko‘ring.
-            </p>
+            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
+              <strong className="block font-bold mb-1">🛡️ Xavfsizlik qoidasi:</strong>
+              Test SMS faqat ma'muriyatning tasdiqlangan telefon raqamlariga yuboriladi. Talabalar yoki ota-onalar raqamlariga test xabar yuborish butunlay bloklangan!
+            </div>
 
             {sendingTest && (
               <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/80 text-xs">
@@ -3514,16 +3491,44 @@ export default function SmsManagementPage() {
             )}
 
             <div>
-              <Input
-                label="Telefon raqami"
-                isPhone
-                type="tel"
-                disabled={sendingTest}
-                placeholder="+998 90 123 45 67"
-                value={testPhone}
-                onChange={(e) => setTestPhone(e.target.value)}
-                required
-              />
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-2">
+                Test yuboriladigan ma'muriyat raqami
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  disabled={sendingTest}
+                  onClick={() => setTestPhone('+998936101774')}
+                  className={`p-3 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                    testPhone.replace(/\D/g, '').endsWith('936101774')
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/30'
+                      : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-sm">+998 93 610 17 74</span>
+                    {testPhone.replace(/\D/g, '').endsWith('936101774') && <span className="text-blue-600 text-base">✓</span>}
+                  </div>
+                  <span className="text-[11px] text-gray-500 block mt-1">Asosiy ma'muriyat raqami</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={sendingTest}
+                  onClick={() => setTestPhone('+998935821774')}
+                  className={`p-3 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                    testPhone.replace(/\D/g, '').endsWith('935821774')
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/30'
+                      : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-sm">+998 93 582 17 74</span>
+                    {testPhone.replace(/\D/g, '').endsWith('935821774') && <span className="text-blue-600 text-base">✓</span>}
+                  </div>
+                  <span className="text-[11px] text-gray-500 block mt-1">Qo‘shimcha ma'muriyat raqami</span>
+                </button>
+              </div>
             </div>
 
             <div>

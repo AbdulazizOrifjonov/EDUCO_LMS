@@ -350,6 +350,17 @@ async function processSequentialQueue() {
       return;
     }
 
+    // Test SMS xavfsizlik cheklovi: Test xabarlari FAQAT 998936101774 yoki 998935821774 ga yuborilishi mumkin!
+    const ALLOWED_TEST_PHONES = new Set(['998936101774', '998935821774']);
+    if (isTestMsg(currentItem) && !ALLOWED_TEST_PHONES.has(cleanPhone)) {
+      console.warn(`[SMS Xavfsizlik] 🛑 Test SMS begona raqamga (+${cleanPhone}) yuborilishi bloklandi! Faqat admin raqamlari ruxsat etilgan.`);
+      currentItem.status = 'cancelled';
+      currentItem.error_message = "Xavfsizlik: Test SMS faqat ma'muriyat raqamlariga (+998936101774, +998935821774) yuborilishi mumkin!";
+      saveDb(db);
+      isQueueProcessing = false;
+      return;
+    }
+
     const messageText = currentItem.message_text || '';
     const recipientName = currentItem.recipient_name || 'Hurmatli foydalanuvchi';
     const isAtt = isAttendanceMsg(currentItem);
