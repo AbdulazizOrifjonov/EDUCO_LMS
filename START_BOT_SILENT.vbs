@@ -1,10 +1,9 @@
-' ========================================================
-' EDUCO LMS: Botni orqa fonda yashirin ishga tushirish skripti
-' Hech qanday qora CMD oynasi ko'rinmaydi, tinchgina ishlaydi.
-' ========================================================
+' ==============================================================================
+' EDUCO LMS: Botlarni orqa fonda yashirin (silent) ishga tushirish skripti
+' Ekranda hech qanday qora CMD oynasi chiqmaydi, ikkala bot tinchgina ishlaydi.
+' ==============================================================================
 Set WshShell = CreateObject("WScript.Shell")
-Set fso = CreateObject("Scripting.FileSystemObject")
-strDir = fso.GetParentFolderName(WScript.ScriptFullName)
+strDir = "C:\Users\Abdul\Documents\EDUCO_LMS"
 
 WshShell.CurrentDirectory = strDir
-WshShell.Run "node bot.js", 0, False
+WshShell.Run """C:\Program Files\nodejs\node.exe"" bot.js", 0, False
