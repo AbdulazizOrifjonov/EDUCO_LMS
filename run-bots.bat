@@ -13,7 +13,7 @@ echo   [1] @EcommerceDatabot - SMS Gateway va Idempotent Navbat Boti
 echo   [2] @EducoLms_Bot     - Davomat, Baholar va LMS Xabarnoma Boti
 echo ======================================================================
 echo.
-powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 59123,59124 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }" >nul 2>&1
+powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"name = 'node.exe'\" | Where-Object { $_.CommandLine -like '*bot.js*' -or $_.CommandLine -like '*telegram-bot.js*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; Get-NetTCPConnection -LocalPort 59123,59124 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep -Milliseconds 800" >nul 2>&1
 echo Server ishga tushmoqda... (Oynani yopmang, botlar ushbu oynada ishlaydi)
 echo.
 node bot.js

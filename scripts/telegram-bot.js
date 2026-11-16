@@ -3087,7 +3087,12 @@ async function pollUpdates() {
         await handleUpdate(update);
       }
     } else if (res && !res.ok) {
-      console.warn('[Telegram getUpdates Error]:', res.error_code, res.description);
+      if (res.error_code === 409) {
+        console.warn('⚠️ [@EducoLms_Bot 409 Conflict]: Boshqa bot sessiyasi tugatilishini kutmoqda (5 soniyadan keyin qayta ulanadi)...');
+        await new Promise((r) => setTimeout(r, 5000));
+      } else {
+        console.warn('[Telegram getUpdates Error]:', res.error_code, res.description);
+      }
     }
   } catch (err) {
     if (err.message && !err.message.includes('timeout')) {
