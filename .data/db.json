@@ -11882,12 +11882,12 @@
       "api_token": "EMTIDA:3x7k46xkpavev_",
       "is_active": true,
       "status": "online",
-      "last_seen_at": "2026-11-15T15:10:35.913Z",
+      "last_seen_at": "2026-11-16T10:13:53.868Z",
       "last_error": null,
       "phone_number": "+998 93 582 17 74",
       "created_at": "2026-10-31T16:24:07.129Z",
       "battery_level": null,
-      "updated_at": "2026-11-15T15:10:35.916Z"
+      "updated_at": "2026-11-16T10:13:53.873Z"
     },
     {
       "id": "dev-backup-2",
@@ -12178,7 +12178,7 @@
       "payment_date": "2026-11-15",
       "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
       "status": "paid",
-      "created_at": "2026-11-16T08:54:05.834Z"
+      "created_at": "2026-11-16T10:16:27.396Z"
     },
     {
       "id": "pay-nov-cleared-usr-student-997249967",
@@ -38863,6 +38863,47 @@
       },
       "error_details": null,
       "created_at": "2026-11-15T15:10:35.926Z"
+    },
+    {
+      "id": "sms-log-1794824033881-kiq8",
+      "queue_id": null,
+      "tracking_id": "6SoaMOPb9oLnU5lR57ixN",
+      "device_id": "dev-primary-1",
+      "recipient_phone": "+998936101774",
+      "recipient_name": "Test qabul qiluvchi",
+      "status": "DISPATCHING",
+      "dispatched_at": "2026-11-16T10:13:53.868Z",
+      "android_received_at": null,
+      "android_sent_at": null,
+      "delivered_at": null,
+      "failed_at": null,
+      "response_payload": {
+        "delivered_via": "Android SMS Gateway (EMTIDA)",
+        "role": "primary",
+        "simulated": false,
+        "tracking_id": "6SoaMOPb9oLnU5lR57ixN",
+        "status": "DISPATCHING",
+        "id": "6SoaMOPb9oLnU5lR57ixN",
+        "deviceId": "LXlvZu27qWuUsZpOViiOh",
+        "createdAt": "2026-11-16T13:13:57.282+03:00",
+        "state": "Pending",
+        "isHashed": false,
+        "isEncrypted": false,
+        "recipients": [
+          {
+            "phoneNumber": "+998936101774",
+            "state": "Pending"
+          }
+        ],
+        "states": {
+          "Pending": "2026-11-16T10:13:57.282755865Z"
+        },
+        "textMessage": {
+          "text": "Bu Eskiz dan test"
+        }
+      },
+      "error_details": null,
+      "created_at": "2026-11-16T10:13:53.881Z"
     }
   ],
   "educo_db_chat_messages": [
@@ -41940,7 +41981,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 4919,
+  "_sync_version": 4952,
   "_deleted_ids": [
     "usr-1793468630979",
     "usr-test-sync-1",
@@ -42265,5 +42306,5 @@
     "sms-manual-1794666934485",
     "sms-att-1794675464959-ljbk0"
   ],
-  "_updated_at": 1794823391221
+  "_updated_at": 1794824187628
 }
