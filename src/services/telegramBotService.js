@@ -99,7 +99,6 @@ export function buildAttendanceNotificationText({
   isHtml = false,
 }) {
   const sName = studentName || 'Zafarbek Karimov';
-  const effectiveCourse = courseName && courseName !== 'Dars' ? courseName : 'Matematika 1.2';
   const effectiveTime = lessonTime && lessonTime !== 'Dars vaqtida' ? lessonTime : '08:30 - 10:00';
   const effectiveTeacher = teacherName && teacherName !== 'Fan mentori' ? teacherName : 'Abdulazizbek Orifjonov';
 
@@ -116,45 +115,41 @@ export function buildAttendanceNotificationText({
 
   if (status === 'present') {
     return (
-      `🟢 ${bOpen}Hurmatli ota-ona!${bClose}\n` +
-      `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) ${bOpen}${effectiveCourse}${bClose} darsida to‘liq qatnashdi.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: ${bOpen}${effectiveTeacher}${bClose}\n` +
+      `🟢 ${bOpen}Hurmatli ota-ona!${bClose}\n\n` +
+      `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) darsga keldi.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
       `Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!\n` +
-      `Hurmat bilan, EDUCO LMS`
+      `Hurmat bilan, ${bOpen}${effectiveTeacher}${bClose}`
     );
   }
 
   if (status === 'late') {
     return (
-      `🟡 ${bOpen}Hurmatli ota-ona!${bClose}\n` +
-      `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) ${bOpen}${effectiveCourse}${bClose} darsiga KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: ${bOpen}${effectiveTeacher}${bClose}\n` +
+      `🟡 ${bOpen}Hurmatli ota-ona!${bClose}\n\n` +
+      `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) darsga kechikib keldi.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
       `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n` +
-      `Hurmat bilan, EDUCO LMS`
+      `Hurmat bilan, ${bOpen}${effectiveTeacher}${bClose}`
     );
   }
 
   if (status === 'excused') {
-    const reasonText = remark ? ` (Sababi: ${remark})` : ' (Sababi: Betobligi sababli)';
+    const reasonText = remark ? ` (Sababi: ${remark})` : '';
     return (
-      `ℹ️ ${bOpen}Hurmatli ota-ona!${bClose}\n` +
-      `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) ${bOpen}${effectiveCourse}${bClose} darsini SABABLI holatda qoldirishi qayd etildi${reasonText}.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: ${bOpen}${effectiveTeacher}${bClose}\n` +
-      `Hurmat bilan, EDUCO LMS`
+      `ℹ️ ${bOpen}Hurmatli ota-ona!${bClose}\n\n` +
+      `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) darsni sababli qoldirdi${reasonText}.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
+      `Hurmat bilan, ${bOpen}${effectiveTeacher}${bClose}`
     );
   }
 
   // default: absent
   return (
-    `🔴 ${bOpen}DIQQAT: Hurmatli ota-ona!${bClose}\n` +
-    `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) ${bOpen}${effectiveCourse}${bClose} fanidan darsda QATNASHMADI (Darsga kelmadi).\n` +
-    `⏰ Dars vaqti: ${effectiveTime}\n` +
-    `👨‍🏫 O‘qituvchi: ${bOpen}${effectiveTeacher}${bClose}\n` +
-    `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
-    `Hurmat bilan, EDUCO LMS`
+    `🔴 ${bOpen}Hurmatli ota-ona!${bClose}\n\n` +
+    `Farzandingiz ${bOpen}${sName}${bClose} bugun (${prettyDate}) darsga kelmadi.\n` +
+    `⏰ Dars vaqti: ${effectiveTime}\n\n` +
+    `Sababini ma’lum qilishingizni yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+    `Hurmat bilan, ${bOpen}${effectiveTeacher}${bClose}`
   );
 }
 

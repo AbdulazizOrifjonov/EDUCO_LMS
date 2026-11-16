@@ -903,58 +903,50 @@ async function sendAttendanceTelegramNotification({ studentId, status, remark, c
 
   if (status === 'present') {
     studentMsg = `🟢 Hurmatli <b>${studentName}</b>!\n\n` +
-      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> darsida to‘liq qatnashdingiz.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Siz bugun (${todayStr}) darsda qatnashdingiz.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
       `Bilim olishdagi intilishingizni qo‘llab-quvvatlaymiz!\n` +
-      `Hurmat bilan, EDUCO LMS`;
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
 
     parentMsg = `🟢 Hurmatli ota-ona!\n\n` +
-      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> darsida to‘liq qatnashdi.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) darsga keldi.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
       `Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!\n` +
-      `Hurmat bilan, EDUCO LMS`;
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
   } else if (status === 'late') {
     studentMsg = `🟡 Hurmatli <b>${studentName}</b>!\n\n` +
-      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> darsiga KECHIKIB yetib keldingiz va ayni vaqtda mashg‘ulotda qatnashmoqdasiz.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Siz bugun (${todayStr}) darsga kechikib keldingiz.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
       `Iltimos, darslarga o‘z vaqtida qatnashishingizni so‘raymiz.\n` +
-      `Hurmat bilan, EDUCO LMS`;
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
 
     parentMsg = `🟡 Hurmatli ota-ona!\n\n` +
-      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> darsiga KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) darsga kechikib keldi.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
       `Iltimos, darslarga o‘z vaqtida qatnashishni nazorat qilishingizni so‘raymiz.\n` +
-      `Hurmat bilan, EDUCO LMS`;
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
   } else if (status === 'excused') {
     studentMsg = `ℹ️ Hurmatli <b>${studentName}</b>!\n\n` +
-      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> darsini SABABLI holatda qoldirishingiz qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
-      `Hurmat bilan, EDUCO LMS`;
+      `Siz bugun (${todayStr}) darsni sababli qoldirishingiz qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
 
     parentMsg = `ℹ️ Hurmatli ota-ona!\n\n` +
-      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> darsini SABABLI holatda qoldirishi qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
-      `Hurmat bilan, EDUCO LMS`;
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) darsni sababli qoldirishi qayd etildi${remark ? ` (Sababi: ${remark})` : ''}.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
   } else {
-    studentMsg = `🔴 DIQQAT: Hurmatli <b>${studentName}</b>!\n\n` +
-      `Siz bugun (${todayStr}) <b>${effectiveCourse}</b> fanidan darsda QATNASHMADINGIZ (Darsga kelmadingiz).\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
-      `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
-      `Hurmat bilan, EDUCO LMS`;
+    studentMsg = `🔴 Hurmatli <b>${studentName}</b>!\n\n` +
+      `Siz bugun (${todayStr}) darsga kelmadingiz.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
+      `Sababini ma’lum qilishingizni yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
 
-    parentMsg = `🔴 DIQQAT: Hurmatli ota-ona!\n\n` +
-      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) <b>${effectiveCourse}</b> fanidan darsda QATNASHMADI (Darsga kelmadi).\n` +
-      `⏰ Dars vaqti: ${effectiveTime}\n` +
-      `👨‍🏫 O‘qituvchi: <b>${effectiveTeacher}</b>\n\n` +
-      `Dars qoldirish sababini ma’lum qilish uchun o‘quv markazi ma’muriyati yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
-      `Hurmat bilan, EDUCO LMS`;
+    parentMsg = `🔴 Hurmatli ota-ona!\n\n` +
+      `Farzandingiz <b>${studentName}</b> bugun (${todayStr}) darsga kelmadi.\n` +
+      `⏰ Dars vaqti: ${effectiveTime}\n\n` +
+      `Sababini ma’lum qilishingizni yoki ustoz bilan bog‘lanishingizni so‘raymiz.\n` +
+      `Hurmat bilan, <b>${effectiveTeacher}</b>`;
   }
 
   if (student.telegram_chat_id) {

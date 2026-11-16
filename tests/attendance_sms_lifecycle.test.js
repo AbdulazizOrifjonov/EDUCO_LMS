@@ -77,9 +77,9 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
     expect(queueItem.recipient_phone).toBe('+998936101774'); // Father's phone
     expect(queueItem.category).toBe('attendance');
     expect(queueItem.attendance_status).toBe('absent');
-    expect(queueItem.message_text).toContain('QATNASHMADI');
-    expect(queueItem.message_text).toContain('Darsga kelmadi');
-    expect(queueItem.message_text).toContain('Matematika 1.2');
+    expect(queueItem.message_text).toContain('darsga kelmadi');
+    expect(queueItem.message_text).toContain('Hurmat bilan, Abdulazizbek Orifjonov');
+    expect(queueItem.message_text).not.toContain('Matematika 1.2');
     expect(queueItem.message_text).toContain('Bobur Karimov');
   });
 
@@ -149,7 +149,9 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
 
     expect(lateItem).toBeDefined();
     expect(lateItem.attendance_status).toBe('late');
-    expect(lateItem.message_text).toContain('KECHIKIB');
+    expect(lateItem.message_text).toContain('kechikib keldi');
+    expect(lateItem.message_text).toContain('Hurmat bilan, Abdulazizbek Orifjonov');
+    expect(lateItem.message_text).not.toContain('Matematika 1.2');
     expect(lateItem.recipient_phone).toBe('+998936101774');
   });
 
@@ -182,8 +184,8 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
 
     expect(lateUpdate).toBeDefined();
     expect(lateUpdate.attendance_status).toBe('late');
-    expect(lateUpdate.message_text).toContain('KECHIKIB yetib keldi va ayni vaqtda mashg‘ulotda qatnashmoqda');
-    expect(lateUpdate.message_text).toContain('Hurmat bilan, EDUCO LMS');
+    expect(lateUpdate.message_text).toContain('kechikib keldi');
+    expect(lateUpdate.message_text).toContain('Hurmat bilan, Abdulazizbek Orifjonov');
   });
 
   it('5. Students without parent phones: silently skips without error', async () => {
@@ -228,7 +230,7 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
     queue = localStore.getSmsQueue();
     const boburLate = queue.find((q) => q.student_id === 'st-test-1' && q.attendance_status === 'late');
     expect(boburLate).toBeDefined();
-    expect(boburLate.message_text).toContain('KECHIKIB');
+    expect(boburLate.message_text).toContain('kechikib keldi');
   });
 
   it('7. Strict Isolation: Debtor SMS is NEVER dispatched automatically when attendance is taken', async () => {
@@ -272,11 +274,12 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
     });
 
     expect(msg).toContain('🟢 Hurmatli ota-ona!');
-    expect(msg).toContain('Farzandingiz Zafarbek Karimov bugun (14.11.2026) Matematika 1.2 darsida to‘liq qatnashdi.');
+    expect(msg).toContain('Farzandingiz Zafarbek Karimov bugun (14.11.2026) darsga keldi.');
     expect(msg).toContain('⏰ Dars vaqti: 08:30 - 10:00');
-    expect(msg).toContain('👨‍🏫 O‘qituvchi: Abdulazizbek Orifjonov');
+    expect(msg).not.toContain('Matematika 1.2');
+    expect(msg).not.toContain('👨‍🏫 O‘qituvchi:');
     expect(msg).toContain('Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!');
-    expect(msg).toContain('Hurmat bilan, EDUCO LMS');
+    expect(msg).toContain('Hurmat bilan, Abdulazizbek Orifjonov');
     expect(msg).not.toContain('oralig‘ida');
     expect(msg).not.toContain('Fan mentori Fan mentori');
   });
@@ -296,11 +299,12 @@ describe('Attendance SMS & 30-Minute Late Update Lifecycle Suite', () => {
     const item = db.educo_db_sms_queue[0];
     expect(item.recipient_phone).toBe('+998936101774');
     expect(item.message_text).toContain('🟢 Hurmatli ota-ona!');
-    expect(item.message_text).toContain('Farzandingiz Zafarbek Karimov bugun (14.11.2026) Matematika 1.2 darsida to‘liq qatnashdi.');
+    expect(item.message_text).toContain('Farzandingiz Zafarbek Karimov bugun (14.11.2026) darsga keldi.');
     expect(item.message_text).toContain('⏰ Dars vaqti: 08:30 - 10:00');
-    expect(item.message_text).toContain('👨‍🏫 O‘qituvchi: Abdulazizbek Orifjonov');
+    expect(item.message_text).not.toContain('Matematika 1.2');
+    expect(item.message_text).not.toContain('👨‍🏫 O‘qituvchi:');
     expect(item.message_text).toContain('Farzandingizning bilim olishdagi intilishini qo‘llab-quvvatlaymiz!');
-    expect(item.message_text).toContain('Hurmat bilan, EDUCO LMS');
+    expect(item.message_text).toContain('Hurmat bilan, Abdulazizbek Orifjonov');
     expect(item.message_text).not.toContain('Fan mentori Fan mentori');
     expect(item.message_text).not.toContain('oralig‘ida');
   });
