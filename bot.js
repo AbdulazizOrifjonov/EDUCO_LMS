@@ -350,12 +350,18 @@ async function processSequentialQueue() {
       return;
     }
 
-    // Test SMS xavfsizlik cheklovi: Test xabarlari FAQAT 998936101774 yoki 998935821774 ga yuborilishi mumkin!
-    const ALLOWED_TEST_PHONES = new Set(['998936101774', '998935821774']);
-    if (isTestMsg(currentItem) && !ALLOWED_TEST_PHONES.has(cleanPhone)) {
-      console.warn(`[SMS Xavfsizlik] 🛑 Test SMS begona raqamga (+${cleanPhone}) yuborilishi bloklandi! Faqat admin raqamlari ruxsat etilgan.`);
+    // Dasturiy unit-testlardan (masalan 'Katta masshtabli test xabari' yoki soxta 9010000xx raqamlari) kelgan soxta navbatlarni bloklash
+    const isMockUnitTest = (item) =>
+      item &&
+      (item.id?.includes('batch50') ||
+        item.id?.includes('test-batch') ||
+        item.message_text?.includes('Katta masshtabli test') ||
+        item.recipient_phone?.includes('9010000'));
+
+    if (isMockUnitTest(currentItem)) {
+      console.warn(`[SMS Xavfsizlik] 🛑 Soxta unit-test SMS bekor qilindi (+${cleanPhone})`);
       currentItem.status = 'cancelled';
-      currentItem.error_message = "Xavfsizlik: Test SMS faqat ma'muriyat raqamlariga (+998936101774, +998935821774) yuborilishi mumkin!";
+      currentItem.error_message = 'Avtomatlashtirilgan soxta test xabari bekor qilindi';
       saveDb(db);
       isQueueProcessing = false;
       return;

@@ -12178,7 +12178,7 @@
       "payment_date": "2026-11-15",
       "notes": "Dekabr oyigacha qarzdorlik to‘liq yopildi (Barchasi to‘langan)",
       "status": "paid",
-      "created_at": "2026-11-16T07:15:22.095Z"
+      "created_at": "2026-11-16T08:54:05.834Z"
     },
     {
       "id": "pay-nov-cleared-usr-student-997249967",
@@ -41940,7 +41940,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 4392,
+  "_sync_version": 4919,
   "_deleted_ids": [
     "usr-1793468630979",
     "usr-test-sync-1",
@@ -42265,5 +42265,5 @@
     "sms-manual-1794666934485",
     "sms-att-1794675464959-ljbk0"
   ],
-  "_updated_at": 1794816953217
+  "_updated_at": 1794823391221
 }

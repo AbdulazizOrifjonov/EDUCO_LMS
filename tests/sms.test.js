@@ -358,6 +358,8 @@ describe('SMS Service - Comprehensive Suite', () => {
       });
       // All 10 tracking IDs must be unique
       expect(trackingIds.size).toBe(10);
+      // Clean up test queue immediately so background daemons never see them
+      localStore.setItem('educo_db_sms_queue', []);
     }, 30000);
 
     it('processes 50 SMS items at scale maintaining zero duplicates and full persistence', async () => {
