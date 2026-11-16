@@ -25,7 +25,7 @@ import {
   HeartHandshake,
   Layers,
   ChevronRight,
-  UserCheck,
+  Info,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { localStore } from '@/lib/localStore';
@@ -42,7 +42,6 @@ export default function TeacherRatingsPage() {
   // States
   const [feedbacks, setFeedbacks] = useState([]);
   const [activeTab, setActiveTab] = useState('leaderboard'); // 'leaderboard' | 'reviews' | 'analytics'
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTeacherFilter, setSelectedTeacherFilter] = useState('ALL');
   const [selectedRatingFilter, setSelectedRatingFilter] = useState('ALL'); // 'ALL' | '9-10' | '7-8' | '5-6' | '1-4'
@@ -78,7 +77,6 @@ export default function TeacherRatingsPage() {
         borderLeft: 'border-l-4 border-l-emerald-500',
         badgeBg: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800',
         progressGradient: 'from-emerald-400 to-teal-500',
-        accentBg: 'from-emerald-50/40 via-white to-white dark:from-emerald-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
         icon: '📐',
       };
     }
@@ -87,7 +85,6 @@ export default function TeacherRatingsPage() {
         borderLeft: 'border-l-4 border-l-blue-500',
         badgeBg: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
         progressGradient: 'from-blue-400 to-indigo-500',
-        accentBg: 'from-blue-50/40 via-white to-white dark:from-blue-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
         icon: '🇬🇧',
       };
     }
@@ -96,7 +93,6 @@ export default function TeacherRatingsPage() {
         borderLeft: 'border-l-4 border-l-orange-500',
         badgeBg: 'bg-orange-50 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300 border border-orange-200 dark:border-orange-800',
         progressGradient: 'from-orange-400 to-amber-500',
-        accentBg: 'from-orange-50/40 via-white to-white dark:from-orange-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
         icon: '🇷🇺',
       };
     }
@@ -105,7 +101,6 @@ export default function TeacherRatingsPage() {
         borderLeft: 'border-l-4 border-l-purple-500',
         badgeBg: 'bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800',
         progressGradient: 'from-purple-400 to-indigo-500',
-        accentBg: 'from-purple-50/40 via-white to-white dark:from-purple-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
         icon: '🧮',
       };
     }
@@ -114,7 +109,6 @@ export default function TeacherRatingsPage() {
         borderLeft: 'border-l-4 border-l-teal-500',
         badgeBg: 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border border-teal-200 dark:border-teal-800',
         progressGradient: 'from-teal-400 to-cyan-500',
-        accentBg: 'from-teal-50/40 via-white to-white dark:from-teal-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
         icon: '📖',
       };
     }
@@ -123,7 +117,6 @@ export default function TeacherRatingsPage() {
         borderLeft: 'border-l-4 border-l-indigo-500',
         badgeBg: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800',
         progressGradient: 'from-indigo-400 to-violet-500',
-        accentBg: 'from-indigo-50/40 via-white to-white dark:from-indigo-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
         icon: '💻',
       };
     }
@@ -132,7 +125,6 @@ export default function TeacherRatingsPage() {
         borderLeft: 'border-l-4 border-l-amber-500',
         badgeBg: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800',
         progressGradient: 'from-amber-400 to-yellow-500',
-        accentBg: 'from-amber-50/40 via-white to-white dark:from-amber-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
         icon: '♟️',
       };
     }
@@ -140,7 +132,6 @@ export default function TeacherRatingsPage() {
       borderLeft: 'border-l-4 border-l-blue-500',
       badgeBg: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
       progressGradient: 'from-blue-400 to-indigo-500',
-      accentBg: 'from-blue-50/40 via-white to-white dark:from-blue-950/20 dark:via-surface-dark-secondary dark:to-surface-dark-secondary',
       icon: '📚',
     };
   };
@@ -149,7 +140,7 @@ export default function TeacherRatingsPage() {
   const teacherStats = useMemo(() => {
     const statsMap = {};
 
-    // Initialize all active teachers
+    // Initialize all active teachers (default to 0)
     teachersList.forEach((tc) => {
       const tcGroups = allGroups.filter(
         (g) => localStore.normalizeUserId(g.teacher_id) === localStore.normalizeUserId(tc.id)
@@ -177,7 +168,7 @@ export default function TeacherRatingsPage() {
       };
     });
 
-    // Populate with feedbacks
+    // Populate with real feedbacks (if any exist)
     feedbacks.forEach((fb) => {
       let tId = fb.teacher_id;
       let matchedKey = Object.keys(statsMap).find(
@@ -228,10 +219,11 @@ export default function TeacherRatingsPage() {
       };
     });
 
-    // Sort by average rating descending, then total reviews descending
+    // Sort by average rating descending, then total reviews descending, then by name
     result.sort((a, b) => {
       if (b.averageRating !== a.averageRating) return b.averageRating - a.averageRating;
-      return b.totalReviews - a.totalReviews;
+      if (b.totalReviews !== a.totalReviews) return b.totalReviews - a.totalReviews;
+      return a.name.localeCompare(b.name);
     });
 
     return result;
@@ -242,14 +234,14 @@ export default function TeacherRatingsPage() {
     const totalFb = feedbacks.length;
     const allScores = feedbacks.map((f) => Number(f.rating) || 0).filter((s) => s > 0);
     const avgScore =
-      allScores.length > 0 ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(1) : '10.0';
-    const topTeacher = teacherStats[0] || null;
+      allScores.length > 0 ? (allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(1) : '0.0';
+    const topTeacher = teacherStats.find((t) => t.totalReviews > 0) || null;
     const totalSuggestions = feedbacks.filter((f) => f.suggestions?.trim()).length;
     const totalComplaints = feedbacks.filter((f) => f.complaints?.trim()).length;
     const positiveCount = feedbacks.filter(
       (f) => f.rating >= 8 || f.satisfaction === 'Juda aʼlo' || f.satisfaction === 'Yaxshi'
     ).length;
-    const satisfactionRate = totalFb > 0 ? Math.round((positiveCount / totalFb) * 100) : 100;
+    const satisfactionRate = totalFb > 0 ? Math.round((positiveCount / totalFb) * 100) : 0;
 
     return {
       totalFb,
@@ -309,7 +301,7 @@ export default function TeacherRatingsPage() {
   // CSV Export
   const handleExportCSV = () => {
     if (feedbacks.length === 0) {
-      toast.error('Eksport qilish uchun fikr-mulohazalar mavjud emas');
+      toast.error('Hozircha eksport qilish uchun fikr-mulohazalar mavjud emas');
       return;
     }
 
@@ -359,10 +351,17 @@ export default function TeacherRatingsPage() {
   };
 
   // Render Medal Badge (Never truncated)
-  const renderMedalBadge = (rank) => {
+  const renderMedalBadge = (rank, hasRatings) => {
+    if (!hasRatings) {
+      return (
+        <span className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-extrabold text-sm flex items-center justify-center shrink-0 border border-gray-200 dark:border-gray-700">
+          #{rank}
+        </span>
+      );
+    }
     if (rank === 1) {
       return (
-        <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-white font-black text-xs shadow-md shadow-amber-500/30 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <span className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-black text-xs shadow-md shadow-amber-500/25 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
           <span>🥇</span>
           <span>#1 Oltin</span>
         </span>
@@ -370,7 +369,7 @@ export default function TeacherRatingsPage() {
     }
     if (rank === 2) {
       return (
-        <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-slate-400 to-slate-600 text-white font-black text-xs shadow-md shadow-slate-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <span className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-slate-400 to-slate-600 text-white font-black text-xs shadow-md shadow-slate-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
           <span>🥈</span>
           <span>#2 Kumush</span>
         </span>
@@ -378,16 +377,15 @@ export default function TeacherRatingsPage() {
     }
     if (rank === 3) {
       return (
-        <span className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 text-white font-black text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <span className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-black text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
           <span>🥉</span>
           <span>#3 Bronza</span>
         </span>
       );
     }
     return (
-      <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-extrabold text-xs flex items-center gap-1 shrink-0 whitespace-nowrap border border-gray-200 dark:border-gray-700">
-        <span>🏅</span>
-        <span>#{rank}</span>
+      <span className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-extrabold text-sm flex items-center justify-center shrink-0 border border-gray-200 dark:border-gray-700">
+        #{rank}
       </span>
     );
   };
@@ -482,7 +480,7 @@ export default function TeacherRatingsPage() {
               Top Ustoz 🥇
             </span>
             <div className="text-sm font-extrabold text-gray-900 dark:text-gray-100 truncate">
-              {overallKPIs.topTeacher?.name || '—'}
+              {overallKPIs.topTeacher ? overallKPIs.topTeacher.name : 'Kutilmoqda'}
             </div>
           </div>
         </div>
@@ -518,6 +516,14 @@ export default function TeacherRatingsPage() {
         </div>
       </div>
 
+      {/* Dynamic Info Notice */}
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 flex items-start sm:items-center gap-3 text-xs text-blue-900 dark:text-blue-200">
+        <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5 sm:mt-0" />
+        <span className="leading-relaxed">
+          <strong>Nol holat (Clean Stock):</strong> Barcha ustozlar reytingi nol holatida turadi. O‘quvchilar o‘z kabinetidagi <strong>"O‘qituvchimga fikr-mulohaza"</strong> bo‘limi orqali darsni baholashi va taklif qoldirishi bilan o‘sha ustozning bali, yulduzlari va reyting o‘rni avtomatik ko‘tariladi.
+        </span>
+      </div>
+
       {/* 3. Navigation Tabs & Quick Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl bg-gray-100/80 dark:bg-surface-dark-tertiary/70 border border-gray-200/80 dark:border-gray-800">
         <div className="flex items-center gap-1.5">
@@ -531,7 +537,7 @@ export default function TeacherRatingsPage() {
             }`}
           >
             <Award className="w-4 h-4" />
-            <span>Ustozlar Reytingi (Peshqadam)</span>
+            <span>Ustozlar Reytingi (Row Ko‘rinishida)</span>
           </button>
 
           <button
@@ -544,7 +550,7 @@ export default function TeacherRatingsPage() {
             }`}
           >
             <MessageSquare className="w-4 h-4" />
-            <span>Fikrlar & Takliflar</span>
+            <span>O‘quvchilar Fikrlari & Takliflari</span>
             <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
               {feedbacks.length}
             </span>
@@ -564,249 +570,149 @@ export default function TeacherRatingsPage() {
           </button>
         </div>
 
-        {activeTab === 'leaderboard' && (
-          <div className="flex items-center gap-1 bg-white dark:bg-surface-dark-secondary p-1 rounded-xl shadow-sm border border-gray-200/60 dark:border-gray-700/60">
-            <button
-              type="button"
-              onClick={() => setViewMode('cards')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'cards'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              Kartalar
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('table')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'table'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              Jadval
-            </button>
-          </div>
-        )}
+        {/* Search */}
+        <div className="relative w-full sm:w-64">
+          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Ustoz yoki fanni qidirish..."
+            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-surface-dark-secondary text-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
       </div>
 
-      {/* 4. TAB 1: O‘QITUVCHILAR PESHQADAMI (LEADERBOARD CARDS) */}
+      {/* 4. TAB 1: O‘QITUVCHILAR PESHQADAMI (ROW-CARD KO‘RINISHI) */}
       {activeTab === 'leaderboard' && (
-        <div className="space-y-6">
-          {viewMode === 'cards' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {teacherStats.map((tc, idx) => {
-                const rank = idx + 1;
-                const subjectStyles = getSubjectColorStyles(tc.subject);
+        <div className="space-y-3">
+          {teacherStats
+            .filter((tc) => {
+              if (!searchQuery.trim()) return true;
+              const q = searchQuery.toLowerCase();
+              return tc.name.toLowerCase().includes(q) || tc.subject.toLowerCase().includes(q);
+            })
+            .map((tc, idx) => {
+              const rank = idx + 1;
+              const subjectStyles = getSubjectColorStyles(tc.subject);
+              const hasRatings = tc.totalReviews > 0;
 
-                return (
-                  <div
-                    key={tc.id}
-                    className={`rounded-3xl p-5 sm:p-6 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between space-y-4 relative ${subjectStyles.borderLeft}`}
-                  >
-                    {/* Top Row: Avatar, Identity, Medal Badge */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <Avatar
-                          src={tc.avatar_url}
-                          name={tc.name}
-                          size="lg"
-                          className="w-13 h-13 rounded-2xl shadow-sm ring-2 ring-gray-100 dark:ring-gray-700 shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100 leading-snug truncate">
-                            {tc.name}
-                          </h3>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold ${subjectStyles.badgeBg}`}>
-                              <span>{subjectStyles.icon}</span>
-                              <span className="truncate">{tc.subject}</span>
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1 font-medium truncate">
-                            <Users className="w-3 h-3 text-gray-400" />
-                            <span>{tc.groupCount} ta guruh • {tc.studentCount} ta o‘quvchi</span>
-                          </p>
-                        </div>
+              return (
+                <div
+                  key={tc.id}
+                  className={`w-full rounded-2xl p-4 sm:p-5 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-xs hover:shadow-md transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 ${subjectStyles.borderLeft}`}
+                >
+                  {/* Left: Medal, Avatar, Name, Subject, Groups */}
+                  <div className="flex items-center gap-3.5 min-w-0 lg:w-[36%]">
+                    <div className="shrink-0">{renderMedalBadge(rank, hasRatings)}</div>
+                    <Avatar
+                      src={tc.avatar_url}
+                      name={tc.name}
+                      size="md"
+                      className="w-12 h-12 rounded-2xl shadow-xs ring-2 ring-gray-100 dark:ring-gray-700 shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <h3 className="font-extrabold text-sm sm:text-base text-gray-900 dark:text-gray-100 leading-snug truncate">
+                        {tc.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold ${subjectStyles.badgeBg}`}>
+                          <span>{subjectStyles.icon}</span>
+                          <span className="truncate">{tc.subject}</span>
+                        </span>
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                          👥 {tc.groupCount} ta guruh • {tc.studentCount} ta o‘quvchi
+                        </span>
                       </div>
-
-                      {/* Rank Medal Badge (shrink-0 prevents any cutting off) */}
-                      <div className="shrink-0">{renderMedalBadge(rank)}</div>
                     </div>
+                  </div>
 
-                    {/* Middle Section: Sleek Rating Showcase */}
-                    <div className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-surface-dark-tertiary/70 border border-slate-100 dark:border-gray-800/80 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-0.5 text-amber-400 text-sm">
-                            {[1, 2, 3, 4, 5].map((starIdx) => (
-                              <Star
-                                key={starIdx}
-                                className={`w-3.5 h-3.5 ${
-                                  tc.averageRating >= starIdx * 2
-                                    ? 'fill-amber-400 text-amber-400'
-                                    : 'text-gray-300 dark:text-gray-600'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 block mt-0.5">
-                            {tc.averageRating >= 9
+                  {/* Middle: Rating Score & Progress Bar */}
+                  <div className="w-full lg:w-[32%] space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5 text-sm">
+                          {[1, 2, 3, 4, 5].map((sIdx) => (
+                            <Star
+                              key={sIdx}
+                              className={`w-3.5 h-3.5 ${
+                                hasRatings && tc.averageRating >= sIdx * 2
+                                  ? 'fill-amber-400 text-amber-400'
+                                  : 'text-gray-300 dark:text-gray-700'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">
+                          {hasRatings
+                            ? tc.averageRating >= 9
                               ? 'Aʼlo darajada'
-                              : tc.averageRating >= 7
-                              ? 'Yaxshi'
-                              : 'O‘rtacha'}
-                          </span>
-                        </div>
-
-                        {/* Large Score Pill */}
-                        <div className="flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200/80 dark:border-amber-800 text-amber-900 dark:text-amber-200 font-black text-sm">
-                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                          <span className="text-base font-black">{tc.totalReviews > 0 ? tc.averageRating : '—'}</span>
-                          <span className="text-xs font-semibold text-gray-400">/ 10</span>
-                        </div>
+                              : 'Yaxshi'
+                            : 'Hali baho yo‘q'}
+                        </span>
                       </div>
 
-                      {/* Smooth Gradient Progress Bar */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400">
-                          <span>Mamnunlik koeffitsiyenti</span>
-                          <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">
-                            {tc.totalReviews > 0 ? `${Math.round(tc.averageRating * 10)}%` : '0%'}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200/80 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full bg-gradient-to-r ${subjectStyles.progressGradient} transition-all duration-500`}
-                            style={{ width: `${tc.totalReviews > 0 ? tc.averageRating * 10 : 0}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* 3 Metrics Pills */}
-                      <div className="grid grid-cols-3 gap-1.5 pt-1 text-center">
-                        <div className="p-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 text-[11px] font-bold truncate">
-                          💬 {tc.totalReviews} baho
-                        </div>
-                        <div className="p-1.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-[11px] font-bold truncate">
-                          💡 {tc.suggestionsCount} taklif
-                        </div>
-                        <div className={`p-1.5 rounded-xl text-[11px] font-bold truncate ${
-                          tc.complaintsCount > 0
-                            ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300'
-                            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
-                        }`}>
-                          {tc.complaintsCount > 0 ? `⚠️ ${tc.complaintsCount} eʼtiroz` : '✅ 0 eʼtiroz'}
-                        </div>
+                      <div className={`px-2.5 py-0.5 rounded-lg text-xs font-black flex items-center gap-1 ${
+                        hasRatings
+                          ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                      }`}>
+                        <Star className={`w-3 h-3 ${hasRatings ? 'fill-amber-500 text-amber-500' : 'text-gray-400'}`} />
+                        <span>{hasRatings ? tc.averageRating : '0.0'}</span>
+                        <span className="text-[10px] text-gray-400">/ 10</span>
                       </div>
                     </div>
 
-                    {/* Latest Student Suggestion Quote */}
-                    {tc.latestSuggestion && (
-                      <div className="p-3 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 text-xs">
-                        <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-bold mb-1">
-                          <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                          <span>So‘nggi taklif:</span>
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300 italic line-clamp-2 leading-relaxed font-medium">
-                          “{tc.latestSuggestion}”
-                        </p>
-                      </div>
-                    )}
+                    {/* Progress Bar */}
+                    <div className="w-full bg-gray-100 dark:bg-gray-800 h-2 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${subjectStyles.progressGradient} transition-all duration-500`}
+                        style={{ width: `${hasRatings ? tc.averageRating * 10 : 0}%` }}
+                      />
+                    </div>
 
-                    {/* Action Button */}
+                    <div className="flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                      <span>Mamnunlik:</span>
+                      <span className={hasRatings ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-gray-400'}>
+                        {hasRatings ? `${Math.round(tc.averageRating * 10)}%` : '0%'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Metrics Pills & Action Button */}
+                  <div className="w-full lg:w-[28%] flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center gap-1.5 text-xs font-bold">
+                      <span className="px-2.5 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300">
+                        💬 {tc.totalReviews}
+                      </span>
+                      <span className="px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300">
+                        💡 {tc.suggestionsCount}
+                      </span>
+                      <span className={`px-2.5 py-1 rounded-xl ${
+                        tc.complaintsCount > 0
+                          ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
+                          : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+                      }`}>
+                        {tc.complaintsCount > 0 ? `⚠️ ${tc.complaintsCount}` : '✅ 0'}
+                      </span>
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedTeacherFilter(tc.id);
                         setActiveTab('reviews');
                       }}
-                      className="w-full py-2.5 px-4 rounded-2xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                     >
-                      <Eye className="w-4 h-4" />
-                      <span>Fidbeklarni ko‘rish ({tc.totalReviews})</span>
-                      <ChevronRight className="w-3.5 h-3.5 opacity-80" />
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Fidbeklar ({tc.totalReviews})</span>
+                      <ChevronRight className="w-3 h-3 opacity-80" />
                     </button>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <Card className="overflow-hidden shadow-sm rounded-3xl">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16">O‘rin</TableHead>
-                    <TableHead>O‘qituvchi</TableHead>
-                    <TableHead>Fan / Kurs</TableHead>
-                    <TableHead>O‘rtacha Ball</TableHead>
-                    <TableHead>Baholar Soni</TableHead>
-                    <TableHead>Takliflar</TableHead>
-                    <TableHead>Eʼtirozlar</TableHead>
-                    <TableHead className="text-right">Amallar</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teacherStats.map((tc, idx) => {
-                    const rank = idx + 1;
-                    return (
-                      <TableRow key={tc.id}>
-                        <TableCell className="font-extrabold text-sm">
-                          {renderMedalBadge(rank)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2.5">
-                            <Avatar src={tc.avatar_url} name={tc.name} size="sm" />
-                            <span className="font-bold text-sm text-gray-900 dark:text-gray-100">
-                              {tc.name}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                          {tc.subject}
-                        </TableCell>
-                        <TableCell>
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                            <Star className="w-3.5 h-3.5 fill-emerald-500 text-emerald-500" />
-                            <span>{tc.totalReviews > 0 ? tc.averageRating : '—'} / 10</span>
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                          {tc.totalReviews} ta
-                        </TableCell>
-                        <TableCell className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold">
-                          {tc.suggestionsCount} ta
-                        </TableCell>
-                        <TableCell>
-                          {tc.complaintsCount > 0 ? (
-                            <span className="text-xs font-bold text-rose-600">⚠️ {tc.complaintsCount} ta</span>
-                          ) : (
-                            <span className="text-xs font-semibold text-emerald-600">0 ta</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedTeacherFilter(tc.id);
-                              setActiveTab('reviews');
-                            }}
-                            className="text-xs font-bold text-blue-600 dark:text-blue-400 cursor-pointer"
-                          >
-                            Ko‘rish
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </Card>
-          )}
+                </div>
+              );
+            })}
         </div>
       )}
 
@@ -814,7 +720,7 @@ export default function TeacherRatingsPage() {
       {activeTab === 'reviews' && (
         <div className="space-y-6">
           {/* Filter Bar */}
-          <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-4">
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-xs space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Search */}
               <div className="relative">
@@ -906,21 +812,21 @@ export default function TeacherRatingsPage() {
 
           {/* Feedbacks Grid */}
           {filteredFeedbacks.length === 0 ? (
-            <div className="p-12 text-center rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-3">
+            <div className="p-12 text-center rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-xs space-y-3">
               <MessageSquare className="w-12 h-12 text-gray-400 mx-auto" />
               <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">
-                Fikr-mulohazalar topilmadi
+                Hozircha fikr-mulohazalar mavjud emas
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-                Tanlangan filtrlar bo‘yicha hozircha fidbek mavjud emas. Filtrlarni o‘zgartirib ko‘ring.
+                O‘quvchilar o‘z profillaridan ustoziga fidbek yuborganida, bu yerda to‘liq ro‘yxat shaklida paydo bo‘ladi.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredFeedbacks.map((fb) => (
                 <div
                   key={fb.id}
-                  className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4"
+                  className="p-5 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-xs hover:shadow-sm transition-shadow flex flex-col justify-between space-y-4"
                 >
                   {/* Top Bar: Student info & Teacher */}
                   <div className="space-y-2.5">
@@ -946,14 +852,14 @@ export default function TeacherRatingsPage() {
                       </div>
 
                       {/* Rating Badge */}
-                      <span className="px-3 py-1.5 rounded-2xl text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1 shrink-0">
+                      <span className="px-3 py-1 rounded-xl text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1 shrink-0">
                         <Star className="w-3.5 h-3.5 fill-emerald-500 text-emerald-500" />
                         <span>{fb.rating} / 10</span>
                       </span>
                     </div>
 
                     {/* Teacher Mention Badge */}
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-700/60 text-xs">
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-700/60 text-xs">
                       <GraduationCap className="w-4 h-4 text-blue-500 shrink-0" />
                       <span className="text-gray-500 dark:text-gray-400">Ustoz:</span>
                       <strong className="text-gray-900 dark:text-gray-100">{fb.teacher_name}</strong>
@@ -982,7 +888,7 @@ export default function TeacherRatingsPage() {
 
                     {/* Suggestions Box */}
                     {fb.suggestions && (
-                      <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 text-xs space-y-1">
+                      <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 text-xs space-y-1">
                         <div className="font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
                           <Lightbulb className="w-4 h-4 text-amber-600" />
                           <span>Darsni qiziqroq qilish bo‘yicha taklif:</span>
@@ -995,7 +901,7 @@ export default function TeacherRatingsPage() {
 
                     {/* Complaints Box */}
                     {fb.complaints && (
-                      <div className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/60 text-xs space-y-1">
+                      <div className="p-3.5 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/60 text-xs space-y-1">
                         <div className="font-bold text-rose-900 dark:text-rose-300 flex items-center gap-1.5">
                           <AlertTriangle className="w-4 h-4 text-rose-600" />
                           <span>Eʼtiroz / Shikoyat:</span>
@@ -1045,7 +951,7 @@ export default function TeacherRatingsPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Score distribution */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-4">
+            <div className="p-6 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-xs space-y-4">
               <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <span>1-10 Ballik Shkala Taqsimoti</span>
@@ -1063,7 +969,7 @@ export default function TeacherRatingsPage() {
                       <span className="w-14 font-extrabold text-gray-700 dark:text-gray-300">
                         {sc} ball
                       </span>
-                      <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-3 rounded-full overflow-hidden">
+                      <div className="flex-1 bg-gray-100 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500"
                           style={{ width: `${pct}%` }}
@@ -1079,7 +985,7 @@ export default function TeacherRatingsPage() {
             </div>
 
             {/* Common Student Suggestions */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm space-y-4">
+            <div className="p-6 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-xs space-y-4">
               <h3 className="font-extrabold text-base text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <Lightbulb className="w-5 h-5 text-amber-500" />
                 <span>O‘quvchilar Eng Ko‘p So‘rayotgan Takliflar</span>
@@ -1111,7 +1017,7 @@ export default function TeacherRatingsPage() {
                 ))}
               </div>
 
-              <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 mt-4 text-xs text-blue-900 dark:text-blue-200 leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 mt-4 text-xs text-blue-900 dark:text-blue-200 leading-relaxed">
                 💡 <strong>Xulosa va Tavsiya:</strong> Talabalar darslarda amaliyot va interaktiv o‘yinli bellashuvlarni juda yaxshi kutib olmoqda. Har bir fanga haftada kamida 1 marta mini-viktorina yoki amaliy mashg‘ulot qo‘shish umumiy o‘zlashtirishni sezilarli oshiradi.
               </div>
             </div>
