@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   LayoutGrid,
   List,
+  ChevronRight,
 } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import Card from '@/components/ui/Card';
@@ -694,36 +695,40 @@ export default function GroupManagement() {
                 <p className="text-xs text-gray-400 mt-1">Qidiruv yoki filtrlash parametrlarini o‘zgartirib ko‘ring.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 p-4 sm:p-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 p-4 sm:p-5">
                 {groups.map((group) => {
                   const cardColor = getSubjectColor(group.name, group.courseName, group.courseColor || group.color);
-                  const count = group.studentCount || 0;
-                  const cap = group.capacity || 20;
-                  const percent = Math.min(Math.round((count / cap) * 100), 100);
-                  const isOverloaded = count >= cap;
+                  const count = group.studentCount || (Array.isArray(group.student_ids) ? group.student_ids.length : 0);
                   const currentRole = profile?.role || 'owner';
                   const detailPath = `/${currentRole}/groups/${group.id}`;
-                  const fee = Number(group.monthly_price || group.monthly_fee || 0);
                   const teacherFullNameStr = group.primaryTeacher?.fullName || group.teacher_name || group.teacherName || '';
-                  const teacherPhoneStr = group.primaryTeacher?.phone || group.teacherPhone || '';
                   const scheduleStr = group.schedule || (group.schedules?.length ? `${group.schedules.length} ta dars / hafta` : null);
 
                   return (
                     <div
                       key={group.id}
-                      className="group relative rounded-2xl p-5 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-700/80 shadow-xs hover:shadow-lg transition-all duration-200 hover:-translate-y-1 flex flex-col justify-between"
+                      onClick={() => navigate(detailPath)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(detailPath);
+                        }
+                      }}
+                      className="group relative rounded-2xl p-5 sm:p-6 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-700/80 shadow-xs hover:shadow-xl hover:border-blue-400 dark:hover:border-emerald-500/60 transition-all duration-200 hover:-translate-y-1 cursor-pointer flex flex-col justify-between select-none"
                       style={{
                         borderLeftWidth: '6px',
                         borderLeftColor: cardColor,
-                        backgroundColor: `${cardColor}08`,
+                        backgroundColor: `${cardColor}0c`,
                       }}
                     >
-                      <div className="space-y-3.5">
-                        {/* Header: Course Icon, Group Name, Room, Status */}
-                        <div className="flex items-start justify-between gap-2.5">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="space-y-4">
+                        {/* 1. Guruh nomi va Fan nomi */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 min-w-0 flex-1">
                             <div
-                              className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 shadow-sm overflow-hidden"
+                              className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 shadow-sm mt-0.5 overflow-hidden"
                               style={{ backgroundColor: cardColor }}
                             >
                               {group.avatar_url || group.image_url ? (
@@ -738,163 +743,69 @@ export default function GroupManagement() {
                             </div>
                             <div className="min-w-0 flex-1">
                               <h3
-                                onClick={() => navigate(detailPath)}
-                                className="font-extrabold text-base text-gray-950 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-emerald-400 transition-colors"
+                                className="font-extrabold text-base sm:text-lg text-gray-950 dark:text-white leading-snug group-hover:text-blue-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2"
                                 title={group.name}
                               >
                                 {group.name}
                               </h3>
-                              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate flex items-center gap-1">
-                                  <BookOpen className="w-3.5 h-3.5 shrink-0" style={{ color: cardColor }} />
-                                  {group.courseName || 'Kurs fani'}
-                                </span>
-                                {group.room && (
-                                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-2xs">
-                                    🚪 {group.room.toLowerCase().includes('xona') ? group.room : `${group.room}-xona`}
-                                  </span>
-                                )}
+                              <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 mt-1">
+                                <BookOpen className="w-3.5 h-3.5 shrink-0" style={{ color: cardColor }} />
+                                <span className="truncate">{group.courseName || group.direction || t('courses.course', 'Kurs fani')}</span>
                               </div>
                             </div>
                           </div>
 
-                          <Badge variant={getStatusBadgeVariant(group.status)} size="sm" className="shrink-0 font-bold uppercase tracking-wider text-[10px]">
-                            {t(`groups.${group.status}`, t(`common.${group.status}`, group.status))}
-                          </Badge>
-                        </div>
-
-                        {/* Information Chips: Schedule & Monthly Fee */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                          {/* Schedule Chip */}
-                          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold bg-white dark:bg-surface-dark-tertiary text-gray-900 dark:text-gray-100 border border-gray-200/90 dark:border-gray-700/80 shadow-2xs">
-                            <Calendar className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
-                            <span className="truncate">
-                              {scheduleStr || t('schedule.noSchedule', 'Jadvalsiz')}
-                            </span>
-                          </div>
-
-                          {/* Monthly Fee Chip */}
-                          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80 shadow-2xs">
-                            <span className="text-sm shrink-0">💰</span>
-                            <span className="truncate">
-                              {fee > 0 ? `${fee.toLocaleString()} so‘m` : 'To‘lov yo‘q'}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Teacher row */}
-                        <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white/80 dark:bg-surface-dark-tertiary/70 border border-gray-200/70 dark:border-gray-700/60 text-xs">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div
-                              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0 shadow-2xs"
-                              style={{ backgroundColor: cardColor }}
-                            >
-                              {teacherFullNameStr ? teacherFullNameStr.charAt(0).toUpperCase() : 'U'}
-                            </div>
-                            <div className="min-w-0">
-                              <span className="text-[10px] uppercase font-bold text-gray-400 block leading-tight">Asosiy O‘qituvchi</span>
-                              <span className="font-bold text-gray-900 dark:text-gray-100 truncate block">
-                                {teacherFullNameStr || t('groups.unassigned', 'Biriktirilmagan')}
-                              </span>
+                          <div className="shrink-0 flex items-center gap-2">
+                            <Badge variant={getStatusBadgeVariant(group.status)} size="sm" className="font-bold uppercase tracking-wider text-[10px]">
+                              {t(`groups.${group.status}`, t(`common.${group.status}`, group.status))}
+                            </Badge>
+                            <div className="w-7 h-7 rounded-full bg-white dark:bg-surface-dark-tertiary border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-center text-gray-400 group-hover:text-blue-600 dark:group-hover:text-emerald-400 group-hover:border-blue-300 dark:group-hover:border-emerald-500/50 group-hover:translate-x-0.5 transition-all shadow-2xs">
+                              <ChevronRight className="w-4 h-4" />
                             </div>
                           </div>
-                          {teacherPhoneStr && (
-                            <span className="text-[11px] font-mono font-semibold text-gray-500 dark:text-gray-400 shrink-0">
-                              {teacherPhoneStr}
-                            </span>
-                          )}
                         </div>
 
-                        {/* Capacity Progress Bar */}
-                        <div className="space-y-1.5 pt-1">
-                          <div className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-gray-300">
-                            <span className="flex items-center gap-1.5">
-                              <Users className="w-3.5 h-3.5 text-gray-400" />
-                              <span>Sig‘im: <b className="text-gray-900 dark:text-white">{count}</b> / {cap} o‘quvchi</span>
-                            </span>
-                            <span className={`font-mono text-xs font-black ${isOverloaded ? 'text-rose-600' : 'text-gray-500'}`}>{percent}%</span>
-                          </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-800 h-2.5 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full transition-all duration-300 rounded-full ${
-                                percent >= 100
-                                  ? 'bg-rose-600'
-                                  : percent > 80
-                                  ? 'bg-amber-500'
-                                  : 'bg-emerald-500'
-                              }`}
-                              style={{ width: `${percent}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Card Bottom / Action Buttons */}
-                      <div className="pt-4 mt-3 border-t border-gray-200/80 dark:border-gray-700/70 flex items-center justify-between gap-2">
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          icon={Eye}
-                          className="flex-1 justify-center text-xs h-9 font-bold rounded-xl shadow-xs cursor-pointer"
-                          onClick={() => navigate(detailPath)}
-                        >
-                          {t('common.view', 'Batafsil')}
-                        </Button>
-
-                        <div className="flex items-center gap-1 shrink-0">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="!p-2 h-9 w-9 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-xl"
-                            title={t('common.edit', 'Tahrirlash')}
-                            onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
+                        {/* 2. O'qituvchining ismi */}
+                        <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/90 dark:bg-surface-dark-tertiary/80 border border-gray-200/80 dark:border-gray-700/70">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black text-white shrink-0 shadow-2xs"
+                            style={{ backgroundColor: cardColor }}
                           >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
+                            {teacherFullNameStr ? teacherFullNameStr.charAt(0).toUpperCase() : 'O'}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[10px] uppercase font-bold text-gray-400 dark:text-gray-500 block leading-tight">
+                              O‘qituvchi
+                            </span>
+                            <span className="font-bold text-sm text-gray-900 dark:text-gray-100 truncate block">
+                              {teacherFullNameStr || t('groups.unassigned', 'Biriktirilmagan')}
+                            </span>
+                          </div>
+                        </div>
 
-                          {!isTeacher && (
-                            <>
-                              {isOverloaded && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="!p-2 h-9 w-9 text-red-600 hover:bg-red-500/10 rounded-xl"
-                                  title="Guruhni 2-guruhga ajratish (Split)"
-                                  onClick={() => setSplitModalGroup(group)}
-                                >
-                                  <Split className="w-4 h-4" />
-                                </Button>
-                              )}
+                        {/* 3. Dars vaqti va Guruhdagi talabalar soni */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                          {/* Vaqti */}
+                          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold bg-white/90 dark:bg-surface-dark-tertiary/80 text-gray-800 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700/70 shadow-2xs">
+                            <Clock className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                            <span className="truncate">
+                              {scheduleStr || t('schedule.noSchedule', 'Jadval belgilanmagan')}
+                            </span>
+                          </div>
 
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`!p-2 h-9 w-9 rounded-xl ${
-                                  group.status === 'archived'
-                                    ? 'text-emerald-600 hover:bg-emerald-500/10'
-                                    : 'text-amber-600 hover:bg-amber-500/10'
-                                }`}
-                                title={group.status === 'archived' ? t('common.restore', 'Qayta tiklash') : t('common.archive', 'Arxivlash')}
-                                onClick={() => handleToggleArchive(group)}
-                              >
-                                {group.status === 'archived' ? (
-                                  <RotateCcw className="w-4 h-4" />
-                                ) : (
-                                  <Archive className="w-4 h-4" />
-                                )}
-                              </Button>
-
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="!p-2 h-9 w-9 text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 rounded-xl"
-                                title={t('common.delete', 'O‘chirish')}
-                                onClick={() => handleDeleteGroup(group)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
+                          {/* Guruhda nechta talaba borligi */}
+                          <div className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold bg-white/90 dark:bg-surface-dark-tertiary/80 text-gray-800 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700/70 shadow-2xs">
+                            <span className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                              <Users className="w-4 h-4 shrink-0" style={{ color: cardColor }} />
+                              <span>Talabalar:</span>
+                            </span>
+                            <span
+                              className="font-extrabold text-xs px-2.5 py-1 rounded-lg font-mono"
+                              style={{ backgroundColor: `${cardColor}18`, color: cardColor }}
+                            >
+                              {count} ta talaba
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
