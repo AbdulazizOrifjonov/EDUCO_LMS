@@ -369,93 +369,39 @@ export default function GroupDetail({ groupId: propGroupId }) {
     <div className="space-y-6 animate-fade-in">
       {/* Header & Back Button */}
       {/* Group Profile Header Card */}
-      <Card className="p-5 sm:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-          <div className="flex items-center gap-2 self-start shrink-0">
+      <Card className="p-4 sm:p-6 shadow-sm space-y-4">
+        {/* Row 1: Back Button, Avatar, Title, Badges & Action Buttons */}
+        <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
+          {/* Left Identity: Back + Avatar + Name + Badges */}
+          <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
             <Button
               variant="outline"
               size="sm"
               icon={ArrowLeft}
               onClick={() => navigate(-1)}
-              className="!p-2 h-9 w-9"
+              className="!p-2 h-9 w-9 shrink-0 mt-0.5"
               title="Orqaga"
             />
-          </div>
 
-          {/* Group Avatar with Camera Upload */}
-          <div className="relative group shrink-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-600 dark:border-emerald-500 flex items-center justify-center text-3xl font-extrabold text-emerald-800 dark:text-emerald-300 shadow-md">
-              {group.avatar_url || group.image_url ? (
-                <img
-                  src={group.avatar_url || group.image_url}
-                  alt={group.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                group.name?.charAt(0) || 'G'
-              )}
-            </div>
+            {/* Group Avatar with Camera Upload */}
+            <div className="relative group shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-600 dark:border-emerald-500 flex items-center justify-center text-2xl sm:text-3xl font-extrabold text-emerald-800 dark:text-emerald-300 shadow-md">
+                {group.avatar_url || group.image_url ? (
+                  <img
+                    src={group.avatar_url || group.image_url}
+                    alt={group.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  group.name?.charAt(0) || 'G'
+                )}
+              </div>
 
-            <label
-              title="Guruhga profil rasmi qo‘yish"
-              className="absolute -bottom-1 -right-1 p-2 bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105"
-            >
-              <Camera className="w-4 h-4" />
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarSelect}
-                disabled={avatarUploading}
-              />
-            </label>
-          </div>
-
-          {/* Group Info & Actions */}
-          <div className="flex-1 text-center sm:text-left rtl:sm:text-right space-y-2 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-wrap justify-center sm:justify-start">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{group.name}</h1>
-              <Badge variant="primary" size="md">
-                {group.courses?.name || group.courseName || 'General Course'}
-              </Badge>
-              <Badge
-                variant={group.status === 'active' ? 'success' : 'secondary'}
-                size="sm"
+              <label
+                title="Guruhga profil rasmi qo‘yish"
+                className="absolute -bottom-1 -right-1 p-1.5 bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-105"
               >
-                <span className="capitalize">{group.status}</span>
-              </Badge>
-            </div>
-
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-4 flex-wrap justify-center sm:justify-start">
-              <span className="flex items-center gap-1 font-medium text-gray-700 dark:text-gray-300">
-                <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
-                Ustoz: {group.teachers?.[0]?.fullName || group.teacher_name || t('groups.unassigned', 'Not Assigned')}
-              </span>
-              <span className="flex items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-500/20">
-                <DollarSign className="w-3.5 h-3.5" />
-                Oylik to‘lov: {Number(group.monthly_price || 0).toLocaleString()} so‘m / oy
-              </span>
-              <span className="flex items-center gap-1">
-                <Building2 className="w-3.5 h-3.5 text-gray-400" />
-                Xona: {group.room || 'TBD'}
-              </span>
-              {group.schedule && (
-                <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400 font-mono">
-                  <Clock className="w-3.5 h-3.5 text-emerald-600" />
-                  {group.schedule}
-                </span>
-              )}
-            </p>
-
-            {/* Avatar action buttons */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer shadow-xs transition-colors">
                 <Camera className="w-3.5 h-3.5" />
-                <span>
-                  {group.avatar_url || group.image_url
-                    ? "Rasmni almashtirish"
-                    : "Guruh profiliga rasm qo‘yish"}
-                </span>
                 <input
                   type="file"
                   accept="image/*"
@@ -464,33 +410,70 @@ export default function GroupDetail({ groupId: propGroupId }) {
                   disabled={avatarUploading}
                 />
               </label>
+            </div>
 
-              {(group.avatar_url || group.image_url) && (
-                <button
-                  type="button"
-                  onClick={handleRemoveAvatar}
-                  disabled={avatarUploading}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 text-xs font-semibold transition-colors"
+            {/* Group Info */}
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-gray-100 leading-tight">
+                  {group.name}
+                </h1>
+                <Badge variant="primary" size="sm">
+                  {group.courses?.name || group.courseName || 'General Course'}
+                </Badge>
+                <Badge
+                  variant={group.status === 'active' ? 'success' : 'secondary'}
+                  size="sm"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Rasmni o‘chirish</span>
-                </button>
-              )}
+                  <span className="capitalize">{group.status}</span>
+                </Badge>
+              </div>
 
-              {avatarUploading && (
-                <span className="text-xs text-emerald-600 animate-pulse font-medium">Yuklanmoqda...</span>
-              )}
+              {/* Avatar quick buttons */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-xs font-semibold cursor-pointer border border-blue-200/60 dark:border-blue-800/60 transition-colors">
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>
+                    {group.avatar_url || group.image_url
+                      ? "Rasmni almashtirish"
+                      : "Guruh profiliga rasm qo‘yish"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarSelect}
+                    disabled={avatarUploading}
+                  />
+                </label>
+
+                {(group.avatar_url || group.image_url) && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    disabled={avatarUploading}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 text-xs font-semibold transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Rasmni o‘chirish</span>
+                  </button>
+                )}
+
+                {avatarUploading && (
+                  <span className="text-xs text-emerald-600 animate-pulse font-medium">Yuklanmoqda...</span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Group Management Actions */}
-          <div className="flex items-center gap-2 self-center sm:self-start shrink-0 mt-2 sm:mt-0 flex-wrap">
+          {/* Right / Second row: Group Management Actions */}
+          <div className="flex flex-wrap items-center gap-2 shrink-0 pt-2 xl:pt-0">
             <Button
               variant="outline"
               size="sm"
               icon={Edit2}
               onClick={() => navigate(`/${currentUserRole}/groups/edit/${group.id}`)}
-              className="text-xs font-bold text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 shadow-xs"
+              className="text-xs font-bold text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 shadow-xs h-9"
               title="Guruh kunlari, soatlari, xonasi va o‘quvchilarini tahrirlash"
             >
               Guruhni tahrirlash (Kun & Vaqt)
@@ -502,7 +485,7 @@ export default function GroupDetail({ groupId: propGroupId }) {
                   size="sm"
                   icon={Split}
                   onClick={() => setIsSplitModalOpen(true)}
-                  className="text-xs font-semibold text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                  className="text-xs font-semibold text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 h-9"
                 >
                   Guruhni bo‘lish
                 </Button>
@@ -511,13 +494,35 @@ export default function GroupDetail({ groupId: propGroupId }) {
                   size="sm"
                   icon={Trash2}
                   onClick={handleDeleteCurrentGroup}
-                  className="text-xs font-semibold"
+                  className="text-xs font-semibold h-9"
                 >
                   Guruhni o‘chirish
                 </Button>
               </>
             )}
           </div>
+        </div>
+
+        {/* Row 2: Metadata Info Badges Row (Full Width, never squeezed) */}
+        <div className="pt-3 border-t border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center gap-2.5 sm:gap-4 text-xs">
+          <span className="inline-flex items-center gap-1.5 font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-surface-dark-tertiary px-2.5 py-1 rounded-xl border border-gray-200/70 dark:border-gray-700/60">
+            <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Ustoz: <strong className="text-gray-900 dark:text-gray-100">{group.teachers?.[0]?.fullName || group.teacher_name || t('groups.unassigned', 'Not Assigned')}</strong></span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-500/20">
+            <DollarSign className="w-3.5 h-3.5" />
+            <span>Oylik to‘lov: <strong>{Number(group.monthly_price || 0).toLocaleString()}</strong> so‘m / oy</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-surface-dark-tertiary px-2.5 py-1 rounded-xl border border-gray-200/70 dark:border-gray-700/60">
+            <Building2 className="w-3.5 h-3.5 text-gray-400" />
+            <span>Xona: <strong className="text-gray-900 dark:text-gray-100">{group.room || 'TBD'}</strong></span>
+          </span>
+          {group.schedule && (
+            <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-mono bg-gray-50 dark:bg-surface-dark-tertiary px-2.5 py-1 rounded-xl border border-gray-200/70 dark:border-gray-700/60">
+              <Clock className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{group.schedule}</span>
+            </span>
+          )}
         </div>
       </Card>
 

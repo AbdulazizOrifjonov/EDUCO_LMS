@@ -643,16 +643,16 @@ export default function PasswordsPage() {
   return (
     <div className="space-y-5 pb-24 sm:pb-12">
       {/* Page Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-surface-dark-secondary p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-sm">
-        <div className="flex items-center gap-3.5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-surface-dark-secondary p-4 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-sm">
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#123D78] to-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-900/20 shrink-0">
             <KeyRound className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
               {t('passwords.title', 'Parollar va Loginlar bazasi')}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
               {isOwner
                 ? t(
                     'passwords.ownerSubtitle',
@@ -666,7 +666,7 @@ export default function PasswordsPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-800">
           <Button
             variant="outline"
             size="md"
@@ -717,7 +717,7 @@ export default function PasswordsPage() {
       <Card>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
           {/* Role Filter Select Option matching user request */}
-          <div className="w-full sm:w-72">
+          <div className="w-full sm:w-80 lg:w-96 min-w-[260px]">
             <Select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
@@ -734,7 +734,7 @@ export default function PasswordsPage() {
           </div>
 
           {/* Clean Search Input */}
-          <div className="relative w-full lg:w-80">
+          <div className="relative w-full sm:w-80 lg:w-96">
             <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"

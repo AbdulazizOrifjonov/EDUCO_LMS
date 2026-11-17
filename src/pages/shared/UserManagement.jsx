@@ -1279,7 +1279,7 @@ export default function UserManagement() {
       <Card noPadding>
         <div className={`p-4 grid grid-cols-1 sm:grid-cols-2 ${isTeacher ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-3 items-center`}>
           {/* Search */}
-          <div className={isTeacher ? 'lg:col-span-2' : 'lg:col-span-2'}>
+          <div className="sm:col-span-2 lg:col-span-2">
             <Input
               icon={Search}
               size="md"
@@ -1609,7 +1609,7 @@ export default function UserManagement() {
                             title={t('common.delete', 'O‘chirish')}
                             onClick={() => handleDeleteUser(row)}
                           >
-                            <span className="hidden xs:inline">{t('common.delete', 'O‘chirish')}</span>
+                            <span>{t('common.delete', 'O‘chirish')}</span>
                           </Button>
                         )}
                       </div>
