@@ -418,6 +418,40 @@
       "total_latency_ms": null,
       "sent_at": "2026-11-16T17:10:38.554Z",
       "updated_at": "2026-11-16T16:34:48.084Z"
+    },
+    {
+      "id": "sms-manual-1794884447585",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Telegram orqali yozilgan",
+      "recipient_type": "manual",
+      "message_text": "wefrgh",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-17T03:00:47.585Z",
+      "queued_at": "2026-11-17T03:00:47.585Z",
+      "last_attempt_at": "2026-11-17T03:00:48.926Z",
+      "tracking_id": "YjhNERgysO9xom-XcMyn3",
+      "sent_at": "2026-11-17T03:00:54.162Z",
+      "delivered_at": null,
+      "error_message": null
+    },
+    {
+      "id": "sms-manual-1794884482991",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Telegram orqali yozilgan",
+      "recipient_type": "manual",
+      "message_text": "wefrgh",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-17T03:01:22.991Z",
+      "queued_at": "2026-11-17T03:01:22.991Z",
+      "last_attempt_at": "2026-11-17T03:01:25.918Z",
+      "tracking_id": "yNVsX5W9BRKZD67DsrWgX",
+      "sent_at": "2026-11-17T03:01:28.656Z",
+      "delivered_at": null,
+      "error_message": null
     }
   ],
   "educo_db_sms_settings": {
@@ -444,6 +478,28 @@
     "debtor_sms_start_date": "2026-12-01",
     "debtor_sms_start_day": 5
   },
-  "_sync_version": 36,
-  "_updated_at": 1794852277886
+  "_sync_version": 822,
+  "_updated_at": 1794887160344,
+  "educo_db_sms_logs": [
+    {
+      "id": "log-1794884488656",
+      "queue_id": "sms-manual-1794884482991",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Telegram orqali yozilgan",
+      "message_text": "wefrgh",
+      "status": "sent",
+      "tracking_id": "yNVsX5W9BRKZD67DsrWgX",
+      "sent_at": "2026-11-17T03:01:28.656Z"
+    },
+    {
+      "id": "log-1794884454162",
+      "queue_id": "sms-manual-1794884447585",
+      "recipient_phone": "+998997287205",
+      "recipient_name": "Telegram orqali yozilgan",
+      "message_text": "wefrgh",
+      "status": "sent",
+      "tracking_id": "YjhNERgysO9xom-XcMyn3",
+      "sent_at": "2026-11-17T03:00:54.162Z"
+    }
+  ]
 }

@@ -354,14 +354,14 @@ export default function TeacherRatingsPage() {
   const renderMedalBadge = (rank, hasRatings) => {
     if (!hasRatings) {
       return (
-        <span className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-extrabold text-sm flex items-center justify-center shrink-0 border border-gray-200 dark:border-gray-700">
+        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-extrabold text-xs sm:text-sm flex items-center justify-center shrink-0 border border-gray-200 dark:border-gray-700">
           #{rank}
         </span>
       );
     }
     if (rank === 1) {
       return (
-        <span className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-black text-xs shadow-md shadow-amber-500/25 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <span className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-black text-[11px] sm:text-xs shadow-md shadow-amber-500/25 flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
           <span>🥇</span>
           <span>#1 Oltin</span>
         </span>
@@ -369,7 +369,7 @@ export default function TeacherRatingsPage() {
     }
     if (rank === 2) {
       return (
-        <span className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-slate-400 to-slate-600 text-white font-black text-xs shadow-md shadow-slate-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <span className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-slate-400 to-slate-600 text-white font-black text-[11px] sm:text-xs shadow-md shadow-slate-500/20 flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
           <span>🥈</span>
           <span>#2 Kumush</span>
         </span>
@@ -377,14 +377,14 @@ export default function TeacherRatingsPage() {
     }
     if (rank === 3) {
       return (
-        <span className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-black text-xs shadow-md shadow-orange-500/20 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <span className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-black text-[11px] sm:text-xs shadow-md shadow-orange-500/20 flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap">
           <span>🥉</span>
           <span>#3 Bronza</span>
         </span>
       );
     }
     return (
-      <span className="w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-extrabold text-sm flex items-center justify-center shrink-0 border border-gray-200 dark:border-gray-700">
+      <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-extrabold text-xs sm:text-sm flex items-center justify-center shrink-0 border border-gray-200 dark:border-gray-700">
         #{rank}
       </span>
     );
@@ -501,7 +501,7 @@ export default function TeacherRatingsPage() {
         </div>
 
         {/* KPI 5: Eʼtirozlar */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm flex items-center gap-3.5">
+        <div className="p-4 rounded-2xl bg-white dark:bg-surface-dark-secondary border border-gray-200/80 dark:border-gray-800 shadow-sm flex items-center gap-3.5 col-span-2 sm:col-span-1 lg:col-span-1">
           <div className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800">
             <AlertTriangle className="w-5 h-5 text-rose-500" />
           </div>
@@ -525,32 +525,32 @@ export default function TeacherRatingsPage() {
       </div>
 
       {/* 3. Navigation Tabs & Quick Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl bg-gray-100/80 dark:bg-surface-dark-tertiary/70 border border-gray-200/80 dark:border-gray-800">
-        <div className="flex items-center gap-1.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 rounded-2xl bg-gray-100/80 dark:bg-surface-dark-tertiary/70 border border-gray-200/80 dark:border-gray-800">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1 sm:pb-0">
           <button
             type="button"
             onClick={() => setActiveTab('leaderboard')}
-            className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === 'leaderboard'
                 ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
-            <Award className="w-4 h-4" />
-            <span>Ustozlar Reytingi (Row Ko‘rinishida)</span>
+            <Award className="w-4 h-4 shrink-0" />
+            <span>Ustozlar Reytingi</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('reviews')}
-            className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === 'reviews'
                 ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
-            <MessageSquare className="w-4 h-4" />
-            <span>O‘quvchilar Fikrlari & Takliflari</span>
+            <MessageSquare className="w-4 h-4 shrink-0" />
+            <span>O‘quvchilar Fikrlari</span>
             <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
               {feedbacks.length}
             </span>
@@ -559,19 +559,19 @@ export default function TeacherRatingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 whitespace-nowrap ${
               activeTab === 'analytics'
                 ? 'bg-white dark:bg-surface-dark-secondary text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
+            <BarChart3 className="w-4 h-4 shrink-0" />
             <span>Tahliliy Diagramma</span>
           </button>
         </div>
 
         {/* Search */}
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-64 shrink-0">
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
           <input
             type="text"
@@ -600,27 +600,27 @@ export default function TeacherRatingsPage() {
               return (
                 <div
                   key={tc.id}
-                  className={`w-full rounded-2xl p-4 sm:p-5 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-xs hover:shadow-md transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 ${subjectStyles.borderLeft}`}
+                  className={`w-full rounded-2xl p-3.5 sm:p-5 bg-white dark:bg-surface-dark-secondary border border-gray-200/90 dark:border-gray-800 shadow-xs hover:shadow-md transition-all flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5 sm:gap-4 ${subjectStyles.borderLeft}`}
                 >
                   {/* Left: Medal, Avatar, Name, Subject, Groups */}
-                  <div className="flex items-center gap-3.5 min-w-0 lg:w-[36%]">
+                  <div className="flex items-center gap-3 sm:gap-3.5 w-full lg:w-[36%] min-w-0">
                     <div className="shrink-0">{renderMedalBadge(rank, hasRatings)}</div>
                     <Avatar
                       src={tc.avatar_url}
                       name={tc.name}
                       size="md"
-                      className="w-12 h-12 rounded-2xl shadow-xs ring-2 ring-gray-100 dark:ring-gray-700 shrink-0"
+                      className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl shadow-xs ring-2 ring-gray-100 dark:ring-gray-700 shrink-0"
                     />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h3 className="font-extrabold text-sm sm:text-base text-gray-900 dark:text-gray-100 leading-snug truncate">
                         {tc.name}
                       </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold ${subjectStyles.badgeBg}`}>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold shrink-0 ${subjectStyles.badgeBg}`}>
                           <span>{subjectStyles.icon}</span>
-                          <span className="truncate">{tc.subject}</span>
+                          <span>{tc.subject}</span>
                         </span>
-                        <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">
                           👥 {tc.groupCount} ta guruh • {tc.studentCount} ta o‘quvchi
                         </span>
                       </div>
@@ -680,7 +680,7 @@ export default function TeacherRatingsPage() {
                   </div>
 
                   {/* Right: Metrics Pills & Action Button */}
-                  <div className="w-full lg:w-[28%] flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-800">
+                  <div className="w-full lg:w-[28%] flex flex-wrap items-center justify-between lg:justify-end gap-2 sm:gap-3 pt-2.5 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-800">
                     <div className="flex items-center gap-1.5 text-xs font-bold">
                       <span className="px-2.5 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300">
                         💬 {tc.totalReviews}
@@ -703,7 +703,7 @@ export default function TeacherRatingsPage() {
                         setSelectedTeacherFilter(tc.id);
                         setActiveTab('reviews');
                       }}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>Fidbeklar ({tc.totalReviews})</span>
@@ -859,7 +859,7 @@ export default function TeacherRatingsPage() {
                     </div>
 
                     {/* Teacher Mention Badge */}
-                    <div className="flex items-center gap-2 p-2 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-700/60 text-xs">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 p-2 rounded-xl bg-gray-50 dark:bg-surface-dark-tertiary border border-gray-100 dark:border-gray-700/60 text-xs">
                       <GraduationCap className="w-4 h-4 text-blue-500 shrink-0" />
                       <span className="text-gray-500 dark:text-gray-400">Ustoz:</span>
                       <strong className="text-gray-900 dark:text-gray-100">{fb.teacher_name}</strong>
@@ -870,7 +870,7 @@ export default function TeacherRatingsPage() {
 
                   {/* Middle: Satisfaction & Content */}
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
                       <span className="text-gray-500 dark:text-gray-400">Darsdan mamnunligi:</span>
                       <span className="font-bold text-gray-800 dark:text-gray-200 px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800">
                         {fb.satisfaction}
