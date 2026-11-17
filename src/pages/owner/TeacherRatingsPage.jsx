@@ -615,12 +615,12 @@ export default function TeacherRatingsPage() {
                       <h3 className="font-extrabold text-sm sm:text-base text-gray-900 dark:text-gray-100 leading-snug truncate">
                         {tc.name}
                       </h3>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold shrink-0 ${subjectStyles.badgeBg}`}>
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+                        <span className={`inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-lg text-[11px] sm:text-xs font-bold shrink-0 ${subjectStyles.badgeBg}`}>
                           <span>{subjectStyles.icon}</span>
                           <span>{tc.subject}</span>
                         </span>
-                        <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium whitespace-nowrap">
+                        <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-medium">
                           👥 {tc.groupCount} ta guruh • {tc.studentCount} ta o‘quvchi
                         </span>
                       </div>
