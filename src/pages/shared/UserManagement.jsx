@@ -1575,22 +1575,22 @@ export default function UserManagement() {
                         </Button>
                       </div>
 
-                      <div className={`grid ${canDeleteUser(row) ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+                      <div className={`grid ${canDeleteUser(row) ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5 sm:gap-2`}>
                         <Button
                           variant="ghost"
                           size="sm"
                           icon={KeyRound}
-                          className="w-full justify-center text-xs py-2 h-9 font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 rounded-xl cursor-pointer"
+                          className="w-full justify-center text-[11px] sm:text-xs px-1 sm:px-2 py-2 h-9 font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 rounded-xl cursor-pointer min-w-0"
                           title={t('users.resetPassword', 'Parolni tiklash')}
                           onClick={() => handleResetPassword(row)}
                         >
-                          {t('users.resetPasswordShort', 'Parol')}
+                          <span className="truncate">{t('users.resetPasswordShort', 'Parol')}</span>
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           icon={row.is_active ? XCircle : CheckCircle}
-                          className={`w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl border cursor-pointer ${
+                          className={`w-full justify-center text-[11px] sm:text-xs px-1 sm:px-2 py-2 h-9 font-semibold rounded-xl border cursor-pointer min-w-0 ${
                             row.is_active
                               ? 'text-rose-600 dark:text-rose-400 border-rose-200/80 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40'
                               : 'text-emerald-600 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-900/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
@@ -1598,18 +1598,18 @@ export default function UserManagement() {
                           title={row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faollashtirish')}
                           onClick={() => handleToggleStatus(row)}
                         >
-                          {row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faol')}
+                          <span className="truncate">{row.is_active ? t('users.suspend', 'Bloklash') : t('users.activate', 'Faol')}</span>
                         </Button>
                         {canDeleteUser(row) && (
                           <Button
                             variant="ghost"
                             size="sm"
                             icon={Trash2}
-                            className="w-full justify-center text-xs py-2 h-9 font-semibold rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50 cursor-pointer"
+                            className="w-full justify-center text-[11px] sm:text-xs px-1 sm:px-2 py-2 h-9 font-semibold rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50 cursor-pointer min-w-0"
                             title={t('common.delete', 'O‘chirish')}
                             onClick={() => handleDeleteUser(row)}
                           >
-                            <span>{t('common.delete', 'O‘chirish')}</span>
+                            <span className="truncate">{t('common.delete', 'O‘chirish')}</span>
                           </Button>
                         )}
                       </div>

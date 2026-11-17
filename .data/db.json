@@ -11809,6 +11809,237 @@
       "recorded_by": "usr-teacher-toshtemirova",
       "finalized": true,
       "updated_at": "2026-11-16T06:15:51.904Z"
+    },
+    {
+      "id": "att-1794894301082-4brdi",
+      "student_id": "usr-student-998822309",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.082Z"
+    },
+    {
+      "id": "att-1794894301116-f564h",
+      "student_id": "usr-student-975190011",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.116Z"
+    },
+    {
+      "id": "att-1794894301138-22ux4",
+      "student_id": "usr-student-948434905",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.138Z"
+    },
+    {
+      "id": "att-1794894301166-8q8ge",
+      "student_id": "usr-student-992223052-malika",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.166Z"
+    },
+    {
+      "id": "att-1794894301175-0j6f9",
+      "student_id": "usr-student-999163660",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.175Z"
+    },
+    {
+      "id": "att-1794894301191-8gz8z",
+      "student_id": "usr-student-957737392",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.191Z"
+    },
+    {
+      "id": "att-1794894301203-eqrob",
+      "student_id": "usr-student-999163660-firdav",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.203Z"
+    },
+    {
+      "id": "att-1794894301216-2zk9h",
+      "student_id": "usr-student-992778855",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.216Z"
+    },
+    {
+      "id": "att-1794894301226-m60gu",
+      "student_id": "usr-student-932901750-solixa",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.226Z"
+    },
+    {
+      "id": "att-1794894301237-oml0z",
+      "student_id": "usr-student-946142213",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.237Z"
+    },
+    {
+      "id": "att-1794894301250-skfna",
+      "student_id": "usr-student-991091574",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.250Z"
+    },
+    {
+      "id": "att-1794894301264-fn1lt",
+      "student_id": "usr-student-991091574-mirey",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.264Z"
+    },
+    {
+      "id": "att-1794894301278-4w5o7",
+      "student_id": "usr-student-909332088",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.278Z"
+    },
+    {
+      "id": "att-1794894301289-2ud9i",
+      "student_id": "usr-student-935066822",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.289Z"
+    },
+    {
+      "id": "att-1794894301302-8y4a9",
+      "student_id": "usr-student-998528047",
+      "group_id": "grp-1793615416295",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793603060709",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.302Z"
+    },
+    {
+      "id": "att-1794894301327-rfusc",
+      "student_id": "usr-student-930098339",
+      "group_id": "grp-1793622453272",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793622233829",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.327Z"
+    },
+    {
+      "id": "att-1794894301341-74m5g",
+      "student_id": "usr-student-901236463",
+      "group_id": "grp-1793622453272",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793622233829",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.341Z"
+    },
+    {
+      "id": "att-1794894301354-b0yil",
+      "student_id": "usr-student-998580121",
+      "group_id": "grp-1793622453272",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793622233829",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.354Z"
+    },
+    {
+      "id": "att-1794894301367-n4rtu",
+      "student_id": "usr-student-998580121-abdula",
+      "group_id": "grp-1793622453272",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793622233829",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.367Z"
+    },
+    {
+      "id": "att-1794894301378-icuuo",
+      "student_id": "usr-student-998822309",
+      "group_id": "grp-1793622453272",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793622233829",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.378Z"
+    },
+    {
+      "id": "att-1794894301391-0cbbm",
+      "student_id": "usr-student-977608589",
+      "group_id": "grp-1793622453272",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-1793622233829",
+      "finalized": true,
+      "updated_at": "2026-11-17T05:45:01.391Z"
     }
   ],
   "educo_db_grades": [
@@ -15883,6 +16114,26 @@
       "is_read": false,
       "link": "/attendance",
       "created_at": "2026-11-16T06:15:51.379Z"
+    },
+    {
+      "id": "notif-ht-1794894301080-k13i",
+      "user_id": "usr-1793603060709",
+      "title": "⏰ Shoshilinch: Darsning yarmi (45 daqiqa) o‘tdi!",
+      "message": "«Matematika 1.2 (MAT-1.2)» guruhi darsi boshlanganiga 45 daqiqa bo‘ldi. Davomat hali olinmadi. Iltimos, darhol belgilang!",
+      "type": "warning",
+      "is_read": false,
+      "link": "/attendance",
+      "created_at": "2026-11-17T05:45:01.081Z"
+    },
+    {
+      "id": "notif-ht-1794894301327-524t",
+      "user_id": "usr-1793622233829",
+      "title": "⏰ Shoshilinch: Darsning yarmi (45 daqiqa) o‘tdi!",
+      "message": "«Rus tili 1.3 (RUS-1.3)» guruhi darsi boshlanganiga 45 daqiqa bo‘ldi. Davomat hali olinmadi. Iltimos, darhol belgilang!",
+      "type": "warning",
+      "is_read": false,
+      "link": "/attendance",
+      "created_at": "2026-11-17T05:45:01.327Z"
     }
   ],
   "educo_db_sms_settings": {
@@ -18738,7 +18989,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 1827,
+  "_sync_version": 3410,
   "_deleted_ids": [
     "usr-1793468630979",
     "usr-test-sync-1",
@@ -19063,6 +19314,6 @@
     "sms-manual-1794666934485",
     "sms-att-1794675464959-ljbk0"
   ],
-  "_updated_at": 1794894176406,
+  "_updated_at": 1794905169240,
   "educo_db_teacher_feedback": []
 }

@@ -2971,10 +2971,10 @@ export default function SmsManagementPage() {
         <div className="space-y-4 sm:space-y-6">
           {/* Queue Filter Toolbar: 2 Distinct Rows (Row 1: Search + Actions, Row 2: Status Pills) */}
           <Card className="p-3 sm:p-4 rounded-2xl shadow-sm space-y-3">
-            {/* Row 1: Search Bar + Action Buttons */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            {/* Row 1: Search Bar + Action Buttons (Responsive xl:flex-row, never collides on tablet/mobile) */}
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
               {/* 1. Search Bar */}
-              <div className="relative w-full md:w-72 lg:w-80 shrink-0">
+              <div className="relative w-full xl:w-80 shrink-0">
                 <Input
                   icon={Search}
                   size="sm"
@@ -2987,7 +2987,7 @@ export default function SmsManagementPage() {
               </div>
 
               {/* 2. Action Buttons Group (Cleanly wraps on smaller screens, never collides) */}
-              <div className="flex flex-wrap items-center gap-2 justify-start md:justify-end">
+              <div className="flex flex-wrap items-center gap-2 justify-start xl:justify-end">
                 <Button
                   variant="outline"
                   size="sm"
