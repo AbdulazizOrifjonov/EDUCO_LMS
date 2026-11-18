@@ -11984,7 +11984,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-17T05:45:01.327Z"
+      "updated_at": "2026-11-17T13:15:56.668Z"
     },
     {
       "id": "att-1794894301341-74m5g",
@@ -11995,7 +11995,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-17T05:45:01.341Z"
+      "updated_at": "2026-11-17T13:15:56.684Z"
     },
     {
       "id": "att-1794894301354-b0yil",
@@ -12006,7 +12006,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-17T05:45:01.354Z"
+      "updated_at": "2026-11-17T13:15:56.708Z"
     },
     {
       "id": "att-1794894301367-n4rtu",
@@ -12017,7 +12017,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-17T05:45:01.367Z"
+      "updated_at": "2026-11-17T13:15:56.716Z"
     },
     {
       "id": "att-1794894301378-icuuo",
@@ -12028,7 +12028,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-17T05:45:01.378Z"
+      "updated_at": "2026-11-17T13:15:56.727Z"
     },
     {
       "id": "att-1794894301391-0cbbm",
@@ -12039,7 +12039,29 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-17T05:45:01.391Z"
+      "updated_at": "2026-11-17T13:15:56.736Z"
+    },
+    {
+      "id": "att-1794919556489-ve3ih",
+      "student_id": "usr-student-909474123",
+      "group_id": "grp-shaxmat",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-teacher-qosimov",
+      "finalized": true,
+      "updated_at": "2026-11-17T12:45:56.489Z"
+    },
+    {
+      "id": "att-1794919556503-1eh7t",
+      "student_id": "usr-student-946019500",
+      "group_id": "grp-shaxmat",
+      "date": "2026-11-17",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-teacher-qosimov",
+      "finalized": true,
+      "updated_at": "2026-11-17T12:45:56.503Z"
     }
   ],
   "educo_db_grades": [
@@ -16134,6 +16156,16 @@
       "is_read": false,
       "link": "/attendance",
       "created_at": "2026-11-17T05:45:01.327Z"
+    },
+    {
+      "id": "notif-ht-1794919556458-sbao",
+      "user_id": "usr-teacher-qosimov",
+      "title": "⏰ Shoshilinch: Darsning yarmi (45 daqiqa) o‘tdi!",
+      "message": "«Shaxmat guruhi (CHESS-1.1)» guruhi darsi boshlanganiga 45 daqiqa bo‘ldi. Davomat hali olinmadi. Iltimos, darhol belgilang!",
+      "type": "warning",
+      "is_read": false,
+      "link": "/attendance",
+      "created_at": "2026-11-17T12:45:56.458Z"
     }
   ],
   "educo_db_sms_settings": {
@@ -18989,7 +19021,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 3410,
+  "_sync_version": 6242,
   "_deleted_ids": [
     "usr-1793468630979",
     "usr-test-sync-1",
@@ -19314,6 +19346,6 @@
     "sms-manual-1794666934485",
     "sms-att-1794675464959-ljbk0"
   ],
-  "_updated_at": 1794905169240,
+  "_updated_at": 1794974987665,
   "educo_db_teacher_feedback": []
 }

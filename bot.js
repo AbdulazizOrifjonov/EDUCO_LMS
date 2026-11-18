@@ -29,7 +29,7 @@ function acquireSingletonLock() {
 }
 
 // ====== ASOSIY SOZLAMALAR ======
-const BOT_TOKEN = process.env.BOT_TOKEN || '6939455511:AAF3lg3N6FdScstAgBC0zxvyvFELFoBYUJI';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || '9049935207:AAG2b-t507eJCpf31RMDIm4gFpbUuhFOI7g';
 const ADMIN_IDS = (process.env.ADMIN_IDS || '1594150529').split(',').map((s) => s.trim()).filter(Boolean);
 const SMS_USER = process.env.SMS_USER || 'EMTIDA';
 const SMS_PASS = process.env.SMS_PASS || '3x7k46xkpavev_';
@@ -801,10 +801,9 @@ async function main() {
   await acquireSingletonLock();
 
   console.log('====================================================');
-  console.log('🚀 EDUCO LMS Telegram Botlar & SMS Xizmati');
+  console.log('🚀 EDUCO LMS Rasmiy Telegram Bot & SMS Xizmati');
   console.log(`📱 SMS Gateway: ${SMS_USER} (${SMS_API})`);
-  console.log(`🤖 Bot 1: @EcommerceDatabot (SMS & Shlyuz Integratori)`);
-  console.log(`🤖 Bot 2: @EducoLms_Bot (Davomat, Baholar va LMS Boti)`);
+  console.log(`🤖 Yagona Rasmiy Bot: @EducoLms_Bot (Davomat, Baholar, SMS Navbati)`);
   console.log('====================================================');
 
   // Telefon holatini konsolda orqa fonda tekshirish
@@ -861,25 +860,9 @@ async function main() {
   process.on('SIGTERM', cleanup);
   process.on('exit', cleanup);
 
-  // 3. TELEGRAMDAN XABARLARNI OLISH (LONG POLLING - @EcommerceDatabot)
-  let offset = 0;
-  while (true) {
-    try {
-      const res = await tg('getUpdates', { offset, timeout: 30, allowed_updates: ['message'] });
-      if (!res.ok) {
-        await sleep(3000);
-        continue;
-      }
-      for (const u of res.result || []) {
-        offset = u.update_id + 1;
-        if (u.message && u.message.text) {
-          handleTelegramMessage(u.message).catch((e) => console.error('[Handle Message Error]', e.message));
-        }
-      }
-    } catch (e) {
-      await sleep(3000);
-    }
-  }
+  // 3. XIZMATNING DOIMIY ISHINI TA'MINLASH
+  console.log('✅ [SMS Gateway] Ketma-ket SMS navbat boshqaruvchisi muvaffaqiyatli ishga tushdi.');
+  console.log('✅ [@EducoLms_Bot] Barcha Telegram buyruqlari va SMS yuborish @EducoLms_Bot orqali boshqariladi.');
 }
 
 if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {

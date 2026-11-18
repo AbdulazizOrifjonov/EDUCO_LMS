@@ -279,6 +279,47 @@ function getSubMenuKeyboard(options = []) {
   return makeKeyboard(rows);
 }
 
+// --- PHONE AND TEXT PARSER FOR DIRECT SMS SENDER ---
+export function parsePhoneAndText(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+  // Format 1: Multi-line (line 1 = phone, line 2+ = text)
+  // Masalan:
+  // 997287205
+  // wefrgh
+  if (lines.length >= 2) {
+    let digits = lines[0].replace(/\D/g, '');
+    if (digits.startsWith('998') ? digits.length >= 12 : digits.length >= 9) {
+      if (digits.length === 9) digits = '998' + digits;
+      if (/^998\d{9}$/.test(digits)) {
+        const bodyText = lines.slice(1).join('\n').trim();
+        if (bodyText) return { phone: digits, text: bodyText };
+      }
+    }
+  }
+
+  // Format 2: Single line (phone text)
+  // Masalan: +998997287205 wefrgh yoki 997287205 wefrgh
+  const re = /\s*(\S+)/y;
+  let digits = '';
+  let end = 0;
+  let m;
+  while ((m = re.exec(raw))) {
+    if (!/^[+\d()\-]+$/.test(m[1])) break;
+    digits += m[1].replace(/\D/g, '');
+    end = re.lastIndex;
+    if (digits.startsWith('998') ? digits.length >= 12 : digits.length >= 9) break;
+  }
+  if (digits.length === 9) digits = '998' + digits;
+  if (/^998\d{9}$/.test(digits)) {
+    const textPart = raw.slice(end).trim();
+    if (textPart) return { phone: digits, text: textPart };
+  }
+
+  return null;
+}
+
 // --- USER RESOLUTION & LINKING ---
 export function findUserByInput(input) {
   if (!input) return null;
@@ -1932,6 +1973,100 @@ export async function handleUpdate(update) {
   // 4. Role specific action routing
   const role = session.role;
   const db = getDb();
+
+  // --- OWNER & ADMIN SMS DIRECT SENDER & GATEWAY CONTROLS ---
+  if (role === 'owner' || role === 'admin') {
+    // 1. Direct Phone Number SMS Parsing (e.g. "997287205 wefrgh" or "+998997287205 wefrgh")
+    const parsedSms = parsePhoneAndText(text);
+    if (parsedSms) {
+      db.educo_db_sms_queue = db.educo_db_sms_queue || [];
+      const newSms = {
+        id: `sms-manual-${Date.now()}`,
+        recipient_phone: '+' + parsedSms.phone,
+        recipient_name: `Telegram (${session.fullName || 'Admin'}) orqali`,
+        recipient_type: 'manual',
+        message_text: parsedSms.text,
+        status: 'pending',
+        attempts: 0,
+        max_attempts: 3,
+        created_at: new Date().toISOString(),
+        queued_at: new Date().toISOString(),
+      };
+      db.educo_db_sms_queue.push(newSms);
+      saveDb(db);
+
+      await sendMessage(
+        chatId,
+        `📥 <b>Xabar SMS navbatiga qo‘shildi!</b>\n\n` +
+        `📱 <b>Raqam:</b> +${parsedSms.phone}\n` +
+        `💬 <b>Matn:</b> "${parsedSms.text}"\n` +
+        `🕒 <b>Vaqt:</b> ${new Date().toLocaleTimeString('uz-UZ')}\n\n` +
+        `<i>Ushbu xabar navbat tartibida telefondagi SMS Gateway orqali yuboriladi.</i>`,
+        getMainMenuKeyboard(session)
+      );
+      return;
+    }
+
+    // 2. /status buyrug'i
+    if (text === '/status' || text === '📱 SMS Gate holati') {
+      const queue = db.educo_db_sms_queue || [];
+      const logs = db.educo_db_sms_logs || [];
+      const pendingCount = queue.filter((q) => q.status === 'pending').length;
+      const processingCount = queue.filter((q) => q.status === 'processing').length;
+      const sentToday = queue.filter((q) => {
+        if (q.status !== 'sent' || !q.sent_at) return false;
+        return new Date(q.sent_at).toDateString() === new Date().toDateString();
+      }).length;
+      const failedCount = queue.filter((q) => q.status === 'failed').length;
+
+      const msgText = `📱 <b>EDUCO LMS SMS Gateway Holati:</b>\n\n` +
+        `🟢 <b>Gateway holati:</b> Online (Xiaomi SMS Shlyuzi)\n` +
+        `⏳ <b>Navbatda kutilayotgan:</b> ${pendingCount} ta\n` +
+        `🔄 <b>Hozir yuborilayotgan:</b> ${processingCount} ta\n` +
+        `✅ <b>Bugun yuborilgan:</b> ${sentToday} ta\n` +
+        `❌ <b>Xatolik bergan:</b> ${failedCount} ta\n` +
+        `📨 <b>Jami SMS jurnali:</b> ${logs.length} ta\n\n` +
+        `💡 <i>To‘g‘ridan-to‘g‘ri SMS yuborish uchun raqam va matnni yuboring:\nMisol: <code>997287205 Salom, bugun dars bor</code></i>`;
+      await sendMessage(chatId, msgText, getMainMenuKeyboard(session));
+      return;
+    }
+
+    // 3. /queue buyrug'i
+    if (text === '/queue' || text === '📋 SMS Navbati') {
+      const queue = db.educo_db_sms_queue || [];
+      const pending = queue.filter((q) => q.status === 'pending');
+      if (pending.length === 0) {
+        await sendMessage(chatId, `✅ <b>Hozirda SMS navbati bo‘sh.</b> Barcha xabarlar yuborilgan!`, getMainMenuKeyboard(session));
+        return;
+      }
+      let rep = `📋 <b>SMS Navbatidagi xabarlar (${pending.length} ta):</b>\n\n`;
+      pending.slice(0, 8).forEach((item, idx) => {
+        rep += `<b>${idx + 1}.</b> ${item.recipient_name || 'Noma‘lum'}\n` +
+          `📱 ${item.recipient_phone}\n` +
+          `💬 <i>"${(item.message_text || '').slice(0, 45)}..."</i>\n\n`;
+      });
+      if (pending.length > 8) rep += `<i>...va yana ${pending.length - 8} ta xabar navbatda turibdi.</i>`;
+      await sendMessage(chatId, rep, getMainMenuKeyboard(session));
+      return;
+    }
+
+    // 4. /retry buyrug'i
+    if (text === '/retry') {
+      const queue = db.educo_db_sms_queue || [];
+      let count = 0;
+      queue.forEach((item) => {
+        if (item.status === 'failed') {
+          item.status = 'pending';
+          item.attempts = 0;
+          item.error_message = null;
+          count++;
+        }
+      });
+      saveDb(db);
+      await sendMessage(chatId, `🔄 <b>${count} ta xatolik bergan SMS qayta navbatga qo‘yildi!</b>`, getMainMenuKeyboard(session));
+      return;
+    }
+  }
 
   // --- OWNER HANDLERS ---
   if (role === 'owner') {
