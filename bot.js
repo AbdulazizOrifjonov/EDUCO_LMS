@@ -29,7 +29,8 @@ function acquireSingletonLock() {
 }
 
 // ====== ASOSIY SOZLAMALAR ======
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || '9049935207:AAG2b-t507eJCpf31RMDIm4gFpbUuhFOI7g';
+const SMS_BOT_TOKEN = process.env.SMS_BOT_TOKEN || process.env.BOT_TOKEN || '6939455511:AAEqJaFE5tmifCzNvknwq9QtPCJdXbQI8PE';
+const LMS_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '9049935207:AAG2b-t507eJCpf31RMDIm4gFpbUuhFOI7g';
 const ADMIN_IDS = (process.env.ADMIN_IDS || '1594150529').split(',').map((s) => s.trim()).filter(Boolean);
 const SMS_USER = process.env.SMS_USER || 'EMTIDA';
 const SMS_PASS = process.env.SMS_PASS || '3x7k46xkpavev_';
@@ -38,7 +39,7 @@ const DB_PATH = path.resolve(__dirname, '.data', 'db.json');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const auth = 'Basic ' + Buffer.from(`${SMS_USER}:${SMS_PASS}`).toString('base64');
-const TG = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const TG = `https://api.telegram.org/bot${SMS_BOT_TOKEN}`;
 
 // --- DB YORDAMCHI FUNKSIYALARI ---
 function getDb() {
@@ -383,20 +384,27 @@ async function processSequentialQueue() {
 
     console.log(`\n[SMS Navbat] ⏳ [1/${totalPending}] Yuborilmoqda: +${cleanPhone} (${recipientName})`);
 
-    // Telegram adminga xabar berish
-    const tgAlertMsg =
-      `📤 <b>SMS Navbatdan yuborilmoqda (Qoldi: ${totalPending} ta):</b>\n\n` +
-      `👤 <b>Qabul qiluvchi:</b> ${recipientName}\n` +
-      `📱 <b>Telefon:</b> +${cleanPhone}\n` +
-      `🏷 <b>Turi:</b> ${tag}\n` +
-      `💬 <b>Xabar:</b> <i>"${messageText}"</i>\n\n` +
-      `⏳ <i>Telefonga uzatildi, natija kutilmoqda...</i>`;
+    // Telegram adminga xabar berish (Faqat qo'lda yuborilgan yoki test SMS larda to'g'ridan-to'g'ri xabar beriladi)
+    // Ommaviy avtomatik SMS larda (davomat, qarzdorlar) adminga xabar to'lib ketmasligi uchun faqat xatolikda aytiladi
+    const isManual = isTestMsg(currentItem) || currentItem.recipient_type === 'manual';
+    const targetChatId = currentItem.source_chat_id || ADMIN_IDS[0] || '1594150529';
+    let adminNote = null;
 
-    const adminNote = await tg('sendMessage', {
-      chat_id: ADMIN_IDS[0] || '1594150529',
-      text: tgAlertMsg,
-      parse_mode: 'HTML',
-    });
+    if (isManual) {
+      const tgAlertMsg =
+        `📤 <b>SMS Navbatdan yuborilmoqda (Qoldi: ${totalPending} ta):</b>\n\n` +
+        `👤 <b>Qabul qiluvchi:</b> ${recipientName}\n` +
+        `📱 <b>Telefon:</b> +${cleanPhone}\n` +
+        `🏷 <b>Turi:</b> ${tag}\n` +
+        `💬 <b>Xabar:</b> <i>"${messageText}"</i>\n\n` +
+        `⏳ <i>Telefonga uzatildi, natija kutilmoqda...</i>`;
+
+      adminNote = await tg('sendMessage', {
+        chat_id: targetChatId,
+        text: tgAlertMsg,
+        parse_mode: 'HTML',
+      });
+    }
 
     // 2. Telefondagi SMS Gateway ilovasiga yuborish
     let jobId = currentItem.tracking_id;
@@ -422,7 +430,7 @@ async function processSequentialQueue() {
 
       if (adminNote?.result?.message_id) {
         await tg('editMessageText', {
-          chat_id: ADMIN_IDS[0] || '1594150529',
+          chat_id: targetChatId,
           message_id: adminNote.result.message_id,
           text: `❌ <b>Xatolik yuz berdi:</b>\n📱 +${cleanPhone} (${recipientName})\n⚠️ Sabab: Gateway serveriga ulanib bo‘lmadi.\nQayta urinish: ${currentItem.attempts}/${maxRetries}`,
           parse_mode: 'HTML',
@@ -464,7 +472,7 @@ async function processSequentialQueue() {
 
       if (adminNote?.result?.message_id) {
         await tg('editMessageText', {
-          chat_id: ADMIN_IDS[0] || '1594150529',
+          chat_id: targetChatId,
           message_id: adminNote.result.message_id,
           text:
             `✅ <b>SMS Muvaffaqiyatli Yetkazildi!</b>\n\n` +
@@ -490,9 +498,15 @@ async function processSequentialQueue() {
 
       if (adminNote?.result?.message_id) {
         await tg('editMessageText', {
-          chat_id: ADMIN_IDS[0] || '1594150529',
+          chat_id: targetChatId,
           message_id: adminNote.result.message_id,
           text: `❌ <b>Telefon yubora olmadi:</b>\n📱 +${cleanPhone} (${recipientName})\n⚠️ Sabab: ${errReason}`,
+          parse_mode: 'HTML',
+        });
+      } else {
+        await tg('sendMessage', {
+          chat_id: ADMIN_IDS[0] || '1594150529',
+          text: `❌ <b>SMS Yuborilmadi:</b>\n📱 +${cleanPhone} (${recipientName})\n⚠️ Sabab: ${errReason}`,
           parse_mode: 'HTML',
         });
       }
@@ -520,7 +534,7 @@ async function processSequentialQueue() {
 
       if (adminNote?.result?.message_id) {
         await tg('editMessageText', {
-          chat_id: ADMIN_IDS[0] || '1594150529',
+          chat_id: targetChatId,
           message_id: adminNote.result.message_id,
           text:
             `⏳ <b>Xabar telefon navbatiga topshirildi:</b>\n` +
@@ -777,6 +791,7 @@ async function handleTelegramMessage(msg) {
     recipient_phone: '+' + p.phone,
     recipient_name: 'Telegram orqali yozilgan',
     recipient_type: 'manual',
+    source_chat_id: chatId,
     message_text: p.text,
     status: 'pending',
     attempts: 0,
@@ -801,9 +816,10 @@ async function main() {
   await acquireSingletonLock();
 
   console.log('====================================================');
-  console.log('🚀 EDUCO LMS Rasmiy Telegram Bot & SMS Xizmati');
+  console.log('🚀 EDUCO LMS Telegram Botlar & SMS Xizmati');
   console.log(`📱 SMS Gateway: ${SMS_USER} (${SMS_API})`);
-  console.log(`🤖 Yagona Rasmiy Bot: @EducoLms_Bot (Davomat, Baholar, SMS Navbati)`);
+  console.log(`🤖 Bot 1: @EcommerceDatabot (Tezkor SMS Boti)`);
+  console.log(`🤖 Bot 2: @EducoLms_Bot (Davomat, Baholar va LMS Boti)`);
   console.log('====================================================');
 
   // Telefon holatini konsolda orqa fonda tekshirish
@@ -860,9 +876,26 @@ async function main() {
   process.on('SIGTERM', cleanup);
   process.on('exit', cleanup);
 
-  // 3. XIZMATNING DOIMIY ISHINI TA'MINLASH
-  console.log('✅ [SMS Gateway] Ketma-ket SMS navbat boshqaruvchisi muvaffaqiyatli ishga tushdi.');
-  console.log('✅ [@EducoLms_Bot] Barcha Telegram buyruqlari va SMS yuborish @EducoLms_Bot orqali boshqariladi.');
+  // 3. TELEGRAMDAN XABARLARNI OLISH (LONG POLLING - @EcommerceDatabot)
+  console.log('✅ [@EcommerceDatabot] Yangi toza token orqali tinglanmoqda (Long Polling)...');
+  let offset = 0;
+  while (true) {
+    try {
+      const res = await tg('getUpdates', { offset, timeout: 30, allowed_updates: ['message'] });
+      if (!res.ok) {
+        await sleep(3000);
+        continue;
+      }
+      for (const u of res.result || []) {
+        offset = u.update_id + 1;
+        if (u.message && u.message.text) {
+          handleTelegramMessage(u.message).catch((e) => console.error('[Handle Message Error]', e.message));
+        }
+      }
+    } catch (e) {
+      await sleep(3000);
+    }
+  }
 }
 
 if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
