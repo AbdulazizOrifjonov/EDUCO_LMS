@@ -272,7 +272,7 @@ function buildGatewayHeaders(device) {
 export async function getEskizToken(device) {
   if (!device) return null;
   const token = (device.api_token || '').trim();
-  if (!token || token.startsWith('EMTIDA:')) {
+  if (!token || token.startsWith('YWN0HB:') || token.startsWith('EMTIDA:')) {
     return null;
   }
   if (token.startsWith('eyJ') || token.length > 50) {

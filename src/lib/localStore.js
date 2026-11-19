@@ -60,15 +60,15 @@ const INITIAL_SMS_SETTINGS = {
 const INITIAL_SMS_DEVICES = [
   {
     id: 'dev-primary-1',
-    name: 'Android SMS Gateway (EMTIDA)',
+    name: 'Android SMS Gateway (YWN0HB)',
     device_role: 'primary',
     gateway_url: 'https://api.sms-gate.app/3rdparty/v1/messages',
-    api_token: 'EMTIDA:3x7k46xkpavev_',
+    api_token: 'YWN0HB:3uqeznmcfmendv',
     is_active: true,
     status: 'online',
     last_seen_at: new Date().toISOString(),
     last_error: null,
-    phone_number: '+998 93 582 17 74',
+    phone_number: '+998 90 000 89 89',
     created_at: new Date().toISOString(),
   },
   {
@@ -4798,17 +4798,17 @@ class LocalStore {
       list = [...INITIAL_SMS_DEVICES];
       this.setItem(STORAGE_KEYS.SMS_DEVICES, list);
     }
-    // Auto-migrate any stale/expired device tokens to the active EMTIDA credentials
+    // Auto-migrate any stale/expired device tokens to the active YWN0HB credentials
     let updated = false;
     list = list.map((dev) => {
       if (dev && dev.device_role === 'primary') {
-        if (!dev.api_token || dev.api_token.includes('SXP6_F') || dev.api_token.includes('demo_token')) {
+        if (!dev.api_token || dev.api_token.includes('EMTIDA') || dev.api_token.includes('SXP6_F') || dev.api_token.includes('demo_token')) {
           updated = true;
           return {
             ...dev,
-            name: 'Android SMS Gateway (EMTIDA)',
+            name: 'Android SMS Gateway (YWN0HB)',
             gateway_url: 'https://api.sms-gate.app/3rdparty/v1/messages',
-            api_token: 'EMTIDA:3x7k46xkpavev_',
+            api_token: 'YWN0HB:3uqeznmcfmendv',
             status: 'online',
             is_active: true,
           };

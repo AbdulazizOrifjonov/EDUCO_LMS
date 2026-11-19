@@ -32,8 +32,8 @@ function acquireSingletonLock() {
 const SMS_BOT_TOKEN = process.env.SMS_BOT_TOKEN || process.env.BOT_TOKEN || '6939455511:AAEqJaFE5tmifCzNvknwq9QtPCJdXbQI8PE';
 const LMS_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '9049935207:AAG2b-t507eJCpf31RMDIm4gFpbUuhFOI7g';
 const ADMIN_IDS = (process.env.ADMIN_IDS || '1594150529').split(',').map((s) => s.trim()).filter(Boolean);
-const SMS_USER = process.env.SMS_USER || 'EMTIDA';
-const SMS_PASS = process.env.SMS_PASS || '3x7k46xkpavev_';
+const SMS_USER = process.env.SMS_USER || 'YWN0HB';
+const SMS_PASS = process.env.SMS_PASS || '3uqeznmcfmendv';
 const SMS_API = 'https://api.sms-gate.app/3rdparty/v1';
 const DB_PATH = path.resolve(__dirname, '.data', 'db.json');
 
