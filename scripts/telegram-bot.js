@@ -3317,6 +3317,37 @@ export function getMonthlyGroupTuitionMessage(date = new Date()) {
     `👤 Olimxo’jiyev Abbosxon`;
 }
 
+// --- QARZDOR OTA-ONALAR UCHUN SHAXSIY ESLATMA (OTASIGA VA ONASIGA ALOHIDA) ---
+export function getDebtorNotificationMessage(student, courseName, amountDue, parentType = 'father', date = new Date()) {
+  const mIdx = date.getMonth();
+  const oyNomi = UZ_MONTH_NAMES[mIdx];
+  const sName = `${student.first_name || ''} ${student.last_name || ''}`.trim() || student.fullName || student.name || 'Farzandingiz';
+  const formattedDebt = new Intl.NumberFormat('uz-UZ').format(amountDue) + " so'm";
+
+  if (parentType === 'mother') {
+    const mName = student.mother_name || student.motherName ? ` (${student.mother_name || student.motherName})` : '';
+    return `👩‍💼 <b>Hurmatli ona${mName}!</b>\n\n` +
+      `Farzandingiz <b>${sName}</b>ning «<b>${courseName}</b>» kursi bo‘yicha <b>${oyNomi}</b> oyi to‘lovini amalga oshirishingizni so‘raymiz. 🌸\n\n` +
+      `💰 <b>Qarzdorlik summasi:</b> <b>${formattedDebt}</b>\n\n` +
+      `💳 <b>Karta orqali to‘lov uchun:</b>\n` +
+      `<code>5614682219926005</code>\n` +
+      `👤 Olimxo’jiyev Abbosxon\n\n` +
+      `Farzandlaringiz ta’limiga bo‘lgan e’tiboringiz va hamkorligingiz uchun katta rahmat! 💐\n\n` +
+      `Hurmat bilan, <b>EDUCO</b> o‘quv markazi.`;
+  }
+
+  // Otasi (Father)
+  const fName = student.father_name || student.fatherName ? ` (${student.father_name || student.fatherName})` : '';
+  return `👨‍💼 <b>Hurmatli ota${fName}!</b>\n\n` +
+    `Farzandingiz <b>${sName}</b>ning «<b>${courseName}</b>» kursi bo‘yicha <b>${oyNomi}</b> oyi to‘lovini amalga oshirishingizni so‘raymiz. 🌸\n\n` +
+    `💰 <b>Qarzdorlik summasi:</b> <b>${formattedDebt}</b>\n\n` +
+    `💳 <b>Karta orqali to‘lov uchun:</b>\n` +
+    `<code>5614682219926005</code>\n` +
+    `👤 Olimxo’jiyev Abbosxon\n\n` +
+    `Farzandlaringiz ta’limiga bo‘lgan e’tiboringiz va hamkorligingiz uchun katta rahmat! 💐\n\n` +
+    `Hurmat bilan, <b>EDUCO</b> o‘quv markazi.`;
+}
+
 export function trackTelegramGroup(chat, myChatMember = null) {
   if (!chat || (chat.type !== 'group' && chat.type !== 'supergroup')) return;
   const db = getDb();

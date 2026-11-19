@@ -647,9 +647,15 @@ async function populateDebtorsToQueue() {
           if (cleanPhone.length === 9) cleanPhone = '998' + cleanPhone;
 
           const sName = `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.fullName || 'Talaba';
-          const pLabel = st.father_phone ? 'Otasi' : st.mother_phone ? 'Onasi' : 'Talaba';
+          const isMother = !st.father_phone && Boolean(st.mother_phone);
+          const pLabel = isMother ? 'Onasi' : 'Otasi';
+          const pGreeting = isMother
+            ? `Hurmatli ona${st.mother_name ? ' (' + st.mother_name + ')' : ''}!`
+            : `Hurmatli ota${st.father_name ? ' (' + st.father_name + ')' : ''}!`;
+          const uzMonths = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+          const currentMonthName = uzMonths[now.getMonth()];
           const formattedDebt = new Intl.NumberFormat('uz-UZ').format(debt) + " so'm";
-          const msg = `Hurmatli ota-ona! Farzandingiz ${sName}ning ${grp.name} kursi uchun ${formattedDebt} to‘lov muddati yetib keldi. Iltimos, to‘lovni amalga oshiring. EDUCO LMS`;
+          const msg = `${pGreeting} Farzandingiz ${sName}ning «${grp.name}» kursi bo‘yicha ${currentMonthName} oyi to‘lovini amalga oshirishingizni so‘raymiz. To‘lov summasi: ${formattedDebt}. Karta: 5614682219926005 (Olimxo’jiyev Abbosxon). EDUCO o‘quv markazi.`;
 
           queue.push({
             id: `sms-deb-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
