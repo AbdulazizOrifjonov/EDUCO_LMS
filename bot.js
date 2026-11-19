@@ -211,9 +211,9 @@ const sendSms = (phone, text) =>
     phoneNumbers: ['+' + phone.replace(/^\+/, '')],
   });
 
-// Telefon haqiqatan yuborganligini tekshirish (40 soniyagacha)
+// Telefon haqiqatan yuborganligini tekshirish (60 soniyagacha)
 async function waitStatus(id) {
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 30; i++) {
     await sleep(2000);
     try {
       const s = await smsApi('GET', `/messages/${id}`);
@@ -223,6 +223,43 @@ async function waitStatus(id) {
     }
   }
   return null;
+}
+
+// Fondagi xabarlarning yetkazilganlik (Delivered) holatini kuzatib borish
+async function checkPendingDeliveries() {
+  try {
+    const db = getDb();
+    const queue = db.educo_db_sms_queue || [];
+    const pending = queue.filter((q) => q.status === 'sent' && !q.delivered_at && q.tracking_id);
+    if (!pending.length) return;
+
+    for (const item of pending) {
+      try {
+        const s = await smsApi('GET', `/messages/${item.tracking_id}`);
+        if (s && (s.state === 'Delivered' || s.state === 'Sent')) {
+          item.delivered_at = new Date().toISOString();
+          saveDb(db);
+          pushQueueToCloud().catch(() => {});
+          if (item.admin_message_id && item.admin_chat_id) {
+            await tg('editMessageText', {
+              chat_id: item.admin_chat_id,
+              message_id: item.admin_message_id,
+              text:
+                `✅ <b>SMS Muvaffaqiyatli Yetkazildi!</b>\n\n` +
+                `👤 <b>Qabul qiluvchi:</b> ${item.recipient_name || 'Foydalanuvchi'}\n` +
+                `📱 <b>Telefon:</b> ${item.recipient_phone}\n` +
+                `💬 <b>Xabar:</b> <i>"${item.message_text}"</i>\n` +
+                `🕒 <b>Vaqt:</b> ${new Date().toLocaleTimeString('uz-UZ')}\n` +
+                `📶 <b>Holat:</b> ${s.state === 'Delivered' ? 'Yetkazildi (Delivered)' : 'Yuborildi (Sent)'}`,
+              parse_mode: 'HTML',
+            });
+            item.admin_message_id = null; // faqat bir marta yangilash
+            saveDb(db);
+          }
+        }
+      } catch (_) {}
+    }
+  } catch (_) {}
 }
 
 // --- MATNNI PARSE QILISH ---
@@ -516,6 +553,8 @@ async function processSequentialQueue() {
       currentItem.status = 'sent';
       currentItem.sent_at = nowIso;
       currentItem.error_message = null;
+      currentItem.admin_message_id = adminNote?.result?.message_id;
+      currentItem.admin_chat_id = targetChatId;
 
       db.educo_db_sms_logs = db.educo_db_sms_logs || [];
       db.educo_db_sms_logs.unshift({
@@ -833,6 +872,11 @@ async function main() {
   setInterval(() => {
     processSequentialQueue().catch((e) => console.error('[Queue Interval Error]', e.message));
   }, 3000);
+
+  // 1.1 Fondagi xabarlarning yetkazilganlik (Delivered) holatini tekshirib turish (har 10 soniyada)
+  setInterval(() => {
+    checkPendingDeliveries().catch((e) => console.error('[Delivery Check Error]', e.message));
+  }, 10000);
 
   // Dastlabki navbat tekshiruvi
   processSequentialQueue();
