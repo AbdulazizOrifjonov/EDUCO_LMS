@@ -3304,15 +3304,10 @@ const UZ_MONTH_NAMES = [
   'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
   'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'
 ];
-const EN_MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
 
 export function getMonthlyGroupTuitionMessage(date = new Date()) {
   const mIdx = date.getMonth();
   const oyNomi = UZ_MONTH_NAMES[mIdx];
-  const monthName = EN_MONTH_NAMES[mIdx];
 
   return `📢 <b>«EDUCO» O‘QUV MARKAZI MA’MURIYATI BILDIRISHNOMASI</b> 📢\n` +
     `━━━━━━━━━━━━━━━━━━━━\n\n` +
@@ -3323,16 +3318,6 @@ export function getMonthlyGroupTuitionMessage(date = new Date()) {
     `💳 <b>To‘lov usullari:</b> Naqd, Click, Payme (Markaz ma’muriyati orqali)\n` +
     `📞 <b>Ma’muriyat:</b> +998 (99) 541-89-89\n` +
     `🌐 <b>Admin:</b> @educomarkaz36\n\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `📢 <b>NOTICE FROM «EDUCO» LEARNING CENTER</b> 📢\n\n` +
-    `👨‍👩‍👧‍👦 <b>Dear parents and students!</b>\n\n` +
-    `📌 According to center regulations, the 1st week of each month is designated as <b>payment week</b>.\n\n` +
-    `⏳ Tuition fees must be settled <b>before the end of the 1st week of each month (between the 1st and 7th)</b>. Today is the final call to complete tuition payments for <b>${monthName}</b>.\n\n` +
-    `⚠️ To ensure ongoing education without disruption and to prevent students from being suspended from classes, please finalize tuition payments today! ❗️\n\n` +
-    `💳 <b>Payment options:</b> Cash, Click, Payme (via Administration)\n` +
-    `📞 <b>Administration:</b> +998 (99) 541-89-89\n` +
-    `🌐 <b>Admin:</b> @educomarkaz36\n\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n` +
     `✨ <i>Farzandingizning sifatli ta’limi va yorqin kelajagi — bizning oliy maqsadimiz!</i>`;
 }
 
