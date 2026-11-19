@@ -938,6 +938,31 @@ async function handleCallbackQuery(cq) {
     return;
   }
 
+  // 0.1 Monthly Group Tuition Reminder manual confirmation
+  if (data === 'grp_tuition_send') {
+    if (session.role !== 'owner' && session.role !== 'admin') {
+      await answerCallbackQuery(cq.id, '⛔ Bu amal faqat Boshliq va Admin uchun!', true);
+      return;
+    }
+    await answerCallbackQuery(cq.id, '🚀 Yuborilmoqda...');
+    await editMessageText(chatId, messageId, '⏳ <i>Barcha guruhlarga to‘lov eslatmasi yuborilmoqda...</i>');
+    const res = await checkAndSendMonthlyGroupTuitionReminder(true);
+    await editMessageText(
+      chatId,
+      messageId,
+      `✅ <b>Oylik to‘lov eslatmasi muvaffaqiyatli tarqatildi!</b>\n\n` +
+      `📊 <b>Natija:</b> ${res.sentCount}/${res.total} ta guruhga yetkazildi.\n` +
+      `🕒 <b>Vaqt:</b> ${new Date().toLocaleTimeString('uz-UZ')}`
+    );
+    return;
+  }
+
+  if (data === 'grp_tuition_cancel') {
+    await answerCallbackQuery(cq.id, 'Bekor qilindi');
+    await editMessageText(chatId, messageId, '❌ Guruhlarga to‘lov eslatmasini yuborish bekor qilindi.');
+    return;
+  }
+
   // 1. Teacher selects group for live attendance panel: `att_g:<groupId>`
   if (data.startsWith('att_g:')) {
     const groupId = data.replace('att_g:', '');
@@ -1569,9 +1594,45 @@ export async function handleUpdate(update) {
     return;
   }
 
+  // Handle my_chat_member updates (Bot guruhga qo'shilganda yoki admin qilinganda)
+  if (update.my_chat_member) {
+    const mcm = update.my_chat_member;
+    const chat = mcm.chat;
+    if (chat && (chat.type === 'group' || chat.type === 'supergroup')) {
+      trackTelegramGroup(chat, mcm);
+      if (mcm.new_chat_member?.status === 'administrator' || mcm.new_chat_member?.status === 'member') {
+        await sendMessage(
+          chat.id,
+          `👋 <b>Assalomu alaykum!</b>\n\n` +
+          `Men <b>«EDUCO LMS»</b> rasmiy tizim botiman.\n` +
+          `Ushbu guruh tizimga muvaffaqiyatli ulandi. Har oyning 1-haftasi tugaguniga qadar to‘lov eslatmalari avtomatik tarzda yetkazib turiladi. 🎓`
+        );
+      }
+    }
+    return;
+  }
+
   if (!update.message) return;
   const msg = update.message;
-  const chatId = msg.chat.id;
+  const chat = msg.chat;
+  const chatId = chat.id;
+
+  // Handle messages inside Groups & Supergroups
+  if (chat && (chat.type === 'group' || chat.type === 'supergroup')) {
+    trackTelegramGroup(chat);
+    const gText = (msg.text || '').trim();
+    if (gText === '/status' || gText === '/status@EducoLms_Bot') {
+      await sendMessage(
+        chatId,
+        `✅ <b>EDUCO LMS Bot faol!</b>\n\n` +
+        `👥 <b>Guruh nomi:</b> ${chat.title || 'Guruh'}\n` +
+        `🆔 <b>Guruh ID:</b> <code>${chatId}</code>\n` +
+        `📅 <i>Guruh to‘lov eslatmalari jadvaliga kiritilgan.</i>`
+      );
+    }
+    return;
+  }
+
   const text = (msg.text || '').trim();
   const contact = msg.contact;
 
@@ -2064,6 +2125,61 @@ export async function handleUpdate(update) {
       });
       saveDb(db);
       await sendMessage(chatId, `🔄 <b>${count} ta xatolik bergan SMS qayta navbatga qo‘yildi!</b>`, getMainMenuKeyboard(session));
+      return;
+    }
+
+    // 5. /send_group_alert yoki '📢 Guruhlarga to‘lov eslatmasi'
+    if (text === '/send_group_alert' || text === '📢 Guruhlarga to‘lov eslatmasi') {
+      const groups = (db.educo_db_telegram_groups || []).filter((g) => g.is_active !== false);
+      const preview = getMonthlyGroupTuitionMessage();
+      const count = groups.length;
+
+      await sendMessage(
+        chatId,
+        `📢 <b>Guruhlar uchun oylik to‘lov eslatmasi boshqaruvi</b>\n\n` +
+        `👥 <b>Tizimga ulangan guruhlar soni:</b> ${count} ta\n` +
+        `📅 <b>Avtomatik jadval:</b> Har oyning 7-sanasida (1-hafta tugaguniga qadar) soat 10:00 da barcha guruhlarga avtomatik yuboriladi.\n\n` +
+        `<b>Guruhlarga ketadigan xabar ko‘rinishi (Preview):</b>\n` +
+        `────────────────────────\n` +
+        preview + `\n` +
+        `────────────────────────\n\n` +
+        (count > 0
+          ? `<i>Hozir barcha ${count} ta guruhga ushbu xabarni tarqatishni xohlaysizmi?</i>`
+          : `⚠️ <i>Hozircha bot hech qaysi guruhga qo‘shilmagan. Botni Telegram guruhingizga qo‘shib, unga <b>Admin</b> huquqini bering, shunda u avtomatik ro‘yxatga olinadi.</i>`),
+        count > 0
+          ? {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: `🚀 Ha, ${count} ta guruhga yuborish`, callback_data: 'grp_tuition_send' },
+                    { text: '❌ Bekor qilish', callback_data: 'grp_tuition_cancel' },
+                  ],
+                ],
+              },
+            }
+          : getMainMenuKeyboard(session)
+      );
+      return;
+    }
+
+    // 6. /guruhlar buyrug'i
+    if (text === '/guruhlar' || text === '👥 Ulangan Telegram guruhlar') {
+      const groups = (db.educo_db_telegram_groups || []).filter((g) => g.is_active !== false);
+      if (groups.length === 0) {
+        await sendMessage(
+          chatId,
+          `ℹ️ <b>Hozircha tizimga ulangan Telegram guruhlar yo‘q.</b>\n\n` +
+          `Botni o‘quv markazingizning sinf yoki kurs guruhlariga a’zo qiling va <b>Admin</b> huquqini bering. Bot ularni avtomatik ro‘yxatga oladi.`,
+          getMainMenuKeyboard(session)
+        );
+        return;
+      }
+      let report = `👥 <b>Tizimga ulangan Telegram guruhlar (${groups.length} ta):</b>\n\n`;
+      groups.forEach((g, idx) => {
+        report += `${idx + 1}. <b>${g.title}</b>\n   🆔 <code>${g.chat_id}</code>\n   📅 Qo‘shilgan: ${g.updated_at ? new Date(g.updated_at).toLocaleDateString('uz-UZ') : 'Yaqinda'}\n\n`;
+      });
+      report += `<i>Ushbu guruhlarning barchasiga har oyning 1-haftasida to‘lov eslatmalari avtomatik yetkaziladi.</i>`;
+      await sendMessage(chatId, report, getMainMenuKeyboard(session));
       return;
     }
   }
@@ -3183,6 +3299,113 @@ async function checkLessonHalfTimeStatus() {
   }
 }
 
+// --- OYLIK GURUHLAR UCHUN TO'LOV ESLATMASI (HAR OYNING 1-HAFTASI YAKUNIGA QADAR) ---
+const UZ_MONTH_NAMES = [
+  'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
+  'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'
+];
+const EN_MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+export function getMonthlyGroupTuitionMessage(date = new Date()) {
+  const mIdx = date.getMonth();
+  const oyNomi = UZ_MONTH_NAMES[mIdx];
+  const monthName = EN_MONTH_NAMES[mIdx];
+
+  return `📢 <b>«EDUCO» O‘QUV MARKAZI MA’MURIYATI BILDIRISHNOMASI</b> 📢\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `👨‍👩‍👧‍👦 <b>Hurmatli ota-onalar va qadrli talabalar!</b>\n\n` +
+    `📌 Markazimiz qoidalariga muvofiq, har oyning birinchi haftasi — <b>to‘lov haftaligi</b> hisoblanadi.\n\n` +
+    `⏳ Oylik o‘qish to‘lovlari <b>har oyning 1-haftasi tugaguniga qadar (1–7 sanalar oralig‘ida)</b> to‘liq amalga oshirilishi lozim. Hozirda <b>${oyNomi}</b> oyi to‘lovlarini yakunlashning so‘nggi kunlari o‘tib bormoqda.\n\n` +
+    `⚠️ Dars jarayonlari uzluksiz davom etishi hamda talabalarimiz guruh darslaridan chetlatilmasliklari uchun to‘lovni bugun amalga oshirishingizni so‘raymiz! ❗️\n\n` +
+    `💳 <b>To‘lov usullari:</b> Naqd, Click, Payme (Markaz ma’muriyati orqali)\n` +
+    `📞 <b>Ma’muriyat:</b> +998 (99) 541-89-89\n` +
+    `🌐 <b>Admin:</b> @educomarkaz36\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `📢 <b>NOTICE FROM «EDUCO» LEARNING CENTER</b> 📢\n\n` +
+    `👨‍👩‍👧‍👦 <b>Dear parents and students!</b>\n\n` +
+    `📌 According to center regulations, the 1st week of each month is designated as <b>payment week</b>.\n\n` +
+    `⏳ Tuition fees must be settled <b>before the end of the 1st week of each month (between the 1st and 7th)</b>. Today is the final call to complete tuition payments for <b>${monthName}</b>.\n\n` +
+    `⚠️ To ensure ongoing education without disruption and to prevent students from being suspended from classes, please finalize tuition payments today! ❗️\n\n` +
+    `💳 <b>Payment options:</b> Cash, Click, Payme (via Administration)\n` +
+    `📞 <b>Administration:</b> +998 (99) 541-89-89\n` +
+    `🌐 <b>Admin:</b> @educomarkaz36\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `✨ <i>Farzandingizning sifatli ta’limi va yorqin kelajagi — bizning oliy maqsadimiz!</i>`;
+}
+
+export function trackTelegramGroup(chat, myChatMember = null) {
+  if (!chat || (chat.type !== 'group' && chat.type !== 'supergroup')) return;
+  const db = getDb();
+  db.educo_db_telegram_groups = db.educo_db_telegram_groups || [];
+  const existingIdx = db.educo_db_telegram_groups.findIndex((g) => String(g.chat_id) === String(chat.id));
+  const status = myChatMember?.new_chat_member?.status;
+  const isLeftOrKicked = status === 'left' || status === 'kicked';
+  const isAdmin = status === 'administrator' || (existingIdx >= 0 && db.educo_db_telegram_groups[existingIdx].is_admin);
+
+  const groupData = {
+    id: String(chat.id),
+    chat_id: chat.id,
+    title: chat.title || 'Telegram Guruh',
+    type: chat.type,
+    is_active: !isLeftOrKicked,
+    is_admin: isAdmin || false,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (existingIdx >= 0) {
+    db.educo_db_telegram_groups[existingIdx] = {
+      ...db.educo_db_telegram_groups[existingIdx],
+      ...groupData,
+    };
+  } else if (!isLeftOrKicked) {
+    db.educo_db_telegram_groups.push(groupData);
+  }
+  saveDb(db);
+}
+
+let lastGroupTuitionPeriod = null;
+
+export async function checkAndSendMonthlyGroupTuitionReminder(forceSend = false) {
+  const now = getTashkentNow();
+  const day = now.getDate();
+  const hour = now.getHours();
+  const periodKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+
+  // Avtomatik yuborish: Har oyning 7-sanasi (1-hafta so'nggi kuni) soat 10:00 da
+  if (!forceSend) {
+    if (day !== 7 || hour !== 10) return { sentCount: 0, total: 0, skipped: true };
+    if (lastGroupTuitionPeriod === periodKey) return { sentCount: 0, total: 0, alreadySent: true };
+  }
+
+  const db = getDb();
+  const groups = (db.educo_db_telegram_groups || []).filter((g) => g.is_active !== false);
+  if (groups.length === 0) return { sentCount: 0, total: 0 };
+
+  const messageText = getMonthlyGroupTuitionMessage(now);
+  let sentCount = 0;
+
+  for (const grp of groups) {
+    try {
+      const res = await sendMessage(grp.chat_id, messageText);
+      if (res && res.ok) {
+        sentCount++;
+      } else {
+        console.warn(`[Group Alert Error] Guruhga yuborib bo‘lmadi: ${grp.title} (${grp.chat_id}):`, res?.error);
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    } catch (e) {
+      console.error(`[Group Alert Exception] ${grp.title}:`, e.message);
+    }
+  }
+
+  lastGroupTuitionPeriod = periodKey;
+  console.log(`[Group Tuition Alert] ✅ ${sentCount}/${groups.length} ta guruhga oylik to‘lov eslatmasi yuborildi.`);
+  return { sentCount, total: groups.length };
+}
+
 // --- POLLING ENGINE (LONG POLLING) ---
 let lastUpdateId = 0;
 let isPolling = false;
@@ -3195,7 +3418,7 @@ async function pollUpdates() {
     const res = await telegramRequest('getUpdates', {
       offset: lastUpdateId + 1,
       timeout: 25,
-      allowed_updates: ['message', 'callback_query'],
+      allowed_updates: ['message', 'callback_query', 'my_chat_member'],
     });
 
     if (res && res.ok && Array.isArray(res.result)) {
@@ -3253,6 +3476,10 @@ export async function startBot() {
     // Start 45-minute lesson half-time cron (Every 60 seconds)
     setInterval(checkLessonHalfTimeStatus, 60000);
     checkLessonHalfTimeStatus().catch(() => {});
+
+    // Start monthly 1st-week tuition group reminder cron (Har soatda tekshiradi, har oyning 7-kunida yuboradi)
+    setInterval(checkAndSendMonthlyGroupTuitionReminder, 3600000);
+    checkAndSendMonthlyGroupTuitionReminder().catch(() => {});
 
     // Start 24/7 Cloud Health Check HTTP Server (Render / Railway / Koyeb port compatibility)
     const PORT = process.env.PORT || 3000;
