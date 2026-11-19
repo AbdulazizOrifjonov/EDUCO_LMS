@@ -3,7 +3,8 @@
 ' Ekranda hech qanday qora CMD oynasi chiqmaydi, ikkala bot tinchgina ishlaydi.
 ' ==============================================================================
 Set WshShell = CreateObject("WScript.Shell")
-strDir = "C:\Users\Abdul\Documents\EDUCO_LMS"
+Set fso = CreateObject("Scripting.FileSystemObject")
+strDir = fso.GetParentFolderName(WScript.ScriptFullName)
 
 WshShell.CurrentDirectory = strDir
-WshShell.Run """C:\Program Files\nodejs\node.exe"" bot.js", 0, False
+WshShell.Run "cmd /c node bot.js", 0, False
