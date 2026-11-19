@@ -3309,16 +3309,12 @@ export function getMonthlyGroupTuitionMessage(date = new Date()) {
   const mIdx = date.getMonth();
   const oyNomi = UZ_MONTH_NAMES[mIdx];
 
-  return `📢 <b>«EDUCO» O‘QUV MARKAZI MA’MURIYATI BILDIRISHNOMASI</b> 📢\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n\n` +
-    `👨‍👩‍👧‍👦 <b>Hurmatli ota-onalar va qadrli talabalar!</b>\n\n` +
-    `📌 Markazimiz qoidalariga muvofiq, har oyning birinchi haftasi — <b>to‘lov haftaligi</b> hisoblanadi.\n\n` +
-    `⏳ Oylik o‘qish to‘lovlari <b>har oyning 1-haftasi tugaguniga qadar (1–7 sanalar oralig‘ida)</b> to‘liq amalga oshirilishi lozim. Hozirda <b>${oyNomi}</b> oyi to‘lovlarini yakunlashning so‘nggi kunlari o‘tib bormoqda.\n\n` +
-    `⚠️ Dars jarayonlari uzluksiz davom etishi hamda talabalarimiz guruh darslaridan chetlatilmasliklari uchun to‘lovni bugun amalga oshirishingizni so‘raymiz! ❗️\n\n` +
-    `💳 <b>To‘lov usullari:</b> Naqd, Click, Payme (Markaz ma’muriyati orqali)\n` +
-    `📞 <b>Ma’muriyat:</b> +998 (99) 541-89-89\n` +
-    `🌐 <b>Admin:</b> @educomarkaz36\n\n` +
-    `✨ <i>Farzandingizning sifatli ta’limi va yorqin kelajagi — bizning oliy maqsadimiz!</i>`;
+  return `👨‍👩‍👧‍👦 <b>Hurmatli ota-onalar!</b>\n\n` +
+    `<b>${oyNomi}</b> oyi uchun to‘lovni amalga oshirishingizni so‘raymiz. 🌸\n\n` +
+    `Farzandlaringiz ta’limiga bo‘lgan e’tiboringiz va hamkorligingiz uchun katta rahmat! 💐\n\n` +
+    `Hurmat bilan, <b>EDUCO</b> o‘quv markazi.\n\n` +
+    `💳 <code>5614682219926005</code>\n` +
+    `👤 Olimxo’jiyev Abbosxon`;
 }
 
 export function trackTelegramGroup(chat, myChatMember = null) {
