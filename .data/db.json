@@ -13623,7 +13623,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-19T05:45:08.814Z"
+      "updated_at": "2026-11-19T13:15:08.889Z"
     },
     {
       "id": "att-1795067108834-l3lsv",
@@ -13634,7 +13634,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-19T05:45:08.834Z"
+      "updated_at": "2026-11-19T13:15:08.928Z"
     },
     {
       "id": "att-1795067108858-n8irn",
@@ -13645,7 +13645,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-19T05:45:08.858Z"
+      "updated_at": "2026-11-19T13:15:08.943Z"
     },
     {
       "id": "att-1795067108879-3mfea",
@@ -13656,7 +13656,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-19T05:45:08.880Z"
+      "updated_at": "2026-11-19T13:15:08.961Z"
     },
     {
       "id": "att-1795067108900-jugbk",
@@ -13667,7 +13667,7 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-19T05:45:08.900Z"
+      "updated_at": "2026-11-19T13:15:08.977Z"
     },
     {
       "id": "att-1795067108922-ura7t",
@@ -13678,7 +13678,29 @@
       "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
       "recorded_by": "usr-1793622233829",
       "finalized": true,
-      "updated_at": "2026-11-19T05:45:08.922Z"
+      "updated_at": "2026-11-19T13:15:08.992Z"
+    },
+    {
+      "id": "att-1795092308727-g9pup",
+      "student_id": "usr-student-909474123",
+      "group_id": "grp-shaxmat",
+      "date": "2026-11-19",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-teacher-qosimov",
+      "finalized": true,
+      "updated_at": "2026-11-19T12:45:08.727Z"
+    },
+    {
+      "id": "att-1795092308741-uu0k1",
+      "student_id": "usr-student-946019500",
+      "group_id": "grp-shaxmat",
+      "date": "2026-11-19",
+      "status": "absent",
+      "remark": "Darsning 45-daqiqasigacha yetib kelmadi (Avtomatik rasmiylashtirildi)",
+      "recorded_by": "usr-teacher-qosimov",
+      "finalized": true,
+      "updated_at": "2026-11-19T12:45:08.741Z"
     }
   ],
   "educo_db_grades": [
@@ -17702,7 +17724,8 @@
       "last_attempt_at": "2026-11-19T10:23:23.368Z",
       "tracking_id": "_oHymF5-TnkILvX3KdMHj",
       "sent_at": "2026-11-19T10:24:25.736Z",
-      "error_message": null
+      "error_message": null,
+      "delivered_at": "2026-11-19T10:30:21.963Z"
     },
     {
       "id": "sms-manual-1795084151284",
@@ -17718,9 +17741,93 @@
       "queued_at": "2026-11-19T10:29:11.284Z",
       "last_attempt_at": "2026-11-19T10:29:47.935Z",
       "tracking_id": "A7UwZfm8IsK0Ehszrjj5T"
+    },
+    {
+      "id": "sms-manual-1795084308279",
+      "recipient_phone": "+998936101774",
+      "recipient_name": "Telegram orqali yozilgan",
+      "recipient_type": "manual",
+      "source_chat_id": 1594150529,
+      "message_text": "salom matmisilar a",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-19T10:31:48.279Z",
+      "queued_at": "2026-11-19T10:31:48.279Z",
+      "last_attempt_at": "2026-11-19T10:31:48.587Z",
+      "tracking_id": "63PvullMYrtvZhBsncwPX",
+      "sent_at": "2026-11-19T10:31:59.004Z",
+      "delivered_at": "2026-11-19T10:32:10.358Z",
+      "error_message": null
+    },
+    {
+      "id": "sms-manual-1795084498436",
+      "recipient_phone": "+998936101774",
+      "recipient_name": "Abdulazizbek (Admin)",
+      "recipient_type": "manual",
+      "source_chat_id": "1594150529",
+      "message_text": "Hurmatli ota-onalar! Noyabr oyi uchun to'lovni amalga oshirishingizni so'raymiz. Karta: 5614682219926005 (Olimxo'jiyev Abbosxon). Hurmat bilan, EDUCO o'quv markazi.",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-19T10:34:58.436Z",
+      "queued_at": "2026-11-19T10:34:58.438Z",
+      "last_attempt_at": "2026-11-19T10:35:07.613Z",
+      "tracking_id": "FxiFeUlY_njlZvKMvQDF-",
+      "sent_at": "2026-11-19T10:35:19.868Z",
+      "delivered_at": "2026-11-19T10:35:33.337Z",
+      "error_message": null
+    },
+    {
+      "id": "sms-manual-1795084551725",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Abdulazizbek Orifjonov",
+      "recipient_type": "manual",
+      "source_chat_id": "1594150529",
+      "message_text": "Hurmatli ota-onalar! Noyabr oyi uchun to'lovni amalga oshirishingizni so'raymiz. Karta: 5614682219926005 (Olimxo'jiyev Abbosxon). Hurmat bilan, EDUCO o'quv markazi.",
+      "status": "sent",
+      "attempts": 0,
+      "max_attempts": 3,
+      "created_at": "2026-11-19T10:35:51.725Z",
+      "queued_at": "2026-11-19T10:35:51.728Z",
+      "last_attempt_at": "2026-11-19T10:36:01.894Z",
+      "tracking_id": "CH_fVJuQuA_NP8LYUUVOi",
+      "sent_at": "2026-11-19T10:36:10.417Z",
+      "delivered_at": "2026-11-19T10:36:20.191Z",
+      "error_message": null
     }
   ],
   "educo_db_sms_logs": [
+    {
+      "id": "log-1795084570417",
+      "queue_id": "sms-manual-1795084551725",
+      "recipient_phone": "+998935821774",
+      "recipient_name": "Abdulazizbek Orifjonov",
+      "message_text": "Hurmatli ota-onalar! Noyabr oyi uchun to'lovni amalga oshirishingizni so'raymiz. Karta: 5614682219926005 (Olimxo'jiyev Abbosxon). Hurmat bilan, EDUCO o'quv markazi.",
+      "status": "sent",
+      "tracking_id": "CH_fVJuQuA_NP8LYUUVOi",
+      "sent_at": "2026-11-19T10:36:10.417Z"
+    },
+    {
+      "id": "log-1795084519868",
+      "queue_id": "sms-manual-1795084498436",
+      "recipient_phone": "+998936101774",
+      "recipient_name": "Abdulazizbek (Admin)",
+      "message_text": "Hurmatli ota-onalar! Noyabr oyi uchun to'lovni amalga oshirishingizni so'raymiz. Karta: 5614682219926005 (Olimxo'jiyev Abbosxon). Hurmat bilan, EDUCO o'quv markazi.",
+      "status": "sent",
+      "tracking_id": "FxiFeUlY_njlZvKMvQDF-",
+      "sent_at": "2026-11-19T10:35:19.868Z"
+    },
+    {
+      "id": "log-1795084319004",
+      "queue_id": "sms-manual-1795084308279",
+      "recipient_phone": "+998936101774",
+      "recipient_name": "Telegram orqali yozilgan",
+      "message_text": "salom matmisilar a",
+      "status": "sent",
+      "tracking_id": "63PvullMYrtvZhBsncwPX",
+      "sent_at": "2026-11-19T10:31:59.004Z"
+    },
     {
       "id": "log-1795083865737",
       "queue_id": "sms-manual-1795083783712",
@@ -18152,6 +18259,16 @@
       "is_read": false,
       "link": "/attendance",
       "created_at": "2026-11-19T05:45:08.814Z"
+    },
+    {
+      "id": "notif-ht-1795092308699-td1k",
+      "user_id": "usr-teacher-qosimov",
+      "title": "⏰ Shoshilinch: Darsning yarmi (45 daqiqa) o‘tdi!",
+      "message": "«Shaxmat guruhi (CHESS-1.1)» guruhi darsi boshlanganiga 45 daqiqa bo‘ldi. Davomat hali olinmadi. Iltimos, darhol belgilang!",
+      "type": "warning",
+      "is_read": false,
+      "link": "/attendance",
+      "created_at": "2026-11-19T12:45:08.700Z"
     }
   ],
   "educo_db_sms_settings": {
@@ -21007,7 +21124,7 @@
       "joined_at": "2026-11-04T06:03:14.870Z"
     }
   ],
-  "_sync_version": 10837,
+  "_sync_version": 11118,
   "_deleted_ids": [
     "usr-1793468630979",
     "usr-test-sync-1",
@@ -21332,6 +21449,6 @@
     "sms-manual-1794666934485",
     "sms-att-1794675464959-ljbk0"
   ],
-  "_updated_at": 1795084218568,
+  "_updated_at": 1795095937099,
   "educo_db_teacher_feedback": []
 }

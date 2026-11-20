@@ -11,7 +11,7 @@ import Select from '@/components/ui/Select';
 import PasswordStrengthInput, { evaluatePasswordStrength } from '@/components/ui/PasswordStrengthInput';
 import { toast } from '@/components/ui/Toast';
 import { createUser, updateUser } from '@/services/userService';
-import { getGroups, enrollStudent } from '@/services/groupService';
+import { getGroups, enrollStudent, transferStudent, removeStudent } from '@/services/groupService';
 import { ROLES } from '@/lib/constants';
 import { formatUzPhone, cleanUzPhone } from '@/utils/phoneFormat';
 
@@ -92,7 +92,8 @@ export default function UserForm({
         isActive: user.is_active !== undefined ? user.is_active : true,
         password: user.password || '',
       });
-      setSelectedGroupId('');
+      const userGroup = user.group_id || (Array.isArray(user.group_ids) ? user.group_ids[0] : '') || '';
+      setSelectedGroupId(userGroup);
     } else if (isOpen) {
       const initialRole = defaultRole || (currentUserRole === 'admin' ? ROLES.STUDENT : ROLES.TEACHER);
       reset({
@@ -172,6 +173,20 @@ export default function UserForm({
           isActive: data.isActive,
           password: trimmedPwd || undefined,
         });
+
+        // If student role, handle group reassignment / transfer cleanly
+        if (data.role === ROLES.STUDENT) {
+          const oldGid = user.group_id || (Array.isArray(user.group_ids) ? user.group_ids[0] : null);
+          if (selectedGroupId && selectedGroupId !== oldGid) {
+            if (oldGid) {
+              await transferStudent(oldGid, selectedGroupId, user.id);
+            } else {
+              await enrollStudent(selectedGroupId, user.id);
+            }
+          } else if (!selectedGroupId && oldGid) {
+            await removeStudent(oldGid, user.id);
+          }
+        }
         toast.success(t('users.updateSuccess', 'Foydalanuvchi ma‘lumotlari yangilandi!'));
       } else {
         const createdUser = await createUser({
@@ -346,7 +361,7 @@ export default function UserForm({
         </div>
 
         {/* Group Assignment (for Student role) */}
-        {selectedRole === ROLES.STUDENT && !isEditing && (
+        {selectedRole === ROLES.STUDENT && (
           <div className="p-3.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-surface-dark-tertiary/30">
             <Select
               label={t('users.assignToGroup', "O'quv guruhiga biriktirish")}

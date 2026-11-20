@@ -3386,13 +3386,16 @@ export async function checkAndSendMonthlyGroupTuitionReminder(forceSend = false)
   const hour = now.getHours();
   const periodKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
 
-  // Avtomatik yuborish: Har oyning 7-sanasi (1-hafta so'nggi kuni) soat 10:00 da
+  const db = getDb();
+  // Persistent tracking in db so restarts don't re-send in the same month
+  const sentPeriod = db.last_group_tuition_period || lastGroupTuitionPeriod;
+
+  // Avtomatik yuborish: Har oyning yarmida (15-sanasi) soat 10:00 da faqat 1 marta guruhlarga
   if (!forceSend) {
-    if (day !== 7 || hour !== 10) return { sentCount: 0, total: 0, skipped: true };
-    if (lastGroupTuitionPeriod === periodKey) return { sentCount: 0, total: 0, alreadySent: true };
+    if (day !== 15 || hour !== 10) return { sentCount: 0, total: 0, skipped: true };
+    if (sentPeriod === periodKey) return { sentCount: 0, total: 0, alreadySent: true };
   }
 
-  const db = getDb();
   const groups = (db.educo_db_telegram_groups || []).filter((g) => g.is_active !== false);
   if (groups.length === 0) return { sentCount: 0, total: 0 };
 
@@ -3414,6 +3417,8 @@ export async function checkAndSendMonthlyGroupTuitionReminder(forceSend = false)
   }
 
   lastGroupTuitionPeriod = periodKey;
+  db.last_group_tuition_period = periodKey;
+  saveDb(db);
   console.log(`[Group Tuition Alert] ✅ ${sentCount}/${groups.length} ta guruhga oylik to‘lov eslatmasi yuborildi.`);
   return { sentCount, total: groups.length };
 }

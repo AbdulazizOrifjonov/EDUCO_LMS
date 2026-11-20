@@ -224,21 +224,26 @@ export async function getGroupById(id) {
   if (found) {
     const allUsers = localStore.getUsers();
     const memberships = localStore.getMemberships ? localStore.getMemberships() : [];
-    const groupMemberIds = memberships
-      .filter((m) => m.group_id === id && m.is_active !== false)
-      .map((m) => localStore.normalizeUserId(m.student_id));
+    const groupMemberIds = new Set(
+      memberships
+        .filter((m) => m.group_id === id && m.is_active !== false)
+        .map((m) => localStore.normalizeUserId(m.student_id))
+    );
 
     let groupStudents = [];
-    if (Array.isArray(found.student_ids) && found.student_ids.length > 0) {
-      groupStudents = allUsers.filter((u) =>
-        found.student_ids.includes(u.id) || groupMemberIds.includes(localStore.normalizeUserId(u.id))
-      );
-    } else if (groupMemberIds.length > 0) {
-      groupStudents = allUsers.filter((u) => groupMemberIds.includes(localStore.normalizeUserId(u.id)));
+    if (Array.isArray(found.student_ids)) {
+      const sIds = new Set(found.student_ids.map(String));
+      const normIds = new Set(found.student_ids.map((sid) => localStore.normalizeUserId(sid)));
+      groupStudents = allUsers.filter((u) => {
+        const uNorm = localStore.normalizeUserId(u.id);
+        return sIds.has(String(u.id)) || normIds.has(uNorm);
+      });
+    } else if (groupMemberIds.size > 0) {
+      groupStudents = allUsers.filter((u) => groupMemberIds.has(localStore.normalizeUserId(u.id)));
       found.student_ids = groupStudents.map((s) => s.id);
     } else {
-      groupStudents = allUsers.filter((u) => u.role === 'student').slice(0, found.enrolled_count || 6);
-      found.student_ids = groupStudents.map((s) => s.id);
+      groupStudents = [];
+      found.student_ids = [];
     }
 
     const studentMemberships = memberships.filter((m) => m.group_id === id && m.is_active !== false);
@@ -525,34 +530,43 @@ export async function uploadGroupAvatar(groupId, file) {
  * Enroll student into group with optional discount / custom pricing
  */
 export async function enrollStudent(groupId, studentId, options = {}) {
+  const normStudentId = localStore.normalizeUserId(studentId);
   const groups = localStore.getGroups();
   const target = groups.find((g) => g.id === groupId);
   if (target) {
-    if (!Array.isArray(target.student_ids)) {
-      const allStudents = localStore.getUsers().filter((u) => u.role === 'student');
-      target.student_ids = allStudents.slice(0, target.enrolled_count || 0).map((u) => u.id);
+    const currentStudentIds = Array.isArray(target.student_ids) ? [...target.student_ids] : [];
+    const alreadyHas = currentStudentIds.some(
+      (id) => String(id) === String(studentId) || localStore.normalizeUserId(id) === normStudentId
+    );
+    if (!alreadyHas) {
+      currentStudentIds.push(studentId);
     }
-    if (!target.student_ids.includes(studentId)) {
-      target.student_ids.push(studentId);
-    }
+    target.student_ids = currentStudentIds;
     target.enrolled_count = target.student_ids.length;
     localStore.saveGroup(target);
   }
 
-  // Ensure user's group_ids array includes this group
+  // Ensure user's group_id and group_ids array includes this group
   try {
     const allUsers = localStore.getUsers ? localStore.getUsers() : [];
-    const targetUser = allUsers.find((u) => u.id === studentId);
+    const targetUser = allUsers.find(
+      (u) => u.id === studentId || localStore.normalizeUserId(u.id) === normStudentId
+    );
     if (targetUser) {
-      const gids = Array.isArray(targetUser.group_ids) ? [...targetUser.group_ids] : (targetUser.group_id ? [targetUser.group_id] : []);
+      const gids = Array.isArray(targetUser.group_ids)
+        ? [...targetUser.group_ids]
+        : (targetUser.group_id ? [targetUser.group_id] : []);
       if (!gids.includes(groupId)) {
         gids.push(groupId);
       }
       targetUser.group_ids = gids;
-      if (!targetUser.group_id) targetUser.group_id = groupId;
-      if (localStore.saveUser) {
-        localStore.saveUser(targetUser);
+      targetUser.group_id = targetUser.group_id || groupId;
+      if (target?.course_id) {
+        targetUser.course_id = target.course_id;
+        targetUser.subject = target.course_name || target.courseName || targetUser.subject;
       }
+      targetUser.updated_at = new Date().toISOString();
+      localStore.saveUser(targetUser);
     }
   } catch (_) {}
 
@@ -569,7 +583,22 @@ export async function enrollStudent(groupId, studentId, options = {}) {
       discount_reason: options.discount_reason || '',
       enrolled_at: new Date().toISOString(),
     });
+    if (localStore.pushToServer) {
+      const allMems = localStore.getMemberships();
+      localStore.pushToServer({ educo_db_memberships: allMems }).catch(() => {});
+    }
   }
+
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo-data-sync', {
+          detail: { type: 'student_enrolled', groupId, studentId },
+        })
+      );
+    }
+  } catch (_) {}
+
   return { success: true };
 }
 
@@ -635,26 +664,62 @@ export async function updateStudentDiscount(groupId, studentId, discountData) {
  * Remove student from group
  */
 export async function removeStudent(groupId, studentId) {
+  const normStudentId = localStore.normalizeUserId(studentId);
   const groups = localStore.getGroups();
   const target = groups.find((g) => g.id === groupId);
   if (target) {
-    if (!Array.isArray(target.student_ids)) {
-      const allStudents = localStore.getUsers().filter((u) => u.role === 'student');
-      target.student_ids = allStudents.slice(0, target.enrolled_count || 0).map((u) => u.id);
-    }
-    target.student_ids = target.student_ids.filter((id) => id !== studentId);
+    const currentStudentIds = Array.isArray(target.student_ids) ? target.student_ids : [];
+    target.student_ids = currentStudentIds.filter(
+      (id) => String(id) !== String(studentId) && localStore.normalizeUserId(id) !== normStudentId
+    );
     target.enrolled_count = target.student_ids.length;
     localStore.saveGroup(target);
   }
+
+  // Also remove from user's group_id and group_ids!
+  try {
+    const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+    const targetUser = allUsers.find(
+      (u) => u.id === studentId || localStore.normalizeUserId(u.id) === normStudentId
+    );
+    if (targetUser) {
+      const gids = (Array.isArray(targetUser.group_ids)
+        ? targetUser.group_ids
+        : (targetUser.group_id ? [targetUser.group_id] : [])
+      ).filter((gid) => gid !== groupId);
+      targetUser.group_ids = gids;
+      if (targetUser.group_id === groupId) {
+        targetUser.group_id = gids[0] || null;
+      }
+      targetUser.updated_at = new Date().toISOString();
+      localStore.saveUser(targetUser);
+    }
+  } catch (_) {}
+
+  // Update membership to inactive AND push to server!
   if (localStore.getMemberships) {
     const list = localStore.getMemberships().map((m) => {
-      if (m.group_id === groupId && localStore.normalizeUserId(m.student_id) === localStore.normalizeUserId(studentId)) {
-        return { ...m, is_active: false };
+      if (m.group_id === groupId && localStore.normalizeUserId(m.student_id) === normStudentId) {
+        return { ...m, is_active: false, updated_at: new Date().toISOString() };
       }
       return m;
     });
     localStore.setItem('educo_db_memberships', list);
+    if (localStore.pushToServer) {
+      localStore.pushToServer({ educo_db_memberships: list }).catch(() => {});
+    }
   }
+
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo-data-sync', {
+          detail: { type: 'student_removed', groupId, studentId },
+        })
+      );
+    }
+  } catch (_) {}
+
   return { success: true };
 }
 
@@ -662,8 +727,98 @@ export async function removeStudent(groupId, studentId) {
  * Transfer student from one group to another
  */
 export async function transferStudent(fromGroupId, toGroupId, studentId) {
-  await removeStudent(fromGroupId, studentId);
-  await enrollStudent(toGroupId, studentId);
+  const normStudentId = localStore.normalizeUserId(studentId);
+
+  // 1. Remove from source group
+  const groups = localStore.getGroups();
+  const fromGroup = groups.find((g) => g.id === fromGroupId);
+  if (fromGroup) {
+    const sIds = Array.isArray(fromGroup.student_ids) ? fromGroup.student_ids : [];
+    fromGroup.student_ids = sIds.filter(
+      (id) => String(id) !== String(studentId) && localStore.normalizeUserId(id) !== normStudentId
+    );
+    fromGroup.enrolled_count = fromGroup.student_ids.length;
+    localStore.saveGroup(fromGroup);
+  }
+
+  // 2. Add to destination group
+  const toGroup = groups.find((g) => g.id === toGroupId);
+  if (toGroup) {
+    const destIds = Array.isArray(toGroup.student_ids) ? [...toGroup.student_ids] : [];
+    const hasAlready = destIds.some(
+      (id) => String(id) === String(studentId) || localStore.normalizeUserId(id) === normStudentId
+    );
+    if (!hasAlready) {
+      destIds.push(studentId);
+    }
+    toGroup.student_ids = destIds;
+    toGroup.enrolled_count = toGroup.student_ids.length;
+    localStore.saveGroup(toGroup);
+  }
+
+  // 3. Update student user record
+  const allUsers = localStore.getUsers ? localStore.getUsers() : [];
+  const targetUser = allUsers.find(
+    (u) => u.id === studentId || localStore.normalizeUserId(u.id) === normStudentId
+  );
+  if (targetUser) {
+    const curGids = (Array.isArray(targetUser.group_ids)
+      ? targetUser.group_ids
+      : (targetUser.group_id ? [targetUser.group_id] : [])
+    ).filter((id) => id !== fromGroupId);
+
+    if (!curGids.includes(toGroupId)) {
+      curGids.push(toGroupId);
+    }
+    targetUser.group_ids = curGids;
+    targetUser.group_id = toGroupId;
+    if (toGroup?.course_id) {
+      targetUser.course_id = toGroup.course_id;
+      targetUser.subject = toGroup.course_name || toGroup.courseName || targetUser.subject;
+    }
+    targetUser.updated_at = new Date().toISOString();
+    localStore.saveUser(targetUser);
+  }
+
+  // 4. Update memberships: deactivate fromGroupId, activate toGroupId
+  if (localStore.getMemberships) {
+    let memList = localStore.getMemberships().map((m) => {
+      if (m.group_id === fromGroupId && localStore.normalizeUserId(m.student_id) === normStudentId) {
+        return { ...m, is_active: false, updated_at: new Date().toISOString() };
+      }
+      return m;
+    });
+
+    const toMemIdx = memList.findIndex(
+      (m) => m.group_id === toGroupId && localStore.normalizeUserId(m.student_id) === normStudentId
+    );
+    if (toMemIdx >= 0) {
+      memList[toMemIdx] = { ...memList[toMemIdx], is_active: true, updated_at: new Date().toISOString() };
+    } else {
+      memList.push({
+        id: `mem-${toGroupId}-${studentId}`,
+        group_id: toGroupId,
+        student_id: studentId,
+        is_active: true,
+        enrolled_at: new Date().toISOString(),
+      });
+    }
+    localStore.setItem('educo_db_memberships', memList);
+    if (localStore.pushToServer) {
+      localStore.pushToServer({ educo_db_memberships: memList }).catch(() => {});
+    }
+  }
+
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('educo-data-sync', {
+          detail: { type: 'student_transferred', fromGroupId, toGroupId, studentId },
+        })
+      );
+    }
+  } catch (_) {}
+
   return { success: true };
 }
 

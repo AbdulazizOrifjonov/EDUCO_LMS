@@ -3173,18 +3173,6 @@ class LocalStore {
     let raw = this.getItem(STORAGE_KEYS.GROUPS, INITIAL_GROUPS);
     if (!Array.isArray(raw)) raw = [];
 
-    // Ensure canonical grp-fullstack has all 3 students (Ismoil, Amirbek, Qudratilla)
-    const fullstackGrp = raw.find((g) => g.id === 'grp-fullstack');
-    if (fullstackGrp) {
-      const canonicalIds = ['usr-student-930098339', 'usr-1793599332662', 'usr-student-943852253'];
-      const currentIds = Array.isArray(fullstackGrp.student_ids) ? fullstackGrp.student_ids : [];
-      const mergedIds = Array.from(new Set([...currentIds, ...canonicalIds]));
-      if (mergedIds.length !== currentIds.length) {
-        fullstackGrp.student_ids = mergedIds;
-        this.setItem(STORAGE_KEYS.GROUPS, raw);
-      }
-    }
-
     // Ensure Abdulazizbek Orifjonov (Mentor) has his canonical Full Stack groups with exact requested schedules
     const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
     if (raw.length > 0 || !isTestEnv) {
@@ -3487,7 +3475,9 @@ class LocalStore {
       room: groupData.room !== undefined ? groupData.room : (existing.room || '101-xona'),
       capacity: Number(groupData.capacity !== undefined ? groupData.capacity : (existing.capacity || 15)),
       enrolled_count: Number(groupData.enrolled_count !== undefined ? groupData.enrolled_count : (existing.enrolled_count || 0)),
-      student_ids: Array.isArray(groupData.student_ids) ? groupData.student_ids : (existing.student_ids || []),
+      student_ids: Array.isArray(groupData.student_ids)
+        ? groupData.student_ids
+        : (Array.isArray(groupData.studentIds) ? groupData.studentIds : (existing.student_ids || [])),
       status: groupData.status || existing.status || 'active',
       monthly_price: Number(groupData.monthly_price !== undefined ? groupData.monthly_price : (groupData.monthlyPrice !== undefined ? groupData.monthlyPrice : (existing.monthly_price || 0))),
       schedule: groupData.schedule || existing.schedule || 'Dush-Chor-Jum, 18:00 - 20:00',
