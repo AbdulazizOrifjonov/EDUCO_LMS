@@ -7,4 +7,13 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 strDir = fso.GetParentFolderName(WScript.ScriptFullName)
 
 WshShell.CurrentDirectory = strDir
-WshShell.Run "cmd /c node bot.js", 0, False
+
+' Node.exe yo'lini aniqlash (Standart dasturlar yoki PATH orqali)
+strNode = "node"
+If fso.FileExists("C:\Program Files\nodejs\node.exe") Then
+    strNode = """C:\Program Files\nodejs\node.exe"""
+ElseIf fso.FileExists("C:\Program Files (x86)\nodejs\node.exe") Then
+    strNode = """C:\Program Files (x86)\nodejs\node.exe"""
+End If
+
+WshShell.Run "cmd /c " & strNode & " bot.js", 0, False
