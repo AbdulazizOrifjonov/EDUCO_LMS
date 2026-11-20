@@ -12,9 +12,13 @@ echo Startup yorlig'i yaratilmoqda...
 cscript //nologo "%~dp0scripts\create_startup_shortcut.vbs"
 
 echo.
+echo Bot orqa fonda hozirning o'zidayoq ishga tushirilmoqda...
+cscript //nologo "%~dp0START_BOT_SILENT.vbs"
+
+echo.
 echo ==========================================================
-echo [TAYYOR] Endi har kuni o'quv markazda kompyuter yoqilganda
-echo bot avtomatik orqa fonda ishlab turadi!
+echo [TAYYOR] Bot orqa fonda muvaffaqiyatli ishga tushirildi!
+echo Shuningdek, har safar kompyuter yoqilganda avtomatik yonadi.
 echo Hech qanday qora oyna ko'rinmaydi.
 echo Bekor qilish uchun: AUTO_STARTUP_OFF.bat ni bosing.
 echo ==========================================================
