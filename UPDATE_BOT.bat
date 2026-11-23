@@ -30,4 +30,5 @@ echo [TAYYOR] Loyiha yangilandi! Bot qayta ishga tushirilmoqda...
 echo ==========================================================
 echo.
 
-call START_BOT.bat
+echo 5. Startup yorlig'i yangilanmoqda va bot orqa fonda yashirin ishga tushirilmoqda...
+call AUTO_STARTUP_ON.bat
