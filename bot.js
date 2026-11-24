@@ -428,13 +428,20 @@ async function processSequentialQueue() {
     let adminNote = null;
 
     if (isManual) {
+      const devStatus = await checkDeviceStatus().catch(() => null);
+      let offlineWarning = '';
+      if (devStatus && !devStatus.online) {
+        offlineWarning = `\n\n⚠️ <b>Diqqat:</b> Planshetingiz (${devStatus.name}) ayni paytda <b>offline</b> (${devStatus.diffMinutes} daqiqadan beri internetga ulanmagan)! Planshet internetini va SMSGate ilovasini tekshiring.`;
+      }
+
       const tgAlertMsg =
         `📤 <b>SMS Navbatdan yuborilmoqda (Qoldi: ${totalPending} ta):</b>\n\n` +
         `👤 <b>Qabul qiluvchi:</b> ${recipientName}\n` +
         `📱 <b>Telefon:</b> +${cleanPhone}\n` +
         `🏷 <b>Turi:</b> ${tag}\n` +
         `💬 <b>Xabar:</b> <i>"${messageText}"</i>\n\n` +
-        `⏳ <i>Telefonga uzatildi, natija kutilmoqda...</i>`;
+        `⏳ <i>Telefonga uzatildi, natija kutilmoqda...</i>` +
+        offlineWarning;
 
       adminNote = await tg('sendMessage', {
         chat_id: targetChatId,
@@ -572,14 +579,20 @@ async function processSequentialQueue() {
       console.log(`[SMS Navbat] ⏳ Xabar telefon navbatiga topshirildi: +${cleanPhone}`);
 
       if (adminNote?.result?.message_id) {
+        const devStatus = await checkDeviceStatus().catch(() => null);
+        const offlineNote =
+          devStatus && !devStatus.online
+            ? `\n\n⚠️ <b>Planshet internetdan uzilgan (${devStatus.diffMinutes} daqiqa oldin).</b> Planshetni yoqing va SMSGate ilovasini tekshiring!`
+            : `\n\n<i>Telefondagi ilova orqali yuborilmoqda.</i>`;
+
         await tg('editMessageText', {
           chat_id: targetChatId,
           message_id: adminNote.result.message_id,
           text:
             `⏳ <b>Xabar telefon navbatiga topshirildi:</b>\n` +
             `📱 +${cleanPhone} (${recipientName})\n` +
-            `💬 <i>"${messageText}"</i>\n\n` +
-            `<i>Telefondagi ilova orqali yuborilmoqda.</i>`,
+            `💬 <i>"${messageText}"</i>` +
+            offlineNote,
           parse_mode: 'HTML',
         });
       }
