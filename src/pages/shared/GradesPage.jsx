@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import {
   Award,
   Calendar,
@@ -123,8 +124,14 @@ export default function GradesPage() {
   const isStudent = profile?.role === ROLES.STUDENT;
   const isOwnerOrAdmin = profile?.role === ROLES.OWNER || profile?.role === ROLES.ADMIN;
 
+  const [searchParams] = useSearchParams();
+  const urlGroupId = searchParams.get('groupId');
+  const [showFromAttendanceBanner, setShowFromAttendanceBanner] = useState(
+    () => searchParams.get('from') === 'attendance'
+  );
+
   const [groups, setGroups] = useState([]);
-  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [selectedGroupId, setSelectedGroupId] = useState(() => searchParams.get('groupId') || '');
   const [grades, setGrades] = useState([]);
   const [students, setStudents] = useState([]);
   const [currentLesson, setCurrentLesson] = useState(null);
@@ -203,7 +210,9 @@ export default function GradesPage() {
             });
           }
           setGroups(groupList);
-          if (groupList.length > 0 && !selectedGroupId) {
+          if (urlGroupId && groupList.some((g) => g.id === urlGroupId)) {
+            setSelectedGroupId(urlGroupId);
+          } else if (groupList.length > 0 && !selectedGroupId) {
             setSelectedGroupId(groupList[0].id);
           }
         } catch (err) {
@@ -212,7 +221,16 @@ export default function GradesPage() {
       }
     };
     init();
-  }, [isStudent, profile]);
+  }, [isStudent, profile, urlGroupId]);
+
+  useEffect(() => {
+    if (urlGroupId && groups.some((g) => g.id === urlGroupId) && urlGroupId !== selectedGroupId) {
+      setSelectedGroupId(urlGroupId);
+    }
+    if (searchParams.get('from') === 'attendance') {
+      setShowFromAttendanceBanner(true);
+    }
+  }, [urlGroupId, groups, searchParams]);
 
   // Load group students, grades, and today's attendance
   const fetchGroupGrades = useCallback(async (isSilent = false) => {
@@ -365,6 +383,31 @@ export default function GradesPage() {
     return { isBeforeStart: false };
   }, [selectedGroup, grades, selectedGroupId]);
 
+  const buildAttendanceMeta = (dateStr) => {
+    const teacherName =
+      `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
+      profile?.name ||
+      profile?.fullName ||
+      selectedGroup?.teacher_name ||
+      'Abdulazizbek Orifjonov';
+    const courseName =
+      selectedGroup?.name || selectedGroup?.course_name || selectedGroup?.courses?.name || 'Dars';
+    const scheduleMatch = selectedGroup?.schedule?.match(/(\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})/);
+    const lessonTime = scheduleMatch
+      ? scheduleMatch[1].replace(/\s+/g, ' ')
+      : selectedGroup?.start_time && selectedGroup?.end_time
+        ? `${selectedGroup.start_time.slice(0, 5)} - ${selectedGroup.end_time.slice(0, 5)}`
+        : '08:30 - 10:00';
+    return {
+      groupId: selectedGroupId,
+      groupName: selectedGroup?.name,
+      courseName,
+      teacherName,
+      lessonTime,
+      date: dateStr,
+    };
+  };
+
   // Quick Action: Mark all students as present in 1 click
   const handleQuickMarkAllPresent = async () => {
     if (students.length === 0) return;
@@ -379,9 +422,11 @@ export default function GradesPage() {
         remark: 'Darsda qatnashdi',
       }));
 
-      await saveAttendanceRecords(lessonId, records, profile?.id);
+      await saveAttendanceRecords(lessonId, records, profile?.id, buildAttendanceMeta(today));
       setTodayAttendance(records);
-      toast.success('Barcha o‘quvchilar darsda bor deb qayd etildi! Endi baholashingiz mumkin.');
+      toast.success(
+        'Davomat saqlandi va ota-onalarga SMS xabarlari yuborilmoqda! Endi baholashingiz mumkin.'
+      );
     } catch (err) {
       console.error(err);
       toast.error('Davomatni saqlashda xatolik yuz berdi');
@@ -415,7 +460,7 @@ export default function GradesPage() {
         remark: attendanceDraft[st.id] === 'absent' ? 'Darsga kelmadi' : '',
       }));
 
-      await saveAttendanceRecords(lessonId, records, profile?.id);
+      await saveAttendanceRecords(lessonId, records, profile?.id, buildAttendanceMeta(today));
       setTodayAttendance(records);
       setShowAttendanceModal(false);
 
@@ -423,7 +468,7 @@ export default function GradesPage() {
         (r) => r.status === 'present' || r.status === 'late'
       ).length;
       toast.success(
-        `Davomat saqlandi! Darsda qatnashgan ${presentCount} ta o‘quvchi baholash uchun tayyor.`
+        `Davomat saqlandi va ota-onalarga SMS xabarlari yuborilmoqda! Darsda qatnashgan ${presentCount} ta o‘quvchi baholash uchun tayyor.`
       );
     } catch (err) {
       console.error(err);
@@ -730,6 +775,43 @@ export default function GradesPage() {
           </div>
         )}
       </div>
+
+      {/* Confirmation Banner when redirected from Attendance */}
+      {!isStudent && showFromAttendanceBanner && (() => {
+        const smsCode = searchParams.get('sms');
+        const bannerTitle =
+          smsCode === 'already'
+            ? 'Davomat muvaffaqiyatli saqlandi (bugungi SMS xabarlari allaqachon yuborilgan).'
+            : smsCode === 'disabled' || smsCode === 'no_phone'
+              ? 'Davomat muvaffaqiyatli saqlandi (ota-ona raqami yo‘qligi yoki SMS o‘chiqligi sababli SMS yuborilmadi).'
+              : 'Davomat muvaffaqiyatli saqlandi va ota-onalarga SMS xabarlari yuborildi!';
+
+        return (
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center text-emerald-700 dark:text-emerald-300 shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-emerald-100">
+                  {bannerTitle}
+                </p>
+                <p className="text-[11px] sm:text-xs text-emerald-800 dark:text-emerald-300 mt-0.5">
+                  Endi {activeGroup?.name ? `"${activeGroup.name}"` : 'tanlangan guruh'} o‘quvchilarini baholashingiz mumkin.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowFromAttendanceBanner(false)}
+              className="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200 p-1 rounded-lg shrink-0 cursor-pointer"
+              aria-label="Yopish"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        );
+      })()}
 
       {/* Group Selector for Teachers & Admins */}
       {!isStudent && (

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ClipboardCheck,
   Calendar,
@@ -75,8 +75,29 @@ export default function AttendancePage() {
 
   // --- URL SEARCH PARAMS FOR BROWSER HISTORY (Google Chrome Back / Forward) ---
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const teacherIdFromUrl = searchParams.get('teacher');
   const groupIdFromUrl = searchParams.get('group');
+  const [saveSuccessData, setSaveSuccessData] = useState(null);
+  const redirectTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleGoToGradesNow = useCallback(() => {
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current);
+      redirectTimerRef.current = null;
+    }
+    if (saveSuccessData?.targetUrl) {
+      navigate(saveSuccessData.targetUrl);
+    }
+  }, [saveSuccessData, navigate]);
 
   // Progressive Drill-down levels:
   // Level 1: drillTeacher === null
@@ -487,6 +508,10 @@ export default function AttendancePage() {
                 ? `${currentLesson.start_time.slice(0, 5)} - ${currentLesson.end_time.slice(0, 5)}`
                 : '08:30 - 10:00';
 
+      const beforeQueueIds = new Set(
+        (localStore.getSmsQueue ? localStore.getSmsQueue() : []).map((q) => q.id)
+      );
+
       await saveAttendanceRecords(currentLesson.id, records, profile?.id, {
         groupId: currentRosterGroup?.id,
         groupName: currentRosterGroup?.name,
@@ -505,22 +530,71 @@ export default function AttendancePage() {
       });
       await refreshGroupStatuses();
 
+      const afterQueue = localStore.getSmsQueue ? localStore.getSmsQueue() : [];
+      const newlyQueuedSms = afterQueue.filter(
+        (q) =>
+          !beforeQueueIds.has(q.id) &&
+          q.category === 'attendance' &&
+          String(q.status || '').toUpperCase() !== 'CANCELLED'
+      );
+      const savedStudentIds = new Set(records.map((r) => r.student_id));
+      const existingTodaySms = afterQueue.filter(
+        (q) =>
+          q.category === 'attendance' &&
+          savedStudentIds.has(q.student_id) &&
+          (q.idempotency_key?.includes(`-${selectedDate}-`) || q.scheduled_at?.startsWith(selectedDate)) &&
+          String(q.status || '').toUpperCase() !== 'CANCELLED'
+      );
+      const smsSettings = localStore.getSmsSettings ? localStore.getSmsSettings() : { is_enabled: true };
+
+      let smsStatusCode = 'sent';
+      let smsStatusText = '';
+      if (newlyQueuedSms.length > 0) {
+        smsStatusCode = 'sent';
+        smsStatusText = `📱 ${newlyQueuedSms.length} ta ota-onaga SMS xabari yuborildi (navbatga qo‘yildi)`;
+      } else if (existingTodaySms.length > 0) {
+        smsStatusCode = 'already';
+        smsStatusText = `📱 Ota-onalarga bugungi SMS xabarlari allaqachon yuborilgan (${existingTodaySms.length} ta)`;
+      } else if (smsSettings && smsSettings.is_enabled === false) {
+        smsStatusCode = 'disabled';
+        smsStatusText = '⚠️ SMS xizmati sozlamalarda o‘chirilgan, faqat davomat saqlandi';
+      } else {
+        smsStatusCode = 'no_phone';
+        smsStatusText = 'ℹ️ Ota-ona telefon raqamlari kiritilmaganligi sababli faqat davomat saqlandi';
+      }
+
       const lateCount = records.filter((r) => r.status === 'late').length;
       const absentCount = records.filter((r) => r.status === 'absent').length;
+      const presentCount = records.filter((r) => r.status === 'present').length;
+      const totalCount = records.length;
 
-      if (attendanceStatus.hasAttendance) {
-        if (lateCount > 0) {
-          toast.success(
-            `Davomat yangilandi! Kechikkan ${lateCount} nafar o‘quvchining ota-onalariga kechikish haqida SMS yuborildi.`
-          );
-        } else {
-          toast.success('Davomat muvaffaqiyatli yangilandi! Ota-onalarga SMS xabarlar uzatildi.');
-        }
-      } else {
-        toast.success(
-          `Davomat qabul qilindi! ${absentCount > 0 ? `${absentCount} nafar kelmagan o‘quvchi ota-onalariga SMS yuborilmoqda. ` : ''}30 daqiqa ichida kechikkanlarni tahrirlashingiz mumkin.`
-        );
+      const groupName = currentRosterGroup?.name || 'Guruh';
+      const targetRole = profile?.role || 'teacher';
+      const targetGroupId = currentRosterGroup?.id || selectedRosterGroupId || '';
+      const targetUrl = `/${targetRole}/grades?groupId=${targetGroupId}&from=attendance&sms=${smsStatusCode}&smsCount=${newlyQueuedSms.length || existingTodaySms.length}`;
+
+      toast.success(
+        `Davomat saqlandi! ${smsStatusText}. Baholash bo‘limiga yo‘naltirilmoqda...`
+      );
+
+      setSaveSuccessData({
+        open: true,
+        presentCount,
+        absentCount,
+        lateCount,
+        totalCount,
+        groupName,
+        smsStatusText,
+        targetUrl,
+      });
+
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
       }
+      redirectTimerRef.current = setTimeout(() => {
+        redirectTimerRef.current = null;
+        navigate(targetUrl);
+      }, 1500);
     } catch (err) {
       console.error(err);
       toast.error(err.message || t('common.error', 'Davomatni saqlashda xatolik'));
@@ -528,6 +602,32 @@ export default function AttendancePage() {
       setSavingRoster(false);
     }
   };
+
+  /**
+   * Renders the shared "Save attendance, send SMS, and proceed to grading" CTA button.
+   */
+  const renderSaveAndRedirectButton = (extraClassName = '', showBadgeOnMobile = false) => (
+    <Button
+      variant="primary"
+      size="md"
+      icon={Save}
+      isLoading={savingRoster}
+      disabled={loadingRoster || rosterStudents.length === 0}
+      onClick={handleSaveRoster}
+      className={`!bg-blue-600 hover:!bg-blue-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 text-white shadow-md shadow-blue-600/25 dark:shadow-emerald-600/25 cursor-pointer flex items-center gap-1.5 ${extraClassName}`}
+    >
+      <span>
+        {attendanceStatus.hasAttendance
+          ? 'O‘zgarishlarni saqlash va Baholashga o‘tish'
+          : 'Davomatni saqlash va Baholashga o‘tish'}
+      </span>
+      <span
+        className={`${showBadgeOnMobile ? 'inline-flex' : 'hidden sm:inline-flex'} items-center text-[10px] font-bold bg-white/25 dark:bg-white/20 px-2 py-0.5 rounded-full ml-1 text-white`}
+      >
+        📱 SMS yuborish
+      </span>
+    </Button>
+  );
 
   // Live 3-State Statistics (🟢 Bor, 🟡 Kech qoldi, 🔴 Kelmadi)
   const liveStats = useMemo(() => {
@@ -863,20 +963,7 @@ export default function AttendancePage() {
                 Davomat yopilgan
               </Button>
             ) : (
-              <Button
-                variant="primary"
-                size="md"
-                icon={Save}
-                isLoading={savingRoster}
-                disabled={loadingRoster || rosterStudents.length === 0}
-                onClick={handleSaveRoster}
-                className="!bg-blue-600 hover:!bg-blue-700 dark:!bg-emerald-600 dark:hover:!bg-emerald-500 text-white shadow-md shadow-blue-600/25 dark:shadow-emerald-600/25 cursor-pointer flex items-center gap-1.5"
-              >
-                <span>{attendanceStatus.hasAttendance ? 'O‘zgarishlarni saqlash' : t('common.save', 'Davomatni saqlash')}</span>
-                <span className="hidden sm:inline-flex items-center text-[10px] font-bold bg-white/25 dark:bg-white/20 px-1.5 py-0.5 rounded-full ml-1 text-white">
-                  📱 SMS
-                </span>
-              </Button>
+              renderSaveAndRedirectButton('', false)
             )}
           </div>
         )}
@@ -2130,6 +2217,17 @@ export default function AttendancePage() {
                 })}
               </div>
             )}
+
+            {/* Bottom Actions Bar */}
+            {canEdit && (rosterStudents || []).length > 0 && (
+              <div className="p-4 bg-gray-50/80 dark:bg-surface-dark-tertiary/40 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Davomat saqlanishi bilan ota-onalarga SMS xabarlar yuboriladi va Baholash bo‘limiga o‘tiladi.</span>
+                </div>
+                {renderSaveAndRedirectButton('w-full sm:w-auto justify-center', true)}
+              </div>
+            )}
           </Card>
         </div>
       )}
@@ -2273,6 +2371,64 @@ export default function AttendancePage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Davomat saqlandi & SMS yuborildi tasdiq modali */}
+      {saveSuccessData?.open && (
+        <Modal
+          isOpen={saveSuccessData.open}
+          onClose={handleGoToGradesNow}
+          title="Davomat muvaffaqiyatli saqlandi!"
+          size="sm"
+        >
+          <div className="text-center py-2 space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-inner">
+              <CheckCircle2 className="w-10 h-10 animate-bounce" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                Davomat qabul qilindi!
+              </h3>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold mt-1 flex items-center justify-center gap-1">
+                <span>{saveSuccessData.smsStatusText || '📱 Ota-onalarga SMS xabarlari navbatga qo‘yildi va yuborilmoqda'}</span>
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <strong>{saveSuccessData.groupName}</strong> guruhi bo‘yicha natijalar:
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 bg-gray-50 dark:bg-surface-dark-tertiary p-3 rounded-xl border border-gray-100 dark:border-gray-800 text-xs">
+              <div className="text-center">
+                <span className="block font-bold text-emerald-600 text-base">{saveSuccessData.presentCount}</span>
+                <span className="text-gray-500 text-[11px]">🟢 Qatnashdi</span>
+              </div>
+              <div className="text-center border-x border-gray-200 dark:border-gray-700">
+                <span className="block font-bold text-amber-500 text-base">{saveSuccessData.lateCount}</span>
+                <span className="text-gray-500 text-[11px]">🟡 Kechikdi</span>
+              </div>
+              <div className="text-center">
+                <span className="block font-bold text-red-500 text-base">{saveSuccessData.absentCount}</span>
+                <span className="text-gray-500 text-[11px]">🔴 Kelmadi</span>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 font-medium animate-pulse">
+                <LoadingSpinner size="sm" />
+                <span>Baholash bo‘limiga o‘tilmoqda...</span>
+              </div>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleGoToGradesNow}
+                className="w-full !bg-blue-600 hover:!bg-blue-700 text-white font-bold cursor-pointer"
+              >
+                Hozir Baholashga o‘tish →
+              </Button>
             </div>
           </div>
         </Modal>
